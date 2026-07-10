@@ -1,0 +1,8 @@
+[
+  { "name": "HTML", "image": "skill-html.png", "bgColor": "#edf2f8" },
+  { "name": "CSS", "image": "skill-css.png", "bgColor": "#edf2f8" },
+  { "name": "Javascript", "image": "skill-javascript.png", "bgColor": "#edf2f8" },
+  { "name": "React", "image": "skill-react.png", "bgColor": "#edf2f8" },
+  { "name": "Marketing Cloud Email Specialist", "image": "skill-mc-email-specialist.png", "bgColor": "#edf2f8" },
+  { "name": "Trailhead Mountaineer", "image": "skill-trailhead-mountaineer.png", "bgColor": "#edf2f8" }
+]

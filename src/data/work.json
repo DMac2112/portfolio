@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Welcom-Inn Website",
+    "description": "A modern and responsive website for a property management company used to advertise their properties and services.",
+    "projectLink": "https://welcom-inn.co.uk/",
+    "tags": ["Web App"],
+    "image": "work-welcom-inn.jpg"
+  },
+  {
+    "title": "MERN Project",
+    "description": "A project using the full force of the MERN stack, currently in progress!",
+    "tags": ["React JS", "Web App"],
+    "image": "work-mern.png"
+  },
+  {
+    "title": "Rubicall Website",
+    "description": "A modern and responsive website designed & developed for a cleaning company to advertise their cleaning services.",
+    "projectLink": "https://www.rubicall.co.uk/",
+    "tags": ["Web App"],
+    "image": "work-rubicall.png"
+  }
+]

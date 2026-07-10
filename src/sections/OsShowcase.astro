@@ -1,0 +1,141 @@
+---
+// Mid-page DominikOS showcase: the recruiter-friendly "here's what it is"
+// surface. Crawlable links, restrained copy, zero heavy assets.
+---
+
+<section id="dominikos" class="section bg-dark os-showcase" aria-labelledby="dominikos-heading">
+  <h2 id="dominikos-heading" class="head-text os-head">
+    Prefer to explore? <span>Boot DominikOS</span>
+  </h2>
+
+  <p class="os-lede">
+    I rebuilt my portfolio as a retro desktop operating system — windows, taskbar,
+    boot screen and all. Everything on this page lives in there too, plus a few
+    things that don't fit on a web page.
+  </p>
+
+  <ul class="os-features">
+    <li>
+      <span class="os-feature-title">Desktop</span>
+      <span class="os-feature-desc">Draggable windows, Start menu, my projects &amp; CV as apps</span>
+    </li>
+    <li>
+      <span class="os-feature-title">2D game</span>
+      <span class="os-feature-desc">Walk my career timeline as an explorable pixel-art town</span>
+    </li>
+    <li>
+      <span class="os-feature-title">Pinball</span>
+      <span class="os-feature-desc">An original cyberpunk table — chase the high score</span>
+    </li>
+  </ul>
+
+  <div class="os-actions">
+    <a class="os-boot-btn" href="/os/?boot=chooser">
+      <span aria-hidden="true">&#x23FB;</span> Boot DominikOS
+    </a>
+    <span class="os-deep p-text">
+      or jump straight to the
+      <a href="/os/?boot=desktop">desktop</a> ·
+      <a href="/os/?boot=game">game</a>
+    </span>
+  </div>
+</section>
+
+<style>
+  .os-showcase {
+    min-height: 70vh;
+  }
+
+  .os-head {
+    color: var(--white-color);
+  }
+
+  .os-head span {
+    color: #22d3ee;
+  }
+
+  .os-lede {
+    margin-top: 1.25rem;
+    max-width: 56ch;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: var(--text-md);
+    line-height: var(--leading-body);
+  }
+
+  .os-features {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2.25rem;
+  }
+
+  .os-features li {
+    width: 15rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .os-feature-title {
+    color: var(--white-color);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    font-weight: 600;
+  }
+
+  .os-feature-desc {
+    color: rgba(255, 255, 255, 0.66);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+  }
+
+  .os-actions {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .os-boot-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.95rem 2rem;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #43c258, #2f9e44 55%, #28863a);
+    border: 1px solid #1f6e2f;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: var(--text-base);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 4px 14px rgba(31, 110, 47, 0.45);
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+
+  .os-boot-btn:hover,
+  .os-boot-btn:focus-visible {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
+  }
+
+  .os-deep {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  .os-deep a {
+    color: #9fd8e8;
+  }
+</style>

@@ -1,0 +1,13 @@
+# deps / build
+node_modules/
+dist/
+.astro/
+
+# env — never commit secrets (the Sanity write token lives ONLY in Netlify env vars)
+.env
+.env.*
+!.env.example
+
+# misc
+.DS_Store
+npm-debug.log*

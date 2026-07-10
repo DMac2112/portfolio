@@ -1,0 +1,170 @@
+---
+// Fixed top navbar. Desktop: inline links. Mobile: accessible slide-in panel
+// driven by ~15 lines of vanilla JS in site script (no framework).
+const links = ['home', 'about', 'work', 'skills', 'dominikos', 'contact'];
+---
+
+<nav class="navbar" aria-label="Main">
+  <ul class="navbar-links">
+    {links.map((item) => (
+      <li><a href={`#${item}`}>{item === 'dominikos' ? 'DominikOS' : item}</a></li>
+    ))}
+  </ul>
+
+  <button
+    class="navbar-toggle"
+    type="button"
+    aria-expanded="false"
+    aria-controls="mobile-menu"
+    data-nav-toggle
+  >
+    <span class="sr-only">Open menu</span>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </svg>
+  </button>
+
+  <div class="navbar-panel" id="mobile-menu" hidden data-nav-panel>
+    <button class="navbar-close" type="button" data-nav-close>
+      <span class="sr-only">Close menu</span>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+    <ul>
+      {links.map((item) => (
+        <li><a href={`#${item}`} data-nav-link>{item === 'dominikos' ? 'DominikOS' : item}</a></li>
+      ))}
+    </ul>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem var(--space-gutter);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .navbar-links {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    gap: 0.5rem;
+  }
+
+  .navbar-links a {
+    display: inline-block;
+    color: var(--gray-color);
+    text-decoration: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 5px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    font-weight: 500;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .navbar-links a:hover,
+  .navbar-links a:focus-visible {
+    color: var(--white-color);
+    background-color: var(--secondary-color);
+  }
+
+  @media screen and (max-width: 900px) {
+    .navbar-links {
+      display: none;
+    }
+  }
+
+  .navbar-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: var(--secondary-color);
+    color: var(--white-color);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(49, 59, 172, 0.25);
+  }
+
+  @media screen and (max-width: 900px) {
+    .navbar-toggle {
+      display: flex;
+      margin-left: auto;
+    }
+  }
+
+  .navbar-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 30;
+    padding: 1.5rem;
+    width: min(75%, 400px);
+    height: 100vh;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    flex-direction: column;
+    background-color: var(--white-color);
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar-panel[hidden] {
+    display: none;
+  }
+
+  .navbar-close {
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    cursor: pointer;
+    margin: 0.5rem 0.5rem 1rem;
+  }
+
+  .navbar-panel ul {
+    list-style: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    padding: 1rem;
+  }
+
+  .navbar-panel a {
+    color: var(--gray-color);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+    font-weight: 500;
+    transition: color 0.3s ease-in-out;
+  }
+
+  .navbar-panel a:hover,
+  .navbar-panel a:focus-visible {
+    color: var(--secondary-color);
+  }
+</style>

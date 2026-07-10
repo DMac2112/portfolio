@@ -1,0 +1,25 @@
+# Site-wide security headers.
+# NOTE: no global CSP yet — /os/ and /game1/ are prebuilt apps whose inline
+# scripts a strict CSP would break; scoping a CSP per-app is a P5 task.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Astro's hashed assets are immutable
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# DominikOS (/os/): CSP is REQUIRED here — the DM Explorer app frames the
+# classic site; without frame-src allowing it, that window renders blank.
+/os/index.html
+  Cache-Control: no-cache
+  Content-Security-Policy: frame-src 'self' https://dominikmachowiak.com; frame-ancestors 'self'
+
+/os/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/game1/assets/*
+  Cache-Control: public, max-age=31536000, immutable

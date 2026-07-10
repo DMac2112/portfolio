@@ -1,0 +1,15 @@
+# All crawlers welcome — including AI crawlers (a growing citation channel;
+# this site ships full static HTML, so they can actually read it).
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://dominikmachowiak.com/sitemap-index.xml

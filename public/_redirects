@@ -1,0 +1,4 @@
+# DominikOS SPA fallback (deep links are query-only today; future-proofing).
+# Netlify serves real files first, so /os/assets/* and /os/content/* are
+# unaffected — only non-existent /os/ paths fall through to the OS shell.
+/os/*   /os/index.html   200

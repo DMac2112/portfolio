@@ -1,0 +1,71 @@
+---
+import { Image } from 'astro:assets';
+import { contentImage, type AboutItem } from '../lib/content';
+
+interface Props {
+  abouts: AboutItem[];
+}
+
+const { abouts } = Astro.props;
+---
+
+<section id="about" class="section bg-white" aria-labelledby="about-heading">
+  <h2 id="about-heading" class="head-text">
+    What am I <span>About?</span><br />Well I am <span>a..</span>
+  </h2>
+
+  <div class="profiles">
+    {abouts.map((about) => (
+      <article class="profile reveal">
+        <Image
+          src={contentImage(about.image)}
+          alt=""
+          width={512}
+          loading="lazy"
+          decoding="async"
+        />
+        <h3 class="bold-text">{about.title}</h3>
+        <p class="p-text">{about.description}</p>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .profiles {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .profile {
+    width: 16rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 2rem;
+    transition: transform 0.3s ease;
+  }
+
+  .profile:hover {
+    transform: scale(1.05);
+  }
+
+  .profile img {
+    width: 100%;
+    height: 170px;
+    border-radius: 15px;
+    object-fit: cover;
+    background-color: var(--primary-color);
+  }
+
+  .profile h3 {
+    margin-top: 1.25rem;
+  }
+
+  .profile p {
+    margin-top: 0.625rem;
+  }
+</style>

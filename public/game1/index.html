@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1f2233" />
+  <title>Dominik Machowiak — Play my portfolio (Game 1)</title>
+  <meta name="description" content="Explore Dominik Machowiak's developer portfolio as a playable 2D game. Walk his career timeline from the Open University to Deloitte." />
+  <link rel="icon" href="/dominik.png" />
+  <style>
+    :root { --bg:#1f2233; --ink:#f4f4f8; --accent:#ffcf6b; --panel:#0d0e15; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; height:100%; background:var(--bg); color:var(--ink);
+      font-family: ui-rounded, "Segoe UI", system-ui, sans-serif; overflow:hidden; overscroll-behavior:none; }
+    #game { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+
+    /* ---- HUD ---- */
+    .hud { position:fixed; z-index:5; pointer-events:none; }
+    #titlebar { top:0; left:0; right:0; padding:10px 14px; display:flex; gap:12px; align-items:center;
+      background:linear-gradient(#1f2233ee, #1f223300); }
+    #titlebar .name { font-weight:800; letter-spacing:.3px; font-size:15px; }
+    #titlebar .game-badge { font-size:10px; font-weight:800; letter-spacing:.5px; color:#0d0e15;
+      background:var(--accent); padding:2px 6px; border-radius:5px; vertical-align:middle; margin-left:4px; }
+    #titlebar .role { font-size:12px; opacity:.75; }
+    #titlebar .spacer { flex:1; }
+    #back-link { pointer-events:auto; text-decoration:none; color:var(--ink); font-size:12.5px;
+      border:1px solid #ffffff33; padding:6px 11px; border-radius:999px; background:#ffffff10; white-space:nowrap; }
+    #back-link:hover { background:#ffffff22; }
+
+    #hud-progress { top:54px; right:12px; font-size:12px; font-weight:700; color:#0d0e15;
+      background:var(--accent); padding:5px 11px; border-radius:999px; box-shadow:0 2px 8px #0006; }
+    #hud-progress.complete { background:#86bc25; color:#0b1a00; }
+
+    #hud-hint { left:50%; bottom:14px; transform:translateX(-50%); font-size:12.5px; opacity:.7;
+      text-align:center; max-width:92vw; transition:opacity .4s; }
+    body.has-interacted #hud-hint { opacity:0; }
+
+    #interact-btn { position:fixed; z-index:6; left:50%; bottom:64px; transform:translate(-50%, 14px); pointer-events:auto;
+      font:inherit; font-weight:700; font-size:15px; color:#0d0e15; background:var(--accent);
+      border:none; border-radius:999px; padding:12px 22px; cursor:pointer; opacity:0;
+      box-shadow:0 6px 18px #000a; transition:opacity .15s, transform .15s; display:none; }
+    #interact-btn.show { display:inline-block; opacity:1; transform:translate(-50%, 0); }
+    #interact-btn:active { transform:translate(-50%, 2px); }
+
+    /* ---- Dialogue overlay ---- */
+    #dialogue-overlay { position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end;
+      justify-content:center; padding:0 0 max(18px, env(safe-area-inset-bottom)); background:#0006; }
+    #dialogue-overlay.hidden { display:none; }
+    #dialogue-box { width:min(680px, 94vw); background:#fbfbfe; color:#1a1a22; border-radius:16px;
+      box-shadow:0 18px 50px #000a; padding:18px 20px; border:3px solid #0d0e15;
+      animation:rise .18s ease-out; }
+    @keyframes rise { from { transform:translateY(14px); opacity:.4; } to { transform:none; opacity:1; } }
+    #dialogue-header { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+    #dialogue-title { margin:0; font-size:19px; }
+    #dialogue-subtitle { font-size:13px; color:#6a6a78; font-weight:600; }
+    #dialogue-body { font-size:16px; line-height:1.55; min-height:2.6em; }
+    #dialogue-body a { color:#2563c9; font-weight:700; }
+    #dialogue-footer { display:flex; align-items:center; gap:10px; margin-top:16px; }
+    #dialogue-footer button { font:inherit; font-weight:700; border-radius:10px; padding:9px 15px;
+      cursor:pointer; border:2px solid #0d0e15; background:#fff; }
+    #dialogue-footer button[hidden] { display:none; }
+    #dialogue-pager { font-size:13px; color:#6a6a78; }
+    #dialogue-close { margin-left:auto; background:#1f2233 !important; color:#fff; }
+    #dialogue-prev, #dialogue-next { background:#ffcf6b !important; }
+
+    /* visually-hidden content for SEO / screen readers */
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+      clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  </style>
+</head>
+<body>
+  <canvas id="game" aria-label="Playable 2D portfolio of Dominik Machowiak"></canvas>
+
+  <!-- HUD -->
+  <div id="titlebar" class="hud">
+    <div>
+      <div class="name">Dominik Machowiak <span class="game-badge">GAME 1</span></div>
+      <div class="role">Front-end Developer · Salesforce Marketing Cloud Developer @ Deloitte</div>
+    </div>
+    <div class="spacer"></div>
+    <a id="back-link" href="../">← Classic site</a>
+  </div>
+  <div id="hud-progress" class="hud">Discovered 0 / 17</div>
+  <div id="hud-hint" class="hud"></div>
+  <button id="interact-btn" type="button">▶ View</button>
+
+  <!-- Dialogue overlay -->
+  <div id="dialogue-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="dialogue-title">
+    <div id="dialogue-box">
+      <header id="dialogue-header">
+        <img id="dialogue-icon" alt="" hidden />
+        <h2 id="dialogue-title"></h2>
+        <span id="dialogue-subtitle" hidden></span>
+      </header>
+      <div id="dialogue-body"></div>
+      <footer id="dialogue-footer">
+        <button id="dialogue-prev" type="button" hidden>‹ Back</button>
+        <span id="dialogue-pager" aria-live="polite"></span>
+        <button id="dialogue-next" type="button" hidden>Next ›</button>
+        <button id="dialogue-close" type="button" aria-label="Close">Close ✕</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- SEO / no-JS fallback: the real content, crawlable and screen-reader friendly -->
+  <noscript>
+    <div style="padding:24px; max-width:640px; margin:auto;">
+      <h1>Dominik Machowiak — Front-end Developer</h1>
+      <p>This is an interactive version of my portfolio. Enable JavaScript to play it, or
+         visit the <a href="https://dominikmachowiak.com">classic site</a>.</p>
+    </div>
+  </noscript>
+
+  <!-- os-bridge MUST load before main.js so KAPLAY captures the right references (plan §8.1) -->
+  <script src="./os-bridge.js"></script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

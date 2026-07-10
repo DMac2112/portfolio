@@ -1,0 +1,1 @@
+import{r as m}from"./vendor-1cf99640.js";function f(r,t){const n=m.useRef(r);n.current=r,m.useEffect(()=>{if(!t)return;let e=0,o=performance.now();const a=s=>{const u=Math.min(.05,(s-o)/1e3);o=s,n.current(u),e=requestAnimationFrame(a)};return e=requestAnimationFrame(a),()=>cancelAnimationFrame(e)},[t])}export{f as u};

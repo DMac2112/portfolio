@@ -1,0 +1,15 @@
+# Netlify config for the Astro rework.
+# Works for git-linked CI builds and `netlify deploy` from the CLI.
+# Drag-and-drop of dist/ serves the static site fine but does NOT ship the
+# contact function — link the repo or use the CLI for the working form.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

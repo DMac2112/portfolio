@@ -1,0 +1,195 @@
+---
+// Contact section inside the site's single semantic <footer> (the old site
+// repeated the copyright block six times via the AppWrap HOC).
+// The form posts to /.netlify/functions/contact — the write token lives
+// server-side in Netlify env vars, never in this bundle.
+import { Image } from 'astro:assets';
+import emailIcon from '../assets/email.png';
+import linkedinIcon from '../assets/linkedin.png';
+
+const year = new Date().getFullYear();
+---
+
+<footer id="contact" class="section bg-white" aria-labelledby="contact-heading">
+  <h2 id="contact-heading" class="head-text">Contact me</h2>
+
+  <div class="contact-cards">
+    <a class="contact-card" href="mailto:dominikmachowiak101@gmail.com">
+      <Image src={emailIcon} alt="" width={40} loading="lazy" />
+      <span class="p-text">dominikmachowiak101@gmail.com</span>
+    </a>
+    <a
+      class="contact-card"
+      href="https://www.linkedin.com/in/dominikmachowiak/"
+      target="_blank"
+      rel="noreferrer noopener"
+    >
+      <Image src={linkedinIcon} alt="" width={40} loading="lazy" />
+      <span class="p-text">Dominik Machowiak</span>
+    </a>
+  </div>
+
+  <form class="contact-form" data-contact-form novalidate>
+    <div>
+      <label class="sr-only" for="cf-name">Your name</label>
+      <input class="p-text" type="text" id="cf-name" name="name" placeholder="Your Name" required />
+    </div>
+    <div>
+      <label class="sr-only" for="cf-email">Your email</label>
+      <input class="p-text" type="email" id="cf-email" name="email" placeholder="Your Email" required />
+    </div>
+    <div>
+      <label class="sr-only" for="cf-message">Your message</label>
+      <textarea class="p-text" id="cf-message" name="message" placeholder="Your Message" required></textarea>
+    </div>
+    <button type="submit" class="p-text contact-submit" data-contact-submit>Send Message</button>
+    <p class="contact-status p-text" role="status" aria-live="polite" data-contact-status></p>
+  </form>
+
+  <div class="footer-bottom">
+    <a class="footer-os-link" href="/os/?boot=chooser">
+      Boot DominikOS — my portfolio as an interactive desktop &rarr;
+    </a>
+    <p class="p-text footer-copy">&copy; {year} Dominik Machowiak · All rights reserved</p>
+  </div>
+</footer>
+
+<style>
+  .contact-cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 3rem 0 1rem;
+    width: min(60rem, 100%);
+  }
+
+  .contact-card {
+    min-width: 18.75rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem;
+    border-radius: 10px;
+    background-color: #f2f3fb;
+    text-decoration: none;
+    transition: box-shadow 0.3s ease-in-out;
+  }
+
+  .contact-card:hover,
+  .contact-card:focus-visible {
+    box-shadow: 0 4px 20px rgba(49, 59, 172, 0.18);
+  }
+
+  .contact-card span {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-mono);
+    font-weight: 500;
+    color: var(--secondary-color);
+  }
+
+  .contact-form {
+    width: min(38rem, 100%);
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0 0;
+  }
+
+  .contact-form > div {
+    width: 100%;
+    margin: 0.75rem 0;
+    border-radius: 10px;
+    background-color: var(--primary-color);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+
+  .contact-form > div:focus-within {
+    box-shadow: 0 0 0 2px var(--secondary-color);
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    width: 100%;
+    padding: 0.95rem;
+    border: none;
+    border-radius: 7px;
+    background-color: var(--primary-color);
+    font-family: var(--font-base);
+    color: var(--black-color);
+    outline: none;
+  }
+
+  .contact-form textarea {
+    height: 10.625rem;
+    resize: vertical;
+  }
+
+  .contact-submit {
+    align-self: flex-start;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    border: none;
+    background-color: var(--secondary-color);
+    font-weight: 500;
+    color: var(--white-color);
+    margin-top: 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .contact-submit:hover,
+  .contact-submit:focus-visible {
+    background-color: #2430af;
+  }
+
+  .contact-submit[disabled] {
+    opacity: 0.7;
+    cursor: wait;
+  }
+
+  .contact-status {
+    min-height: 1.4em;
+    font-size: var(--text-sm);
+    margin-top: 0.75rem;
+  }
+
+  .contact-status.is-error {
+    color: #d43d2a;
+  }
+
+  .contact-status.is-success {
+    color: #2f9e44;
+    font-weight: 600;
+  }
+
+  .footer-bottom {
+    margin-top: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .footer-os-link {
+    color: var(--secondary-color);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .footer-os-link:hover,
+  .footer-os-link:focus-visible {
+    text-decoration: underline;
+  }
+
+  .footer-copy {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--gray-color);
+    text-align: center;
+  }
+</style>

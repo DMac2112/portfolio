@@ -1,0 +1,42 @@
+[
+  {
+    "type": "Employment",
+    "works": [
+      {
+        "name": "Salesforce Marketing Cloud Developer",
+        "company": "Deloitte",
+        "year": "2024-Present",
+        "desc": "• Led a Marketing Automation project for a polish automotive client, provided technical consultation, developed & deployed scalable solutions using Marketing Technologies. • Worked on a marketing transformation for multiple car brands including approximately 300 email/sms messages in email studio using HTML, CSS, Javascript and AMPScript."
+      },
+      {
+        "name": "Web Developer",
+        "company": "Welcom-Inn",
+        "year": "2023-2024",
+        "desc": "Designed & developed a website for a property management company using HTML CSS & Javascript. Website is currently being used to advertise Welcom-Inns properties and services."
+      },
+      {
+        "name": "Front-end Web Developer",
+        "company": "Rubicall",
+        "year": "2022-2023",
+        "desc": "Designed & developed a website for a cleaning company using HTML CSS & Javascript. I later returned for additional work for the company to expand the website as they moved into the Airbnb business."
+      },
+      {
+        "name": "Intern Front-end Web Developer",
+        "company": "Hawthorne Electronics",
+        "year": "2021",
+        "desc": "Worked as a volunteer front end web developer for a small electronics company. Responsible for making changes to individual web pages in order to enhance the feel & functionality of the website."
+      }
+    ]
+  },
+  {
+    "type": "Education",
+    "works": [
+      {
+        "name": "BSc Computing and IT Software",
+        "company": "The Open University",
+        "year": "2018-2021",
+        "desc": "Studied a bachelors degree in Computing and IT software at The Open University."
+      }
+    ]
+  }
+]

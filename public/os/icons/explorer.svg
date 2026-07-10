@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Original globe mark (deliberately NOT the lowercase-e browser logo). -->
+  <defs>
+    <radialGradient id="gl" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#9fd4f7"/><stop offset=".6" stop-color="#3f8cf3"/><stop offset="1" stop-color="#1c5fc4"/></radialGradient>
+  </defs>
+  <circle cx="24" cy="24" r="16.5" fill="url(#gl)" stroke="#123c78" stroke-width="1.8"/>
+  <path d="M7.5 24 h33 M24 7.5 v33 M11 14.5 c7 5 19 5 26 0 M11 33.5 c7-5 19-5 26 0" fill="none" stroke="#dcedfd" stroke-width="1.5" opacity=".9"/>
+  <ellipse cx="24" cy="24" rx="8.2" ry="16.5" fill="none" stroke="#dcedfd" stroke-width="1.5" opacity=".9"/>
+  <path d="M4.5 29 C 12 37.5 33 40 44.5 31.5" fill="none" stroke="#ffcf6b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M44.5 31.5 l-4.6-.3 3-3.4 z" fill="#ffcf6b"/>
+</svg>

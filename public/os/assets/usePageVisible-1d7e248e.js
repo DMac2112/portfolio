@@ -1,0 +1,1 @@
+import{r as t}from"./vendor-1cf99640.js";function o(){const[i,n]=t.useState(()=>typeof document>"u"?!0:document.visibilityState==="visible");return t.useEffect(()=>{const e=()=>n(document.visibilityState==="visible");return document.addEventListener("visibilitychange",e),()=>document.removeEventListener("visibilitychange",e)},[]),i}export{o as u};

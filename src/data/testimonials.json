@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Norbert",
+    "company": "Hawthorne Electronics",
+    "feedback": "Our website underwent a remarkable transformation with Dominik's input and changes. His expertise and dedication brought a fresh appeal and functionality to the site, impressing both us and our customers. Dominik's professionalism and attention to detail allowed us to upgrade our website to create a seamless user experience. We're immensely grateful for his contribution, and it has undoubtedly boosted our online presence and business prospects.",
+    "image": "testimonial-norbert.png"
+  },
+  {
+    "name": "Agnieszka",
+    "company": "Welcom-Inn",
+    "feedback": "I greatly appreciate Dominik's efforts in developing a functional website for our company. Despite my limited knowledge of websites, he guided us patiently. The website effectively showcases our rental properties and services. Dominik's expertise has improved our online presence, simplifying the exploration of our offerings for potential clients. I recommend Dominik for his skillful and patient approach to website development.",
+    "image": "testimonial-agnieszka.jpg"
+  },
+  {
+    "name": "Barbara",
+    "company": "Rubicall",
+    "feedback": "I'm thrilled to share my positive experience with Dominik at Rubicall. He created a fantastic website for our cleaning business! I'm not very tech-savvy, but Dominik was patient and understood our needs. The website looks great, works great on phones and computers, and our clients love it. I highly recommend Dominik for any business looking to expand their business online.",
+    "image": "testimonial-barbara.png"
+  }
+]

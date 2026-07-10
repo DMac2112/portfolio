@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" data-theme="xp">
+<head>
+  <meta charset="UTF-8" />
+  <!-- §10.4 asked for user-scalable=no, §11.3 requires 200% zoom (WCAG 1.4.4) — a11y wins;
+       modern iOS ignores the flag anyway. The embedded game manages its own touch-action. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>DominikOS — Dominik Machowiak's desktop portfolio</title>
+  <meta name="description" content="Dominik Machowiak's portfolio reimagined as a retro desktop OS. Open the résumé, projects and games as desktop apps — or jump straight into the Dev District game." />
+  <meta name="theme-color" content="#245edb" />
+  <!-- Self-canonical: /os/ is a distinct indexable experience listed in the sitemap. -->
+  <link rel="canonical" href="https://dominikmachowiak.com/os/" />
+  <link rel="icon" href="/os/ui/start-flag.svg" type="image/svg+xml" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Dominik Machowiak",
+    "jobTitle": "Salesforce Marketing Cloud Developer",
+    "worksFor": { "@type": "Organization", "name": "Deloitte" },
+    "alumniOf": { "@type": "CollegeOrUniversity", "name": "The Open University" },
+    "email": "mailto:dominikmachowiak101@gmail.com",
+    "url": "https://dominikmachowiak.com/",
+    "sameAs": [
+      "https://www.linkedin.com/in/dominikmachowiak/",
+      "https://dominikmachowiak.com/"
+    ]
+  }
+  </script>
+  <style>
+    /* Pre-CSS shell: keep the first paint dark + quiet while the chooser chunk loads. */
+    html, body { margin: 0; min-height: 100%; background: #0d1b3e; color: #eef2fb;
+      font-family: "Segoe UI", system-ui, sans-serif; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  </style>
+  <script type="module" crossorigin src="/os/assets/index-5f85d041.js"></script>
+  <link rel="modulepreload" crossorigin href="/os/assets/vendor-1cf99640.js">
+  <link rel="stylesheet" href="/os/assets/index-24624b32.css">
+  <style>@view-transition { navigation: auto; }</style>
+</head>
+<body>
+  <noscript>
+    <div style="padding: 24px; max-width: 640px; margin: auto;">
+      <h1>Dominik Machowiak — Salesforce Marketing Cloud Developer</h1>
+      <p>DominikOS is an interactive desktop-style portfolio and needs JavaScript.
+        The full accessible portfolio lives at
+        <a style="color:#9cc3ff" href="https://dominikmachowiak.com/">dominikmachowiak.com</a>.</p>
+    </div>
+  </noscript>
+
+  <!-- §11.4: static semantic résumé for crawlers & screen readers. Lives OUTSIDE #root so React never touches it. -->
+  <div id="seo-resume" class="sr-only">
+    <h1>Dominik Machowiak</h1>
+    <p>Salesforce Marketing Cloud Developer at Deloitte. Front-end developer (HTML, CSS, JavaScript, React, TypeScript).</p>
+    <p>
+      Email: <a href="mailto:dominikmachowiak101@gmail.com">dominikmachowiak101@gmail.com</a> ·
+      <a href="https://www.linkedin.com/in/dominikmachowiak/">LinkedIn</a> ·
+      <a href="https://dominikmachowiak.com/">Classic portfolio site</a>
+    </p>
+    <h2>Experience</h2>
+    <ul>
+      <li><strong>Salesforce Marketing Cloud Developer — Deloitte (2024–Present).</strong>
+        Led a marketing-automation project for a Polish automotive client; technical consultation;
+        built ~300 email and SMS messages in Email Studio using HTML, CSS, JavaScript and AMPScript
+        across a multi-brand marketing transformation.</li>
+      <li><strong>Web Developer — Welcom-Inn (2023–2024).</strong>
+        Designed and built a live property-management website:
+        <a href="https://welcom-inn.co.uk/">welcom-inn.co.uk</a>.</li>
+      <li><strong>Front-end Web Developer — Rubicall (2022–2023).</strong>
+        Built the cleaning-company site and returned to expand it for their Airbnb business:
+        <a href="https://www.rubicall.co.uk/">rubicall.co.uk</a>.</li>
+      <li><strong>Intern Front-end Web Developer — Hawthorne Electronics (2021).</strong>
+        Volunteer role improving web pages' feel and functionality.</li>
+    </ul>
+    <h2>Education</h2>
+    <p>BSc Computing &amp; IT Software — The Open University (2018–2021).</p>
+    <h2>Skills</h2>
+    <p>HTML, CSS, JavaScript, React, TypeScript, Sass, Redux, Node, GraphQL, Git, Figma.</p>
+    <h2>Certifications</h2>
+    <p>Salesforce Marketing Cloud Email Specialist; Salesforce Trailhead Mountaineer.</p>
+  </div>
+
+  <div id="root"></div>
+  
+</body>
+</html>

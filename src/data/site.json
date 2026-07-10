@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "title": "Dominik Machowiak | Salesforce Marketing Cloud & Front-End Developer",
+    "description": "Dominik Machowiak — Salesforce Marketing Cloud Developer at Deloitte and front-end developer (React, JavaScript). See my projects, or boot DominikOS: my portfolio as an interactive desktop with a 2D game."
+  },
+  "hero": {
+    "greeting": "Hello! My name is",
+    "name": "Dominik Machowiak",
+    "role": "Salesforce Marketing Cloud & Front-End Developer",
+    "tagline": "I build fast, polished web experiences — from React front-ends to large-scale marketing automation at Deloitte.",
+    "primaryCta": { "label": "View my work", "href": "#work" },
+    "secondaryCta": { "label": "Contact me", "href": "#contact" }
+  },
+  "sections": {
+    "aboutHeading": "What am I About? Well I am a..",
+    "workHeading": "My Current Development Portfolio",
+    "workFilters": ["Web App", "React JS", "All"],
+    "skillsHeading": "My Experience & Skills",
+    "testimonialsHeading": "What people say",
+    "contactHeading": "Contact me"
+  },
+  "contact": {
+    "email": "dominikmachowiak101@gmail.com",
+    "linkedinUrl": "https://www.linkedin.com/in/dominikmachowiak/",
+    "linkedinLabel": "Dominik Machowiak"
+  },
+  "footer": {
+    "osLink": "Boot DominikOS — my portfolio as an interactive desktop →",
+    "copyright": "Dominik Machowiak · All rights reserved"
+  }
+}

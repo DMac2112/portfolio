@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Frontend Developer",
+    "description": "I am a passionate frontend developer who has the desire to design and develop great-looking web applications which are satisfying & engaging to use! The tools I have used thus far to achieve this are HTML5, CSS3, Javascript and various APIs.",
+    "image": "about-frontend.svg"
+  },
+  {
+    "title": "Open-minded Programmer",
+    "description": "Throughout my education and work experience I have had the opportunity to gain experience in various programming languages and technologies. This has led me to always look for new challenges where I can showcase my skills and hopefully learn even more!",
+    "image": "about-programmer.jpg"
+  },
+  {
+    "title": "Avid Learner",
+    "description": "What I enjoy most is acquiring knowledge and learning ways in which I can improve my work and myself. Therefore I am always on the look out for new technologies which I can put to good use to improve my projects! This allows me to adapt and be agile in my approach to work.",
+    "image": "about-learner.jpg"
+  },
+  {
+    "title": "Aspiring React Developer",
+    "description": "I am well-versed in HTML, CSS and Javascript. However, I am always looking to improve and gain knowledge! This is why I have spent time learning the React JS library on top of my existing Frontend experience. This also does not stop me from learning any other Frameworks in the future!",
+    "image": "about-react.svg"
+  }
+]

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <!-- Original stylized hill wallpaper for DominikOS (authored for this project; not a photo,
+       not derived from any Microsoft asset). -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f71cd"/>
+      <stop offset=".45" stop-color="#5c9de6"/>
+      <stop offset=".78" stop-color="#a8d4f5"/>
+      <stop offset="1" stop-color="#d3ecfc"/>
+    </linearGradient>
+    <linearGradient id="hillBack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#93c95e"/>
+      <stop offset="1" stop-color="#5e9b38"/>
+    </linearGradient>
+    <linearGradient id="hillFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a9dc6e"/>
+      <stop offset=".55" stop-color="#71b23f"/>
+      <stop offset="1" stop-color="#41761f"/>
+    </linearGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="11"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <g fill="#ffffff" opacity=".95" filter="url(#soft)">
+    <ellipse cx="380" cy="185" rx="155" ry="44"/>
+    <ellipse cx="480" cy="152" rx="112" ry="36"/>
+    <ellipse cx="295" cy="152" rx="92" ry="30"/>
+  </g>
+  <g fill="#ffffff" opacity=".85" filter="url(#soft)">
+    <ellipse cx="1150" cy="125" rx="135" ry="36"/>
+    <ellipse cx="1245" cy="97" rx="92" ry="27"/>
+  </g>
+  <g fill="#ffffff" opacity=".55" filter="url(#soft)">
+    <ellipse cx="920" cy="265" rx="115" ry="25"/>
+  </g>
+  <path fill="url(#hillBack)" d="M0 640 Q 260 515 560 588 T 1080 566 T 1600 598 V 900 H 0 Z"/>
+  <path fill="#ffffff" opacity=".14" d="M0 648 Q 260 523 560 596 T 1080 574 T 1600 606 V 622 Q 1080 586 560 606 Q 260 534 0 656 Z"/>
+  <path fill="url(#hillFront)" d="M0 762 Q 350 598 780 688 T 1600 700 V 900 H 0 Z"/>
+  <path fill="#ffffff" opacity=".12" d="M0 770 Q 350 606 780 696 T 1600 708 V 726 Q 1180 706 780 712 Q 380 622 0 782 Z"/>
+</svg>

@@ -1,0 +1,107 @@
+---
+import '@fontsource-variable/dm-sans';
+import '@fontsource-variable/space-grotesk';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+}
+
+const { title, description, ogImage = '/dominik.png' } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImageAbs = new URL(ogImage, Astro.site);
+
+// Entity signals: Person + WebSite + ProfilePage consolidated in one @graph.
+// This is the core "#1 for the name query" lever.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': 'https://dominikmachowiak.com/#person',
+      name: 'Dominik Machowiak',
+      url: 'https://dominikmachowiak.com/',
+      image: 'https://dominikmachowiak.com/dominik.png',
+      jobTitle: 'Salesforce Marketing Cloud Developer',
+      worksFor: { '@type': 'Organization', name: 'Deloitte' },
+      alumniOf: { '@type': 'CollegeOrUniversity', name: 'The Open University' },
+      knowsAbout: [
+        'Salesforce Marketing Cloud',
+        'AMPscript',
+        'Email Studio',
+        'Front-End Development',
+        'React',
+        'JavaScript',
+        'HTML',
+        'CSS',
+      ],
+      email: 'mailto:dominikmachowiak101@gmail.com',
+      sameAs: ['https://www.linkedin.com/in/dominikmachowiak/'],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://dominikmachowiak.com/#website',
+      url: 'https://dominikmachowiak.com/',
+      name: 'Dominik Machowiak — Portfolio',
+      publisher: { '@id': 'https://dominikmachowiak.com/#person' },
+    },
+    {
+      '@type': 'ProfilePage',
+      '@id': canonical.href + '#page',
+      url: canonical.href,
+      isPartOf: { '@id': 'https://dominikmachowiak.com/#website' },
+      mainEntity: { '@id': 'https://dominikmachowiak.com/#person' },
+    },
+  ],
+};
+
+// Warm /os/ near-click (Chromium): 'moderate' waits for real pointer intent,
+// so the heavy OS never downloads on initial page load.
+const speculationRules = {
+  prerender: [{ where: { href_matches: '/os/*' }, eagerness: 'moderate' }],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#151320" />
+    <link rel="icon" href="/dominik.png" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="generator" content={Astro.generator} />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageAbs} />
+    <meta property="og:site_name" content="Dominik Machowiak" />
+    <!-- TODO: replace og:image with a branded 1200x630 card (DominikOS screenshot + name/role) and switch twitter:card to summary_large_image -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageAbs} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script type="speculationrules" set:html={JSON.stringify(speculationRules)} />
+
+    <!-- js flag: reveal animations only ever hide content when JS runs -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
+
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
