@@ -1,0 +1,11 @@
+{
+  "id": "notepad",
+  "title": "readme.txt - Notepad",
+  "kind": "notepad",
+  "icon": "/os/icons/notepad.svg",
+  "category": "apps",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Programs" },
+  "window": { "width": 480, "height": 400, "minWidth": 320, "minHeight": 240 },
+  "content": "/os/content/readme.txt"
+}

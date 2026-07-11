@@ -1,0 +1,11 @@
+{
+  "id": "experience",
+  "title": "Experience",
+  "kind": "timeline",
+  "icon": "/os/icons/experience.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 5 },
+  "startMenu": { "show": true, "group": "Programs" },
+  "window": { "width": 640, "height": 560, "minWidth": 380, "minHeight": 320, "singleton": true },
+  "data": "/os/content/experience.json"
+}

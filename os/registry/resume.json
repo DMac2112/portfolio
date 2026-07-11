@@ -1,0 +1,13 @@
+{
+  "id": "resume",
+  "title": "Dominik Machowiak - CV",
+  "kind": "pdf",
+  "icon": "/os/icons/resume.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 1, "label": "My Resume" },
+  "startMenu": { "show": true, "group": "Documents" },
+  "window": { "width": 680, "height": 760, "minWidth": 420, "singleton": true },
+  "src": "/os/assets/cv.pdf",
+  "download": { "href": "/os/assets/cv.pdf", "filename": "Dominik-Machowiak-CV.pdf" },
+  "seo": { "heading": "Dominik Machowiak — Résumé", "body": "Salesforce Marketing Cloud Developer at Deloitte. Front-end developer: HTML, CSS, JavaScript, React, TypeScript." }
+}

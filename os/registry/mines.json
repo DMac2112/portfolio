@@ -1,0 +1,10 @@
+{
+  "id": "mines",
+  "title": "Minesweeper",
+  "kind": "react",
+  "icon": "/os/icons/mines.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Games" },
+  "window": { "width": 380, "height": 470, "minWidth": 300, "minHeight": 380, "singleton": true, "maximizedOnMobile": true }
+}

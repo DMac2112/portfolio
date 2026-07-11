@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <!-- Original Dialtone icon authored for DominikOS: a pixel speech bubble holding a phone
+       handset, with a presence dot. An original mark — nothing traced from any product. -->
+  <!-- bubble -->
+  <rect x="3" y="5" width="42" height="30" fill="#31b4a6" stroke="#0f6a5e" stroke-width="2"/>
+  <rect x="5" y="7" width="38" height="5" fill="#63d3c6"/>
+  <path d="M11 35 L11 45 L21 35 Z" fill="#31b4a6" stroke="#0f6a5e" stroke-width="2"/>
+  <!-- handset (bridge on top, ear/mouth cups below) -->
+  <rect x="14" y="15" width="20" height="5" fill="#ffffff"/>
+  <rect x="11" y="18" width="7" height="9" fill="#ffffff"/>
+  <rect x="30" y="18" width="7" height="9" fill="#ffffff"/>
+  <!-- signal ticks -->
+  <rect x="39" y="12" width="2" height="8" fill="#bff0ea"/>
+  <rect x="36" y="15" width="2" height="5" fill="#bff0ea"/>
+  <!-- presence dot -->
+  <circle cx="39" cy="33" r="5.5" fill="#3fbf3f" stroke="#1e5622" stroke-width="1.5"/>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Original Minesweeper icon authored for DominikOS: a raised beveled tile with a code-drawn
+       mine and a small flag corner. Nothing traced from any product. -->
+  <rect x="3" y="3" width="42" height="42" rx="4" fill="#c0c0c0" stroke="#7b7b7b" stroke-width="1"/>
+  <!-- raised bevel -->
+  <path d="M4 4 H44 V8 H8 V44 H4 Z" fill="#f2f2f2"/>
+  <path d="M44 4 V44 H4 V40 H40 V4 Z" fill="#808080"/>
+  <!-- mine -->
+  <g stroke="#141414" stroke-width="2.6" stroke-linecap="round">
+    <line x1="24" y1="10" x2="24" y2="38"/><line x1="10" y1="24" x2="38" y2="24"/>
+    <line x1="14.2" y1="14.2" x2="33.8" y2="33.8"/><line x1="33.8" y1="14.2" x2="14.2" y2="33.8"/>
+  </g>
+  <circle cx="24" cy="24" r="8.5" fill="#161616"/>
+  <circle cx="20.6" cy="20.6" r="2.4" fill="#ffffff"/>
+  <!-- flag corner -->
+  <rect x="34" y="9" width="1.8" height="9" fill="#1a1a1a"/>
+  <path d="M34.4 9 L28.5 11.6 L34.4 14.2 Z" fill="#d62a2a"/>
+  <rect x="30.5" y="17.4" width="9" height="2.4" fill="#1a1a1a"/>
+</svg>

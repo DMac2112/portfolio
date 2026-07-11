@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Original bird-through-pipes icon authored for DominikOS. All shapes drawn in code;
+       nothing traced from any existing game sprite. -->
+  <defs>
+    <linearGradient id="flSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bfe4ff"/><stop offset="1" stop-color="#8fc9f5"/>
+    </linearGradient>
+    <linearGradient id="flPipe" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6fce5f"/><stop offset=".5" stop-color="#57b84a"/><stop offset="1" stop-color="#3f8f36"/>
+    </linearGradient>
+    <radialGradient id="flBird" cx=".38" cy=".32" r=".8">
+      <stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#ffd23e"/><stop offset="1" stop-color="#e3a41c"/>
+    </radialGradient>
+  </defs>
+  <rect x="3" y="3" width="42" height="42" rx="8" fill="url(#flSky)" stroke="#6fa8d8" stroke-width="1.5"/>
+  <!-- clouds -->
+  <ellipse cx="12" cy="12" rx="6" ry="2.6" fill="#ffffff" opacity=".8"/>
+  <ellipse cx="34" cy="9" rx="4.5" ry="2.1" fill="#ffffff" opacity=".7"/>
+  <!-- a green pipe descending from the top-right, leaving a gap -->
+  <rect x="33.5" y="3" width="9" height="12" fill="url(#flPipe)"/>
+  <rect x="31.5" y="13" width="13" height="5.5" rx="1" fill="url(#flPipe)" stroke="#2f6f28" stroke-width=".8"/>
+  <!-- ground strip -->
+  <rect x="3" y="39" width="42" height="6" fill="#ded49a"/>
+  <rect x="3" y="39" width="42" height="2.2" fill="#8ccf5e"/>
+  <!-- the bird, mid-flap -->
+  <circle cx="19" cy="26" r="8" fill="url(#flBird)" stroke="#c98a16" stroke-width="1.2"/>
+  <path d="M11.5 26 q4 5 8.5 2.5" fill="none" stroke="#e3a41c" stroke-width="1.4" stroke-linecap="round"/>
+  <ellipse cx="13.5" cy="25" rx="3.6" ry="2.4" fill="#f2b21f" transform="rotate(-24 13.5 25)"/>
+  <circle cx="22" cy="22.5" r="3" fill="#ffffff" stroke="#c98a16" stroke-width=".8"/>
+  <circle cx="23" cy="22.5" r="1.4" fill="#222"/>
+  <path d="M26 25 L31 24 L26 28 Z" fill="#ff8c2b" stroke="#d96a12" stroke-width=".7" stroke-linejoin="round"/>
+</svg>

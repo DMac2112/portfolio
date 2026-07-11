@@ -1,0 +1,10 @@
+{
+  "id": "paint",
+  "title": "Paint",
+  "kind": "react",
+  "icon": "/os/icons/paint.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 6 },
+  "startMenu": { "show": true, "group": "Programs" },
+  "window": { "width": 640, "height": 500, "minWidth": 460, "minHeight": 360, "singleton": true, "maximizedOnMobile": true }
+}

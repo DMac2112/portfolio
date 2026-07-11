@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path d="M6 10 a4 4 0 0 1 4-4 h20 a4 4 0 0 1 4 4 v12 a4 4 0 0 1-4 4 H18 l-7 6 v-6 h-1 a4 4 0 0 1-4-4 Z" fill="#dcedfd" stroke="#2c4a94" stroke-width="1.7"/>
+  <text x="20" y="22" text-anchor="middle" font-family="Georgia, serif" font-size="17" font-weight="bold" fill="#2f71cd">&#8220;&#8221;</text>
+  <path d="M20 26 a4 4 0 0 1 4-4 h14 a4 4 0 0 1 4 4 v9 a4 4 0 0 1-4 4 h-1 v5 l-6-5 H24 a4 4 0 0 1-4-4 Z" fill="#ffe9a8" stroke="#8a6414" stroke-width="1.6"/>
+  <path d="M25 27.5h12M25 31h12M25 34.5h7" stroke="#8a6414" stroke-width="1.4"/>
+</svg>

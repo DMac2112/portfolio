@@ -1,0 +1,10 @@
+{
+  "id": "pinball",
+  "title": "Space Pinball",
+  "kind": "react",
+  "icon": "/os/icons/pinball.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Games" },
+  "window": { "width": 640, "height": 780, "minWidth": 430, "minHeight": 540, "singleton": true, "maximizedOnMobile": true }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "my-computer",
+  "title": "My Computer",
+  "kind": "mycomputer",
+  "icon": "/os/icons/my-computer.svg",
+  "category": "system",
+  "desktop": { "show": true, "order": 0 },
+  "startMenu": { "show": true, "group": "Places" },
+  "window": { "width": 560, "height": 440, "minWidth": 380, "minHeight": 300, "singleton": true }
+}

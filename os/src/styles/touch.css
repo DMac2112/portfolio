@@ -1,0 +1,21 @@
+/* touch.css — touch-target sizing (DOMINIKOS-PLAN §10.2). Applied via [data-input="touch"],
+ * set on <html> by SystemContext. Targets .win__* classes, never XP.css classes. */
+:root[data-input="touch"] .win__controls button {
+  width: 40px;
+  height: 26px;
+}
+:root[data-input="touch"] .taskbar-btn,
+:root[data-input="touch"] .quick-launch button,
+:root[data-input="touch"] .tray button {
+  min-height: var(--hit);
+}
+:root[data-input="touch"] .start-menu__item,
+:root[data-input="touch"] .ctx-menu button {
+  min-height: var(--hit);
+}
+:root[data-input="touch"] .desk-icon {
+  min-width: var(--hit);
+  min-height: var(--hit);
+}
+/* iOS edge-swipe guard (§10.4): scope touch-action to drag surfaces only */
+:root[data-input="touch"] .win__titlebar { touch-action: none; }

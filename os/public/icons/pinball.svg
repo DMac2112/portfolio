@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Original Space Pinball icon authored for DominikOS. -->
+  <defs>
+    <linearGradient id="pbt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c2a66"/><stop offset="1" stop-color="#0a0f2e"/>
+    </linearGradient>
+    <radialGradient id="pbb" cx=".35" cy=".3" r="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#cdd6e8"/><stop offset="1" stop-color="#5a6b8c"/>
+    </radialGradient>
+  </defs>
+  <rect x="8" y="3" width="32" height="42" rx="7" fill="url(#pbt)" stroke="#69e6ff" stroke-width="2"/>
+  <circle cx="18" cy="14" r="1.1" fill="#cfe0fb"/><circle cx="31" cy="9.5" r="1" fill="#cfe0fb"/><circle cx="27" cy="19" r=".9" fill="#cfe0fb"/>
+  <circle cx="24" cy="14" r="4.6" fill="#7a4fd0" stroke="#c99df5" stroke-width="1.4"/>
+  <circle cx="24" cy="24" r="4.4" fill="url(#pbb)"/>
+  <path d="M13 36 L21.5 41" stroke="#2b1a4e" stroke-width="6" stroke-linecap="round"/>
+  <path d="M13 36 L21.5 41" stroke="#ffcf6b" stroke-width="4" stroke-linecap="round"/>
+  <path d="M35 36 L26.5 41" stroke="#2b1a4e" stroke-width="6" stroke-linecap="round"/>
+  <path d="M35 36 L26.5 41" stroke="#ffcf6b" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="13" cy="36" r="2.2" fill="#b03328"/><circle cx="35" cy="36" r="2.2" fill="#b03328"/>
+</svg>

@@ -1,0 +1,10 @@
+{
+  "id": "pasjans",
+  "title": "Pasjans",
+  "kind": "react",
+  "icon": "/os/icons/pasjans.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Games" },
+  "window": { "width": 780, "height": 580, "minWidth": 620, "minHeight": 460, "singleton": true, "maximizedOnMobile": true }
+}

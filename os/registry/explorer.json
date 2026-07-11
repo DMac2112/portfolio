@@ -1,0 +1,10 @@
+{
+  "id": "explorer",
+  "title": "DM Explorer",
+  "kind": "react",
+  "icon": "/os/icons/explorer.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 6, "label": "DM Explorer" },
+  "startMenu": { "show": true, "group": "Programs" },
+  "window": { "width": 920, "height": 660, "minWidth": 480, "minHeight": 380, "singleton": true, "maximizedOnMobile": true }
+}
