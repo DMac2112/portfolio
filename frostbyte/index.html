@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#122a42" />
+  <title>Frostbyte — a Dominik Machowiak original</title>
+  <meta name="description" content="Frostbyte: a cosy penguin hangout, an original mini-world built by Dominik Machowiak." />
+  <link rel="icon" href="/os/icons/frostbyte.svg" />
+  <style>
+    :root { --bg:#122a42; --ink:#f4f8fc; --accent:#7fd6ff; --panel:#0d1c2b; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; height:100%; background:var(--bg); color:var(--ink);
+      font-family: ui-rounded, "Segoe UI", system-ui, sans-serif; overflow:hidden; overscroll-behavior:none; }
+    #game { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+
+    /* ---- HUD ---- */
+    .hud { position:fixed; z-index:5; pointer-events:none; }
+    #titlebar { top:0; left:0; right:0; padding:10px 14px; display:flex; gap:12px; align-items:center;
+      background:linear-gradient(#122a42ee, #122a4200); }
+    #titlebar .name { font-weight:800; letter-spacing:.3px; font-size:15px; }
+    #back-link { pointer-events:auto; text-decoration:none; color:var(--ink); font-size:12.5px;
+      border:1px solid #ffffff33; padding:6px 11px; border-radius:999px; background:#ffffff10; white-space:nowrap; }
+    #back-link:hover { background:#ffffff22; }
+    #titlebar .spacer { flex:1; }
+
+    #coin-counter { top:54px; right:12px; font-size:12px; font-weight:700; color:#0d1c2b;
+      background:var(--accent); padding:5px 11px; border-radius:999px; box-shadow:0 2px 8px #0006; }
+
+    /* ---- Dialogue overlay (NPC speech / shop / dress-up), game1 typeHtml pattern ---- */
+    #dialogue-overlay { position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end;
+      justify-content:center; padding:0 0 max(18px, env(safe-area-inset-bottom)); background:#0006; }
+    #dialogue-overlay.hidden { display:none; }
+    #dialogue-box { width:min(680px, 94vw); background:#fbfbfe; color:#1a1a22; border-radius:16px;
+      box-shadow:0 18px 50px #000a; padding:18px 20px; border:3px solid #0d1c2b; }
+    #dialogue-header { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+    #dialogue-title { margin:0; font-size:19px; }
+    #dialogue-body { font-size:16px; line-height:1.55; min-height:2.6em; }
+    #dialogue-footer { display:flex; align-items:center; gap:10px; margin-top:16px; }
+    #dialogue-footer button { font:inherit; font-weight:700; border-radius:10px; padding:9px 15px;
+      cursor:pointer; border:2px solid #0d1c2b; background:#fff; }
+    #dialogue-close { margin-left:auto; background:#122a42 !important; color:#fff; }
+
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+      clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  </style>
+</head>
+<body>
+  <canvas id="game" aria-label="Frostbyte — a cosy penguin hangout"></canvas>
+
+  <!-- HUD -->
+  <div id="titlebar" class="hud">
+    <div class="name">Frostbyte</div>
+    <div class="spacer"></div>
+    <a id="back-link" href="../">← Classic site</a>
+  </div>
+  <div id="coin-counter" class="hud" hidden>0 coins</div>
+
+  <!-- Dialogue overlay -->
+  <div id="dialogue-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="dialogue-title">
+    <div id="dialogue-box">
+      <header id="dialogue-header">
+        <h2 id="dialogue-title"></h2>
+      </header>
+      <div id="dialogue-body"></div>
+      <footer id="dialogue-footer">
+        <button id="dialogue-close" type="button" aria-label="Close">Close ✕</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- SEO / no-JS fallback -->
+  <noscript>
+    <div style="padding:24px; max-width:640px; margin:auto;">
+      <h1>Frostbyte</h1>
+      <p>An original penguin hangout by Dominik Machowiak. Enable JavaScript to play it, or
+         visit the <a href="https://dominikmachowiak.com">classic site</a>.</p>
+    </div>
+  </noscript>
+
+  <!-- os-bridge MUST load before main.js so KAPLAY captures the right references -->
+  <script src="./os-bridge.js"></script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
