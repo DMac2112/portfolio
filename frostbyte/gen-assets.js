@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import zlib from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ITEM_CATALOG } from './content/cosmetics.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(__dirname, 'assets');
@@ -70,75 +71,137 @@ const C = {
 const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 const shade = (c, f) => [Math.max(0, Math.min(255, c[0] * f)), Math.max(0, Math.min(255, c[1] * f)), Math.max(0, Math.min(255, c[2] * f))];
 
-/* ----------------------------- PENGUIN -------------------------------- */
-// 4 cols x 5 rows, 16x16 cells (§4.3): row0 down, row1 side (left = flipX), row2 up, row3 emote, row4 throw.
-function buildPenguin(bodyHex) {
-  const body = hex(bodyHex), bodyD = shade(body, 0.72), bodyL = shade(body, 1.2);
-  const CW = 16, CH = 16, COLS = 4, ROWS = 5;
+/* ----------------------------- PENGUIN (layered) ---------------------- */
+// Avatar §1: the penguin is a stack of alignment-locked 4x3 sheets (64x48, 16px cells):
+//   penguin-body  = GRAYSCALE silhouette, recoloured at runtime by k.color(bodyHex)
+//   penguin-belly = untinted detail: cream belly + dark eyes + orange beak/feet
+//   cosmetics/*   = GRAYSCALE overlays, recoloured at runtime by the item's catalog tint
+// row0 down (0-3), row1 side/right (4-7; left = flipX), row2 up (8-11). Head is stationary
+// during a walk cycle (only feet bob), so every layer shares one frame index via syncFrame().
+const CW = 16, CH = 16, COLS = 4, ROWS = 3;
+const LEG_A = [0, -1, 0, 1]; // waddle bob per walk frame
+
+// grayscale body palette (tinted at runtime)
+const G = { hi: [230, 230, 234], mid: [174, 174, 180], lo: [112, 112, 120], out: [46, 46, 54] };
+// untinted detail palette
+const D = { belly: [246, 249, 252], eye: [26, 32, 42], beak: [255, 176, 64], beakD: [222, 140, 38], foot: [255, 176, 64], footD: [222, 140, 38] };
+
+function eggBody(p) {
+  for (let y = 3; y <= 14; y++) {
+    const halfW = y < 8 ? 3 + (y - 3) * 0.4 : 4.3 - (y - 8) * 0.35;
+    const xL = Math.round(8 - halfW), xR = Math.round(8 + halfW);
+    for (let x = xL; x <= xR; x++) p(x, y, G.mid);
+    p(xL, y, G.out); p(xR, y, G.out);       // side outline
+    p(xL + 1, y, G.lo); p(xR - 1, y, G.hi);  // inner shade / light
+  }
+  for (let x = 6; x <= 10; x++) { p(x, 3, G.out); p(x, 14, G.out); } // top/bottom caps
+}
+function bellyPatch(p) {
+  for (let y = 7; y <= 13; y++) {
+    const halfW = 2.6 - Math.abs(y - 10) * 0.35;
+    for (let x = Math.round(8 - halfW); x <= Math.round(8 + halfW); x++) p(x, y, D.belly);
+  }
+}
+function footG(p, x, y) { p(x, y, G.mid); p(x + 1, y, G.lo); }
+function footD(p, x, y) { p(x, y, D.foot); p(x + 1, y, D.footD); }
+
+function buildPenguinBody() {
   const img = Img(CW * COLS, CH * ROWS);
   const cell = (fx, fy, draw) => draw((x, y, c) => px(img, fx * CW + x, fy * CH + y, c));
-  const legA = [0, -1, 0, 1]; // waddle bob per frame, matches game1's leg-offset convention
-
-  function bodyShape(p) {
-    // egg-shaped body, x3..12, y3..14
-    for (let y = 3; y <= 14; y++) {
-      const halfW = y < 8 ? 3 + ((y - 3) * 0.4) : 4.3 - ((y - 8) * 0.35);
-      for (let x = Math.round(8 - halfW); x <= Math.round(8 + halfW); x++) p(x, y, body);
-    }
-    for (let y = 3; y <= 14; y++) p(Math.round(8 - (y < 8 ? 3 + (y - 3) * 0.4 : 4.3 - (y - 8) * 0.35)), y, bodyD);
-    for (let y = 3; y <= 14; y++) p(Math.round(8 + (y < 8 ? 3 + (y - 3) * 0.4 : 4.3 - (y - 8) * 0.35)), y, bodyL);
-  }
-  function belly(p) { for (let y = 7; y <= 13; y++) { const halfW = 2.6 - Math.abs(y - 10) * 0.35; for (let x = Math.round(8 - halfW); x <= Math.round(8 + halfW); x++) p(x, y, C.belly); } }
-  function foot(p, x, y) { p(x, y, C.beak); p(x + 1, y, C.beakD); }
-
   for (let f = 0; f < COLS; f++) {
-    const la = legA[f], lb = -legA[f];
-    // ---- DOWN ----
-    cell(f, 0, (p) => {
-      for (let x = 5; x <= 10; x++) p(x, 15, [0, 0, 0, 50]); // shadow
-      bodyShape(p); belly(p);
-      p(6, 5, C.out); p(9, 5, C.out); // eyes
-      p(7, 6, C.beak); p(8, 6, C.beak); p(7, 7, C.beakD); p(8, 7, C.beakD); // beak
-      foot(p, 6, 14 + la); foot(p, 9, 14 + lb);
-    });
-    // ---- SIDE (facing right; left = flipX) ----
-    cell(f, 1, (p) => {
-      for (let x = 5; x <= 10; x++) p(x, 15, [0, 0, 0, 50]);
-      bodyShape(p); belly(p);
-      p(10, 5, C.out); // one eye
-      p(10, 6, C.beak); p(11, 6, C.beak); p(10, 7, C.beakD); // side beak, points right
-      foot(p, 7 + la, 14); foot(p, 9 + lb, 14);
-    });
-    // ---- UP (back of the head — no face) ----
-    cell(f, 2, (p) => {
-      for (let x = 5; x <= 10; x++) p(x, 15, [0, 0, 0, 50]);
-      bodyShape(p);
-      foot(p, 6, 14 + la); foot(p, 9, 14 + lb);
-    });
-    // ---- EMOTE (row3): non-directional bounce + sparkle, one-shot 4-frame loop ----
-    cell(f, 3, (p) => {
-      const bob = [0, -1, -2, -1][f];
-      for (let x = 5; x <= 10; x++) p(x, 15, [0, 0, 0, 50]);
-      const shift = (draw) => (x, y, c) => draw(x, y + bob, c);
-      bodyShape(shift(p)); belly(shift(p));
-      p(6, 5 + bob, C.out); p(9, 5 + bob, C.out);
-      p(7, 6 + bob, C.beak); p(8, 6 + bob, C.beak);
-      foot(p, 6, 14); foot(p, 9, 14);
-      if (f >= 1) { p(11 + f, 2, [255, 240, 160, 220]); p(12 + f, 3, [255, 240, 160, 160]); } // sparkle
-    });
-    // ---- THROW (row4): wind-up/release, one-shot 4-frame ----
-    cell(f, 4, (p) => {
-      for (let x = 5; x <= 10; x++) p(x, 15, [0, 0, 0, 50]);
-      bodyShape(p); belly(p);
-      p(10, 5, C.out);
-      p(10, 6, C.beak); p(11, 6, C.beak);
-      foot(p, 7, 14); foot(p, 9, 14);
-      // flipper swings from low (f0) to raised overhead (f2/f3 = release)
-      const wingY = [12, 9, 5, 6][f], wingX = [11, 12, 12, 13][f];
-      p(wingX, wingY, bodyD); p(wingX, wingY + 1, bodyD);
-    });
+    const la = LEG_A[f], lb = -LEG_A[f];
+    cell(f, 0, (p) => { for (let x = 5; x <= 10; x++) p(x, 15, [0, 0, 0, 45]); eggBody(p); footG(p, 6, 14 + la); footG(p, 9, 14 + lb); });
+    cell(f, 1, (p) => { for (let x = 5; x <= 10; x++) p(x, 15, [0, 0, 0, 45]); eggBody(p); footG(p, 7 + la, 14); footG(p, 9 + lb, 14); });
+    cell(f, 2, (p) => { for (let x = 5; x <= 10; x++) p(x, 15, [0, 0, 0, 45]); eggBody(p); footG(p, 6, 14 + la); footG(p, 9, 14 + lb); });
   }
-  return save('penguin.png', img);
+  return save('penguin-body.png', img);
+}
+
+function buildPenguinBelly() {
+  const img = Img(CW * COLS, CH * ROWS);
+  const cell = (fx, fy, draw) => draw((x, y, c) => px(img, fx * CW + x, fy * CH + y, c));
+  for (let f = 0; f < COLS; f++) {
+    const la = LEG_A[f], lb = -LEG_A[f];
+    // down: belly + two eyes + centred beak + orange feet
+    cell(f, 0, (p) => { bellyPatch(p); p(6, 5, D.eye); p(9, 5, D.eye); p(7, 6, D.beak); p(8, 6, D.beak); p(7, 7, D.beakD); p(8, 7, D.beakD); footD(p, 6, 14 + la); footD(p, 9, 14 + lb); });
+    // side: belly + one eye + side beak + orange feet
+    cell(f, 1, (p) => { bellyPatch(p); p(10, 5, D.eye); p(10, 6, D.beak); p(11, 6, D.beak); p(10, 7, D.beakD); footD(p, 7 + la, 14); footD(p, 9 + lb, 14); });
+    // up: back of head — no belly/eyes/beak, just orange feet
+    cell(f, 2, (p) => { footD(p, 6, 14 + la); footD(p, 9, 14 + lb); });
+  }
+  return save('penguin-belly.png', img);
+}
+
+/* ----------------------------- COSMETIC OVERLAYS ---------------------- */
+// Grayscale shapes, tinted per-item at runtime. Head is stationary during a walk cycle, so each
+// row's 4 frames are identical. Drawn only on facings where the item is visible.
+const CG = { fill: [212, 212, 218], edge: [116, 116, 126], hi: [244, 244, 248] };
+
+function drawHat(p, id) {
+  if (id === 'snug-beanie') {
+    for (let x = 5; x <= 10; x++) { p(x, 3, CG.fill); p(x, 4, CG.fill); }
+    for (let x = 6; x <= 9; x++) p(x, 2, CG.fill);
+    for (let x = 5; x <= 10; x++) p(x, 5, CG.edge); // brim
+    p(6, 3, CG.hi);
+  } else if (id === 'party-cone') {
+    p(8, 0, CG.fill); for (let x = 7; x <= 8; x++) p(x, 1, CG.fill);
+    for (let x = 6; x <= 9; x++) p(x, 2, CG.fill); for (let x = 5; x <= 10; x++) p(x, 3, CG.fill);
+    for (let x = 5; x <= 10; x++) p(x, 4, CG.edge);
+    p(8, 1, CG.hi);
+  } else if (id === 'propeller-cap') {
+    for (let x = 5; x <= 10; x++) { p(x, 3, CG.fill); p(x, 4, CG.fill); }
+    p(8, 2, CG.fill);
+    for (let x = 4; x <= 11; x++) p(x, 1, CG.edge); // propeller bar
+    p(8, 0, CG.hi);
+  } else if (id === 'ice-crown') {
+    for (let x = 5; x <= 10; x++) p(x, 4, CG.fill);
+    p(5, 3, CG.fill); p(5, 2, CG.hi); p(8, 3, CG.fill); p(8, 1, CG.hi); p(10, 3, CG.fill); p(10, 2, CG.hi);
+  }
+}
+
+function drawEyewear(p, id, facing) {
+  const lens = facing === 'down' ? [[6, 5], [9, 5]] : [[10, 5]];
+  for (const [lx, ly] of lens) { p(lx, ly, CG.fill); p(lx, ly - 1, CG.edge); p(lx, ly + 1, CG.edge); }
+  if (facing === 'down') { p(7, 5, CG.edge); p(8, 5, CG.edge); } // bridge
+  if (id === 'star-specs') for (const [lx, ly] of lens) p(lx, ly, CG.hi);
+  if (id === 'goggles') for (let x = 5; x <= 10; x++) if (facing === 'down') p(x, 5, x % 2 ? CG.edge : CG.fill); // strap
+}
+
+function drawNeck(p, id) {
+  if (id === 'striped-scarf') {
+    for (let x = 5; x <= 10; x++) p(x, 8, CG.fill);
+    for (let x = 5; x <= 10; x++) p(x, 9, CG.edge);
+    p(9, 10, CG.fill); p(10, 10, CG.fill); p(9, 11, CG.hi); // hanging end
+  } else if (id === 'bandana') {
+    for (let x = 6; x <= 9; x++) p(x, 8, CG.fill); for (let x = 7; x <= 8; x++) p(x, 9, CG.fill); p(8, 10, CG.edge);
+  } else if (id === 'bowtie') {
+    p(7, 8, CG.fill); p(7, 9, CG.fill); p(9, 8, CG.fill); p(9, 9, CG.fill); p(8, 8, CG.edge); p(8, 9, CG.hi);
+  }
+}
+
+function drawHeld(p, id) {
+  if (id === 'mini-flag') {
+    for (let y = 7; y <= 12; y++) p(12, y, CG.edge); // pole
+    for (let x = 13; x <= 15; x++) { p(x, 7, CG.fill); p(x, 8, CG.fill); } p(13, 7, CG.hi);
+  } else if (id === 'bubble-wand') {
+    for (let y = 9; y <= 12; y++) p(12, y, CG.edge);
+    p(12, 7, CG.fill); p(14, 7, CG.fill); p(13, 6, CG.fill); p(13, 8, CG.fill); // ring
+  } else if (id === 'snowball') {
+    p(12, 10, CG.fill); p(13, 10, CG.fill); p(12, 11, CG.fill); p(13, 11, CG.fill); p(13, 10, CG.hi);
+  } else if (id === 'sparkler-wand') {
+    for (let y = 9; y <= 12; y++) p(12, y, CG.edge);
+    p(13, 6, CG.hi); p(14, 7, CG.fill); p(12, 6, CG.fill); p(13, 8, CG.hi);
+  }
+}
+
+function buildCosmetic(item) {
+  const img = Img(CW * COLS, CH * ROWS);
+  const cell = (fx, fy, draw) => draw((x, y, c) => px(img, fx * CW + x, fy * CH + y, c));
+  const rowOf = { down: 0, side: 1, up: 2 };
+  const drawer = { hat: drawHat, eyewear: drawEyewear, neck: drawNeck, held: drawHeld }[item.slot];
+  const facings = item.slot === 'eyewear' || item.slot === 'held' ? ['down', 'side'] : ['down', 'side', 'up'];
+  for (let f = 0; f < COLS; f++) for (const facing of facings) cell(f, rowOf[facing], (p) => drawer(p, item.id, facing));
+  return save(path.join('cosmetics', `${item.slot}-${item.id}.png`), img);
 }
 
 /* ----------------------------- ROOM: Chillmere Plaza -------------------- */
@@ -173,7 +236,11 @@ function buildRoomPlaza() {
 
 /* ----------------------------- run -------------------------------------- */
 const made = [
-  buildPenguin('#2b3346'),
+  buildPenguinBody(),
+  buildPenguinBelly(),
   buildRoomPlaza(),
+  ...ITEM_CATALOG.map(buildCosmetic),
 ];
+// The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
+try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }
 console.log('Generated:\n  ' + made.join('\n  '));
