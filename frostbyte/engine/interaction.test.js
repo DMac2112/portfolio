@@ -1,0 +1,174 @@
+import { describe, it, expect } from 'vitest';
+import { findNearestInteractable, mergeInteractables, INTERACT_R } from './interaction.js';
+
+describe('findNearestInteractable', () => {
+  it('picks the closest of several candidates within range', () => {
+    const pos = { x: 0, y: 0 };
+    const candidates = [
+      { id: 'far', pos: { x: 150, y: 0 }, kind: 'landmark' },    // 150 away
+      { id: 'close', pos: { x: 50, y: 0 }, kind: 'shop' },       // 50 away
+      { id: 'medium', pos: { x: 100, y: 0 }, kind: 'npc' },      // 100 away
+    ];
+    const result = findNearestInteractable(pos, candidates);
+    expect(result.id).toBe('close');
+  });
+
+  it('returns null when all candidates exceed maxDist', () => {
+    const pos = { x: 0, y: 0 };
+    const candidates = [
+      { id: 'a', pos: { x: 200, y: 0 }, kind: 'landmark' },
+      { id: 'b', pos: { x: 300, y: 0 }, kind: 'shop' },
+    ];
+    const result = findNearestInteractable(pos, candidates, 100);
+    expect(result).toBeNull();
+  });
+
+  it('returns null for an empty candidates array', () => {
+    const pos = { x: 0, y: 0 };
+    const result = findNearestInteractable(pos, []);
+    expect(result).toBeNull();
+  });
+
+  it('breaks ties deterministically: first candidate in array wins', () => {
+    const pos = { x: 0, y: 0 };
+    // Two candidates at identical distance from pos
+    const candidates = [
+      { id: 'first', pos: { x: 50, y: 0 }, kind: 'landmark' },
+      { id: 'second', pos: { x: 50, y: 0 }, kind: 'shop' },
+    ];
+    const result = findNearestInteractable(pos, candidates);
+    expect(result.id).toBe('first');
+  });
+
+  it('respects a custom maxDist override', () => {
+    const pos = { x: 0, y: 0 };
+    const candidates = [
+      { id: 'within', pos: { x: 50, y: 0 }, kind: 'landmark' },
+      { id: 'outside', pos: { x: 150, y: 0 }, kind: 'shop' },
+    ];
+    // Use custom maxDist of 100
+    const result = findNearestInteractable(pos, candidates, 100);
+    expect(result.id).toBe('within');
+  });
+
+  it('uses INTERACT_R as default maxDist', () => {
+    const pos = { x: 0, y: 0 };
+    const candidates = [
+      { id: 'inside', pos: { x: 100, y: 0 }, kind: 'landmark' },
+      { id: 'outside', pos: { x: INTERACT_R + 10, y: 0 }, kind: 'shop' },
+    ];
+    const result = findNearestInteractable(pos, candidates);
+    expect(result.id).toBe('inside');
+  });
+
+  it('excludes a candidate exactly at distance maxDist (boundary test)', () => {
+    const pos = { x: 0, y: 0 };
+    const candidates = [
+      { id: 'at-boundary', pos: { x: 100, y: 0 }, kind: 'landmark' },
+    ];
+    // maxDist = 100, but candidate is exactly 100 away, so should be excluded
+    const result = findNearestInteractable(pos, candidates, 100);
+    expect(result).toBeNull();
+  });
+
+  it('uses hypot distance (2D Euclidean)', () => {
+    const pos = { x: 0, y: 0 };
+    // Candidate at (3, 4) has distance sqrt(3^2 + 4^2) = sqrt(25) = 5
+    const candidates = [
+      { id: 'target', pos: { x: 3, y: 4 }, kind: 'landmark' },
+    ];
+    const result = findNearestInteractable(pos, candidates, 6);
+    expect(result.id).toBe('target');
+  });
+
+  it('returns null when 2D distance exceeds maxDist', () => {
+    const pos = { x: 0, y: 0 };
+    // Candidate at (3, 4) has distance 5
+    const candidates = [
+      { id: 'target', pos: { x: 3, y: 4 }, kind: 'landmark' },
+    ];
+    const result = findNearestInteractable(pos, candidates, 4);
+    expect(result).toBeNull();
+  });
+});
+
+describe('mergeInteractables', () => {
+  it('combines hotspots and npcs into one list', () => {
+    const hotspots = [
+      { id: 'fountain', pos: { x: 100, y: 200 }, kind: 'landmark' },
+      { id: 'shop', pos: { x: 300, y: 400 }, kind: 'shop' },
+    ];
+    const npcs = [
+      { id: 'npc1', pos: { x: 50, y: 60 } },
+      { id: 'npc2', pos: { x: 70, y: 80 } },
+    ];
+    const result = mergeInteractables(hotspots, npcs);
+    expect(result).toHaveLength(4);
+  });
+
+  it('tags every NPC entry with kind:npc', () => {
+    const hotspots = [
+      { id: 'fountain', pos: { x: 100, y: 200 }, kind: 'landmark' },
+    ];
+    const npcs = [
+      { id: 'npc1', pos: { x: 50, y: 60 } },
+      { id: 'npc2', pos: { x: 70, y: 80 } },
+    ];
+    const result = mergeInteractables(hotspots, npcs);
+    const npcEntries = result.filter((entry) => entry.kind === 'npc');
+    expect(npcEntries).toHaveLength(2);
+    expect(npcEntries[0].id).toBe('npc1');
+    expect(npcEntries[1].id).toBe('npc2');
+  });
+
+  it('preserves hotspot kind values', () => {
+    const hotspots = [
+      { id: 'fountain', pos: { x: 100, y: 200 }, kind: 'landmark' },
+      { id: 'shop', pos: { x: 300, y: 400 }, kind: 'shop' },
+    ];
+    const npcs = [];
+    const result = mergeInteractables(hotspots, npcs);
+    expect(result[0].kind).toBe('landmark');
+    expect(result[1].kind).toBe('shop');
+  });
+
+  it('ignores extra properties on npc objects', () => {
+    const hotspots = [];
+    const npcs = [
+      { id: 'npc1', pos: { x: 50, y: 60 }, name: 'Alice', health: 100, texture: 'penguin.png' },
+    ];
+    const result = mergeInteractables(hotspots, npcs);
+    expect(result[0]).toEqual({
+      id: 'npc1',
+      pos: { x: 50, y: 60 },
+      kind: 'npc',
+    });
+    expect(result[0].name).toBeUndefined();
+    expect(result[0].health).toBeUndefined();
+  });
+
+  it('handles empty hotspots array', () => {
+    const hotspots = [];
+    const npcs = [
+      { id: 'npc1', pos: { x: 50, y: 60 } },
+    ];
+    const result = mergeInteractables(hotspots, npcs);
+    expect(result).toHaveLength(1);
+    expect(result[0].kind).toBe('npc');
+  });
+
+  it('handles empty npcs array', () => {
+    const hotspots = [
+      { id: 'fountain', pos: { x: 100, y: 200 }, kind: 'landmark' },
+    ];
+    const npcs = [];
+    const result = mergeInteractables(hotspots, npcs);
+    expect(result).toHaveLength(1);
+    expect(result[0].kind).toBe('landmark');
+  });
+
+  it('handles both arrays empty', () => {
+    const result = mergeInteractables([], []);
+    expect(result).toHaveLength(0);
+  });
+});

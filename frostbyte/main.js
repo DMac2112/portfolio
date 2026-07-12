@@ -11,6 +11,8 @@ import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
 import { checkDailyLogin } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
+import { initRoomCrowd } from './world/npc-runtime.js';
+import { ROOM_SPAWN } from './content/npc-spawn.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -91,6 +93,11 @@ k.scene('room', (roomId) => {
   const dressBtn = document.getElementById('dressup-btn');
   if (dressBtn) dressBtn.onclick = () => (dressUp.isOpen() ? dressUp.close() : dressUp.open());
   refreshCoins();
+
+  // NPC crowd — the "it only pretends" fake-multiplayer layer. Ticks and pauses for free, since
+  // it's driven from this same k.onUpdate, which KAPLAY simply never calls while paused.
+  const spawnConfig = ROOM_SPAWN[roomId];
+  if (spawnConfig) initRoomCrowd(k, roomId, spawnConfig, room.scale);
 
   // Movement input is ignored while the dress-up overlay is open (frozen-flag pattern).
   k.onMousePress(() => { if (!dressUp.isOpen()) moveTarget = k.toWorld(k.mousePos()); });
