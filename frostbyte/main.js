@@ -158,7 +158,7 @@ k.scene('room', (roomId, opts = {}) => {
     return null;
   };
   function doInteract() {
-    if (dressUp.isOpen()) return;
+    if (dressUp.isOpen() || chatUI.isOpen()) return; // 'e' typed into the chat box must not interact
     const action = actionFor(nearest);
     if (action === 'minigame') {
       if (interactPrompt) interactPrompt.classList.remove('show'); // hide before leaving the scene
@@ -208,7 +208,10 @@ k.scene('room', (roomId, opts = {}) => {
     announce(`You ${id}`);
   }
   const emotes = createEmotes({ onEmote: playEmote });
-  emotes.ids.forEach((id, i) => { if (i < 9) k.onKeyPress(String(i + 1), () => playEmote(id)); });
+  // digits typed into the chat box (or with dress-up open) must not fire emotes
+  emotes.ids.forEach((id, i) => {
+    if (i < 9) k.onKeyPress(String(i + 1), () => { if (!dressUp.isOpen() && !chatUI.isOpen()) playEmote(id); });
+  });
 
   // Player speech bubble — recreated only when the visible bubble changes, opacity tracks its fade.
   let curBubbleId = null;
