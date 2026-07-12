@@ -9,7 +9,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const GAME1_DIR = path.resolve(here, '..', 'game1');
+// Sibling static game folders served on the same origin (deployed topology §3): /game1/ and
+// /frostbyte/ are static peers of /os/ in production, so dev/preview must serve them too.
+const SIBLING_GAMES: Record<string, string> = {
+  '/game1': path.resolve(here, '..', 'game1'),
+  '/frostbyte': path.resolve(here, '..', 'frostbyte'),
+};
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -26,31 +31,35 @@ const MIME: Record<string, string> = {
   '.wasm': 'application/wasm',
 };
 
-// Deployed topology (§3): /os/ and /game1/ are static peers on one origin. dev-server.js has no
-// proxy (§12.5), so for iteration this middleware serves the sibling ../game1 folder at /game1/
-// on the SAME origin as the Vite dev/preview server — the iframe embed then behaves exactly as
-// it will in production (same-origin, postMessage bridge, no CORS).
-function serveGame1(): Plugin {
+// Deployed topology (§3): /os/ and the game folders are static peers on one origin. dev-server.js
+// has no proxy (§12.5), so for iteration this middleware serves each sibling game folder at its
+// prefix on the SAME origin as the Vite dev/preview server — the iframe embeds then behave exactly
+// as they will in production (same-origin, postMessage bridge, no CORS).
+function serveSiblingGames(): Plugin {
   const handler: Connect.NextHandleFunction = (req, res, next) => {
     const url = (req.url ?? '').split('?')[0];
-    if (url === '/game1') {
-      res.statusCode = 302;
-      res.setHeader('Location', '/game1/');
-      res.end();
+    for (const [prefix, dir] of Object.entries(SIBLING_GAMES)) {
+      if (url === prefix) {
+        res.statusCode = 302;
+        res.setHeader('Location', prefix + '/');
+        res.end();
+        return;
+      }
+      if (!url.startsWith(prefix + '/')) continue;
+      let rel = decodeURIComponent(url.slice(prefix.length));
+      if (rel.endsWith('/')) rel += 'index.html';
+      const file = path.join(dir, path.normalize(rel));
+      if (!file.startsWith(dir + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
+        return next();
+      }
+      res.setHeader('Content-Type', MIME[path.extname(file).toLowerCase()] ?? 'application/octet-stream');
+      fs.createReadStream(file).pipe(res);
       return;
     }
-    if (!url.startsWith('/game1/')) return next();
-    let rel = decodeURIComponent(url.slice('/game1'.length));
-    if (rel.endsWith('/')) rel += 'index.html';
-    const file = path.join(GAME1_DIR, path.normalize(rel));
-    if (!file.startsWith(GAME1_DIR + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
-      return next();
-    }
-    res.setHeader('Content-Type', MIME[path.extname(file).toLowerCase()] ?? 'application/octet-stream');
-    fs.createReadStream(file).pipe(res);
+    return next();
   };
   return {
-    name: 'dominikos:serve-game1',
+    name: 'dominikos:serve-sibling-games',
     configureServer(server) {
       server.middlewares.use(handler);
     },
@@ -62,7 +71,7 @@ function serveGame1(): Plugin {
 
 export default defineConfig({
   base: '/os/',
-  plugins: [react(), serveGame1()],
+  plugins: [react(), serveSiblingGames()],
   server: { port: 4183, strictPort: true },
   preview: { port: 4181, strictPort: true },
   build: {

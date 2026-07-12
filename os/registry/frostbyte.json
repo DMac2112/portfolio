@@ -1,0 +1,11 @@
+{
+  "id": "frostbyte",
+  "title": "Frostbyte",
+  "kind": "iframe",
+  "icon": "/os/icons/frostbyte.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Games" },
+  "window": { "width": 960, "height": 640, "minWidth": 480, "minHeight": 360, "singleton": true, "maximizedOnMobile": true },
+  "src": "/frostbyte/index.html?embedded=1"
+}

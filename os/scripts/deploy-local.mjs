@@ -14,9 +14,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.resolve(here, '..');
 const DIST = path.join(APP, 'dist');
 const GAME1_SRC = path.resolve(APP, '..', 'game1');
+const FROSTBYTE_SRC = path.resolve(APP, '..', 'frostbyte');
 const SITE = path.resolve(APP, '..', '..', 'portfolio-2026');
 const OS_DEST = path.join(SITE, 'os');
 const GAME1_DEST = path.join(SITE, 'game1');
+const FROSTBYTE_DEST = path.join(SITE, 'frostbyte');
 
 if (!fs.existsSync(DIST)) {
   console.error('✖ dist/ not found — run `npm run build` first.');
@@ -34,5 +36,12 @@ console.log(`✔ os/dist → ${OS_DEST}`);
 // game1: overwrite the live copy with the edited one (index.html, main.js, os-bridge.js, vendor/)
 fs.cpSync(GAME1_SRC, GAME1_DEST, { recursive: true });
 console.log(`✔ ../game1 → ${GAME1_DEST}`);
+
+// frostbyte: same pattern — static peer of /os/ (skip dev-only bits and node_modules)
+fs.cpSync(FROSTBYTE_SRC, FROSTBYTE_DEST, {
+  recursive: true,
+  filter: (src) => !/node_modules|\.test\.js$|dev-server\.cjs$|gen-assets\.js$/.test(src),
+});
+console.log(`✔ ../frostbyte → ${FROSTBYTE_DEST}`);
 
 console.log('\nLocal topology ready — serve it with: node dev-server.js (in portfolio-2026, :4178)');
