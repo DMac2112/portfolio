@@ -73,6 +73,20 @@
     .cz-state { font-size:11px; font-weight:800; color:#2a7a7a; }
     .cz-cell.locked .cz-state { color:#b06a2a; }
 
+    /* ---- Interact prompt (shown near an interactable) ---- */
+    #interact-prompt { position:fixed; z-index:6; left:50%; bottom:64px; transform:translate(-50%, 14px);
+      pointer-events:auto; font:inherit; font-weight:700; font-size:14px; color:#0d1c2b; background:var(--accent);
+      border:none; border-radius:999px; padding:11px 20px; cursor:pointer; opacity:0; display:none;
+      box-shadow:0 6px 18px #000a; transition:opacity .15s, transform .15s; }
+    #interact-prompt.show { display:inline-block; opacity:1; transform:translate(-50%, 0); }
+    #interact-prompt:active { transform:translate(-50%, 2px); }
+
+    /* ---- Coin toast (earned coins after a minigame) ---- */
+    #coin-toast { position:fixed; z-index:7; left:50%; top:72px; transform:translate(-50%, -8px);
+      font-weight:800; font-size:15px; color:#0b1a00; background:#86bc25; padding:8px 16px; border-radius:999px;
+      box-shadow:0 4px 14px #0008; opacity:0; display:none; transition:opacity .3s, transform .3s; pointer-events:none; }
+    #coin-toast.show { display:block; opacity:1; transform:translate(-50%, 0); }
+
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
       clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   </style>
@@ -88,6 +102,8 @@
   </div>
   <div id="coin-counter" class="hud" hidden>0 coins</div>
   <button id="dressup-btn" type="button">👕 Dress Up</button>
+  <button id="interact-prompt" type="button">▶ Interact</button>
+  <div id="coin-toast" role="status" aria-live="polite"></div>
 
   <!-- Customize (dress-up) overlay -->
   <div id="customize-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="customize-title">

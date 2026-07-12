@@ -9,10 +9,14 @@ import { resolveMoveVector, clampToBounds, resolveObstacles, resolveFacing } fro
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
-import { checkDailyLogin } from './engine/economy.js';
+import { checkDailyLogin, earnCoins } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
+import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
+import { findNearestInteractable, mergeInteractables } from './engine/interaction.js';
+import { minigameForHotspot } from './content/minigames-registry.js';
+import { recordCoins, remainingToday } from './engine/minigame-daily.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -56,6 +60,12 @@ const PLAYER_RADIUS = 12;
  * ------------------------------------------------------------------ */
 k.loadSprite('room-plaza', './assets/room-plaza.png');
 loadAvatarSprites(k);
+k.loadSprite('snowpal', './assets/minigame/snowpal.png');
+k.loadSprite('snowball', './assets/minigame/snowball.png');
+k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
+
+// Register the Snowdrift Toss scene (a sibling scene entered/exited via the room ↔ minigame contract).
+registerMinigameSnowdrift(k);
 
 /* ------------------------------------------------------------------ *
  * Coin HUD
@@ -66,16 +76,49 @@ function refreshCoins() {
   coinEl.textContent = `${save.coins} coins`;
 }
 
+const coinToastEl = document.getElementById('coin-toast');
+let coinToastTimer = null;
+function showCoinToast(msg) {
+  coinToastEl.textContent = msg;
+  coinToastEl.classList.add('show');
+  clearTimeout(coinToastTimer);
+  coinToastTimer = setTimeout(() => coinToastEl.classList.remove('show'), 2600);
+}
+
 /* ------------------------------------------------------------------ *
  * Room scene — parameterized by room id (Engine & World Architecture §3).
  * ------------------------------------------------------------------ */
-k.scene('room', (roomId) => {
+k.scene('room', (roomId, opts = {}) => {
   const room = ROOM_REGISTRY[roomId];
   buildRoom(k, room);
 
-  const spawn = room.spawnPoints.default;
+  // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
+  // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
+  for (const h of room.hotspots ?? []) {
+    if (h.kind !== 'minigame' && h.kind !== 'shop') continue;
+    const lw = Math.max(64, (h.label?.length ?? 4) * 9 + 18);
+    k.add([k.rect(lw, 22, { radius: 6 }), k.pos(h.x, h.y - 46), k.anchor('center'),
+      k.color(k.Color.fromHex('#0d1c2b')), k.opacity(0.82), k.z(100000)]);
+    k.add([k.text(h.label ?? '', { size: 12 }), k.pos(h.x, h.y - 46), k.anchor('center'),
+      k.color(k.Color.fromHex('#f4f8fc')), k.z(100001)]);
+  }
+
+  const spawn = room.spawnPoints[opts.spawn] ?? room.spawnPoints.default;
   const avatar = makeAvatarActor(k, save.avatar, spawn, room.scale);
   const player = avatar.root;
+
+  // Returning from the minigame: credit the earned coins (re-clamped to today's remaining cap).
+  if (opts.coinsEarned > 0) {
+    const credited = Math.min(opts.coinsEarned, remainingToday(save, todayISO));
+    if (credited > 0) {
+      earnCoins(save, credited, 'minigame', []);
+      recordCoins(save, todayISO, credited);
+      persist(save);
+      showCoinToast(`+${credited} coins!`);
+    } else {
+      showCoinToast('Daily coin cap reached');
+    }
+  }
 
   let facing = spawn.facing === 'left' ? 'left' : 'down';
   let moveTarget = null;
@@ -97,7 +140,32 @@ k.scene('room', (roomId) => {
   // NPC crowd — the "it only pretends" fake-multiplayer layer. Ticks and pauses for free, since
   // it's driven from this same k.onUpdate, which KAPLAY simply never calls while paused.
   const spawnConfig = ROOM_SPAWN[roomId];
-  if (spawnConfig) initRoomCrowd(k, roomId, spawnConfig, room.scale);
+  const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, room.scale) : null;
+
+  // Interaction: nearest hotspot/NPC scan → interact prompt → launch. Only 'minigame' and 'shop'
+  // are actionable today (NPC dialogue / landmark flavour come in later phases).
+  const hotspotInteractables = (room.hotspots ?? []).map((h) => ({ id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label }));
+  const interactPrompt = document.getElementById('interact-prompt');
+  let nearest = null;
+
+  const actionFor = (hit) => {
+    if (!hit) return null;
+    if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
+    if (hit.kind === 'shop') return 'shop';
+    return null;
+  };
+  function doInteract() {
+    if (dressUp.isOpen()) return;
+    const action = actionFor(nearest);
+    if (action === 'minigame') {
+      if (interactPrompt) interactPrompt.classList.remove('show'); // hide before leaving the scene
+      k.go(minigameForHotspot(nearest.id).sceneId, { from: roomId });
+    } else if (action === 'shop') {
+      dressUp.open();
+    }
+  }
+  k.onKeyPress('e', doInteract);
+  if (interactPrompt) interactPrompt.onclick = doInteract;
 
   // Movement input is ignored while the dress-up overlay is open (frozen-flag pattern).
   k.onMousePress(() => { if (!dressUp.isOpen()) moveTarget = k.toWorld(k.mousePos()); });
@@ -133,6 +201,19 @@ k.scene('room', (roomId) => {
 
     const cam = computeCamPos(player.pos);
     k.setCamPos(cam.x, cam.y);
+
+    // Nearest-interactable scan (hotspots + live NPCs), drives the interact prompt.
+    const liveNpcs = crowd ? crowd.getRoom().npcs : [];
+    nearest = findNearestInteractable(player.pos, mergeInteractables(hotspotInteractables, liveNpcs));
+    const action = actionFor(nearest);
+    if (interactPrompt) {
+      if (action && !frozen) {
+        interactPrompt.textContent = action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` : '👕 Dress Up';
+        interactPrompt.classList.add('show');
+      } else {
+        interactPrompt.classList.remove('show');
+      }
+    }
   });
 
   function fitCam() { k.setCamScale(k.vec2(computeCamScale(k.width() / k.height()))); }

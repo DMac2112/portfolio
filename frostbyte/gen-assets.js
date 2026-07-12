@@ -13,6 +13,7 @@ const OUT = path.join(__dirname, 'assets');
 fs.mkdirSync(OUT, { recursive: true });
 fs.mkdirSync(path.join(OUT, 'props'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'cosmetics'), { recursive: true });
+fs.mkdirSync(path.join(OUT, 'minigame'), { recursive: true });
 
 /* ----------------------------- PNG encoder (verbatim technique from game1) --------------- */
 const CRC = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
@@ -234,12 +235,76 @@ function buildRoomPlaza() {
   return save('room-plaza.png', img);
 }
 
+/* ----------------------------- MINIGAME: Snowdrift Toss ------------------ */
+// Extra tones not already in C, matching the spec for this minigame's art.
+const MG = { shadow: [170, 190, 210], dark: [40, 46, 54], orange: [255, 150, 60], sky: [214, 228, 240] };
+
+function buildSnowpal() {
+  const img = Img(32, 32);
+  // fills a disc with `color` only on the +x side (a flat one-side shade), masked to the same circle.
+  const shadeDiscSide = (cx, cy, r, color) => {
+    for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
+      if (x * x + y * y <= r * r + r * 0.6 && x > r * 0.3) px(img, cx + x, cy + y, color);
+    }
+  };
+  // body (bottom, larger), then head (top, smaller) drawn after so it sits cleanly on the body
+  disc(img, 16, 23, 10, C.snow);
+  shadeDiscSide(16, 23, 10, MG.shadow);
+  disc(img, 16, 9, 7, C.snow);
+  shadeDiscSide(16, 9, 7, MG.shadow);
+
+  // dot eyes
+  px(img, 13, 8, MG.dark); px(img, 19, 8, MG.dark);
+  // small orange triangle nose, pointing right
+  px(img, 17, 10, MG.orange); px(img, 18, 10, MG.orange); px(img, 17, 11, MG.orange);
+  // dark buttons down the body
+  px(img, 16, 18, MG.dark); px(img, 16, 22, MG.dark); px(img, 16, 26, MG.dark);
+
+  return save(path.join('minigame', 'snowpal.png'), img);
+}
+
+function buildSnowball() {
+  const img = Img(12, 12);
+  disc(img, 6, 6, 5, C.snow);
+  // lighter highlight, top-left
+  px(img, 4, 3, C.snowL); px(img, 3, 4, C.snowL);
+  // faint blue-grey shadow arc, bottom-right
+  const shadow = [...MG.shadow, 130];
+  px(img, 8, 8, shadow); px(img, 9, 7, shadow); px(img, 8, 9, shadow); px(img, 7, 9, shadow);
+  return save(path.join('minigame', 'snowball.png'), img);
+}
+
+function buildMinigameBg() {
+  const W = 480, H = 270;
+  const img = Img(W, H);
+  const bandH = Math.round(H * 0.4); // upper ~40% gradient band; lower ~60% is solid snow ground
+  for (let y = 0; y < H; y++) {
+    const t = y / bandH;
+    const base = y <= bandH
+      ? MG.sky.map((v, i) => v + (C.snow[i] - v) * t)
+      : C.snow;
+    for (let x = 0; x < W; x++) {
+      let col = base;
+      const n = rnd();
+      if (n > 0.97) col = C.snowD; else if (n > 0.94) col = C.snowL;
+      px(img, x, y, col);
+    }
+  }
+  // subtle horizon line
+  const horizonC = shade(C.snow, 0.94);
+  for (let x = 0; x < W; x++) px(img, x, bandH, horizonC);
+  return save(path.join('minigame', 'toss-bg.png'), img);
+}
+
 /* ----------------------------- run -------------------------------------- */
 const made = [
   buildPenguinBody(),
   buildPenguinBelly(),
   buildRoomPlaza(),
   ...ITEM_CATALOG.map(buildCosmetic),
+  buildSnowpal(),
+  buildSnowball(),
+  buildMinigameBg(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

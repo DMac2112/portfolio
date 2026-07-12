@@ -29,6 +29,7 @@ export function DEFAULT_SAVE(now = nowISO()) {
     ownedItems: starterDyeIds(),                   // 4 free starter dyes
     npcGreetedOn: {},
     pickupsCollectedOn: {},
+    dailyCoins: {},                                // { "YYYY-MM-DD": minigame coins earned that day }
     lastLoginDate: null,
     loginStreak: 0,
     prefs: { muted: false, reducedMotion: prefersReducedMotion(), lastRoom: 'plaza' },
