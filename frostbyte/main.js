@@ -17,6 +17,9 @@ import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
 import { findNearestInteractable, mergeInteractables } from './engine/interaction.js';
 import { minigameForHotspot } from './content/minigames-registry.js';
 import { recordCoins, remainingToday } from './engine/minigame-daily.js';
+import { newChat, addBubble, tick as tickChat, active as activeChat } from './engine/chat.js';
+import { createChat } from './ui/chat.js';
+import { createEmotes, emoteSymbol } from './ui/emotes.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -167,13 +170,77 @@ k.scene('room', (roomId, opts = {}) => {
   k.onKeyPress('e', doInteract);
   if (interactPrompt) interactPrompt.onclick = doInteract;
 
-  // Movement input is ignored while the dress-up overlay is open (frozen-flag pattern).
+  /* ------------------------------------------------------------------ *
+   * Chat & emotes — strictly LOCAL. Player text renders only as their own
+   * in-canvas bubble and an sr-only aria-live mirror; it is never sent
+   * anywhere (no fetch/postMessage/etc.). Bubbles age on KAPLAY dt, so they
+   * freeze with the world under the pause contract.
+   * ------------------------------------------------------------------ */
+  const playerChat = newChat();
+  const chatLive = document.getElementById('chat-live');
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  function announce(msg) { if (chatLive) chatLive.textContent = msg; }
+
+  const chatUI = createChat({
+    onSay: (text) => {
+      if (!text) return;
+      addBubble(playerChat, { speaker: 'you', text });
+      announce(`You: ${text}`);
+    },
+  });
+  const sayBtn = document.getElementById('say-btn');
+  if (sayBtn) sayBtn.onclick = () => (chatUI.isOpen() ? chatUI.close() : chatUI.open());
+
+  // Floating emote symbol above the player + a11y announce (no body-frame animation — Avatar §3).
+  function playEmote(id) {
+    const sym = k.add([
+      k.text(emoteSymbol(id), { size: 14 }), k.pos(player.pos.x, player.pos.y - 84),
+      k.anchor('center'), k.z(100002), k.opacity(1),
+    ]);
+    let life = 0;
+    sym.onUpdate(() => {
+      life += k.dt();
+      if (!reduceMotion) sym.pos = k.vec2(player.pos.x, player.pos.y - 84 - life * 30);
+      else sym.pos = k.vec2(player.pos.x, player.pos.y - 84);
+      sym.opacity = Math.max(0, 1 - life);
+      if (life >= 1) k.destroy(sym);
+    });
+    announce(`You ${id}`);
+  }
+  const emotes = createEmotes({ onEmote: playEmote });
+  emotes.ids.forEach((id, i) => { if (i < 9) k.onKeyPress(String(i + 1), () => playEmote(id)); });
+
+  // Player speech bubble — recreated only when the visible bubble changes, opacity tracks its fade.
+  let curBubbleId = null;
+  let bubbleObjs = null;
+  function clearPlayerBubble() {
+    if (bubbleObjs) { k.destroy(bubbleObjs.bg); k.destroy(bubbleObjs.txt); bubbleObjs = null; }
+    curBubbleId = null;
+  }
+  function renderPlayerBubble() {
+    const list = activeChat(playerChat);
+    const top = list.length ? list[list.length - 1] : null;
+    if (!top) { clearPlayerBubble(); return; }
+    if (top.id !== curBubbleId) {
+      clearPlayerBubble();
+      const w = Math.min(180, Math.max(48, top.text.length * 6 + 16));
+      const bg = player.add([k.rect(w, 22, { radius: 7 }), k.pos(0, -78), k.anchor('center'),
+        k.color(k.Color.fromHex('#7fd6ff')), k.opacity(0.95), k.z(99998)]);
+      const txt = player.add([k.text(top.text, { size: 9, width: w - 10 }), k.pos(0, -78), k.anchor('center'),
+        k.color(k.Color.fromHex('#0d1c2b')), k.z(99999)]);
+      bubbleObjs = { bg, txt }; curBubbleId = top.id;
+    }
+    bubbleObjs.bg.opacity = 0.95 * top.alpha;
+    bubbleObjs.txt.opacity = top.alpha;
+  }
+
+  // Movement input is ignored while an overlay (dress-up or chat) is open (frozen-flag pattern).
   k.onMousePress(() => { if (!dressUp.isOpen()) moveTarget = k.toWorld(k.mousePos()); });
   k.onTouchStart((pos) => { if (!dressUp.isOpen()) moveTarget = k.toWorld(pos); });
 
   k.onUpdate(() => {
     const dt = Math.min(k.dt(), 0.05); // defensive clamp against tab-switch spikes
-    const frozen = dressUp.isOpen();
+    const frozen = dressUp.isOpen() || chatUI.isOpen();
     const keys = frozen ? {} : {
       left: k.isKeyDown('left') || k.isKeyDown('a'),
       right: k.isKeyDown('right') || k.isKeyDown('d'),
@@ -201,6 +268,10 @@ k.scene('room', (roomId, opts = {}) => {
 
     const cam = computeCamPos(player.pos);
     k.setCamPos(cam.x, cam.y);
+
+    // Age + render the player's local speech bubbles.
+    tickChat(playerChat, dt * 1000);
+    renderPlayerBubble();
 
     // Nearest-interactable scan (hotspots + live NPCs), drives the interact prompt.
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];

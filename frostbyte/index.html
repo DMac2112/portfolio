@@ -87,6 +87,17 @@
       box-shadow:0 4px 14px #0008; opacity:0; display:none; transition:opacity .3s, transform .3s; pointer-events:none; }
     #coin-toast.show { display:block; opacity:1; transform:translate(-50%, 0); }
 
+    /* ---- Social HUD: Say button + emote bar ---- */
+    #say-btn { position:fixed; z-index:6; right:12px; bottom:56px; pointer-events:auto; font:inherit;
+      font-weight:700; font-size:13px; color:#0d1c2b; background:var(--accent); border:none; border-radius:999px;
+      padding:9px 16px; cursor:pointer; box-shadow:0 4px 14px #0008; }
+    #say-btn:active { transform:translateY(1px); }
+    #emote-bar { position:fixed; z-index:6; left:12px; bottom:14px; display:flex; gap:6px; pointer-events:auto; }
+    .emote-btn { font-size:18px; line-height:1; width:40px; height:40px; border:none; border-radius:12px;
+      background:#ffffff1a; cursor:pointer; box-shadow:0 2px 8px #0006; }
+    .emote-btn:hover { background:#ffffff33; }
+    .emote-btn:active { transform:translateY(1px); }
+
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
       clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   </style>
@@ -104,6 +115,9 @@
   <button id="dressup-btn" type="button">👕 Dress Up</button>
   <button id="interact-prompt" type="button">▶ Interact</button>
   <div id="coin-toast" role="status" aria-live="polite"></div>
+  <button id="say-btn" type="button">💬 Say</button>
+  <div id="emote-bar" aria-label="Emotes"></div>
+  <div id="chat-live" class="sr-only" aria-live="polite"></div>
 
   <!-- Customize (dress-up) overlay -->
   <div id="customize-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="customize-title">
