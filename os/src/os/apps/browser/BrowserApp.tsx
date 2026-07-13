@@ -10,11 +10,12 @@ import { useSystem } from '../../context/SystemContext';
 import { usePageVisible } from '../../hooks/usePageVisible';
 import { tone } from '../../sound';
 import { newNav, current, navigate, back, forward, canBack, canForward, normalize, HOME, type Nav } from './history';
-import { lookup, SKY_URL, BUBBLE_URL, REAL_URL } from './sites';
+import { lookup, SKY_URL, BUBBLE_URL, FROSTBYTE_URL, REAL_URL } from './sites';
 
 interface Load { url: string; progress: number }
 
 const FAVORITES: { label: string; url: string; icon: string }[] = [
+  { label: 'Frostbyte', url: FROSTBYTE_URL, icon: '/os/icons/frostbyte.svg' },
   { label: 'Sky Hopper', url: SKY_URL, icon: '/os/icons/flappy.svg' },
   { label: 'Bubble Shooter', url: BUBBLE_URL, icon: '/os/icons/bubble.svg' },
   { label: 'DominikNet Home', url: HOME, icon: '/os/icons/explorer.svg' },

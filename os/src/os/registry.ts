@@ -28,7 +28,9 @@ export const componentByKind: Partial<Record<AppKind, LazyApp>> = {
 export const componentById: Record<string, LazyApp> = {
   // in-app React games (§8.4/§8.6): one manifest + one icon + this line = a new game
   // (Sky Hopper + Bubble Shooter are "web games" now — their lazy imports live in
-  //  apps/browser/sites.tsx and they load inside DM Explorer, BROWSER-PLAN §3)
+  //  apps/browser/sites.tsx and they load inside DM Explorer, BROWSER-PLAN §3. Frostbyte
+  //  joined them there too, as a same-origin iframe rather than a lazy import — it never
+  //  had a componentById entry since it was always kind:'iframe'.)
   pinball: lazy(() => import('./games/pinball/PinballApp')),
   pasjans: lazy(() => import('./games/pasjans/SolitaireApp')),
   mines: lazy(() => import('./games/mines/MinesApp')),

@@ -1,9 +1,13 @@
 // sites.tsx — the fake Web inside DM Explorer (BROWSER-PLAN §2.4/§2.6). Every page is
-// original art/copy on invented *.dominikos.net domains (legal gate scans this file). The two
-// web games render the REAL game components — their lazy imports moved here from registry.ts,
-// so the chunks stay code-split. Games receive the browser's windowId + `active`, which keeps
-// their own §8.4 pause logic working (minimize/blur pauses; navigating away unmounts).
-import { lazy, Suspense } from 'react';
+// original art/copy on invented *.dominikos.net domains (legal gate scans this file). Sky
+// Hopper and Bubble Shooter render the REAL game components — their lazy imports moved here
+// from registry.ts, so the chunks stay code-split. Frostbyte is a third web game, but it was
+// already a same-origin iframe (its own dev server under /frostbyte/), so it gets its own
+// FrostbyteFrame below instead of a lazy import — same os-bridge-v1 pause contract IframeHost
+// uses for native iframe games, just wired against ctx.active instead of shouldRun. Games
+// receive the browser's windowId + `active`, which keeps their own §8.4 pause logic working
+// (minimize/blur pauses; navigating away unmounts).
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import type { AppManifest } from '../../types';
 import { ExternalFrame } from '../../window/IframeHost';
 import { HOME } from './history';
@@ -27,6 +31,7 @@ export interface Site {
 
 export const SKY_URL = 'http://games.dominikos.net/sky-hopper/';
 export const BUBBLE_URL = 'http://games.dominikos.net/bubble-shooter/';
+export const FROSTBYTE_URL = 'http://games.dominikos.net/frostbyte/';
 export const REAL_URL = 'https://dominikmachowiak.com/';
 
 const noop = (): void => {};
@@ -64,6 +69,51 @@ function GamePage({ ctx, name, blurb, w, h, children }: {
   );
 }
 
+const BRIDGE_CH = 'os-bridge-v1';
+
+/** Frostbyte's iframe glue — not IframeHost (DM Explorer pages render arbitrary JSX, §2.6),
+ *  but the same os-bridge-v1 pause contract IframeHost wires for native games (§8.2): post
+ *  pause/resume on `focused` changes, first post gated on 'ready' from the frame, e.source
+ *  validated, listener cleaned up on unmount. Same-origin game sandbox (mirrors IframeHost's
+ *  trusted-game branch) — frostbyte/os-bridge.js already speaks this protocol, zero changes
+ *  needed on that side. The caller keys this by ctx.reloadToken so Refresh unmounts/remounts
+ *  the whole frame (a fresh instance = a fresh bridgeReady ref, no manual reset needed). */
+function FrostbyteFrame({ focused }: { focused: boolean }) {
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const bridgeReady = useRef(false);
+
+  useEffect(() => {
+    const post = (type: 'pause' | 'resume') =>
+      frameRef.current?.contentWindow?.postMessage({ ch: BRIDGE_CH, type }, window.location.origin);
+
+    if (bridgeReady.current) post(focused ? 'resume' : 'pause');
+
+    const onMessage = (e: MessageEvent) => {
+      const m = e.data as { ch?: string; type?: string } | null;
+      if (!m || m.ch !== BRIDGE_CH || e.source !== frameRef.current?.contentWindow) return;
+      if (m.type === 'ready') {
+        bridgeReady.current = true;
+        post(focused ? 'resume' : 'pause'); // game may finish loading while inactive
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [focused]);
+
+  return (
+    <div className="iframe-stage">
+      <iframe
+        ref={frameRef}
+        src="/frostbyte/index.html?embedded=1"
+        title="Frostbyte"
+        sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+        loading="lazy"
+        tabIndex={0}
+      />
+    </div>
+  );
+}
+
 const SITES: Site[] = [
   {
     url: HOME,
@@ -79,6 +129,10 @@ const SITES: Site[] = [
           <section className="portal__box">
             <h2>Today's links</h2>
             <ul>
+              <li>
+                <button type="button" className="weblink" onClick={() => ctx.go(FROSTBYTE_URL)}>Frostbyte</button>
+                {' '}— waddle around, dress up, and play daily minigames with friends. Featured!
+              </li>
               <li>
                 <button type="button" className="weblink" onClick={() => ctx.go(SKY_URL)}>Sky Hopper</button>
                 {' '}— one button, endless pipes. New!
@@ -106,6 +160,16 @@ const SITES: Site[] = [
           Best viewed at 1024×768 · © 2003 DominikNet · no popups, no cookies, no answers (see Dialtone)
         </footer>
       </div>
+    ),
+  },
+  {
+    url: FROSTBYTE_URL,
+    title: 'Frostbyte — DominikNet Arcade',
+    favicon: '/os/icons/frostbyte.svg',
+    render: (ctx) => (
+      <GamePage ctx={ctx} name="Frostbyte" blurb="Waddle around, dress up your avatar, and win coins in daily minigames. Your save follows you home." w={960} h={640}>
+        <FrostbyteFrame key={ctx.reloadToken} focused={ctx.active} />
+      </GamePage>
     ),
   },
   {
