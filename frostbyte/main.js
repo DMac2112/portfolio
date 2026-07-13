@@ -20,6 +20,9 @@ import { recordCoins, remainingToday } from './engine/minigame-daily.js';
 import { newChat, addBubble, tick as tickChat, active as activeChat } from './engine/chat.js';
 import { createChat } from './ui/chat.js';
 import { createEmotes, emoteSymbol } from './ui/emotes.js';
+import { createMap } from './ui/map.js';
+import { nodeByRoom } from './content/map.js';
+import { canTravel, arriveSpawnId } from './engine/travel.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -62,6 +65,7 @@ const PLAYER_RADIUS = 12;
  * Asset loading
  * ------------------------------------------------------------------ */
 k.loadSprite('room-plaza', './assets/room-plaza.png');
+k.loadSprite('room-den', './assets/room-den.png');
 loadAvatarSprites(k);
 k.loadSprite('snowpal', './assets/minigame/snowpal.png');
 k.loadSprite('snowball', './assets/minigame/snowball.png');
@@ -89,11 +93,56 @@ function showCoinToast(msg) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Dialogue overlay — the index.html #dialogue-overlay, wired minimally
+ * (H1: locked-door copy; NPC dialogue can reuse it in later phases).
+ * ------------------------------------------------------------------ */
+const dlgOverlay = document.getElementById('dialogue-overlay');
+const dlgTitle = document.getElementById('dialogue-title');
+const dlgBody = document.getElementById('dialogue-body');
+const dlgClose = document.getElementById('dialogue-close');
+let dlgLastFocus = null;
+function dialogueIsOpen() { return dlgOverlay ? !dlgOverlay.classList.contains('hidden') : false; }
+function showDialogue(title, body) {
+  if (!dlgOverlay) return;
+  dlgLastFocus = document.activeElement;
+  dlgTitle.textContent = title ?? '';
+  dlgBody.textContent = body ?? '';
+  dlgOverlay.classList.remove('hidden');
+  dlgClose?.focus();
+}
+function closeDialogue() {
+  dlgOverlay?.classList.add('hidden');
+  dlgLastFocus?.focus?.();
+  dlgLastFocus = null;
+}
+if (dlgClose) dlgClose.onclick = closeDialogue;
+dlgOverlay?.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDialogue(); });
+
+/* ------------------------------------------------------------------ *
+ * HUD visibility — the social/map buttons are persistent DOM, so they'd
+ * float over (and act on, via stale scene closures) the minigame scene.
+ * Hidden on minigame entry, restored on every room entry (H1 review fix).
+ * ------------------------------------------------------------------ */
+const HUD_BTN_IDS = ['map-btn', 'say-btn', 'dressup-btn', 'emote-bar'];
+let inMinigame = false;
+function setHudVisible(v) {
+  for (const id of HUD_BTN_IDS) { const el = document.getElementById(id); if (el) el.hidden = !v; }
+}
+
+/* ------------------------------------------------------------------ *
  * Room scene — parameterized by room id (Engine & World Architecture §3).
  * ------------------------------------------------------------------ */
 k.scene('room', (roomId, opts = {}) => {
   const room = ROOM_REGISTRY[roomId];
   buildRoom(k, room);
+
+  // Remember where the player is — the map's "You are here" pin reads this (H1).
+  save.prefs.lastRoom = roomId;
+  persist(save);
+
+  // Back in a room: restore the HUD the minigame hid, and let travel guards relax.
+  setHudVisible(true);
+  inMinigame = false;
 
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
@@ -145,9 +194,11 @@ k.scene('room', (roomId, opts = {}) => {
   const spawnConfig = ROOM_SPAWN[roomId];
   const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, room.scale) : null;
 
-  // Interaction: nearest hotspot/NPC scan → interact prompt → launch. Only 'minigame' and 'shop'
-  // are actionable today (NPC dialogue / landmark flavour come in later phases).
+  // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. 'minigame', 'shop'
+  // and 'door' are actionable (locked doors show their copy); NPCs/landmarks stay promptless and
+  // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
   const hotspotInteractables = (room.hotspots ?? []).map((h) => ({ id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label }));
+  const doorInteractables = (room.doors ?? []).map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
   const interactPrompt = document.getElementById('interact-prompt');
   let nearest = null;
 
@@ -155,16 +206,24 @@ k.scene('room', (roomId, opts = {}) => {
     if (!hit) return null;
     if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
     if (hit.kind === 'shop') return 'shop';
+    if (hit.kind === 'door') return 'door';
     return null;
   };
   function doInteract() {
-    if (dressUp.isOpen() || chatUI.isOpen()) return; // 'e' typed into the chat box must not interact
+    if (anyOverlayOpen()) return; // 'e' typed into the chat box (or any open modal) must not interact
     const action = actionFor(nearest);
     if (action === 'minigame') {
       if (interactPrompt) interactPrompt.classList.remove('show'); // hide before leaving the scene
+      setHudVisible(false); // persistent DOM buttons must not float over (or act on) the minigame
+      inMinigame = true;
       k.go(minigameForHotspot(nearest.id).sceneId, { from: roomId });
     } else if (action === 'shop') {
       dressUp.open();
+    } else if (action === 'door') {
+      const d = nearest.door;
+      if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
+      if (interactPrompt) interactPrompt.classList.remove('show');
+      k.go('room', d.targetRoom, { spawn: d.targetSpawn ?? arriveSpawnId(roomId) });
     }
   }
   k.onKeyPress('e', doInteract);
@@ -208,10 +267,29 @@ k.scene('room', (roomId, opts = {}) => {
     announce(`You ${id}`);
   }
   const emotes = createEmotes({ onEmote: playEmote });
-  // digits typed into the chat box (or with dress-up open) must not fire emotes
+  // digits typed into the chat box (or with any modal open) must not fire emotes
   emotes.ids.forEach((id, i) => {
-    if (i < 9) k.onKeyPress(String(i + 1), () => { if (!dressUp.isOpen() && !chatUI.isOpen()) playEmote(id); });
+    if (i < 9) k.onKeyPress(String(i + 1), () => { if (!anyOverlayOpen()) playEmote(id); });
   });
+
+  // Island-map travel (H1) — the ui singleton renders pins from content/map.js; the pure
+  // engine/travel.js guard decides legality so the rules stay testable headless.
+  const mapUI = createMap({
+    getCurrent: () => roomId,
+    onTravel: (target) => {
+      // frozen:false is correct (the map closed itself before calling back); inMinigame is the
+      // real module-level flag so a stale scene closure can never travel out of a running game.
+      const res = canTravel({ frozen: false, inMinigame, currentRoomId: roomId }, nodeByRoom(target));
+      if (!res.ok) return;
+      if (interactPrompt) interactPrompt.classList.remove('show');
+      k.go('room', target, { spawn: 'fromMap' });
+    },
+  });
+  const anyOverlayOpen = () =>
+    dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || dialogueIsOpen();
+  const mapBtn = document.getElementById('map-btn');
+  if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
+  k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
 
   // Player speech bubble — recreated only when the visible bubble changes, opacity tracks its fade.
   let curBubbleId = null;
@@ -237,13 +315,14 @@ k.scene('room', (roomId, opts = {}) => {
     bubbleObjs.txt.opacity = top.alpha;
   }
 
-  // Movement input is ignored while an overlay (dress-up or chat) is open (frozen-flag pattern).
-  k.onMousePress(() => { if (!dressUp.isOpen()) moveTarget = k.toWorld(k.mousePos()); });
-  k.onTouchStart((pos) => { if (!dressUp.isOpen()) moveTarget = k.toWorld(pos); });
+  // Movement input is ignored while ANY overlay (dress-up/chat/map/dialogue) is open — one
+  // shared frozen predicate so pointer, keys and prompts can never disagree (H1 audit fix).
+  k.onMousePress(() => { if (!anyOverlayOpen()) moveTarget = k.toWorld(k.mousePos()); });
+  k.onTouchStart((pos) => { if (!anyOverlayOpen()) moveTarget = k.toWorld(pos); });
 
   k.onUpdate(() => {
     const dt = Math.min(k.dt(), 0.05); // defensive clamp against tab-switch spikes
-    const frozen = dressUp.isOpen() || chatUI.isOpen();
+    const frozen = anyOverlayOpen();
     const keys = frozen ? {} : {
       left: k.isKeyDown('left') || k.isKeyDown('a'),
       right: k.isKeyDown('right') || k.isKeyDown('d'),
@@ -276,13 +355,22 @@ k.scene('room', (roomId, opts = {}) => {
     tickChat(playerChat, dt * 1000);
     renderPlayerBubble();
 
-    // Nearest-interactable scan (hotspots + live NPCs), drives the interact prompt.
+    // Nearest-ACTIONABLE scan (hotspots + doors + live NPCs) — NPCs have no action yet, so the
+    // isActionable filter keeps a nearby waddler from shadowing a shop/minigame/door prompt.
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];
-    nearest = findNearestInteractable(player.pos, mergeInteractables(hotspotInteractables, liveNpcs));
+    nearest = findNearestInteractable(
+      player.pos,
+      mergeInteractables(hotspotInteractables.concat(doorInteractables), liveNpcs),
+      undefined,
+      { isActionable: (c) => actionFor(c) !== null },
+    );
     const action = actionFor(nearest);
     if (interactPrompt) {
       if (action && !frozen) {
-        interactPrompt.textContent = action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` : '👕 Dress Up';
+        interactPrompt.textContent =
+          action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
+          action === 'shop' ? '👕 Dress Up' :
+          nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');
       } else {
         interactPrompt.classList.remove('show');

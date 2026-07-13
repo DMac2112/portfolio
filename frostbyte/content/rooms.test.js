@@ -69,4 +69,58 @@ describe('room configs', () => {
       }
     }
   });
+
+  it('den and plaza: mutual door reachability (den→plaza and plaza→den)', () => {
+    const den = ROOM_REGISTRY.den;
+    const plaza = ROOM_REGISTRY.plaza;
+    expect(den).toBeDefined();
+
+    // Den's door-out should reach plaza
+    const denDoorOut = den.doors.find(d => d.id === 'door-out');
+    expect(denDoorOut).toBeDefined();
+    expect(denDoorOut.targetRoom).toBe('plaza');
+    expect(denDoorOut.locked).toBe(false);
+
+    // Plaza's door-den should reach den
+    const plazaDoorDen = plaza.doors.find(d => d.id === 'door-den');
+    expect(plazaDoorDen).toBeDefined();
+    expect(plazaDoorDen.targetRoom).toBe('den');
+    expect(plazaDoorDen.locked).toBe(false);
+  });
+
+  it('den: solids do not contain any spawn point (collision-free spawn)', () => {
+    const den = ROOM_REGISTRY.den;
+    for (const sp of Object.values(den.spawnPoints)) {
+      for (const solid of den.solids ?? []) {
+        const leftEdge = solid.x - solid.w / 2;
+        const rightEdge = solid.x + solid.w / 2;
+        const topEdge = solid.y - solid.h / 2;
+        const bottomEdge = solid.y + solid.h / 2;
+        const isInside = sp.x >= leftEdge && sp.x <= rightEdge && sp.y >= topEdge && sp.y <= bottomEdge;
+        expect(isInside).toBe(false);
+      }
+    }
+  });
+
+  it('plaza: fromMap spawn is inside bounds and outside fountain solid', () => {
+    const plaza = ROOM_REGISTRY.plaza;
+    const fromMapSpawn = plaza.spawnPoints.fromMap;
+    expect(fromMapSpawn).toBeDefined();
+
+    // Inside bounds
+    expect(fromMapSpawn.x).toBeGreaterThanOrEqual(plaza.bounds.x0);
+    expect(fromMapSpawn.x).toBeLessThanOrEqual(plaza.bounds.x1);
+    expect(fromMapSpawn.y).toBeGreaterThanOrEqual(plaza.bounds.y0);
+    expect(fromMapSpawn.y).toBeLessThanOrEqual(plaza.bounds.y1);
+
+    // Outside fountain solid
+    const fountain = plaza.solids.find(s => s.id === 'fountain-driftback');
+    expect(fountain).toBeDefined();
+    const leftEdge = fountain.x - fountain.w / 2;
+    const rightEdge = fountain.x + fountain.w / 2;
+    const topEdge = fountain.y - fountain.h / 2;
+    const bottomEdge = fountain.y + fountain.h / 2;
+    const isInFountain = fromMapSpawn.x >= leftEdge && fromMapSpawn.x <= rightEdge && fromMapSpawn.y >= topEdge && fromMapSpawn.y <= bottomEdge;
+    expect(isInFountain).toBe(false);
+  });
 });

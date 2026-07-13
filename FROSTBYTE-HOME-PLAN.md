@@ -176,7 +176,8 @@ Map travel multiplies `'room'` scene re-entries, which weaponizes two known S5-a
 2. **Nearest-ACTIONABLE interact**: the picker must skip action-less candidates (NPCs) — the igloo
    packs door + sign + brush into a small disc and a visitor NPC would shadow all three.
 
-Also fixed in passing: `save.lastRoom` replaces the minigame's hardcoded `from||'plaza'` fallback.
+Also in passing: `save.prefs.lastRoom` is recorded on every room entry (H2+ features read it); the
+minigame keeps its explicit `from` scene param — an explicit source beats a global read.
 
 ## 9. Test matrix (all pure, all headless — the S1–S5 discipline)
 

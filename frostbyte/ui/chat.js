@@ -14,6 +14,16 @@ import { CHAT_PHRASES, soften } from '../content/chat-phrases.js';
 const MAX_LEN = 60;
 let stylesInjected = false;
 
+// Singleton state (Home Plan §8.1): `k.scene('room', …)` re-runs on every room change and every
+// return from a minigame, and each run used to call createChat(...) again, appending a brand-new
+// #chat-overlay to <body> — duplicate ids, stale onSay closures, and eventually one open() call
+// per every past instance. `instance` caches the DOM/listeners built on the FIRST call ever;
+// `boundOpts` is a mutable ref every handler below reads through, rebound on EVERY call (including
+// the first) so a later scene entry's fresh `onSay` closure always wins, even though the DOM/listeners
+// underneath are never rebuilt.
+let instance = null;
+const boundOpts = { onSay: null };
+
 function injectStyles() {
   if (stylesInjected) return; // idempotent: only ever add the <style> tag once per page
   stylesInjected = true;
@@ -100,9 +110,13 @@ function buildDom() {
  * @param {{ onSay: (text:string) => void }} opts  onSay is called with the FINAL string to speak
  *   (already trimmed, capped to 60 chars, and soften()-ed). The caller renders the bubble; this UI
  *   NEVER sends text anywhere.
- * @returns {{ open:()=>void, close:()=>void, isOpen:()=>boolean }}
+ * @returns {{ open:()=>void, close:()=>void, isOpen:()=>boolean }}  the SAME instance object on
+ *   every call, once built (singleton — see `instance`/`boundOpts` above).
  */
-export function createChat({ onSay }) {
+export function createChat(opts) {
+  boundOpts.onSay = opts.onSay; // rebind every call, even repeats — cheap, and keeps this in sync
+  if (instance) return instance; // already built: DOM/listeners stay exactly as they are
+
   injectStyles();
   const { overlay, closeBtn, grid, form, input } = buildDom();
 
@@ -119,7 +133,7 @@ export function createChat({ onSay }) {
   // Quick phrases are pre-vetted, author-written, and already short — sent as-is (Panel contents
   // contract: onSay(phrase) then close), no trim/cap/soften needed.
   function sayPhrase(phrase) {
-    onSay(phrase);
+    boundOpts.onSay(phrase);
     close();
   }
 
@@ -128,7 +142,7 @@ export function createChat({ onSay }) {
   function sayFreeText() {
     const trimmed = input.value.trim().slice(0, MAX_LEN);
     if (!trimmed) return;
-    onSay(soften(trimmed));
+    boundOpts.onSay(soften(trimmed));
     input.value = '';
     close();
   }
@@ -150,5 +164,6 @@ export function createChat({ onSay }) {
   closeBtn.onclick = close;
   overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 
-  return { open, close, isOpen };
+  instance = { open, close, isOpen };
+  return instance;
 }

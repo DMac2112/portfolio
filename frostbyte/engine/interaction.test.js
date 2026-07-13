@@ -90,6 +90,72 @@ describe('findNearestInteractable', () => {
     const result = findNearestInteractable(pos, candidates, 4);
     expect(result).toBeNull();
   });
+
+  describe('opts.isActionable (nearest-ACTIONABLE, Home Plan §8.2)', () => {
+    const isActionable = (c) => c.kind !== 'npc'; // mirrors main.js's actionFor(...) !== null shape
+
+    it('an action-less nearer candidate no longer shadows a farther actionable one', () => {
+      const pos = { x: 0, y: 0 };
+      const candidates = [
+        { id: 'npc-nearby', pos: { x: 10, y: 0 }, kind: 'npc' },   // 10 away, not actionable
+        { id: 'shop-far', pos: { x: 80, y: 0 }, kind: 'shop' },    // 80 away, actionable
+      ];
+      const result = findNearestInteractable(pos, candidates, INTERACT_R, { isActionable });
+      expect(result.id).toBe('shop-far');
+    });
+
+    it('returns null when every candidate within range is non-actionable', () => {
+      const pos = { x: 0, y: 0 };
+      const candidates = [
+        { id: 'npc-a', pos: { x: 10, y: 0 }, kind: 'npc' },
+        { id: 'npc-b', pos: { x: 20, y: 0 }, kind: 'npc' },
+      ];
+      const result = findNearestInteractable(pos, candidates, INTERACT_R, { isActionable });
+      expect(result).toBeNull();
+    });
+
+    it('still picks the nearest among multiple actionable candidates when npcs are interspersed', () => {
+      const pos = { x: 0, y: 0 };
+      const candidates = [
+        { id: 'npc', pos: { x: 5, y: 0 }, kind: 'npc' },
+        { id: 'shop-close', pos: { x: 50, y: 0 }, kind: 'shop' },
+        { id: 'minigame-far', pos: { x: 100, y: 0 }, kind: 'minigame' },
+      ];
+      const result = findNearestInteractable(pos, candidates, INTERACT_R, { isActionable });
+      expect(result.id).toBe('shop-close');
+    });
+
+    it('maxDist is still enforced together with the isActionable filter', () => {
+      const pos = { x: 0, y: 0 };
+      const candidates = [
+        { id: 'npc-close', pos: { x: 10, y: 0 }, kind: 'npc' },
+        { id: 'shop-out-of-range', pos: { x: 150, y: 0 }, kind: 'shop' },
+      ];
+      const result = findNearestInteractable(pos, candidates, 100, { isActionable });
+      expect(result).toBeNull();
+    });
+
+    it('ties among actionable candidates still go to the first entry in the array', () => {
+      const pos = { x: 0, y: 0 };
+      const candidates = [
+        { id: 'npc', pos: { x: 50, y: 0 }, kind: 'npc' },       // same distance as the two below, but filtered out
+        { id: 'first', pos: { x: 50, y: 0 }, kind: 'shop' },
+        { id: 'second', pos: { x: 50, y: 0 }, kind: 'minigame' },
+      ];
+      const result = findNearestInteractable(pos, candidates, INTERACT_R, { isActionable });
+      expect(result.id).toBe('first');
+    });
+
+    it('default path (no opts) is unchanged: everything is actionable', () => {
+      const pos = { x: 0, y: 0 };
+      const candidates = [
+        { id: 'npc-nearest', pos: { x: 10, y: 0 }, kind: 'npc' },
+        { id: 'shop-far', pos: { x: 80, y: 0 }, kind: 'shop' },
+      ];
+      const result = findNearestInteractable(pos, candidates);
+      expect(result.id).toBe('npc-nearest'); // no filter supplied -> nearest overall, old behavior
+    });
+  });
 });
 
 describe('mergeInteractables', () => {

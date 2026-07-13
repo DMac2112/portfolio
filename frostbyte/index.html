@@ -92,7 +92,13 @@
       font-weight:700; font-size:13px; color:#0d1c2b; background:var(--accent); border:none; border-radius:999px;
       padding:9px 16px; cursor:pointer; box-shadow:0 4px 14px #0008; }
     #say-btn:active { transform:translateY(1px); }
-    #emote-bar { position:fixed; z-index:6; left:12px; bottom:14px; display:flex; gap:6px; pointer-events:auto; }
+    /* Island map button — pinned bottom-left, the classic corner (FROSTBYTE-HOME-PLAN §2.1);
+       the emote bar shifts right to make room. */
+    #map-btn { position:fixed; z-index:6; left:12px; bottom:14px; pointer-events:auto; font-size:18px;
+      line-height:1; width:40px; height:40px; border:none; border-radius:12px; color:#0d1c2b;
+      background:var(--accent); cursor:pointer; box-shadow:0 2px 8px #0006; }
+    #map-btn:active { transform:translateY(1px); }
+    #emote-bar { position:fixed; z-index:6; left:60px; bottom:14px; display:flex; gap:6px; pointer-events:auto; }
     .emote-btn { font-size:18px; line-height:1; width:40px; height:40px; border:none; border-radius:12px;
       background:#ffffff1a; cursor:pointer; box-shadow:0 2px 8px #0006; }
     .emote-btn:hover { background:#ffffff33; }
@@ -116,6 +122,7 @@
   <button id="interact-prompt" type="button">▶ Interact</button>
   <div id="coin-toast" role="status" aria-live="polite"></div>
   <button id="say-btn" type="button">💬 Say</button>
+  <button id="map-btn" type="button" aria-label="Island map (M)" title="Island map (M)">🗺️</button>
   <div id="emote-bar" aria-label="Emotes"></div>
   <div id="chat-live" class="sr-only" aria-live="polite"></div>
 

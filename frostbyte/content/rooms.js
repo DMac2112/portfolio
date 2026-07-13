@@ -22,6 +22,7 @@ export const ROOM_REGISTRY = {
       fromWorkshop: { x: 130, y: 500, facing: 'right' },
       fromTrail:    { x: 720, y: 170, facing: 'down' },
       fromMinigame: { x: 1050, y: 620, facing: 'down' },
+      fromMap:      { x: 720, y: 560, facing: 'down' },
     },
     camera: { leadY: -50 },
     hotspots: [
@@ -36,7 +37,7 @@ export const ROOM_REGISTRY = {
       { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: true, lockedCopy: "The trail's still snowed in — check back soon." },
       { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 456, targetRoom: 'court', locked: true, lockedCopy: "They're still smoothing the ice out there." },
       { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 360, targetRoom: 'workshop', locked: true, lockedCopy: "The workshop lamps aren't lit yet." },
-      { id: 'door-den', label: 'Your Den', x: 720, y: 936, targetRoom: 'den', locked: true, lockedCopy: 'Your den is still being built. Hang tight!' },
+      { id: 'door-den', label: 'Your Den', x: 720, y: 936, targetRoom: 'den', locked: false, targetSpawn: 'fromPlaza' },
     ],
     // Rendered + collidable in the S1 spike: fountain/pond only (what room-plaza.png actually paints).
     // Bench/shop/minigame/noticeboard solids land once their art does (P2-P4), to avoid invisible walls.
@@ -44,6 +45,32 @@ export const ROOM_REGISTRY = {
       { id: 'fountain-driftback', x: 792, y: 264, w: 220, h: 160 },
     ],
     // Populated in P3 (NPC crowd) — empty for the S1 waddle spike.
+    npcSpawnAnchors: [],
+  },
+
+  // H1: Your Den — the player's private igloo-dome home. Furniture & edit-mode layers land in H2.
+  den: {
+    id: 'den',
+    title: 'Your Den',
+    mapAsset: 'room-den',                            // ./assets/room-den.png
+    tile: 16, gridCols: 30, gridRows: 20,             // native 480x320, world 1440x960 — same as plaza
+    scale: 3,
+    bounds: { x0: 400, x1: 1040, y0: 240, y1: 800 },
+    spawnPoints: {
+      default:    { x: 720, y: 560, facing: 'down' },
+      fromPlaza:  { x: 720, y: 720, facing: 'up' },
+      fromMap:    { x: 720, y: 560, facing: 'down' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'hearth-den', label: 'The Hearth', kind: 'landmark', x: 720, y: 280 },
+    ],
+    doors: [
+      { id: 'door-out', label: 'Chillmere Plaza', x: 720, y: 800, targetRoom: 'plaza', locked: false, targetSpawn: 'fromDen' },
+    ],
+    solids: [
+      { id: 'hearth-den', x: 720, y: 285, w: 120, h: 90 },
+    ],
     npcSpawnAnchors: [],
   },
 };

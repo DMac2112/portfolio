@@ -235,6 +235,200 @@ function buildRoomPlaza() {
   return save('room-plaza.png', img);
 }
 
+/* ----------------------------- ROOM: Your Den (igloo interior) --------- */
+// Native 480x320, same technique/dims as buildRoomPlaza. Floor disc ~127r centered on the frame;
+// the hearth solid sits at world (720,240,120,90) -> native (240,80,40,30) /scale(3), matching
+// content/rooms.js `den.solids`, so the painted ember glow lines up with the real collision box.
+const ICE = {
+  floor: [220, 233, 244], floorD: [198, 215, 230], floorL: [240, 248, 254],
+  wall: [172, 202, 222], wallD: [132, 166, 190], wallEdge: [92, 128, 156],
+  mat: [178, 108, 70], matD: [140, 82, 54],
+  stone: [156, 156, 166], stoneD: [116, 116, 128],
+  ember: [255, 150, 58], emberL: [255, 210, 132], emberD: [176, 62, 38],
+  aurora: [140, 232, 214],
+  crate: [150, 108, 74], crateD: [114, 80, 52],
+  void: [22, 32, 46],
+};
+
+function buildRoomDen() {
+  const W = 480, H = 320;
+  const img = Img(W, H);
+  const cx = 240, cy = 160, rFloor = 127, wallT = 26, rWall = rFloor + wallT;
+
+  // Dark vignette beyond the dome's round silhouette (the canvas is square; the dome reads as round).
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const d = Math.hypot(x - cx, y - cy);
+    const t = Math.min(1, Math.max(0, (d - (rWall - 14)) / 120));
+    px(img, x, y, shade(ICE.void, 1 - t * 0.5));
+  }
+
+  // Packed-snow floor disc.
+  for (let y = -rFloor; y <= rFloor; y++) for (let x = -rFloor; x <= rFloor; x++) {
+    if (x * x + y * y > rFloor * rFloor + rFloor * 0.6) continue;
+    let col = ICE.floor; const n = rnd();
+    if (n > 0.9) col = ICE.floorD; else if (n > 0.8) col = ICE.floorL;
+    px(img, cx + x, cy + y, col);
+  }
+
+  // Ice-block ring wall: angular "blocks" (alternating tint) with light-from-above gradation.
+  const segs = 30, bands = 2;
+  for (let y = -rWall; y <= rWall; y++) for (let x = -rWall; x <= rWall; x++) {
+    const r = Math.hypot(x, y);
+    if (r < rFloor - 1 || r > rWall) continue;
+    const theta = Math.atan2(y, x);
+    const frac = ((theta + Math.PI) / (Math.PI * 2)) * segs;
+    const segIdx = Math.floor(frac), segFrac = frac - segIdx;
+    const bandIdx = Math.min(bands - 1, Math.floor((r - rFloor) / (wallT / bands)));
+    const lightF = 1 - ((y + rWall) / (2 * rWall)) * 0.4; // north (top) reads brighter than south
+    let col = shade((segIdx + bandIdx) % 2 === 0 ? ICE.wall : ICE.wallD, lightF);
+    if (segFrac < 0.05 || segFrac > 0.95 || Math.abs((r - rFloor) - wallT / bands) < 1.1) col = ICE.wallEdge;
+    px(img, cx + x, cy + y, col);
+  }
+
+  // Door gap: south wall opening (~x 225-255 native) — lit threshold + doormat, a snow sliver beyond.
+  for (let y = 0; y <= rWall + 16; y++) for (let x = -15; x <= 15; x++) {
+    const wx = cx + x, wy = cy + y;
+    if (wx < 0 || wy < 0 || wx >= W || wy >= H) continue;
+    const r = Math.hypot(x, y);
+    if (r < rFloor - 1) continue;
+    px(img, wx, wy, r > rWall ? shade(C.snowD, 0.6) : ICE.mat);
+  }
+  rect(img, cx - 14, cy + rFloor - 20, 28, 15, ICE.mat);
+  for (let i = 0; i < 28; i++) { px(img, cx - 14 + i, cy + rFloor - 20, ICE.matD); px(img, cx - 14 + i, cy + rFloor - 6, ICE.matD); }
+  for (let j = 0; j < 15; j++) { px(img, cx - 14, cy + rFloor - 20 + j, ICE.matD); px(img, cx + 13, cy + rFloor - 20 + j, ICE.matD); }
+
+  // Window slits (3), each carved into the wall with a faint teal aurora glow bleeding outward.
+  for (const deg of [-104, -16, 154]) {
+    const a = (deg * Math.PI) / 180;
+    const sx = cx + Math.cos(a) * ((rFloor + rWall) / 2), sy = cy + Math.sin(a) * ((rFloor + rWall) / 2);
+    for (let y = -rWall; y <= rWall; y++) for (let x = -rWall; x <= rWall; x++) {
+      const r = Math.hypot(x, y);
+      if (r < rFloor + 3 || r > rWall - 3) continue;
+      const theta = Math.atan2(y, x);
+      let da = theta - a; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+      if (Math.abs(da) < 0.045) px(img, cx + x, cy + y, ICE.aurora);
+    }
+    for (let layer = 12; layer >= 3; layer -= 3) disc(img, Math.round(sx), Math.round(sy), layer, [...ICE.aurora, Math.round(80 * (1 - layer / 12))]);
+  }
+
+  // Hearth — matches the world (720,240,120,90) solid, native (240,80,40,30): stone ring + embers.
+  const hx = 240, hy = 80;
+  disc(img, hx, hy, 21, ICE.stoneD); disc(img, hx, hy, 18, ICE.stone);
+  for (let layer = 16; layer >= 3; layer -= 3) disc(img, hx, hy, layer, [...ICE.ember, Math.round(70 * (1 - layer / 16))]);
+  disc(img, hx, hy, 8, ICE.ember); disc(img, hx, hy - 2, 5, ICE.emberL); disc(img, hx, hy - 3, 2, ICE.emberD);
+
+  // Floor flourishes, kept sparse — a knit-rug outline and a small crate. Furniture proper is H2.
+  for (let y = -22; y <= 22; y++) for (let x = -34; x <= 34; x++) {
+    const e = (x * x) / (34 * 34) + (y * y) / (22 * 22);
+    if (e >= 0.82 && e <= 1) px(img, cx - 58 + x, cy + 40 + y, ICE.matD);
+  }
+  rrect(img, cx + 64, cy + 18, 20, 20, ICE.crateD);
+  rect(img, cx + 66, cy + 20, 16, 16, ICE.crate);
+  rect(img, cx + 66, cy + 20, 16, 3, shade(ICE.crate, 1.25));
+
+  return save('room-den.png', img);
+}
+
+/* ----------------------------- MAP: Chillmere Isle ---------------------- */
+// 480x320 painted-look travel map (island only — pins/labels are DOM, content/map.js owns them).
+// The three mist patches are centered exactly on MAP_NODES' locked x/y so the future-area pins land
+// on the cloud cover; the plaza/den glyphs sit under the 'plaza'/'den' pins for the same reason.
+const ISLE = {
+  sea: [42, 66, 92], seaD: [30, 50, 72], seaL: [64, 98, 128],
+  land: [204, 219, 234], landD: [176, 195, 214], landL: [226, 238, 248],
+  coast: [126, 158, 184],
+  plaza: [200, 202, 212], plazaD: [166, 168, 180], fountain: [110, 178, 214],
+  dome: [236, 244, 250], domeSh: [176, 202, 220], domeDoor: [96, 72, 52],
+  roof: [176, 92, 84], roofD: [140, 68, 62],
+  mist: [250, 251, 253], mistShadow: [172, 194, 214],
+};
+
+function buildMapIsle() {
+  const W = 480, H = 320;
+  const img = Img(W, H);
+  const cx0 = W / 2, cy0 = H / 2, diag = Math.hypot(cx0, cy0);
+
+  // Cool sea backdrop with a soft painted-paper vignette (lighter center, deeper at the corners).
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = Math.hypot(x - cx0, y - cy0) / diag;
+    let col = shade(ISLE.sea, 1 + (1 - t) * 0.18);
+    const n = rnd();
+    if (n > 0.96) col = shade(ISLE.seaL, 1 + (1 - t) * 0.1); else if (n > 0.9) col = ISLE.seaD;
+    px(img, x, y, col);
+  }
+
+  // Island landmass — a union of overlapping blobs, sized to host every map node (incl. locked ones).
+  const blobs = [
+    [220, 150, 130], [300, 220, 90], [190, 55, 72], [372, 128, 76],
+    [90, 150, 82], [250, 88, 58], [150, 232, 68],
+  ];
+  const isLand = (x, y) => blobs.some(([bx, by, br]) => (x - bx) ** 2 + (y - by) ** 2 <= br * br);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (!isLand(x, y)) continue;
+    let col = ISLE.land; const n = rnd();
+    if (n > 0.92) col = ISLE.landD; else if (n > 0.85) col = ISLE.landL;
+    px(img, x, y, col);
+  }
+  // Coastline: darker fringe just inside the shore, lighter shallow-water fringe just outside it.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const land = isLand(x, y);
+    const edge = isLand(x - 2, y) !== land || isLand(x + 2, y) !== land || isLand(x, y - 2) !== land || isLand(x, y + 2) !== land;
+    if (!edge) continue;
+    px(img, x, y, land ? ISLE.coast : [...ISLE.seaL, 190]);
+  }
+
+  // Pine clusters — flavor only, a scaled-down version of the plaza's disc-stack pine.
+  const pineAt = (px0, py0, s) => {
+    disc(img, px0, py0 - 3 * s, 3.4 * s, [30, 80, 64]);
+    disc(img, px0, py0 - 5 * s, 2.7 * s, [46, 110, 86]);
+    disc(img, px0, py0 - 6.6 * s, 2 * s, [46, 110, 86]);
+  };
+  for (const [bx, by] of [[150, 210], [270, 200], [320, 145], [175, 100]]) pineAt(bx, by, 1.15);
+
+  // Snowfield, northwest — a brighter, sparkly patch of terrain (flavor; no baked label).
+  for (let y = 16; y <= 100; y++) for (let x = 30; x <= 150; x++) {
+    if (!isLand(x, y)) continue;
+    if (rnd() > 0.55) px(img, x, y, ISLE.landL);
+    if (rnd() > 0.985) px(img, x, y, [255, 255, 255]);
+  }
+
+  // Plaza square — small painted town glyph under the 'plaza' pin at normalized (0.46, 0.40).
+  const ppx = Math.round(0.46 * W), ppy = Math.round(0.40 * H);
+  rect(img, ppx - 12, ppy - 12, 24, 24, ISLE.plazaD);
+  rect(img, ppx - 10, ppy - 10, 20, 20, ISLE.plaza);
+  rect(img, ppx - 1, ppy - 10, 2, 20, ISLE.plazaD);
+  rect(img, ppx - 10, ppy - 1, 20, 2, ISLE.plazaD);
+  disc(img, ppx, ppy, 3, ISLE.fountain);
+  for (const [ox, oy] of [[-20, -14], [18, -16], [-18, 16], [20, 14]]) {
+    rect(img, ppx + ox - 4, ppy + oy - 4, 8, 8, ISLE.roofD);
+    rect(img, ppx + ox - 4, ppy + oy - 5, 8, 3, ISLE.roof);
+  }
+
+  // Igloo dome — small painted dome glyph under the 'den' pin at normalized (0.62, 0.74).
+  const dpx = Math.round(0.62 * W), dpy = Math.round(0.74 * H);
+  disc(img, dpx, dpy, 12, ISLE.domeSh);
+  disc(img, dpx, dpy - 2, 11, ISLE.dome);
+  rect(img, dpx - 3, dpy + 5, 6, 4, ISLE.domeDoor);
+
+  // Mist/cloud patches over the three locked areas — centers match MAP_NODES exactly. Painted as
+  // tight scalloped puffs (not a broad soft glow) so each patch reads as a discrete cloud sitting
+  // on the island, rather than washing the whole map out to white-on-white.
+  const puffs = [[0, -2, 17], [-13, 5, 14], [13, 5, 14], [0, 10, 13]];
+  for (const [nx, ny] of [[0.38, 0.12], [0.80, 0.38], [0.14, 0.46]]) {
+    const mx = Math.round(nx * W), my = Math.round(ny * H);
+    // faint haze rim so the cloud doesn't have a hard cutoff against the land
+    for (let layer = 30; layer >= 20; layer -= 5) disc(img, mx, my, layer, [...ISLE.mist, Math.round(60 * (1 - layer / 30))]);
+    // cool shadowed underside, offset down-right, for a puffy 3-D read
+    for (const [ox, oy, r] of puffs) disc(img, mx + ox + 3, my + oy + 4, r, [...ISLE.mistShadow, 130]);
+    // opaque cloud body
+    for (const [ox, oy, r] of puffs) disc(img, mx + ox, my + oy, r, [...ISLE.mist, 235]);
+    // small bright highlight, upper-left
+    disc(img, mx - 6, my - 9, 7, [255, 255, 255, 170]);
+  }
+
+  return save('map-isle.png', img);
+}
+
 /* ----------------------------- MINIGAME: Snowdrift Toss ------------------ */
 // Extra tones not already in C, matching the spec for this minigame's art.
 const MG = { shadow: [170, 190, 210], dark: [40, 46, 54], orange: [255, 150, 60], sky: [214, 228, 240] };
@@ -305,6 +499,8 @@ const made = [
   buildSnowpal(),
   buildSnowball(),
   buildMinigameBg(),
+  buildRoomDen(),
+  buildMapIsle(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }
