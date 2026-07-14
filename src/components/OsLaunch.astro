@@ -74,20 +74,19 @@ const { revised, human } = Astro.props;
 
 <dialog class="cv-dlg" data-cv-dlg aria-labelledby="cv-dlg-title">
   <div class="cv-dlg__win">
-    <div class="cv-dlg__titlebar">
-      <span class="cv-dlg__title" id="cv-dlg-title">Dominik Machowiak - CV</span>
-      <button class="cv-dlg__x" type="button" data-cv-close aria-label="Close">&#x00D7;</button>
-    </div>
     <div class="cv-dlg__bar">
-      <a class="cv-dlg__btn" href="/os/assets/cv.pdf" download="Dominik-Machowiak-CV.pdf">&#x2913; Download</a>
-      <a class="cv-dlg__btn" href="/os/assets/cv.pdf" target="_blank" rel="noopener">Open in new tab &#x2197;</a>
+      <span class="cv-dlg__title" id="cv-dlg-title">Dominik Machowiak — CV</span>
+      <a class="cv-dlg__btn" href="/os/assets/cv.pdf" download="Dominik-Machowiak-CV.pdf">Download</a>
+      <a class="cv-dlg__btn cv-dlg__btn--ghost" href="/os/assets/cv.pdf" target="_blank" rel="noopener">Open in new tab &#x2197;</a>
+      <button class="cv-dlg__x" type="button" data-cv-close aria-label="Close the CV">&#x2715;</button>
     </div>
     <!-- <object> renders the PDF inline on desktop; the fallback covers mobile browsers,
          which refuse inline PDFs and would otherwise show an empty frame. -->
     <object class="cv-dlg__frame" data="/os/assets/cv.pdf" type="application/pdf" title="Dominik Machowiak - CV">
       <div class="cv-dlg__fallback">
-        <p>Your browser won't show PDFs inline.</p>
-        <a class="cv-dlg__btn" href="/os/assets/cv.pdf" target="_blank" rel="noopener">Open the CV &#x2197;</a>
+        <p>Your browser won't display PDFs inline.</p>
+        <a class="cv-dlg__btn cv-dlg__btn--big" href="/os/assets/cv.pdf" target="_blank" rel="noopener">Open the CV &#x2197;</a>
+        <a class="cv-dlg__btn cv-dlg__btn--ghost" href="/os/assets/cv.pdf" download="Dominik-Machowiak-CV.pdf">Download instead</a>
       </div>
     </object>
   </div>
@@ -399,104 +398,141 @@ const { revised, human } = Astro.props;
     white-space: nowrap;
   }
 
-  /* ---- CV viewer: an XP window in a native <dialog> ---- */
+  /* ---- CV viewer: deliberately MODERN (the XP treatment lives inside the OS only).
+         Full-screen on phones, a centred sheet on desktop. ---- */
   .cv-dlg {
+    width: min(1000px, 96vw);
+    max-width: none;
+    max-height: none;
     padding: 0;
     border: 0;
     background: transparent;
-    max-width: 92vw;
-    max-height: 92vh;
-    width: 860px;
   }
 
-  .cv-dlg::backdrop { background: rgba(3, 12, 40, 0.55); }
+  .cv-dlg::backdrop {
+    background: rgba(8, 14, 30, 0.72);
+    backdrop-filter: blur(3px);
+  }
 
   .cv-dlg__win {
     display: flex;
     flex-direction: column;
-    height: min(88vh, 900px);
+    height: min(90vh, 1000px);
     overflow: hidden;
-    font-family: Tahoma, 'Segoe UI', Verdana, sans-serif;
-    background: #f2f0e8;
-    border: 1px solid rgba(13, 36, 88, 0.65);
-    border-radius: 9px;
-    box-shadow: 0 22px 44px -16px rgba(3, 12, 40, 0.75);
+    font-family: system-ui, 'Segoe UI', sans-serif;
+    background: #14161c;
+    border-radius: 14px;
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
   }
-
-  .cv-dlg__titlebar {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 8px 7px 12px;
-    background: linear-gradient(180deg, #4a7ff0 0%, #2a5ade 45%, #1d47bb 100%);
-  }
-
-  .cv-dlg__title {
-    color: #fff;
-    font-size: 13px;
-    font-weight: 700;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-  }
-
-  .cv-dlg__x {
-    width: 18px;
-    height: 18px;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    border-radius: 4px;
-    background: linear-gradient(180deg, #f0836f, #d43d2a);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4);
-  }
-
-  .cv-dlg__x:hover { filter: brightness(1.1); }
 
   .cv-dlg__bar {
     flex: none;
     display: flex;
-    gap: 6px;
-    padding: 6px 8px;
-    border-bottom: 1px solid #cdc9bb;
-    background: linear-gradient(180deg, #fbfaf5, #eeebe1);
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #1c1f27;
+    border-bottom: 1px solid #2c313d;
+  }
+
+  .cv-dlg__title {
+    flex: 1;
+    min-width: 0;
+    color: #f3f5f9;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .cv-dlg__btn {
-    padding: 5px 11px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #101a33;
+    flex: none;
+    padding: 8px 13px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: #3b6ef0;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
     text-decoration: none;
-    border: 1px solid #9a9683;
-    border-radius: 4px;
-    background: linear-gradient(180deg, #fdfdfb, #e4e1d6);
-    box-shadow: inset 0 1px 0 #fff;
+    cursor: pointer;
   }
 
-  .cv-dlg__btn:hover { filter: brightness(1.05); }
+  .cv-dlg__btn:hover { filter: brightness(1.08); }
+
+  .cv-dlg__btn--ghost {
+    background: transparent;
+    border-color: #3a404f;
+    color: #cbd3e4;
+  }
+
+  .cv-dlg__btn--ghost:hover { background: #262b36; }
+  .cv-dlg__btn--big { padding: 12px 20px; font-size: 15px; }
+
+  .cv-dlg__x {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: #cbd3e4;
+    font-size: 15px;
+    line-height: 1;
+    border: 1px solid #3a404f;
+    border-radius: 8px;
+    background: transparent;
+  }
+
+  .cv-dlg__x:hover { background: #262b36; color: #fff; }
 
   .cv-dlg__frame {
     flex: 1;
     width: 100%;
     min-height: 0;
     border: 0;
-    background: #555;
+    background: #4b4f58;
   }
 
   .cv-dlg__fallback {
-    display: grid;
-    place-items: center;
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
     height: 100%;
     padding: 24px;
-    color: #f4f6fb;
-    font-size: 13px;
+    color: #f3f5f9;
+    font-size: 14px;
     text-align: center;
+    background: #14161c;
+  }
+
+  /* Phones: edge-to-edge, no wasted pixels; the title yields to the buttons. */
+  @media (max-width: 640px) {
+    .cv-dlg {
+      width: 100vw;
+      height: 100dvh;
+      margin: 0;
+      max-width: 100vw;
+    }
+
+    .cv-dlg__win {
+      height: 100dvh;
+      border-radius: 0;
+      padding-top: env(safe-area-inset-top);
+    }
+
+    .cv-dlg__title {
+      flex: 0 1 auto;
+      font-size: 13px;
+    }
+
+    .cv-dlg__btn {
+      padding: 8px 10px;
+      font-size: 12.5px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
