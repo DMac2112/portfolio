@@ -14,6 +14,7 @@ fs.mkdirSync(OUT, { recursive: true });
 fs.mkdirSync(path.join(OUT, 'props'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'cosmetics'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'minigame'), { recursive: true });
+fs.mkdirSync(path.join(OUT, 'furniture'), { recursive: true });
 
 /* ----------------------------- PNG encoder (verbatim technique from game1) --------------- */
 const CRC = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
@@ -490,6 +491,307 @@ function buildMinigameBg() {
   return save(path.join('minigame', 'toss-bg.png'), img);
 }
 
+/* ----------------------------- FURNITURE (Home Plan §4, §10) ------------ */
+// One PNG per item at the EXACT native size pinned by content/furniture-catalog.js (world scale is
+// x3 at render time). Chunky pixel art in the room's cool-blue/ice palette family (reuses ICE.* from
+// buildRoomDen) with warm accents (F.cush/F.wood/F.glow/F.gold) so furniture reads distinctly against
+// the icy room shell. Non-rug items read as front-facing objects with a 1px dark outline (F.out) and
+// a soft grounding shadow; rugs are flat top-down shapes (no outline/shadow — they lie under the
+// penguin, per plan §4.2 "rugs render under everything"). No shared-PRNG (`rnd()`) calls here, so
+// registering buildFurniture() after every existing builder cannot perturb their output.
+const F = {
+  out: C.out,
+  wood: ICE.crate, woodD: ICE.crateD, woodL: shade(ICE.crate, 1.25),
+  ice: ICE.floor, iceD: ICE.floorD, iceL: ICE.floorL,
+  wall: ICE.wall, wallD: ICE.wallD,
+  cush: [222, 140, 82], cushD: [186, 106, 58], cushL: [242, 178, 122],
+  metal: [104, 116, 130], metalD: [76, 86, 98], metalL: [154, 166, 180],
+  glow: ICE.ember, glowL: ICE.emberL, glowD: ICE.emberD,
+  aur: ICE.aurora, aurD: [92, 176, 160],
+  gold: [214, 176, 88], goldD: [170, 132, 58],
+  dark: [40, 46, 54],
+  cream: D.belly,
+};
+
+// Outlined rectangle: fill, then a 1px border of `edge` traced on top (chunky-sprite convention).
+function obox(img, x, y, w, h, fill, edge = F.out) {
+  rect(img, x, y, w, h, fill);
+  for (let i = 0; i < w; i++) { px(img, x + i, y, edge); px(img, x + i, y + h - 1, edge); }
+  for (let j = 0; j < h; j++) { px(img, x, y + j, edge); px(img, x + w - 1, y + j, edge); }
+}
+// Thin outlined post/leg: dark side columns (or a solid dark peg when w<=2) with a capped top.
+function legRect(img, x, y, w, h, fill, edge = F.out) {
+  rect(img, x, y, w, h, fill);
+  for (let j = 0; j < h; j++) { px(img, x, y + j, edge); if (w > 1) px(img, x + w - 1, y + j, edge); }
+  for (let i = 0; i < w; i++) px(img, x + i, y, edge);
+}
+function oval(img, cx, cy, rx, ry, c) {
+  for (let y = -ry; y <= ry; y++) for (let x = -rx; x <= rx; x++)
+    if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1) px(img, cx + x, cy + y, c);
+}
+function ovalRing(img, cx, cy, rx, ry, c, steps = 180) {
+  for (let i = 0; i < steps; i++) {
+    const a = (i / steps) * Math.PI * 2;
+    px(img, Math.round(cx + Math.cos(a) * rx), Math.round(cy + Math.sin(a) * ry), c);
+  }
+}
+// Soft grounding shadow for front-facing items (mirrors the penguin body's under-foot shadow).
+function groundShadow(img, cx, cy, rx, ry) { oval(img, cx, cy, rx, ry, [0, 0, 0, 50]); }
+
+/* seating */
+function furnSnowSofa() { // 32x24
+  const img = Img(32, 24);
+  groundShadow(img, 16, 22, 13, 3);
+  obox(img, 0, 2, 6, 19, F.wall);   // left arm
+  obox(img, 26, 2, 6, 19, F.wall);  // right arm
+  obox(img, 4, 2, 24, 8, F.wallD);  // backrest
+  rect(img, 4, 2, 24, 2, F.wall);   // backrest highlight
+  obox(img, 1, 8, 30, 12, F.ice);   // seat cushions
+  rect(img, 1, 9, 30, 2, F.iceL);
+  for (let y = 9; y <= 18; y++) { px(img, 13, y, F.iceD); px(img, 19, y, F.iceD); } // cushion seams
+  rect(img, 1, 17, 30, 2, F.cush);  // front trim (warm accent)
+  rect(img, 1, 17, 30, 1, F.cushL);
+  return save(path.join('furniture', 'snow-sofa.png'), img);
+}
+function furnIceStool() { // 16x16
+  const img = Img(16, 16);
+  groundShadow(img, 8, 14, 6, 2);
+  legRect(img, 3, 8, 2, 6, F.wallD);
+  legRect(img, 11, 8, 2, 6, F.wallD);
+  oval(img, 8, 6, 6, 4, F.out);
+  oval(img, 8, 6, 5, 3, F.ice);
+  oval(img, 8, 5, 5, 2, F.iceL);
+  rect(img, 4, 6, 8, 1, F.cush); // seam trim
+  return save(path.join('furniture', 'ice-stool.png'), img);
+}
+function furnBeanDriftChair() { // 24x20
+  const img = Img(24, 20);
+  groundShadow(img, 12, 18, 9, 2);
+  const blobs = [[12, 15, 9], [12, 10, 8], [7, 8, 5], [17, 8, 5], [12, 6, 5]];
+  for (const [bx, by, br] of blobs) disc(img, bx, by, br + 1, F.out);
+  for (const [bx, by, br] of blobs) disc(img, bx, by, br, F.wall);
+  disc(img, 10, 7, 3, F.wallD);
+  disc(img, 15, 11, 4, F.iceL);
+  rect(img, 6, 17, 12, 2, F.cush); // base seam (warm accent)
+  return save(path.join('furniture', 'bean-drift-chair.png'), img);
+}
+function furnLogBench() { // 32x16
+  const img = Img(32, 16);
+  groundShadow(img, 16, 14, 14, 2);
+  obox(img, 2, 4, 28, 7, F.wood);
+  rect(img, 2, 4, 28, 2, F.woodL);
+  for (let x = 5; x < 29; x += 4) { px(img, x, 6, F.woodD); px(img, x, 8, F.woodD); } // bark rings
+  legRect(img, 5, 11, 3, 4, F.woodD);
+  legRect(img, 24, 11, 3, 4, F.woodD);
+  return save(path.join('furniture', 'log-bench.png'), img);
+}
+
+/* tables */
+function furnIceSlabTable() { // 32x20
+  const img = Img(32, 20);
+  groundShadow(img, 16, 18, 14, 2);
+  legRect(img, 6, 9, 5, 9, F.wall);
+  legRect(img, 21, 9, 5, 9, F.wall);
+  obox(img, 1, 3, 30, 6, F.iceL);
+  rect(img, 1, 3, 30, 2, [255, 255, 255, 90]);
+  for (let i = 0; i < 5; i++) px(img, 5 + i * 6, 5, F.iceD); // facet cracks
+  return save(path.join('furniture', 'ice-slab-table.png'), img);
+}
+function furnDriftwoodSideTable() { // 20x16
+  const img = Img(20, 16);
+  groundShadow(img, 10, 14, 8, 2);
+  legRect(img, 3, 7, 3, 7, F.woodD);
+  legRect(img, 14, 7, 3, 7, F.woodD);
+  obox(img, 1, 2, 18, 5, F.wood);
+  rect(img, 1, 2, 18, 1, F.woodL);
+  return save(path.join('furniture', 'driftwood-side-table.png'), img);
+}
+
+/* lighting */
+function furnGlowlamp() { // 16x28
+  const img = Img(16, 28);
+  groundShadow(img, 8, 26, 5, 2);
+  legRect(img, 7, 14, 2, 11, F.metal);
+  obox(img, 5, 22, 6, 3, F.metalD);
+  for (let r = 8; r >= 2; r -= 2) disc(img, 8, 9, r, [...F.glow, Math.round(65 * (1 - r / 8) + 25)]);
+  disc(img, 8, 9, 6, F.out);
+  disc(img, 8, 9, 5, F.glowL);
+  disc(img, 8, 8, 3, [255, 255, 255, 130]);
+  return save(path.join('furniture', 'glowlamp.png'), img);
+}
+function furnAuroraLantern() { // 16x24
+  const img = Img(16, 24);
+  groundShadow(img, 8, 22, 5, 2);
+  for (let y = 2; y <= 5; y++) { px(img, 7, y, F.metalD); px(img, 8, y, F.metalD); } // hanging loop
+  for (let r = 7; r >= 2; r -= 2) disc(img, 8, 12, r, [...F.aur, Math.round(60 * (1 - r / 7) + 20)]);
+  obox(img, 4, 8, 8, 9, F.metalD);
+  rect(img, 5, 9, 6, 7, F.aur);
+  rect(img, 5, 9, 6, 2, [255, 255, 255, 90]);
+  legRect(img, 6, 17, 4, 2, F.metal);
+  return save(path.join('furniture', 'aurora-lantern.png'), img);
+}
+function furnStringLights() { // 48x12
+  const img = Img(48, 12);
+  const bulbCols = [F.glow, F.aur, F.cushL, F.iceL];
+  for (let x = 0; x < 48; x++) {
+    const t = (x % 24) / 24;
+    px(img, x, 2 + Math.round(Math.sin(t * Math.PI) * 5), F.metalD); // drooping wire
+  }
+  for (let i = 0; i < 6; i++) {
+    const x = 4 + i * 8, t = (x % 24) / 24;
+    const y = 2 + Math.round(Math.sin(t * Math.PI) * 5) + 1;
+    const c = bulbCols[i % bulbCols.length];
+    disc(img, x, y + 1, 3, [...c, 110]);
+    disc(img, x, y + 1, 2, c);
+  }
+  return save(path.join('furniture', 'string-lights.png'), img);
+}
+
+/* rugs — flat top-down shapes, no outline/shadow (they sit under the penguin, plan §4.2) */
+function furnOvalKnitRug() { // 48x32
+  const img = Img(48, 32);
+  oval(img, 24, 16, 22, 14, F.cushD);
+  oval(img, 24, 16, 20, 12, F.cush);
+  for (let ring = 3; ring < 12; ring += 3) ovalRing(img, 24, 16, 20 - ring, 12 - ring * 0.6, F.cushL, 200);
+  ovalRing(img, 24, 16, 20, 12, F.cushD, 220);
+  return save(path.join('furniture', 'oval-knit-rug.png'), img);
+}
+function furnFishRug() { // 40x28
+  const img = Img(40, 28);
+  oval(img, 15, 14, 12, 9, F.wallD);
+  oval(img, 15, 14, 10, 7, F.wall);
+  for (let y = -8; y <= 8; y++) { const w = 9 - Math.abs(y) * 0.7; for (let x = 0; x <= w; x++) px(img, 27 + x, 14 + y, F.wallD); }
+  for (let y = -6; y <= 6; y++) { const w = 7 - Math.abs(y) * 0.55; for (let x = 0; x <= w; x++) px(img, 27 + x, 14 + y, F.wall); }
+  oval(img, 15, 17, 7, 3, F.cush); // belly accent
+  disc(img, 10, 11, 2, F.out);     // eye dot
+  return save(path.join('furniture', 'fish-rug.png'), img);
+}
+function furnStarRug() { // 36x36
+  const cx = 18, cy = 18;
+  const img = Img(36, 36);
+  const starFill = (rO, rI, c) => {
+    for (let y = 0; y < 36; y++) for (let x = 0; x < 36; x++) {
+      const dx = x - cx, dy = y - cy;
+      const ang = Math.atan2(dy, dx) + Math.PI / 2;
+      const seg = (((ang / (Math.PI * 2)) * 5) % 1 + 1) % 1;
+      const spikeT = (seg < 0.5 ? seg : 1 - seg) * 2;
+      const rEdge = rI + (rO - rI) * spikeT;
+      if (Math.hypot(dx, dy) <= rEdge) px(img, x, y, c);
+    }
+  };
+  starFill(17, 8, F.aurD);
+  starFill(16, 7, F.aur);
+  disc(img, cx, cy, 4, F.cush);
+  return save(path.join('furniture', 'star-rug.png'), img);
+}
+
+/* decor */
+function furnFrostFern() { // 16x28
+  const img = Img(16, 28);
+  groundShadow(img, 8, 26, 5, 2);
+  obox(img, 4, 20, 8, 6, F.wood);
+  rect(img, 4, 20, 8, 1, F.woodL);
+  const fronds = [[-6, -14], [-3, -18], [0, -20], [3, -18], [6, -14]];
+  const green = [64, 132, 108], greenD = [40, 96, 78], greenL = [124, 196, 172];
+  for (const [dx, dy] of fronds) {
+    for (let i = 0; i <= 10; i++) {
+      const t = i / 10;
+      const x = Math.round(8 + dx * t), y = Math.round(20 + dy * t);
+      px(img, x, y, i > 7 ? greenL : green);
+      px(img, x + 1, y, greenD);
+    }
+  }
+  return save(path.join('furniture', 'frost-fern.png'), img);
+}
+function furnSnowBonsai() { // 20x24
+  const img = Img(20, 24);
+  groundShadow(img, 10, 22, 6, 2);
+  obox(img, 5, 17, 10, 6, F.wood);
+  rect(img, 5, 17, 10, 1, F.woodL);
+  for (let y = 16; y >= 8; y--) { const x = 10 + Math.round(Math.sin(y * 0.6) * 2); px(img, x, y, F.woodD); px(img, x + 1, y, F.woodD); }
+  const clumps = [[7, 7, 4], [12, 6, 4], [10, 3, 4]];
+  for (const [cx, cy, r] of clumps) disc(img, cx, cy, r + 1, F.out);
+  for (const [cx, cy, r] of clumps) disc(img, cx, cy, r, C.pine);
+  for (const [cx, cy] of clumps) disc(img, cx, cy - 1, 2, C.snowL); // snow caps
+  return save(path.join('furniture', 'snow-bonsai.png'), img);
+}
+function furnPenguinPortrait() { // 24x28 — framed generic-penguin silhouette
+  const img = Img(24, 28);
+  obox(img, 1, 1, 22, 26, F.gold);
+  rect(img, 1, 1, 22, 2, F.goldD);
+  obox(img, 4, 4, 16, 20, F.iceL, F.goldD);
+  const cx = 12, cy = 17;
+  for (let y = -8; y <= 6; y++) {
+    const halfW = y < -2 ? 3 + (y + 8) * 0.35 : 4.2 - (y + 2) * 0.3;
+    for (let x = -Math.round(halfW); x <= Math.round(halfW); x++) px(img, cx + x, cy + y, F.dark);
+  }
+  disc(img, cx, cy - 6, 2, F.cush); // beak dot
+  return save(path.join('furniture', 'penguin-portrait.png'), img);
+}
+function furnTrophyShelf() { // 32x20
+  const img = Img(32, 20);
+  obox(img, 2, 12, 28, 4, F.wood);
+  rect(img, 2, 12, 28, 1, F.woodL);
+  legRect(img, 4, 16, 2, 3, F.woodD);
+  legRect(img, 26, 16, 2, 3, F.woodD);
+  for (const cx of [7, 16, 25]) {
+    disc(img, cx, 7, 3, F.gold);
+    rect(img, cx - 1, 9, 2, 3, F.goldD);
+    px(img, cx - 3, 6, F.goldD); px(img, cx + 3, 6, F.goldD); // handles
+    disc(img, cx - 1, 6, 1, [255, 255, 255, 150]);
+  }
+  return save(path.join('furniture', 'trophy-shelf.png'), img);
+}
+
+/* tech / fun */
+function furnSnowputer() { // 24x24 — chunky CRT
+  const img = Img(24, 24);
+  groundShadow(img, 12, 22, 8, 2);
+  obox(img, 8, 17, 8, 5, F.metalD); // base stand
+  obox(img, 3, 3, 18, 14, F.iceL);  // case
+  obox(img, 6, 5, 12, 8, F.dark);   // screen
+  rect(img, 7, 6, 10, 6, F.aur);
+  for (let y = 6; y < 12; y += 2) rect(img, 7, y, 10, 1, [...F.aurD, 140]); // scanlines
+  disc(img, 20, 5, 1, F.cush); // power LED
+  return save(path.join('furniture', 'snowputer.png'), img);
+}
+function furnRecordBox() { // 20x20
+  const img = Img(20, 20);
+  groundShadow(img, 10, 18, 7, 2);
+  obox(img, 1, 8, 18, 9, F.wood);
+  rect(img, 1, 8, 18, 1, F.woodL);
+  disc(img, 10, 7, 7, F.out);
+  disc(img, 10, 7, 6, F.dark);
+  ovalRing(img, 10, 7, 4, 4, F.metalL, 120);
+  disc(img, 10, 7, 1, F.cush);
+  return save(path.join('furniture', 'record-box.png'), img);
+}
+function furnCocoaMachine() { // 20x28
+  const img = Img(20, 28);
+  groundShadow(img, 10, 26, 6, 2);
+  obox(img, 6, 19, 8, 6, F.iceL); // cup
+  rect(img, 6, 19, 8, 1, F.iceD);
+  obox(img, 3, 4, 14, 17, F.cream);
+  rect(img, 3, 4, 14, 2, [255, 255, 255, 90]);
+  obox(img, 5, 6, 10, 6, F.metalD); // reservoir window
+  rect(img, 6, 7, 8, 4, F.wood);    // cocoa fill
+  disc(img, 10, 10, 2, F.woodL);
+  rect(img, 8, 14, 4, 3, F.metal);  // spout
+  disc(img, 14, 9, 1, F.cush);      // dial light
+  return save(path.join('furniture', 'cocoa-machine.png'), img);
+}
+
+function buildFurniture() {
+  return [
+    furnSnowSofa(), furnIceStool(), furnBeanDriftChair(), furnLogBench(),
+    furnIceSlabTable(), furnDriftwoodSideTable(),
+    furnGlowlamp(), furnAuroraLantern(), furnStringLights(),
+    furnOvalKnitRug(), furnFishRug(), furnStarRug(),
+    furnFrostFern(), furnSnowBonsai(), furnPenguinPortrait(), furnTrophyShelf(),
+    furnSnowputer(), furnRecordBox(), furnCocoaMachine(),
+  ];
+}
+
 /* ----------------------------- run -------------------------------------- */
 const made = [
   buildPenguinBody(),
@@ -501,6 +803,7 @@ const made = [
   buildMinigameBg(),
   buildRoomDen(),
   buildMapIsle(),
+  ...buildFurniture(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

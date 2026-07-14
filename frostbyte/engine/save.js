@@ -30,6 +30,8 @@ export function DEFAULT_SAVE(now = nowISO()) {
     npcGreetedOn: {},
     pickupsCollectedOn: {},
     dailyCoins: {},                                // { "YYYY-MM-DD": minigame coins earned that day }
+    home: { open: false, shell: 'dome-basic', placed: [] }, // den decorating (H2): placed = [{id,x,y,flip}] world coords
+    furniture: {},                                 // { itemId: count } owned-but-not-placed stock (H2)
     lastLoginDate: null,
     loginStreak: 0,
     prefs: { muted: false, reducedMotion: prefersReducedMotion(), lastRoom: 'plaza' },
@@ -56,6 +58,7 @@ export function migrateSave(raw, now = nowISO()) {
       equipped: { ...base.avatar.equipped, ...((s.avatar && s.avatar.equipped) ?? {}) },
     },
     prefs: { ...base.prefs, ...(s.prefs ?? {}) },
+    home: { ...base.home, ...(s.home ?? {}) },
   };
 }
 

@@ -45,6 +45,17 @@ describe('migrateSave', () => {
     expect(s.avatar.equipped.hat).toBe('snug-beanie');
     expect(s.avatar.equipped.neck).toBe(null);
   });
+  it('forward-defaults the H2 home/furniture fields on a pre-H2 save', () => {
+    const s = migrateSave({ coins: 77 }, '2026-07-13T00:00:00.000Z');
+    expect(s.home).toEqual({ open: false, shell: 'dome-basic', placed: [] });
+    expect(s.furniture).toEqual({});
+  });
+  it('preserves a partial home while backfilling its missing fields', () => {
+    const s = migrateSave({ home: { open: true } }, '2026-07-13T00:00:00.000Z');
+    expect(s.home.open).toBe(true);
+    expect(s.home.shell).toBe('dome-basic');
+    expect(s.home.placed).toEqual([]);
+  });
 });
 
 describe('load / persist round-trip', () => {

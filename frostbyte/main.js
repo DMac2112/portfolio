@@ -9,7 +9,7 @@ import { resolveMoveVector, clampToBounds, resolveObstacles, resolveFacing } fro
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
-import { checkDailyLogin, earnCoins } from './engine/economy.js';
+import { checkDailyLogin, earnCoins, spendCoins } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
@@ -23,6 +23,11 @@ import { createEmotes, emoteSymbol } from './ui/emotes.js';
 import { createMap } from './ui/map.js';
 import { nodeByRoom } from './content/map.js';
 import { canTravel, arriveSpawnId } from './engine/travel.js';
+import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
+import { SNAP, addToInventory, place as placeFurn, move as moveFurn, flip as flipFurn, store as storeFurn, hitTest } from './engine/home-editor.js';
+import { loadFurnitureSprites, initFurnitureLayer } from './world/furniture.js';
+import { createEditMode } from './ui/edit-mode.js';
+import { createCatalog } from './ui/catalog.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -67,6 +72,7 @@ const PLAYER_RADIUS = 12;
 k.loadSprite('room-plaza', './assets/room-plaza.png');
 k.loadSprite('room-den', './assets/room-den.png');
 loadAvatarSprites(k);
+loadFurnitureSprites(k);
 k.loadSprite('snowpal', './assets/minigame/snowpal.png');
 k.loadSprite('snowball', './assets/minigame/snowball.png');
 k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
@@ -272,6 +278,98 @@ k.scene('room', (roomId, opts = {}) => {
     if (i < 9) k.onKeyPress(String(i + 1), () => { if (!anyOverlayOpen()) playEmote(id); });
   });
 
+  /* ---------------------------------------------------------------- *
+   * Den decorating (H2) — pure rules in engine/home-editor.js; sprites
+   * mirrored by world/furniture.js; tray/catalogue are ui singletons.
+   * Canvas owns pick-to-place, click-select and drag-move below.
+   * ---------------------------------------------------------------- */
+  const isHome = roomId === 'den';
+  const furnLayer = isHome ? initFurnitureLayer(k, save.home, room.scale) : null;
+  const catalogById = Object.fromEntries(FURNITURE_CATALOG.map((it) => [it.id, it]));
+  let pickId = null;   // tray item armed for placement
+  let selIdx = -1;     // selected placed-furniture index
+  let dragging = false;
+
+  const invList = () =>
+    Object.entries(save.furniture)
+      .filter(([, n]) => n > 0)
+      .map(([id, n]) => ({ id, label: furnitureById(id)?.label ?? id, count: n }));
+
+  function syncEditUI() {
+    furnLayer?.sync();
+    editMode.refresh();
+    if (catalogUI.isOpen()) catalogUI.refresh();
+    refreshCoins();
+    persist(save);
+  }
+  const selectPlaced = (idx) => {
+    selIdx = idx;
+    editMode.setSelected(idx >= 0 ? { label: furnitureById(save.home.placed[idx].id)?.label ?? '' } : null);
+  };
+
+  const editMode = createEditMode({
+    getInventory: invList,
+    getPlacedCount: () => save.home.placed.length,
+    maxPlaced: MAX_PLACED,
+    onSelectItem: (id) => { pickId = id; selectPlaced(-1); },
+    onStoreSelected: () => {
+      if (selIdx < 0) return;
+      if (storeFurn(save.home, save.furniture, selIdx, []).ok) { selectPlaced(-1); syncEditUI(); }
+    },
+    onFlipSelected: () => { if (selIdx >= 0 && flipFurn(save.home, selIdx, []).ok) syncEditUI(); },
+    onOpenCatalog: () => catalogUI.open(),
+    onExit: () => { editMode.close(); pickId = null; dragging = false; editMode.clearPick(); selectPlaced(-1); },
+  });
+  const catalogUI = createCatalog({
+    getCoins: () => save.coins,
+    getOwnedCount: (id) => save.furniture[id] ?? 0,
+    onBuy: (id) => {
+      const item = furnitureById(id);
+      if (!item || !spendCoins(save, item.price)) return;
+      addToInventory(save.furniture, id, []);
+      syncEditUI();
+    },
+  });
+
+  // Canvas press while editing: armed item -> place; otherwise select (and start dragging) a hit.
+  function editPress(w) {
+    if (pickId) {
+      const item = furnitureById(pickId);
+      const r = placeFurn(save.home, save.furniture, item, w.x, w.y, room.bounds, MAX_PLACED, []);
+      if (r.ok) {
+        if ((save.furniture[pickId] ?? 0) <= 0) { pickId = null; editMode.clearPick(); }
+        selectPlaced(r.index);
+        syncEditUI();
+      }
+      return;
+    }
+    const hit = hitTest(save.home, catalogById, w.x, w.y);
+    selectPlaced(hit);
+    dragging = hit >= 0;
+  }
+  k.onMouseRelease(() => { if (dragging) { dragging = false; persist(save); } });
+
+  // Keyboard editing path (a11y): arrows nudge one snap step, R flips, Delete stores.
+  const nudge = (dx, dy) => {
+    if (!editMode.isOpen() || chatUI.isOpen() || selIdx < 0) return;
+    const p = save.home.placed[selIdx];
+    const item = p && furnitureById(p.id);
+    if (item && moveFurn(save.home, selIdx, p.x + dx, p.y + dy, item, room.bounds, []).ok) syncEditUI();
+  };
+  k.onKeyPress('left', () => nudge(-SNAP, 0));
+  k.onKeyPress('right', () => nudge(SNAP, 0));
+  k.onKeyPress('up', () => nudge(0, -SNAP));
+  k.onKeyPress('down', () => nudge(0, SNAP));
+  k.onKeyPress('r', () => {
+    if (editMode.isOpen() && !chatUI.isOpen() && selIdx >= 0 && flipFurn(save.home, selIdx, []).ok) syncEditUI();
+  });
+  const storeSelectedKey = () => {
+    if (!editMode.isOpen() || chatUI.isOpen() || selIdx < 0) return;
+    if (storeFurn(save.home, save.furniture, selIdx, []).ok) { selectPlaced(-1); syncEditUI(); }
+  };
+  k.onKeyPress('delete', storeSelectedKey);
+  k.onKeyPress('backspace', storeSelectedKey);
+
   // Island-map travel (H1) — the ui singleton renders pins from content/map.js; the pure
   // engine/travel.js guard decides legality so the rules stay testable headless.
   const mapUI = createMap({
@@ -286,10 +384,18 @@ k.scene('room', (roomId, opts = {}) => {
     },
   });
   const anyOverlayOpen = () =>
-    dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || dialogueIsOpen();
+    dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || dialogueIsOpen() ||
+    editMode.isOpen() || catalogUI.isOpen();
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
+
+  // Decorate button — den-only (kept out of HUD_BTN_IDS so setHudVisible can't unhide it elsewhere).
+  const editBtn = document.getElementById('edit-btn');
+  if (editBtn) {
+    editBtn.hidden = !isHome;
+    editBtn.onclick = () => { if (isHome && !anyOverlayOpen()) { selectPlaced(-1); editMode.open(); } };
+  }
 
   // Player speech bubble — recreated only when the visible bubble changes, opacity tracks its fade.
   let curBubbleId = null;
@@ -315,14 +421,32 @@ k.scene('room', (roomId, opts = {}) => {
     bubbleObjs.txt.opacity = top.alpha;
   }
 
-  // Movement input is ignored while ANY overlay (dress-up/chat/map/dialogue) is open — one
-  // shared frozen predicate so pointer, keys and prompts can never disagree (H1 audit fix).
-  k.onMousePress(() => { if (!anyOverlayOpen()) moveTarget = k.toWorld(k.mousePos()); });
-  k.onTouchStart((pos) => { if (!anyOverlayOpen()) moveTarget = k.toWorld(pos); });
+  // Movement input is ignored while ANY overlay is open — one shared frozen predicate so
+  // pointer, keys and prompts can never disagree (H1 audit fix). Edit mode instead routes
+  // canvas presses to the furniture editor (the tray is non-modal by design).
+  k.onMousePress(() => {
+    if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
+    if (!anyOverlayOpen()) moveTarget = k.toWorld(k.mousePos());
+  });
+  k.onTouchStart((pos) => {
+    // touchToMouse:true already synthesizes a mousePress for every tap, so editPress must be
+    // routed ONLY through onMousePress — wiring it here too would double-fire on one tap
+    // (double stock burn / duplicate placement — H2 review blocker). The idempotent moveTarget
+    // assignment is safe to keep on both paths.
+    if (!anyOverlayOpen()) moveTarget = k.toWorld(pos);
+  });
 
   k.onUpdate(() => {
     const dt = Math.min(k.dt(), 0.05); // defensive clamp against tab-switch spikes
     const frozen = anyOverlayOpen();
+
+    // Drag-move a selected furniture piece while the mouse stays down (edit mode only).
+    if (dragging && editMode.isOpen() && selIdx >= 0 && k.isMouseDown()) {
+      const w = k.toWorld(k.mousePos());
+      const p = save.home.placed[selIdx];
+      const item = p && furnitureById(p.id);
+      if (item && moveFurn(save.home, selIdx, w.x, w.y, item, room.bounds, []).ok) furnLayer?.sync();
+    }
     const keys = frozen ? {} : {
       left: k.isKeyDown('left') || k.isKeyDown('a'),
       right: k.isKeyDown('right') || k.isKeyDown('d'),
