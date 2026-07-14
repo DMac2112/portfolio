@@ -4,7 +4,7 @@
   "kind": "pdf",
   "icon": "/os/icons/resume.svg",
   "category": "apps",
-  "desktop": { "show": true, "order": 1, "label": "My Resume" },
+  "desktop": { "show": true, "order": 1, "label": "CV" },
   "startMenu": { "show": true, "group": "Documents" },
   "window": { "width": 680, "height": 760, "minWidth": 420, "singleton": true },
   "src": "/os/assets/cv.pdf",
