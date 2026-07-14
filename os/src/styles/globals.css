@@ -639,9 +639,57 @@ body {
 }
 
 /* pdf app */
-.pdf-app { height: 100%; display: flex; flex-direction: column; }
-.pdf-app__bar { flex: none; display: flex; gap: 6px; align-items: center; padding: 4px 6px; }
-.pdf-app__frame { flex: 1; border: 0; width: 100%; background: #555; }
+/* PDF viewer — period XP/Reader chrome around the browser's native document view.
+   Laid out as toolbar groups / body row / status bar so the Adobe-6 tribute (page box,
+   zoom picker, thumbnail rail) can slot in later — see the SLOT comments in PdfApp.tsx. */
+.pdf-app { height: 100%; display: flex; flex-direction: column; background: #ece9d8; }
+
+.pdf-app__toolbar {
+  flex: none; display: flex; align-items: center; gap: 2px;
+  padding: 3px 4px;
+  background: linear-gradient(180deg, #f8f7f2 0%, #ece9d8 55%, #e3e0ce 100%);
+  border-bottom: 1px solid #aca899;
+  box-shadow: inset 0 1px 0 #fff;
+}
+.pdf-app__group { display: flex; align-items: center; gap: 2px; }
+/* classic engraved separator: dark line + light highlight */
+.pdf-app__sep {
+  width: 1px; align-self: stretch; margin: 3px 4px;
+  background: #aca899; box-shadow: 1px 0 0 #fff;
+}
+.pdf-app__btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  min-height: 24px; padding: 3px 8px;
+  font: inherit; font-size: 11px; color: #101010; text-decoration: none;
+  background: transparent; border: 1px solid transparent; border-radius: 3px;
+  cursor: pointer;
+}
+.pdf-app__btn:hover {
+  background: linear-gradient(180deg, #fffdf4, #f3efd2);
+  border-color: #c0b98f;
+}
+.pdf-app__btn:active {
+  background: #e0dbc0; border-color: #a8a072;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.22);
+}
+.pdf-app__btn:focus-visible { outline: 1px dotted #101010; outline-offset: 1px; }
+.pdf-app__ico { font-size: 13px; line-height: 1; }
+
+.pdf-app__body { flex: 1; min-height: 0; display: flex; }
+.pdf-app__frame { flex: 1; min-height: 0; width: 100%; border: 0; background: #555; }
+
+.pdf-app__status {
+  flex: none; display: flex; align-items: stretch; height: 22px;
+  background: #ece9d8; border-top: 1px solid #fff;
+  font-size: 11px; color: #3b3b3b;
+}
+.pdf-app__cell {
+  display: flex; align-items: center; padding: 0 8px;
+  border: 1px solid #aca899; border-left-color: #fff; border-top-color: #aca899;
+  border-right-color: #fff; border-bottom-color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pdf-app__cell--grow { flex: 1; min-width: 0; }
 
 /* my computer app */
 .mycomputer { padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
