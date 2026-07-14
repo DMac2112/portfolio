@@ -1,0 +1,226 @@
+{
+  "variant": "revised",
+  "meta": {
+    "title": "Dominik Machowiak | Salesforce Marketing Cloud & Front-End Developer",
+    "description": "Dominik Machowiak is a Salesforce Marketing Cloud Developer at Deloitte and front-end developer. View selected work, experience and DominikOS."
+  },
+  "navigation": {
+    "ariaLabel": "Main navigation",
+    "links": [
+      { "id": "home", "label": "Home" },
+      { "id": "about", "label": "Profile" },
+      { "id": "work", "label": "Work" },
+      { "id": "skills", "label": "Experience" },
+      { "id": "dominikos", "label": "DominikOS" },
+      { "id": "contact", "label": "Contact" }
+    ],
+    "openMenuLabel": "Open menu",
+    "closeMenuLabel": "Close menu",
+    "copyToggle": {
+      "ariaLabel": "Switch portfolio copy",
+      "showCurrentLabel": "View original copy",
+      "showRevisedLabel": "View revised copy"
+    }
+  },
+  "hero": {
+    "greeting": "Hello, I'm",
+    "name": "Dominik Machowiak",
+    "role": "Salesforce Marketing Cloud & Front-End Developer",
+    "tagline": "At Deloitte, I develop Salesforce Marketing Cloud solutions. I also build responsive websites with HTML, CSS and JavaScript, and I work with React.",
+    "primaryCta": { "label": "View selected work", "href": "#work" },
+    "secondaryCta": { "label": "Get in touch", "href": "#contact" }
+  },
+  "about": {
+    "heading": "Professional Profile",
+    "items": [
+      {
+        "title": "Marketing Automation",
+        "description": "I develop and deploy Salesforce Marketing Cloud solutions at Deloitte. My automotive-sector work includes technical consultation and work on approximately 300 email and SMS messages for a multi-brand marketing transformation.",
+        "image": "about-programmer.jpg"
+      },
+      {
+        "title": "Front-End Development",
+        "description": "I design and develop responsive websites with HTML, CSS and JavaScript. My selected work includes websites for property management and cleaning businesses.",
+        "image": "about-frontend.svg"
+      },
+      {
+        "title": "Technical Foundation",
+        "description": "My Computing and IT Software studies at The Open University complement practical work in front-end development and marketing automation. I have also spent time learning React alongside my core web-development tools.",
+        "image": "about-learner.jpg"
+      }
+    ]
+  },
+  "work": {
+    "heading": "Selected Work",
+    "filterAriaLabel": "Filter projects by type",
+    "filters": [],
+    "projectImageAltPrefix": "Screenshot of",
+    "projectLinkLabelPrefix": "Visit",
+    "items": [
+      {
+        "title": "Welcom-Inn Website",
+        "description": "A responsive website designed and developed for a property management company to present its rental properties and services.",
+        "projectLink": "https://welcom-inn.co.uk/",
+        "tags": ["Client Website", "HTML", "CSS", "JavaScript"],
+        "image": "work-welcom-inn.jpg"
+      },
+      {
+        "title": "Rubicall Website",
+        "description": "A responsive website designed and developed for a cleaning company, then expanded when the business moved into Airbnb services.",
+        "projectLink": "https://www.rubicall.co.uk/",
+        "tags": ["Client Website", "HTML", "CSS", "JavaScript"],
+        "image": "work-rubicall.png"
+      }
+    ]
+  },
+  "experienceAndSkills": {
+    "heading": "Experience, Education & Skills",
+    "groups": [
+      {
+        "type": "Professional Experience",
+        "works": [
+          {
+            "name": "Salesforce Marketing Cloud Developer",
+            "company": "Deloitte",
+            "year": "2024–Present",
+            "desc": "Led a marketing automation project for a Polish automotive client, providing technical consultation and developing and deploying marketing technology solutions. Contributed to a marketing transformation covering multiple car brands, including work on approximately 300 email and SMS messages in Email Studio with HTML, CSS, JavaScript and AMPscript."
+          },
+          {
+            "name": "Web Developer",
+            "company": "Welcom-Inn",
+            "year": "2023–2024",
+            "desc": "Designed and developed a website for a property management company using HTML, CSS and JavaScript. The website presents the company's properties and services."
+          },
+          {
+            "name": "Front-End Web Developer",
+            "company": "Rubicall",
+            "year": "2022–2023",
+            "desc": "Designed and developed a website for a cleaning company using HTML, CSS and JavaScript, then returned to expand it when the business moved into Airbnb services."
+          },
+          {
+            "name": "Intern Front-End Web Developer",
+            "company": "Hawthorne Electronics",
+            "year": "2021",
+            "desc": "Volunteered as a front-end web developer for a small electronics company, updating individual pages to improve the website's presentation and functionality."
+          }
+        ]
+      },
+      {
+        "type": "Education",
+        "works": [
+          {
+            "name": "BSc Computing and IT Software",
+            "company": "The Open University",
+            "year": "2018–2021",
+            "desc": "Studied Computing and IT Software at The Open University."
+          }
+        ]
+      }
+    ],
+    "skills": [
+      { "name": "HTML", "image": "skill-html.png", "bgColor": "#edf2f8" },
+      { "name": "CSS", "image": "skill-css.png", "bgColor": "#edf2f8" },
+      { "name": "JavaScript", "image": "skill-javascript.png", "bgColor": "#edf2f8" },
+      { "name": "React", "image": "skill-react.png", "bgColor": "#edf2f8" },
+      { "name": "Marketing Cloud Email Specialist", "image": "skill-mc-email-specialist.png", "bgColor": "#edf2f8" }
+    ]
+  },
+  "testimonials": {
+    "heading": "Client Feedback",
+    "previousLabel": "Previous testimonial",
+    "nextLabel": "Next testimonial",
+    "items": [
+      {
+        "name": "Norbert",
+        "company": "Hawthorne Electronics",
+        "feedback": "Our website underwent a remarkable transformation with Dominik's input and changes. His expertise and dedication brought a fresh appeal and functionality to the site, impressing both us and our customers. Dominik's professionalism and attention to detail allowed us to upgrade our website to create a seamless user experience. We're immensely grateful for his contribution, and it has undoubtedly boosted our online presence and business prospects.",
+        "image": "testimonial-norbert.png",
+        "verbatim": true
+      },
+      {
+        "name": "Agnieszka",
+        "company": "Welcom-Inn",
+        "feedback": "I greatly appreciate Dominik's efforts in developing a functional website for our company. Despite my limited knowledge of websites, he guided us patiently. The website effectively showcases our rental properties and services. Dominik's expertise has improved our online presence, simplifying the exploration of our offerings for potential clients. I recommend Dominik for his skillful and patient approach to website development.",
+        "image": "testimonial-agnieszka.jpg",
+        "verbatim": true
+      },
+      {
+        "name": "Barbara",
+        "company": "Rubicall",
+        "feedback": "I'm thrilled to share my positive experience with Dominik at Rubicall. He created a fantastic website for our cleaning business! I'm not very tech-savvy, but Dominik was patient and understood our needs. The website looks great, works great on phones and computers, and our clients love it. I highly recommend Dominik for any business looking to expand their business online.",
+        "image": "testimonial-barbara.png",
+        "verbatim": true
+      }
+    ]
+  },
+  "osLaunch": {
+    "ariaLabel": "Open DominikOS, an interactive portfolio with projects, a CV, a 2D career game and pinball",
+    "title": "DominikOS",
+    "headline": "Explore my portfolio as a desktop.",
+    "description": "Open my projects and CV, explore my career timeline in a 2D game, or play pinball—all inside DominikOS.",
+    "buttonLabel": "Boot DominikOS",
+    "taskbarLabels": ["Desktop", "2D game", "Pinball", "CV"]
+  },
+  "osShowcase": {
+    "heading": "Explore DominikOS",
+    "lede": "DominikOS is a retro-desktop version of my portfolio, with draggable windows, projects, my CV, a career game and pinball.",
+    "features": [
+      {
+        "title": "Desktop",
+        "description": "Open my projects and CV in draggable app windows."
+      },
+      {
+        "title": "Career Game",
+        "description": "Explore my career timeline in a 2D pixel-art town."
+      },
+      {
+        "title": "Pinball",
+        "description": "Play an original cyberpunk-themed table and chase a high score."
+      }
+    ],
+    "primaryCta": { "label": "Boot DominikOS", "href": "/os/?boot=chooser" },
+    "deepLinkPrefix": "Or go straight to the",
+    "deepLinks": [
+      { "label": "desktop", "href": "/os/?boot=desktop" },
+      { "label": "game", "href": "/os/?boot=game" }
+    ]
+  },
+  "contact": {
+    "heading": "Get in Touch",
+    "intro": "Email me, connect on LinkedIn or use the form below.",
+    "email": {
+      "label": "dominikmachowiak101@gmail.com",
+      "href": "mailto:dominikmachowiak101@gmail.com",
+      "ariaLabel": "Email Dominik Machowiak"
+    },
+    "linkedin": {
+      "label": "Connect on LinkedIn",
+      "href": "https://www.linkedin.com/in/dominikmachowiak/",
+      "ariaLabel": "Dominik Machowiak on LinkedIn"
+    },
+    "form": {
+      "nameLabel": "Your name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Your email",
+      "emailPlaceholder": "Your email",
+      "messageLabel": "Your message",
+      "messagePlaceholder": "Your message",
+      "submitLabel": "Send message",
+      "sendingLabel": "Sending...",
+      "validationMessage": "Please complete all fields.",
+      "successMessage": "Thanks—your message has been sent.",
+      "errorMessage": "The form could not send your message. Please email me directly instead."
+    }
+  },
+  "footer": {
+    "osLinkLabel": "Explore the interactive portfolio in DominikOS →",
+    "osLinkHref": "/os/?boot=chooser",
+    "copyright": "Dominik Machowiak · All rights reserved"
+  },
+  "rails": {
+    "emailLabel": "Email Dominik Machowiak",
+    "linkedinLabel": "Dominik Machowiak on LinkedIn",
+    "sectionNavigationLabel": "Section navigation",
+    "jumpLabelPrefix": "Jump to"
+  }
+}

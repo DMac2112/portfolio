@@ -82,6 +82,16 @@ button {
   font-family: inherit;
 }
 
+/* Copy variants default to current in HTML and switch before first paint. */
+html[data-copy-version='current'] [data-copy-version='revised'],
+html[data-copy-version='current'] [data-copy-version='human'],
+html[data-copy-version='revised'] [data-copy-version='current'],
+html[data-copy-version='revised'] [data-copy-version='human'],
+html[data-copy-version='human'] [data-copy-version='current'],
+html[data-copy-version='human'] [data-copy-version='revised'] {
+  display: none !important;
+}
+
 /* Cross-document view transition into /os/ (progressive enhancement). */
 @view-transition {
   navigation: auto;

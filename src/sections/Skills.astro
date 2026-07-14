@@ -2,61 +2,89 @@
 // Experience timeline (Employment first, newest role first — sorted in the
 // data layer) + skill bubbles. Tooltips are pure CSS, keyboard-reachable.
 import { Image } from 'astro:assets';
-import { contentImage, type ExperienceGroup, type Skill } from '../lib/content';
+import {
+  contentImage,
+  type ExperienceGroup,
+  type HumanContent,
+  type RevisedContent,
+  type Skill,
+} from '../lib/content';
 
 interface Props {
   experiences: ExperienceGroup[];
   skills: Skill[];
+  revised: RevisedContent['experienceAndSkills'];
+  human: HumanContent['experienceAndSkills'];
 }
 
-const { experiences, skills } = Astro.props;
+const { experiences, skills, revised, human } = Astro.props;
+const variants = [
+  { version: 'current', groups: experiences, skills },
+  { version: 'revised', groups: revised.groups, skills: revised.skills },
+  { version: 'human', groups: human.groups, skills: human.skills },
+];
+const humanHeadingWords = human.heading.split(' ');
+const humanHeadingAccent = humanHeadingWords.pop() || '';
+const humanHeadingLead = humanHeadingWords.join(' ');
 ---
 
 <section id="skills" class="section bg-white" aria-labelledby="skills-heading">
-  <h2 id="skills-heading" class="head-text">My Experience &amp; Skills</h2>
+  <h2 id="skills-heading" class="head-text">
+    <span class="copy-heading" data-copy-version="current">My Experience &amp; <span>Skills</span></span>
+    <span class="copy-heading" data-copy-version="revised">Experience, Education &amp; <span>Skills</span></span>
+    <span class="copy-heading" data-copy-version="human">
+      {humanHeadingLead}{' '}<span>{humanHeadingAccent}</span>
+    </span>
+  </h2>
 
-  <div class="skills-container">
-    <div class="exp-col">
-      {experiences.map((group) => (
-        <div class="exp-group reveal">
-          <p class="exp-type bold-text">{group.type}</p>
-          <ul class="exp-works">
-            {group.works.map((work, i) => {
-              const tipId = `tip-${group.type}-${i}`.toLowerCase().replace(/[^a-z0-9-]/g, '');
-              return (
-                <li class="exp-work" tabindex="0" aria-describedby={tipId}>
-                  <h3 class="bold-text">{work.name}</h3>
-                  {work.year && <p class="p-text exp-year">{work.year}</p>}
-                  <p class="p-text">{work.company}</p>
-                  <span class="exp-tooltip" role="tooltip" id={tipId}>{work.desc}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-    </div>
-
-    <ul class="skills-list">
-      {skills.map((skill) => (
-        <li class="skill reveal">
-          <div class="skill-bubble" style={`background-color: ${skill.bgColor || '#edf2f8'};`}>
-            <Image
-              src={contentImage(skill.image)}
-              alt=""
-              width={96}
-              loading="lazy"
-              decoding="async"
-            />
+  {variants.map(({ version, groups, skills: variantSkills }) => (
+    <div class="skills-container" data-copy-version={version}>
+      <div class="exp-col">
+        {groups.map((group) => (
+          <div class="exp-group reveal">
+            <p class="exp-type bold-text">{group.type}</p>
+            <ul class="exp-works">
+              {group.works.map((work, i) => {
+                const tipId = `tip-${version}-${group.type}-${i}`.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                return (
+                  <li class="exp-work" tabindex="0" aria-describedby={tipId}>
+                    <h3 class="bold-text">{work.name}</h3>
+                    {work.year && <p class="p-text exp-year">{work.year}</p>}
+                    <p class="p-text">{work.company}</p>
+                    <span class="exp-tooltip" role="tooltip" id={tipId}>{work.desc}</span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-          <p class="p-text">{skill.name}</p>
-        </li>
-      ))}
-    </ul>
-  </div>
+        ))}
+      </div>
+
+      <ul class="skills-list">
+        {variantSkills.map((skill) => (
+          <li class="skill reveal">
+            <div class="skill-bubble" style={`background-color: ${skill.bgColor || '#edf2f8'};`}>
+              <Image
+                src={contentImage(skill.image)}
+                alt=""
+                width={96}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <p class="p-text">{skill.name}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
 </section>
 
 <style>
+  .head-text > .copy-heading {
+    color: inherit;
+  }
+
   .skills-container {
     width: 100%;
     padding-top: 4rem;

@@ -2,7 +2,9 @@
 // Hero: dark section with the SEO-correct H1 (name + role — the old site's
 // single H1 was "Hello!") and the DominikOS boot card as signature CTA.
 import { Image } from 'astro:assets';
+import CopyText from '../components/CopyText.astro';
 import OsLaunch from '../components/OsLaunch.astro';
+import type { HumanContent, RevisedContent } from '../lib/content';
 
 import htmlIcon from '../assets/html.png';
 import jsIcon from '../assets/javascript.png';
@@ -13,6 +15,15 @@ import reactIcon from '../assets/react.png';
 
 const leftCircles = [htmlIcon, jsIcon, cssIcon];
 const rightCircles = [pythonIcon, csharpIcon, reactIcon];
+
+interface Props {
+  revised: RevisedContent['hero'];
+  revisedOsLaunch: RevisedContent['osLaunch'];
+  human: HumanContent['hero'];
+  humanOsLaunch: HumanContent['osLaunch'];
+}
+
+const { revised, revisedOsLaunch, human, humanOsLaunch } = Astro.props;
 ---
 
 <header id="home" class="section bg-dark hero">
@@ -25,20 +36,35 @@ const rightCircles = [pythonIcon, csharpIcon, reactIcon];
   </div>
 
   <div class="hero-info">
-    <p class="hero-greeting">Hello! My name is</p>
+    <p class="hero-greeting">
+      <CopyText current="Hello! My name is" revised={revised.greeting} human={human.greeting} />
+    </p>
     <h1 class="hero-h1">
       <span class="hero-name">Dominik Machowiak</span>
-      <span class="hero-role">Salesforce Marketing Cloud &amp; Front-End Developer</span>
+      <span class="hero-role">
+        <CopyText
+          current="Salesforce Marketing Cloud & Front-End Developer"
+          revised={revised.role}
+          human={human.role}
+        />
+      </span>
     </h1>
     <p class="hero-sub">
-      I build fast, polished web experiences — from React front-ends to large-scale
-      marketing automation at Deloitte.
+      <CopyText
+        current="I build fast, polished web experiences — from React front-ends to large-scale marketing automation at Deloitte."
+        revised={revised.tagline}
+        human={human.tagline}
+      />
     </p>
     <div class="hero-ctas">
-      <a class="hero-btn hero-btn-primary" href="#work">View my work</a>
-      <a class="hero-btn" href="#contact">Contact me</a>
+      <a class="hero-btn hero-btn-primary" href="#work">
+        <CopyText current="View my work" revised={revised.primaryCta.label} human={human.primaryCta.label} />
+      </a>
+      <a class="hero-btn" href="#contact">
+        <CopyText current="Contact me" revised={revised.secondaryCta.label} human={human.secondaryCta.label} />
+      </a>
     </div>
-    <OsLaunch />
+    <OsLaunch revised={revisedOsLaunch} human={humanOsLaunch} />
   </div>
 
   <div class="hero-circles hero-circles-right" aria-hidden="true">

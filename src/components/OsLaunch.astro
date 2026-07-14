@@ -2,6 +2,15 @@
 // The DominikOS boot card: a miniature desktop window that previews the real
 // thing. Ported 1:1 from the CRA version (src/components/OsLaunch) — plain
 // crawlable <a>, no framework, prefetch-on-intent via the small script below.
+import CopyText from './CopyText.astro';
+import type { HumanContent, RevisedContent } from '../lib/content';
+
+interface Props {
+  revised: RevisedContent['osLaunch'];
+  human: HumanContent['osLaunch'];
+}
+
+const { revised, human } = Astro.props;
 ---
 
 <a
@@ -20,23 +29,34 @@
   </span>
 
   <span class="osl-body">
-    <span class="osl-headline">My portfolio is an operating system.</span>
+    <span class="osl-headline">
+      <CopyText current="My portfolio is an operating system." revised={revised.headline} human={human.headline} />
+    </span>
     <span class="osl-sub">
-      Boot a full desktop — open my projects and CV, play pinball, or walk my career as a 2D game.
+      <CopyText
+        current="Boot a full desktop — open my projects and CV, play pinball, or walk my career as a 2D game."
+        revised={revised.description}
+        human={human.description}
+      />
     </span>
     <span class="osl-boot">
       <span class="osl-power" aria-hidden="true">&#x23FB;</span>
-      Boot it up
+      <CopyText current="Boot it up" revised={revised.buttonLabel} human={human.buttonLabel} />
     </span>
   </span>
 
   <span class="osl-taskbar" aria-hidden="true">
     <span class="osl-start">start</span>
     <span class="osl-apps">
-      <span>Desktop</span>
-      <span>2D game</span>
-      <span>Pinball</span>
-      <span>CV</span>
+      {['Desktop', '2D game', 'Pinball', 'CV'].map((label, index) => (
+        <span>
+          <CopyText
+            current={label}
+            revised={revised.taskbarLabels[index] || label}
+            human={human.taskbarLabels[index] || label}
+          />
+        </span>
+      ))}
     </span>
     <span class="osl-clock" data-osl-clock>--:--</span>
   </span>

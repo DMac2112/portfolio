@@ -1,0 +1,175 @@
+{
+  "variant": "human",
+  "meta": {
+    "title": "Dominik Machowiak | Web Developer, Marketing Automation & DominikOS",
+    "description": "Websites for real businesses, marketing automation, React and DominikOS: a retro desktop version of Dominik Machowiak's portfolio."
+  },
+  "navigation": {
+    "links": [
+      { "id": "home", "label": "Home" },
+      { "id": "about", "label": "About" },
+      { "id": "work", "label": "Things I've built" },
+      { "id": "skills", "label": "Experience" },
+      { "id": "dominikos", "label": "DominikOS" },
+      { "id": "contact", "label": "Say hello" }
+    ]
+  },
+  "hero": {
+    "greeting": "Hey, I'm",
+    "role": "Web developer, marketing automation developer, and builder of DominikOS.",
+    "tagline": "Websites for real businesses, marketing automation, a bit of React, and a portfolio that turned into a retro desktop with games in it. That's what you'll find here.",
+    "primaryCta": { "label": "See what I've built", "href": "#work" },
+    "secondaryCta": { "label": "Say hello", "href": "#contact" }
+  },
+  "about": {
+    "heading": "A little about me",
+    "items": [
+      {
+        "title": "Websites for real businesses",
+        "description": "I've designed and built websites for a property-management company and a cleaning business, using HTML, CSS and JavaScript to put their services and offers online.",
+        "image": "about-frontend.svg"
+      },
+      {
+        "title": "Automation, not just interfaces",
+        "description": "I also work in Salesforce Marketing Cloud at Deloitte: technical consultation, marketing automation and a multi-brand automotive transformation with around 300 email and SMS messages.",
+        "image": "about-programmer.jpg"
+      },
+      {
+        "title": "Still adding to the toolkit",
+        "description": "HTML, CSS and JavaScript are where I started. React sits alongside them now, and this portfolio includes projects that go well beyond a normal project card.",
+        "image": "about-learner.jpg"
+      }
+    ]
+  },
+  "work": {
+    "heading": "A few things I've built",
+    "filterAriaLabel": "Filter projects by type",
+    "filters": [],
+    "projectImageAltPrefix": "Screenshot of",
+    "projectLinkLabelPrefix": "Visit",
+    "items": [
+      {
+        "title": "Welcom-Inn Website",
+        "description": "A responsive site for a property-management company to showcase its properties and services. Straightforward on the surface, but built from the ground up.",
+        "projectLink": "https://welcom-inn.co.uk/",
+        "tags": ["Client Website", "HTML", "CSS", "JavaScript"],
+        "image": "work-welcom-inn.jpg"
+      },
+      {
+        "title": "Rubicall Website",
+        "description": "A responsive website for a cleaning business. I later came back to expand it when the company moved into Airbnb services.",
+        "projectLink": "https://www.rubicall.co.uk/",
+        "tags": ["Client Website", "HTML", "CSS", "JavaScript"],
+        "image": "work-rubicall.png"
+      },
+      {
+        "title": "MERN Project",
+        "description": "A MERN-stack project that is still in progress. It is not a finished case study yet, and that is the point of calling it a work in progress.",
+        "tags": ["React JS", "Web App"],
+        "image": "work-mern.png"
+      }
+    ]
+  },
+  "experienceAndSkills": {
+    "heading": "Where I've worked, what I've learned",
+    "groups": [
+      {
+        "type": "The work bit",
+        "works": [
+          {
+            "name": "Salesforce Marketing Cloud Developer",
+            "company": "Deloitte",
+            "year": "2024–Present",
+            "desc": "Marketing automation for a Polish automotive client, technical consultation, and a lot of Email Studio: approximately 300 email and SMS messages across several car brands, using HTML, CSS, JavaScript and AMPscript."
+          },
+          {
+            "name": "Web Developer",
+            "company": "Welcom-Inn",
+            "year": "2023–2024",
+            "desc": "Designed and built the company's website with HTML, CSS and JavaScript. It is used to advertise the company's properties and services."
+          },
+          {
+            "name": "Front-End Web Developer",
+            "company": "Rubicall",
+            "year": "2022–2023",
+            "desc": "Designed and built the cleaning business's website, then returned to add more when the company moved into Airbnb services."
+          },
+          {
+            "name": "Intern Front-End Web Developer",
+            "company": "Hawthorne Electronics",
+            "year": "2021",
+            "desc": "A volunteer front-end role: improving individual pages so the site worked and felt better."
+          }
+        ]
+      },
+      {
+        "type": "The study bit",
+        "works": [
+          {
+            "name": "BSc Computing and IT Software",
+            "company": "The Open University",
+            "year": "2018–2021",
+            "desc": "Studied Computing and IT Software at The Open University."
+          }
+        ]
+      }
+    ],
+    "skills": [
+      { "name": "HTML", "image": "skill-html.png", "bgColor": "#edf2f8" },
+      { "name": "CSS", "image": "skill-css.png", "bgColor": "#edf2f8" },
+      { "name": "JavaScript", "image": "skill-javascript.png", "bgColor": "#edf2f8" },
+      { "name": "React", "image": "skill-react.png", "bgColor": "#edf2f8" },
+      { "name": "Marketing Cloud Email Specialist", "image": "skill-mc-email-specialist.png", "bgColor": "#edf2f8" },
+      { "name": "Trailhead Mountaineer", "image": "skill-trailhead-mountaineer.png", "bgColor": "#edf2f8" }
+    ]
+  },
+  "testimonials": {
+    "heading": "Nice things people have said"
+  },
+  "osLaunch": {
+    "headline": "The portfolio went a bit further than a portfolio.",
+    "description": "Open the projects and CV, wander through a 2D career game, or take a break with pinball. Everything lives inside DominikOS.",
+    "buttonLabel": "Open the desktop",
+    "taskbarLabels": ["Desktop", "2D game", "Pinball", "CV"]
+  },
+  "osShowcase": {
+    "heading": "The not-so-normal bit",
+    "lede": "DominikOS is this portfolio rebuilt as a retro desktop. The projects, CV and a few games are all inside it, so there is more to explore than a normal page.",
+    "features": [
+      {
+        "title": "Poke around",
+        "description": "Open projects and the CV in draggable app windows."
+      },
+      {
+        "title": "Walk it",
+        "description": "Explore a 2D pixel-art version of the career timeline."
+      },
+      {
+        "title": "Take a break",
+        "description": "Play an original cyberpunk pinball table and chase a high score."
+      }
+    ],
+    "primaryCta": { "label": "Open DominikOS", "href": "/os/?boot=chooser" },
+    "deepLinkPrefix": "Or skip straight to the"
+  },
+  "contact": {
+    "heading": "Want to say hello?",
+    "intro": "Questions, feedback or a project to discuss? Email me, find me on LinkedIn or use the form below.",
+    "email": {
+      "label": "dominikmachowiak101@gmail.com"
+    },
+    "linkedin": {
+      "label": "Find me on LinkedIn"
+    },
+    "form": {
+      "submitLabel": "Send it",
+      "sendingLabel": "Sending...",
+      "validationMessage": "Just add your name, email and message first.",
+      "successMessage": "Thanks—your message is on its way.",
+      "errorMessage": "Something went sideways. Please email me directly instead."
+    }
+  },
+  "footer": {
+    "osLinkLabel": "Open DominikOS and have a look around →"
+  }
+}

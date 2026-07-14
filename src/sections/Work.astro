@@ -3,68 +3,126 @@
 // script; cards carry data-tags). All cards are server-rendered — crawlers
 // always see every project.
 import { Image } from 'astro:assets';
-import { contentImage, type WorkItem } from '../lib/content';
+import { contentImage, type HumanContent, type RevisedContent, type WorkItem } from '../lib/content';
 
 interface Props {
   works: WorkItem[];
+  revised: RevisedContent['work'];
+  human: HumanContent['work'];
 }
 
-const { works } = Astro.props;
+const { works, revised, human } = Astro.props;
 const filters = ['Web App', 'React JS', 'All'];
+const variants = [
+  {
+    version: 'current',
+    items: works,
+    filters,
+    filterAriaLabel: 'Filter projects by type',
+    imageAltPrefix: 'Screenshot of',
+    linkLabelPrefix: 'Visit',
+  },
+  {
+    version: 'revised',
+    items: revised.items,
+    filters: revised.filters,
+    filterAriaLabel: revised.filterAriaLabel,
+    imageAltPrefix: revised.projectImageAltPrefix,
+    linkLabelPrefix: revised.projectLinkLabelPrefix,
+  },
+  {
+    version: 'human',
+    items: human.items,
+    filters: human.filters,
+    filterAriaLabel: human.filterAriaLabel,
+    imageAltPrefix: human.projectImageAltPrefix,
+    linkLabelPrefix: human.projectLinkLabelPrefix,
+  },
+];
+const humanHeadingWords = human.heading.split(' ');
+const humanHeadingAccent = humanHeadingWords.pop() || '';
+const humanHeadingLead = humanHeadingWords.join(' ');
 ---
 
 <section id="work" class="section bg-primary" aria-labelledby="work-heading">
   <h2 id="work-heading" class="head-text">
-    My Current Development <span>Portfolio</span>
+    <span class="copy-heading" data-copy-version="current">
+      My Current Development <span>Portfolio</span>
+    </span>
+    <span class="copy-heading" data-copy-version="revised">
+      Selected <span>Work</span>
+    </span>
+    <span class="copy-heading" data-copy-version="human">
+      {humanHeadingLead}{' '}<span>{humanHeadingAccent}</span>
+    </span>
   </h2>
 
-  <div class="work-filter" role="group" aria-label="Filter projects by type">
-    {filters.map((item) => (
-      <button
-        type="button"
-        class="work-filter-btn"
-        aria-pressed={item === 'All' ? 'true' : 'false'}
-        data-filter={item}
-      >
-        {item}
-      </button>
-    ))}
-  </div>
+  {variants.map(({ version, items, filters: variantFilters, filterAriaLabel, imageAltPrefix, linkLabelPrefix }) => (
+    <div class="work-version" data-copy-version={version}>
+      {variantFilters.length > 0 && (
+        <div class="work-filter" role="group" aria-label={filterAriaLabel}>
+          {variantFilters.map((item) => (
+            <button
+              type="button"
+              class="work-filter-btn"
+              aria-pressed={item === 'All' ? 'true' : 'false'}
+              data-filter={item}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      )}
 
-  <div class="work-grid" data-work-grid>
-    {works.map((work) => (
-      <article class="work-card reveal" data-tags={JSON.stringify(work.tags || [])}>
-        <div class="work-img">
-          <Image
-            src={contentImage(work.image)}
-            alt={`Screenshot of ${work.title}`}
-            width={576}
-            loading="lazy"
-            decoding="async"
-          />
-          {work.projectLink && (
-            <div class="work-links">
-              <a href={work.projectLink} target="_blank" rel="noreferrer noopener" aria-label={`Visit ${work.title}`}>
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="24" height="24">
-                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="2" />
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
-                </svg>
-              </a>
+      <div class="work-grid" data-work-grid>
+        {items.map((work) => (
+          <article class="work-card reveal" data-tags={JSON.stringify(work.tags || [])}>
+            <div class="work-img">
+              <Image
+                src={contentImage(work.image)}
+                alt={`${imageAltPrefix} ${work.title}`}
+                width={576}
+                loading="lazy"
+                decoding="async"
+              />
+              {work.projectLink && (
+                <div class="work-links">
+                  <a
+                    href={work.projectLink}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label={`${linkLabelPrefix} ${work.title}`}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="24" height="24">
+                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="2" />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+                    </svg>
+                  </a>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div class="work-content">
-          {work.tags?.[0] && <p class="work-tag p-text">{work.tags[0]}</p>}
-          <h3 class="bold-text">{work.title}</h3>
-          <p class="p-text">{work.description}</p>
-        </div>
-      </article>
-    ))}
-  </div>
+            <div class="work-content">
+              {work.tags?.[0] && <p class="work-tag p-text">{work.tags[0]}</p>}
+              <h3 class="bold-text">{work.title}</h3>
+              <p class="p-text">{work.description}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  ))}
 </section>
 
 <style>
+  .head-text > .copy-heading {
+    color: inherit;
+  }
+
+  .work-version {
+    width: 100%;
+  }
+
   .work-filter {
     display: flex;
     flex-wrap: wrap;

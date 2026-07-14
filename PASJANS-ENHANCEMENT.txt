@@ -1,0 +1,1511 @@
+Do a thorough analysis of the OS code here in my portfolio, and tell me what is missing from a 2000s OS windows xp like this one. what else could be implemented to enhance the feel of the system. Also what games where popular on systems like that.
+
+Research, analyse and come back with propositions, not a full plan but a high level breakdown with tldrs of how we can expand this and keep making it better.
+
+Subagents you can spawn:
+1 opus.
+2 Sonnets.
+As many haikus as you need. Go crazy just this once.
+Show more
+I'll scout the OS code structure first, then fan out a research workflow within your budget (1 Opus, 2 Sonnets, Haiku swarm).
+
+Globpattern: "public/**/*"
+Found 101 files
+Globpattern: "*"
+Found 101 files
+Globpattern: "public/os/**/*.{js,mjs,html,css}"
+Found 29 files
+Bash List os directory and peek at integration plan
+IN
+ls "c:/Users/domin/OneDrive/Desktop/Websites/portfolio-rework/public/os" && cat "c:/Users/domin/OneDrive/Desktop/Websites/portfolio-rework/OS-INTEGRATION-PLAN.md" 2>/dev/null | head -50
+
+OUT
+assets
+chrome
+content
+fonts
+games
+icons
+index.html
+ui
+wallpaper
+The OS is vendored as a built bundle in public/os/. Let me find the source — likely a sibling repo — and the integration plan.
+
+Bash List Websites parent dir and repo root
+IN
+ls "c:/Users/domin/OneDrive/Desktop/Websites/" && ls "c:/Users/domin/OneDrive/Desktop/Websites/portfolio-rework"
+
+OUT
+BACKUPS
+New
+Norbert
+Personal Website
+RubiCall
+ai-operating-rules.md
+dominikos
+dsada
+game
+game2
+github-recovery-codes.txt
+norb
+norbert-codex
+portfolio-2026
+portfolio-rework
+welcom-inn
+README.md
+astro.config.mjs
+dist
+netlify
+netlify.toml
+node_modules
+npm20.cmd
+package-lock.json
+package.json
+public
+src
+tsconfig.json
+Bash List dominikos source repo structure
+IN
+ls "c:/Users/domin/OneDrive/Desktop/Websites/dominikos" && ls "c:/Users/domin/OneDrive/Desktop/Websites/dominikos/src" 2>/dev/null
+
+OUT
+Exit code 2
+BROWSER-PLAN.md
+CONTENT-MIGRATION-PLAN.md
+CONTENT.md
+CONTEXT.md
+DOMINIKOS-PLAN.md
+Dominik Machowiak CV.pdf
+FROSTBYTE-EXECUTION.md
+FROSTBYTE-HOME-PLAN.md
+FROSTBYTE-PLAN.md
+Graphics
+MINESWEEPER-PLAN.md
+OS-INTEGRATION-PLAN.md
+PAINT-PLAN.md
+README.md
+SKYPE-PLAN.md
+antigravity
+frostbyte
+game1
+os
+pinball_graphics_plan.md
+reference
+reports
+Bash List os source directory
+IN
+ls "c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os" && ls "c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src" 2>/dev/null
+
+OUT
+ASSET-CREDITS.md
+README.md
+deploy
+dist
+index.html
+node_modules
+package-lock.json
+package.json
+postcss.config.cjs
+public
+registry
+scripts
+src
+tailwind.config.cjs
+tsconfig.json
+vite.config.ts
+main.tsx
+os
+styles
+vite-env.d.ts
+Bash Inventory OS source files with counts
+IN
+find "c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src" -type f | head -120 && echo "---COUNT---" && find "c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src" -type f | wc -l && echo "---LINES---" && find "c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src" -name "*.tsx" -o -name "*.ts" -o -name "*.css" | xargs wc -l | tail -5
+
+OUT
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/main.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/browser/BrowserApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/browser/history.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/browser/history.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/browser/sites.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/ContactApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/dialtone/callMachine.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/dialtone/callMachine.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/dialtone/contacts.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/dialtone/DialtoneApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/DocWindow.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/ExperienceApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/FolderApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/ImageViewApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/MyComputerApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/NotepadApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/paint/canvas.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/paint/canvas.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/paint/PaintApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/PdfApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/Placeholder.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/apps/RecycleBinApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/boot/BiosScreen.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/boot/BootChooser.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/boot/BootScreen.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/boot/LoginScreen.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/boot/ShutdownScreen.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/bufferShim.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/context/SystemContext.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/desktop/AltTabSwitcher.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/desktop/ContextMenu.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/desktop/DesktopIconView.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/desktop/IconGrid.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/desktop/iconLayout.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/desktop/iconLayout.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/desktop/iconPosStore.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/env.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/bubble/BubbleApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/bubble/engine.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/bubble/engine.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/flappy/engine.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/flappy/engine.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/flappy/FlappyApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/mines/engine.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/mines/engine.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/mines/MinesApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/pasjans/cards.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/pasjans/engine.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/pasjans/engine.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/pasjans/SolitaireApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/pinball/physics.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/pinball/physics.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/games/pinball/PinballApp.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/hooks/useClock.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/hooks/useFullscreen.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/hooks/useGameLoop.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/hooks/usePageVisible.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/hooks/useWindowDrag.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/machines/sessionMachine.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/mobile/backStack.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/mobile/MobileShell.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/registry.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/shell/Desktop.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/shell/OSShell.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/shell/Wallpaper.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/sound.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/storage.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/store/osStore.test.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/store/osStore.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/store/snapPreviewStore.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/Clock.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/MobileDock.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/MobileStartLauncher.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/QuickLaunch.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/StartButton.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/StartMenu.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/SystemTray.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/Taskbar.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/taskbar/TaskButtons.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/types.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/useDeviceMode.ts
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/window/AppHost.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/window/IframeHost.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/window/ResizeHandles.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/window/SnapPreview.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/window/TitleBar.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/window/Window.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/os/window/WindowLayer.tsx
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/chooser.css
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/tokens.css
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/touch.css
+c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/vite-env.d.ts
+---COUNT---
+93
+---LINES---
+  1398 c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css
+    38 c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/tokens.css
+    21 c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/touch.css
+     1 c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/vite-env.d.ts
+ 13890 total
+Bash Copy DominikOS source and plan docs into scratchpad
+IN
+SRC="c:/Users/domin/OneDrive/Desktop/Websites/dominikos"
+DST="C:/Users/domin/AppData/Local/Temp/claude/c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework/95c0835a-7f10-46ea-8718-aecb979c9211/scratchpad/dominikos"
+mkdir -p "$DST"
+cp -r "$SRC/os/src" "$DST/os-src"
+cp -r "$SRC/os/registry" "$DST/os-registry" 2>/dev/null
+cp "$SRC"/*.md "$DST/" 2>/dev/null
+cp "$SRC/os/index.html" "$SRC/os/vite.config.ts" "$SRC/os/package.json" "$SRC/os/README.md" "$DST/" 2>/dev/null
+ls "$DST" && echo "---registry---" && ls "$DST/os-registry" 2>/dev/null | head
+
+OUT
+BROWSER-PLAN.md
+CONTENT-MIGRATION-PLAN.md
+CONTENT.md
+CONTEXT.md
+DOMINIKOS-PLAN.md
+FROSTBYTE-EXECUTION.md
+FROSTBYTE-HOME-PLAN.md
+FROSTBYTE-PLAN.md
+MINESWEEPER-PLAN.md
+OS-INTEGRATION-PLAN.md
+PAINT-PLAN.md
+README.md
+SKYPE-PLAN.md
+index.html
+os-registry
+os-src
+package.json
+pinball_graphics_plan.md
+vite.config.ts
+---registry---
+about.json
+contact.json
+dialtone.json
+experience.json
+explorer.json
+game1.json
+games.json
+mines.json
+my-computer.json
+my-projects.json
+Workflow
+IN
+{
+  "script": "export const meta = {\n  name: 'dominikos-xp-analysis',\n  description: 'Inventory DominikOS source, research XP-era authenticity + 2000s games, synthesize enhancement propositions',\n  phases: [\n    { title: 'Inventory', detail: '15 Haiku readers over OS source slices', model: 'haiku' },\n    { title: 'Research', detail: '2 Sonnets: XP feel + 2000s games', model: 'sonnet' },\n    { title: 'Synthesize', detail: 'Opus gap analysis + propositions', model: 'opus' },\n  ],\n}\n\nconst SCRATCH = 'C:/Users/domin/AppData/Local/Temp/claude/c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework/95c0835a-7f10-46ea-8718-aecb979c9211/scratchpad/dominikos'\nconst REPO = 'c:/Users/domin/OneDrive/Desktop/Websites/portfolio-rework'\n\nconst INV_SCHEMA = {\n  type: 'object',\n  required: ['area', 'implemented', 'fidelity', 'gaps', 'notes'],\n  properties: {\n    area: { type: 'string' },\n    implemented: { type: 'array', items: { type: 'string' }, description: 'Concrete features/behaviors that exist in this code' },\n    fidelity: { type: 'array', items: { type: 'string' }, description: 'Windows-XP-era authenticity details done well (visuals, behaviors, sounds)' },\n    gaps: { type: 'array', items: { type: 'string' }, description: 'Missing, stubbed, TODO, placeholder, or shallow things noticed' },\n    notes: { type: 'string', description: 'Anything else a designer of an XP-like web OS should know' },\n  },\n}\n\nconst SLICES = [\n  { key: 'shell-desktop', files: ['os-src/os/shell/Desktop.tsx', 'os-src/os/shell/OSShell.tsx', 'os-src/os/shell/Wallpaper.tsx', 'os-src/os/desktop/AltTabSwitcher.tsx', 'os-src/os/desktop/ContextMenu.tsx', 'os-src/os/desktop/DesktopIconView.tsx', 'os-src/os/desktop/IconGrid.tsx', 'os-src/os/desktop/iconLayout.ts', 'os-src/os/desktop/iconPosStore.ts'] },\n  { key: 'window-system', files: ['os-src/os/window/AppHost.tsx', 'os-src/os/window/IframeHost.tsx', 'os-src/os/window/ResizeHandles.tsx', 'os-src/os/window/SnapPreview.tsx', 'os-src/os/window/TitleBar.tsx', 'os-src/os/window/Window.tsx', 'os-src/os/window/WindowLayer.tsx', 'os-src/os/hooks/useWindowDrag.ts', 'os-src/os/store/snapPreviewStore.ts'] },\n  { key: 'taskbar', files: ['os-src/os/taskbar/Taskbar.tsx', 'os-src/os/taskbar/StartButton.tsx', 'os-src/os/taskbar/StartMenu.tsx', 'os-src/os/taskbar/QuickLaunch.tsx', 'os-src/os/taskbar/TaskButtons.tsx', 'os-src/os/taskbar/SystemTray.tsx', 'os-src/os/taskbar/Clock.tsx', 'os-src/os/taskbar/MobileDock.tsx', 'os-src/os/taskbar/MobileStartLauncher.tsx', 'os-src/os/hooks/useClock.ts'] },\n  { key: 'boot-session-sound', files: ['os-src/os/boot/BiosScreen.tsx', 'os-src/os/boot/BootChooser.tsx', 'os-src/os/boot/BootScreen.tsx', 'os-src/os/boot/LoginScreen.tsx', 'os-src/os/boot/ShutdownScreen.tsx', 'os-src/os/machines/sessionMachine.ts', 'os-src/os/context/SystemContext.tsx', 'os-src/os/sound.ts', 'os-src/os/storage.ts'] },\n  { key: 'core-store-registry', files: ['os-src/os/store/osStore.ts', 'os-src/os/registry.ts', 'os-src/os/types.ts', 'os-src/os/env.ts', 'os-src/os/bufferShim.ts'], extra: 'Also list and read ALL .json files in ' + SCRATCH + '/os-registry/ — they define the app registry.' },\n  { key: 'mobile-hooks', files: ['os-src/os/mobile/MobileShell.tsx', 'os-src/os/mobile/backStack.ts', 'os-src/os/useDeviceMode.ts', 'os-src/os/hooks/useFullscreen.ts', 'os-src/os/hooks/usePageVisible.ts', 'os-src/os/hooks/useGameLoop.ts'] },\n  { key: 'apps-core', files: ['os-src/os/apps/DocWindow.tsx', 'os-src/os/apps/ExperienceApp.tsx', 'os-src/os/apps/FolderApp.tsx', 'os-src/os/apps/ImageViewApp.tsx', 'os-src/os/apps/MyComputerApp.tsx', 'os-src/os/apps/NotepadApp.tsx', 'os-src/os/apps/PdfApp.tsx', 'os-src/os/apps/RecycleBinApp.tsx', 'os-src/os/apps/ContactApp.tsx', 'os-src/os/apps/Placeholder.tsx'] },\n  { key: 'app-browser', files: ['os-src/os/apps/browser/BrowserApp.tsx', 'os-src/os/apps/browser/history.ts', 'os-src/os/apps/browser/sites.tsx', 'BROWSER-PLAN.md'] },\n  { key: 'app-dialtone-paint', files: ['os-src/os/apps/dialtone/DialtoneApp.tsx', 'os-src/os/apps/dialtone/callMachine.ts', 'os-src/os/apps/dialtone/contacts.ts', 'os-src/os/apps/paint/PaintApp.tsx', 'os-src/os/apps/paint/canvas.ts', 'SKYPE-PLAN.md', 'PAINT-PLAN.md'] },\n  { key: 'games-bubble-flappy-mines', files: ['os-src/os/games/bubble/BubbleApp.tsx', 'os-src/os/games/bubble/engine.ts', 'os-src/os/games/flappy/FlappyApp.tsx', 'os-src/os/games/flappy/engine.ts', 'os-src/os/games/mines/MinesApp.tsx', 'os-src/os/games/mines/engine.ts', 'MINESWEEPER-PLAN.md'] },\n  { key: 'games-solitaire-pinball', files: ['os-src/os/games/pasjans/SolitaireApp.tsx', 'os-src/os/games/pasjans/engine.ts', 'os-src/os/games/pasjans/cards.tsx', 'os-src/os/games/pinball/PinballApp.tsx', 'os-src/os/games/pinball/physics.ts', 'pinball_graphics_plan.md'] },\n  { key: 'styles-assets', files: ['os-src/styles/globals.css', 'os-src/styles/tokens.css', 'os-src/styles/touch.css', 'os-src/styles/chooser.css', 'index.html', 'os-src/main.tsx'], extra: 'Also Glob \"public/os/**\" in ' + REPO + ' and report what static assets exist (icons, chrome SVGs, wallpaper, fonts, content files) — note there appear to be NO sound/audio asset files; verify that.' },\n  { key: 'plan-docs', files: ['DOMINIKOS-PLAN.md', 'CONTEXT.md', 'CONTENT.md', 'CONTENT-MIGRATION-PLAN.md', 'OS-INTEGRATION-PLAN.md', 'README.md'], extra: 'These are planning docs, not code. Summarize the project vision, what phases are done vs planned, and any already-planned-but-unbuilt features (report those as gaps).' },\n  { key: 'frostbyte-game', files: ['FROSTBYTE-PLAN.md', 'FROSTBYTE-HOME-PLAN.md', 'FROSTBYTE-EXECUTION.md'], extra: 'Also skim source in ' + REPO + '/public/frostbyte/ — read os-bridge.js, engine/save.js, engine/economy.js, content/minigames-registry.js and list the rest via Glob. This is a Club-Penguin-style game inside the OS.' },\n  { key: 'game1', files: [], extra: 'Read these files in ' + REPO + '/public/game1/: main.js, content.js, os-bridge.js, index.html. This is a KAPLAY-based portfolio exploration game (\"DM Explorer\") embedded in the OS. Report what it does, its XP-era integration (how it talks to the OS), and gaps.' },\n]\n\nfunction invPrompt(slice) {\n  const list = slice.files.map(f => SCRATCH + '/' + f).join('\\n')\n  return 'You are auditing one slice of \"DominikOS\", a Windows-XP-style desktop OS built as a React/Vite web app for a personal portfolio site. Your slice: \"' + slice.key + '\".\\n\\n' +\n    'Read ALL of these files completely (use the Read tool; they are small):\\n' + (list || '(no fixed list)') + '\\n\\n' +\n    (slice.extra ? slice.extra + '\\n\\n' : '') +\n    'Then report, as structured output:\\n' +\n    '- implemented: every concrete feature/behavior present (be exhaustive; e.g. \"windows can snap to screen halves\", \"double-click title bar maximizes\", \"sounds play on X\").\\n' +\n    '- fidelity: details that authentically recreate the 2000s Windows XP feel.\\n' +\n    '- gaps: anything missing, stubbed, placeholder, TODO-marked, or noticeably shallower than real XP behavior in this area. Compare against your knowledge of real Windows XP.\\n' +\n    '- notes: hardcoded strings/languages, coupling, extensibility observations, sound/audio usage, anything a designer should know.\\n' +\n    'Be factual — only report what the code actually shows.'\n}\n\nconst XP_RESEARCH_PROMPT = 'You are researching for a developer who built \"DominikOS\" — a Windows-XP-style desktop OS as a web portfolio (boot/BIOS screen, login, desktop icons, draggable/snappable windows, taskbar + start menu + tray + clock, apps: Notepad, Paint, a fake IE-style browser, a Skype-like app called Dialtone, My Computer, Recycle Bin, PDF resume viewer; games: Solitaire, Minesweeper, Pinball, bubble shooter, flappy clone, plus two embedded original games). He asks: what is MISSING compared to a real 2000s Windows XP machine, and what would most enhance the authentic feel?\\n\\n' +\n  'Use WebSearch/WebFetch to verify details you are unsure of. Cover:\\n' +\n  '1. System sounds: the full XP sound scheme (startup, logon/logoff, ding, chord, critical stop, balloon, navigate click, recycle) and where each plays; how web recreations (e.g. winXP web clones) handle audio licensing (typically original soundalikes).\\n' +\n  '2. Shell behaviors & micro-interactions that sell the fantasy: marquee/rubber-band selection, icon drag ghosting, balloon tips from the tray, tooltips, tray icon flyouts, clock double-click date/time dialog, Display Properties (wallpaper/theme/screensaver picker), screensavers (3D Pipes, Maze, Starfield, Bubbles, marquee), window open/minimize animations, right-click Refresh, cascading Start-menu submenus, \"All Programs\" flyout, notification balloons (\"Your computer might be at risk\"), Windows update shield, error dialogs (the classic critical-error box), BSOD as easter egg, boot chimes, hover-highlight rows in Explorer, status bars in every app, menu bars (File Edit View Help) on every window.\\n' +\n  '3. Bundled XP-era apps a visitor would expect: Windows Media Player / Winamp-style music player, Calculator, WordPad, Command Prompt (cmd.exe), Task Manager, Control Panel, Character Map, Disk Defragmenter (mesmerizing UI), Sound Recorder, MSN/Windows Messenger, Outlook Express, Movie Maker, Clippy (Office). For each: 1 line on what a lightweight web homage could be.\\n' +\n  '4. Era third-party icons: Winamp (\"it really whips the llama\\'s ass\"), LimeWire/Kazaa, mIRC/ICQ (\"uh-oh!\"), Nero, WinRAR nag dialog, DC++, and — IMPORTANT, the developer is Polish — Polish 2000s computing culture: Gadu-Gadu messenger (the sunflower, \"brzęczyk\" sound), Tlen.pl, Wirtualna Polska/Onet portals, Neostrada dial-up. Verify Polish details via search.\\n' +\n  '5. Note which of these are trademark/copyright-risky and the standard homage approach (rename + original assets).\\n\\n' +\n  'Deliverable: a well-organized markdown report, each item with a one-line description, why it is iconic to the era, and a rough feel-impact rating (high/medium/low). Rank within sections by feel-impact. This feeds a synthesis agent — be comprehensive but concrete.'\n\nconst GAMES_RESEARCH_PROMPT = 'You are researching 2000s-era PC gaming for a developer whose web portfolio is a Windows-XP-style OS (\"DominikOS\") that already includes: Solitaire (Klondike, called Pasjans), Minesweeper, Space-Cadet-style Pinball, a bubble shooter, a Flappy Bird clone, and two original embedded games. He asks: what games were popular on Windows XP-era machines, and which would be great additions?\\n\\n' +\n  'Use WebSearch to verify. Cover:\\n' +\n  '1. Games bundled with Windows 95→XP: FreeCell, Hearts, Spider Solitaire, the XP \"Internet Games\" (Internet Checkers/Backgammon etc. via MSN Zone), Chip\\'s Challenge / Hover! / SkiFree lineage, 3D Pinball. Which of these does DominikOS NOT have yet?\\n' +\n  '2. Iconic 2000s PC games kids/teens played on such machines (full games, NOT clonable, but worth knowing as cultural reference): CS 1.6, The Sims, GTA Vice City, NFS Underground, Age of Empires II, RollerCoaster Tycoon, Zoo Tycoon, Diablo II, Heroes III (huge in Poland!), Worms Armageddon, Gothic (huge in Poland).\\n' +\n  '3. Casual/shareware/flash-era games that ARE feasible as small web clones: PopCap catalog (Bejeweled, Zuma, Insaniquarium, Feeding Frenzy, Peggle), Icy Tower (Swedish freeware, massive in Poland), Chicken Invaders (huge in Poland), DX-Ball/Arkanoid, Snake, Pong, Tetris, Bounce, Miniclip/Newgrounds flash staples, Line Rider, Powder Game, Winmine variants.\\n' +\n  '4. Polish-specific 2000s gaming culture (the developer is Polish): Heroes III cult status, Gothic, Franko, Icy Tower, Chicken Invaders, gry.pl / flash portals, komputer świat gry cover discs.\\n' +\n  '5. For each feasible addition: rough build effort (S/M/L for a solo dev with an existing game-engine hook pattern — the OS has a useGameLoop hook and each game is engine.ts + App.tsx with tests), fun-per-effort verdict, and legal note (public-domain mechanics like Klondike/Tetris-likes vs trademarked brands needing renamed homage).\\n\\n' +\n  'Deliverable: well-organized markdown; end with a TOP-10 ranked list of recommended additions balancing era-authenticity, nostalgia (incl. Polish angle), effort, and variety vs games already present.'\n\nphase('Inventory')\nlog('Fanning out ' + SLICES.length + ' Haiku readers + 2 Sonnet researchers')\n\nconst tasks = [\n  ...SLICES.map(s => () => agent(invPrompt(s), { label: 'inv:' + s.key, phase: 'Inventory', model: 'haiku', effort: 'medium', schema: INV_SCHEMA })),\n  () => agent(XP_RESEARCH_PROMPT, { label: 'research:xp-feel', phase: 'Research', model: 'sonnet', effort: 'high' }),\n  () => agent(GAMES_RESEARCH_PROMPT, { label: 'research:games', phase: 'Research', model: 'sonnet', effort: 'high' }),\n]\n\nconst results = await parallel(tasks)\nconst inventories = results.slice(0, SLICES.length).filter(Boolean)\nconst xpReport = results[SLICES.length] || '(research agent failed)'\nconst gamesReport = results[SLICES.length + 1] || '(research agent failed)'\nlog('Inventory complete: ' + inventories.length + '/' + SLICES.length + ' slices; research reports in. Synthesizing with Opus.')\n\nphase('Synthesize')\nconst synthesis = await agent(\n  'You are the lead architect synthesizing an analysis of \"DominikOS\" — a Windows-XP-style web OS portfolio built in React/Vite by Dominik Machowiak (Polish developer). Below: (A) structured code inventories from 15 auditors who read the entire source, (B) a research report on XP-era authenticity, (C) a research report on 2000s games.\\n\\n' +\n  '=== A. CODE INVENTORIES ===\\n' + JSON.stringify(inventories, null, 1) + '\\n\\n' +\n  '=== B. XP-FEEL RESEARCH ===\\n' + xpReport + '\\n\\n' +\n  '=== C. GAMES RESEARCH ===\\n' + gamesReport + '\\n\\n' +\n  'Produce a HIGH-LEVEL propositions document in markdown (NOT an implementation plan). The developer asked: \"what is missing from a 2000s Windows-XP-like OS, what could enhance the feel, and what games were popular then — give me propositions with TLDRs.\"\\n\\n' +\n  'Structure:\\n' +\n  '1. **State of the OS — TLDR**: 5-8 bullets on what already exists and what it already nails (be specific; credit real strengths found in inventories).\\n' +\n  '2. **Missing XP staples** ranked by feel-impact-per-effort, grouped: (a) Sound & audio, (b) Shell micro-interactions, (c) System apps, (d) Personalization/Display Properties, (e) Easter eggs & era flavor (incl. Polish touches like Gadu-Gadu). For EACH item: one-line TLDR, why it sells the fantasy, effort S/M/L. Cross-check against inventories — do NOT propose things the code already has (e.g. if snap/alt-tab/context menus exist, skip them or propose only the missing depth).\\n' +\n  '3. **Games**: short \"what was actually popular then\" summary (bundled + Polish scene), then top ~8 recommended additions with TLDR + effort + legal note, avoiding overlap with existing games (solitaire, mines, pinball, bubble, flappy, frostbyte, game1).\\n' +\n  '4. **Sleeper ideas**: 3-5 unexpected high-delight propositions that combine portfolio purpose with OS fantasy (e.g. defrag screensaver over project data, CMD with portfolio commands, Clippy-like assistant answering recruiter questions).\\n' +\n  '5. **Suggested next 5**: if he only does five things, which five and why — one line each.\\n' +\n  'Honor gaps the inventories flagged (e.g. missing sounds, unused plans, stubbed features, already-planned-but-unbuilt items from plan docs). Keep every TLDR crisp. Total length: thorough but readable — this goes straight to the developer.',\n  { label: 'synthesize:propositions', phase: 'Synthesize', model: 'opus', effort: 'high' }\n)\n\nreturn { synthesis, sliceCount: inventories.length, xpReport, gamesReport }"
+}
+OUT
+Workflow launched in background. Task ID: wympj223a
+Summary: Inventory DominikOS source, research XP-era authenticity + 2000s games, synthesize enhancement propositions
+Transcript dir: C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\subagents\workflows\wf_22281214-9cc
+Script file: C:\Users\domin\.claude\projects\C--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\dominikos-xp-analysis-wf_22281214-9cc.js
+(Edit this file with Write/Edit and re-invoke Workflow with {scriptPath: "C:\Users\domin\.claude\projects\C--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\dominikos-xp-analysis-wf_22281214-9cc.js"} to iterate without resending the script.)
+Run ID: wf_22281214-9cc
+To resume after editing the script: Workflow({scriptPath: "C:\Users\domin\.claude\projects\C--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\dominikos-xp-analysis-wf_22281214-9cc.js", resumeFromRunId: "wf_22281214-9cc"}) — completed agents return cached results (cached results may themselves be empty — inspect journal.jsonl before assuming there is something to recover).
+
+You will be notified when it completes. Use /workflows to watch live progress.
+Read C:\Users\domin\AppData\Local\Temp\claude\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\scratchpad\dominikos\os-src\os\sound.ts
+Bash Skim DominikOS plan doc intro
+IN
+head -80 "C:/Users/domin/AppData/Local/Temp/claude/c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework/95c0835a-7f10-46ea-8718-aecb979c9211/scratchpad/dominikos/DOMINIKOS-PLAN.md"
+
+OUT
+# DominikOS — Windows XP Desktop Portfolio: Master Implementation Plan
+
+**Author:** Lead Architect · **Executor:** Fable · **Format:** Build top-to-bottom, no further research required.
+**Product codename:** **DominikOS** (never "Windows", "Windows XP", "Microsoft", or "Luna" in user-facing copy).
+
+> This document supersedes and reconciles five design sections and two critiques. Where sections disagreed, this plan settles on ONE decision and the executor MUST follow it. Contradictions are resolved silently in favor of the choices stated here. **Sections 0 and 4 define the canonical contracts (types, tokens, boot flow, store API, DOM class contract) that every later section cites verbatim. Do not invent parallel copies.**
+
+---
+
+## 0. Canonical contracts (READ FIRST — everything cites these)
+
+Before any feature work, Fable creates three files that are the single source of truth. All later code imports from them. This resolves critique items A1–A6, C17–C19, and the "four private copies" root cause.
+
+### 0.1 Canonical decisions (locked)
+
+| Concern | LOCKED decision | Rejected alternatives |
+|---|---|---|
+| **OS theme (primary)** | **Windows XP "Luna Blue"** via **XP.css** for in-window controls only | Vista/Aero (documented alternative, §5.9, ships later behind a token/attr flag) |
+| **Build** | **Vite 5 + React 18 + TypeScript strict**, deployed at **`/os/`** | Bolting onto the compiled CRA artifact (impossible) |
+| **Window runtime state** | **Zustand** store `useOSStore` with a `.getState()` imperative facade | Raw Context (re-render storm); all-XState (too chatty); imperative `windowManager` singleton |
+| **Session lifecycle** | **XState v5** machine `sessionMachine` (splash/boot/login/desktop/shutdown) | Putting windows in XState |
+| **Static config** | **React Context** `SystemContext` for theme/sound/a11y/locale/device | — |
+| **App registry** | **JSON manifests** globbed at build + a code-side **`componentMap`** joined by `id`/`kind` (§0.4) | TS-only registry; JSON-only registry (can't hold lazy components) |
+| **Window DOM/class contract** | **Custom BEM `.win__*`** (NOT raw XP.css `.window`/`.title-bar`); XP.css scoped to `.win-body` interior only | Raw XP.css title bars (won't theme to Aero; can't be touch-scaled cleanly) |
+| **Drag architecture** | **Imperative `transform` on the DOM node during drag** (Pointer Events + `setPointerCapture`), single Zustand commit on drop | `@use-gesture` writing to Zustand every frame (re-render storm) |
+| **Tokens** | ONE `tokens.css`, keyed by `:root[data-theme="xp"]` (default) / `[data-theme="aero"]` | `--wm-*` vs `--luna-*` split; `data-theme="vista"` naming |
+| **Breakpoints** | `BP.phone=640`, `BP.tablet=1024`. **Free-float windowing only at `≥1024px` AND `pointer:fine`.** Phone AND tablet get single-window/maximized. | `<768px` mobile; draggable-window tablet middle-ground |
+| **Game pause** | **KAPLAY real API** (`game.paused` + audio mute) via a small hook added to `game1/main.js` | `requestAnimationFrame` monkey-patch (fragile / possibly inert) |
+| **"game1 untouched"** | **FALSE — game1 IS edited** (bridge + embedded flag + pause hook). Documented in §8. | The "zero changes" claim in earlier drafts is void |
+| **i18n** | **English only for v1.** Content files carry a `-en` suffix to leave the door open. Do NOT install `react-i18next` or `-pl` files in v1. | Installing two i18n mechanisms |
+| **Wallpaper** | **Original stylized hill SVG (mandatory).** Ship NO `bliss.*` file. | Bliss photo or any crop (illegal) |
+| **Icons** | **SVG**, one file per app in `/os/icons/<id>.svg`, rendered at 16/32/48 via CSS | Mixed PNG `-16` conventions |
+| **KAPLAY delivery** | **Vendor KAPLAY locally into `/game1/`** (self-host, remove unpkg import) so offline/preload claims hold | unpkg CDN import (breaks SW precache + first-launch) |
+
+### 0.2 `src/os/types.ts` — the ONE manifest + window contract
+
+```ts
+// ============ src/os/types.ts — canonical, imported everywhere ============
+import type { LazyExoticComponent, ComponentType } from 'react';
+
+export type AppKind =
+  | 'document'   // markdown/HTML doc window (Résumé HTML fallback, About, Skills, Testimonials)
+  | 'folder'     // grid of child app icons (Projects, Games)
+  | 'iframe'     // embed a same-origin static app (game1) OR external URL (Explorer)
+  | 'react'      // code-split React component (in-app games, custom apps)
+  | 'timeline'   // Experience/career component
+  | 'contact'    // Outlook-Express-style contact app
+  | 'notepad'    // plaintext viewer (readme.txt)
+  | 'imageview'  // image viewer
+  | 'pdf'        // PDF viewer (résumé)
+  | 'mycomputer' // flavor/system app
+  | 'recyclebin';// flavor app
+
+export type WindowDisplayState = 'normal' | 'minimized' | 'maximized';
+export type SnapZone = 'left' | 'right' | 'top-max' | null; // desktop-only, no quarter-snaps in v1
+export interface Rect { x: number; y: number; width: number; height: number; }
+
+/** The ONE manifest. JSON files match this shape (minus `component`, which the
+ *  componentMap supplies at runtime — see §0.4). */
+export interface AppManifest {
+  id: string;                     // unique kebab-case: 'resume', 'game1', 'proj-welcom-inn'
+  title: string;                  // window title-bar + taskbar label
+  kind: AppKind;
+  icon: string;                   // '/os/icons/<id>.svg'
+  category: 'games' | 'apps' | 'system';
+  desktop?: { show: boolean; order?: number };   // auto-flow grid position by `order` ONLY
+  startMenu?: { show: boolean; group?: 'Programs'|'Documents'|'Games'|'Places' };
+  window: {
+    width: number; height: number;               // default size (px, desktop)
+    minWidth?: number; minHeight?: number;
+    resizable?: boolean;                          // default true
+    maximizable?: boolean;                        // default true
+    singleton?: boolean;                          // focus existing instead of 2nd instance
+    aspectRatio?: number;                         // games lock ratio (e.g. 4/3); letterbox rules §8.5
+    maximizedOnMobile?: boolean;                  // default true
+  };
+  // exactly one payload field, by kind:
+  content?: string;   // 'document'|'notepad': path to .md/.txt
+  src?: string;       // 'iframe': same-origin path ('/game1/') or external URL; 'imageview'|'pdf': asset path
+  children?: string[];// 'folder': child app ids
+While the swarm runs, two useful first-hand findings from my own reading:
+
+Sound is minimal by design: sound.ts ships zero audio files — just 4 short WebAudio-synthesized tones (logon, shutdown, click, ding). A full XP-style "sound scheme" (balloon pops, recycle, navigate clicks, error chords) is one of the clearest gap areas.
+The master plan already locks some decisions worth respecting in any proposal: no Microsoft trademarks or sampled assets anywhere (original soundalikes/lookalikes only), English-only v1, an Aero theme planned behind a token flag, and a JSON-manifest app registry that makes adding new apps cheap.
+The workflow is now running: 15 Haiku auditors reading every source slice (shell, windows, taskbar, boot, apps, games, plans, Frostbyte, game1), 2 Sonnets doing web research (XP-era authenticity checklist + 2000s games incl. the Polish scene), and 1 Opus synthesizing the propositions. I'll report the full breakdown when it completes.
+
+<task-notification>
+<task-id>wympj223a</task-id>
+<tool-use-id>toolu_01RMMUYPmSY3EhWfPVRmgk7p</tool-use-id>
+<output-file>C:\Users\domin\AppData\Local\Temp\claude\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\tasks\wympj223a.output</output-file>
+<status>completed</status>
+<summary>Dynamic workflow "Inventory DominikOS source, research XP-era authenticity + 2000s games, synthesize enhancement propositions" completed</summary>
+<result>{"synthesis":"# DominikOS — Propositions: XP Feel, Missing Staples &amp; Games\n\n*A high-level ideas document (not an implementation plan). Everything below is cross-checked against the code inventories so nothing already built is proposed as \"new.\" Effort tags: **S** = a few hours, **M** = a day-ish, **L** = multi-day.*\n\n---\n\n## 1. State of the OS — TLDR\n\nYou have built far more than a skin. What already exists and genuinely nails the fantasy:\n\n- **A real window manager.** Drag (rAF-coalesced, 60fps), 8-handle resize, minimize/maximize/restore with taskbar-suck + scale-from-icon animations, edge snapping (left/right/top), aspect-lock for games, focus shields on iframes, and a 12-window LRU cap. This is the hard part and it's done.\n- **A proper shell.** Column-major icon grid with drag + snap-to-grid + ghost preview, **rubber-band marquee selection** (already present — the research that lists this as \"missing\" is out of date), Alt+Tab switcher with reverse cycling, roving-tabindex keyboard nav, F6 region cycling, and desktop/icon right-click menus.\n- **A believable boot ceremony.** BIOS → wordmark+marquee → Luna login tile → desktop, with a real session FSM (restart returns to login, not full boot), deep-links (`?boot=game`), and accessibility toggles (reduce-motion, large text) baked into the chooser.\n- **A synthesized audio engine that already works.** A shared WebAudio `tone()` system with a logon chime wired to login, plus rich per-game SFX (Pinball, Bubble, Dialtone call tones). The pipes are laid — most of them just aren't connected yet (see §2a).\n- **Deep, genuinely-XP app fidelity.** Outlook-Express-style Contact, My Computer with fake C:/D: drives, Recycle Bin easter egg, a full Windows-Paint clone (Bresenham, flood-fill, 28-swatch palette, undo/redo), a Dialtone IM app with a pure call state-machine, and an IE-style **DM Explorer** browser with fake `*.dominikos.net` domains and a DominikNet portal.\n- **Seven working games** on one shared `useGameLoop` pause contract: Klondike (Pasjans), Minesweeper, Space-Cadet-style Pinball, Bubble Shooter, Flappy, plus the Frostbyte (Club-Penguin-style) world and the game1 Dev District portfolio-RPG.\n- **Accessibility and legal discipline most clones skip:** aria-live announcers, focus restoration, skip-links, a `data-motion` reduce killswitch, a grep-based legal-gate CI banning MS asset fingerprints, and an \"DominikOS is an original homage\" disclaimer.\n\n**The through-line of what's missing:** the OS is *visually* and *mechanically* excellent but **mostly silent, mostly menu-less, and has no \"system settings\" surface.** Those three are where the remaining nostalgia lives.\n\n---\n\n## 2. Missing XP staples — ranked by feel-per-effort\n\n### (a) Sound &amp; audio — *the single biggest gap, and the cheapest to close*\n\nYour inventories confirm the engine exists but is barely wired: `sound.shutdown()`, `sound.click()`, and `sound.ding()` are **defined and never called anywhere.** A silent XP reads as \"unfinished\" instantly, because people remember XP by ear.\n\n| Proposition | TLDR | Why it sells the fantasy | Effort |\n|---|---|---|---|\n| **Startup/boot chime** | Play a soundalike \"Microsoft Sound\" as the desktop paints in | The most recognizable audio cue of the era; its absence is the loudest silence | **S** |\n| **Wire the sounds you already wrote** | Actually call `shutdown()`, `click()`, `ding()` | Zero new code — they exist; shutdown button, nav clicks, dialogs all go live | **S** |\n| **Window event sounds** | Minimize/maximize/restore/close/error stingers | Every window interaction currently happens in dead silence | **S–M** |\n| **Recycle swoosh** | Delete-to-bin sound | You already *have* a Recycle Bin — this is free flavor | **S** |\n| **Balloon-tip two-tone** | Soft chime when a tray balloon pops | Pairs with the balloon-tip idea in §2b; great joke vehicle | **S** |\n| **Critical-stop sound** | Error tone paired with the classic error dialog (§2b) | The \"something broke\" signature; one reusable pairing | **S** |\n\n&gt; **Legal note for all audio:** synthesize *soundalike originals* (same melodic shape/timbre) via your existing `tone()` engine — never ship the actual MS `.wav` files. The recordings are commissioned compositions with real copyright weight, unlike UI chrome. Your synth-only approach is already the correct pattern; just extend it.\n\n### (b) Shell micro-interactions — *structural \"realness\" cues*\n\n| Proposition | TLDR | Why it sells the fantasy | Effort |\n|---|---|---|---|\n| **Menu bars (File / Edit / View / Help)** | A menu row on windows that lack one | The load-bearing \"skeleton\" of every XP app; its absence reads as fake. Paint/Mines have one — Notepad, viewers, DocWindow don't | **M** |\n| **Classic error dialog component** | White modal, red-X icon, Tahoma, OK/Cancel | Inventory flags \"no dialog styling separate from window chrome\"; one reusable component usable everywhere (and pairs with the critical-stop sound) | **S** |\n| **Tooltips on ~1s hover** | Delayed hover boxes on chrome + icons | Cheapest \"this is a real OS\" tell; only the clock has one today | **S–M** |\n| **Balloon tips from the tray** | Speech-bubble popups (Security-Center style) | Nostalgic *and* the best vehicle for portfolio jokes (\"Your résumé may be at risk…\") | **M** |\n| **Cascading Start Menu / All Programs flyout** | Hover-out submenu on Start | You have the two-column layout but no flyouts; closes a structural expectation | **M** |\n| **Title-bar right-click sysmenu + taskbar right-click menu** | Move/Size/Minimize/Maximize/Close on right-click | Both flagged missing; muscle-memory reflexes | **M** |\n| **Show Desktop button + taskbar clock → Date/Time dialog** | Tray-end \"show desktop\"; double-click clock opens tabbed calendar | Small period-correct details; the clock dialog is a \"hidden depth\" delight | **S / M** |\n\n*Already done, do not rebuild:* marquee selection, Alt+Tab, icon-drag ghosting, right-click Refresh, snap zones, resize handles with cursors. (The one gap on Refresh: it only resets the aria-live text — make it actually re-flow icons.)\n\n### (c) System apps a visitor expects\n\n| Proposition | TLDR | Why it sells the fantasy | Effort |\n|---|---|---|---|\n| **Task Manager (Ctrl+Alt+Del)** | Fake Processes tab with jokey fluctuating CPU%/Mem for \"DominikOS.exe\", \"resume.exe\" | High dev-audience delight; the Ctrl+Alt+Del reflex is universal | **M** |\n| **Command Prompt** | Sandboxed `cmd` with `dir`, `whoami`, `help` + portfolio easter eggs | Strong pull for a developer-heavy visitor base; `dir C:\\Projects` listing your work is a great gag | **M** |\n| **Calculator** | Standard calc, Scientific-mode easter egg | Expected accessory, self-contained | **M** |\n| **Control Panel** | Applet grid deep-linking to Display/Sounds settings | Cheap *once* §2d exists; the natural home for wallpaper/theme/sound toggles | **M** |\n| **Disk Defragmenter** | Purely decorative colored-block shuffle animation | Famously mesmerizing, near-zero functional cost — and see the sleeper idea in §4 | **S–M** |\n| **Media player** | Skinnable mini-player + visualizer for ambient/portfolio audio | Visualizer works as decoration even idle | **M–L** |\n\n### (d) Personalization / Display Properties — *a whole category you have zero of today*\n\nInventories flag: no wallpaper selection UI, single hardcoded wallpaper, Aero theme \"reserved but unreachable,\" no Classic theme, no screensaver.\n\n| Proposition | TLDR | Why it sells the fantasy | Effort |\n|---|---|---|---|\n| **Display Properties dialog** | Right-click desktop → Properties → tabbed wallpaper/theme/screensaver | The canonical XP customization surface; non-destructive playground | **M** |\n| **Wallpaper picker** | Swap between a few original SVG wallpapers | You already load one hill SVG — make it a set | **S** |\n| **Screensaver after idle** | 3D-Pipes or Starfield-style canvas after N seconds
+... (truncated 44895 chars, full result in C:\Users\domin\AppData\Local\Temp\claude\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\tasks\wympj223a.output)</result>
+<diagnostics>Per-agent results: C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\subagents\workflows\wf_22281214-9cc/journal.jsonl — one {"type":"result",...} line per completed agent with its full return value.
+If the result above is empty or unexpected, Read this file BEFORE diagnosing — do not assume agents returned non-empty results.
+To re-run with edited post-processing: Workflow({scriptPath: 'C:\Users\domin\.claude\projects\C--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\dominikos-xp-analysis-wf_22281214-9cc.js', resumeFromRunId: 'wf_22281214-9cc'}) — agents whose (prompt, opts) are unchanged replay from cache.</diagnostics>
+<usage><agent_count>18</agent_count><agents_done>18</agents_done><agents_error>0</agents_error><agents_skipped>0</agents_skipped><agents_empty_result>0</agents_empty_result><subagent_tokens>823273</subagent_tokens><tool_uses>216</tool_uses><duration_ms>738180</duration_ms></usage>
+</task-notification>
+The workflow finished — all 18 agents completed. Let me read the full synthesis from the output file.
+
+Read C:\Users\domin\AppData\Local\Temp\claude\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\tasks\wympj223a.output
+Grep "sound\.(shutdown|click|ding|logon)\(" (in C:\Users\domin\AppData\Local\Temp\claude\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\scratchpad\dominikos\os-src)
+2 lines of output
+Grep "from ['"].*sound['"]|import.*\btone\b" (in C:\Users\domin\AppData\Local\Temp\claude\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\scratchpad\dominikos\os-src)
+9 lines of output
+Write c:\Users\domin\OneDrive\Desktop\Websites\portfolio-rework\OS-ENHANCEMENT-PROPOSITIONS.md
+247 lines
+# DominikOS — Propositions: XP Feel, Missing Staples & Games
+
+*A high-level ideas document (not an implementation plan). Produced 2026-07-13 from a full source audit (15 code slices of `dominikos/os/src`, plan docs, Frostbyte, game1) plus web research on XP-era authenticity and 2000s gaming. Effort tags: **S** = a few hours, **M** = a day-ish, **L** = multi-day.*
+
+---
+
+## 1. State of the OS — TLDR
+
+DominikOS is far more than a skin. What already exists and genuinely nails the fantasy:
+
+- **A real window manager.** Drag (rAF-coalesced), 8-handle resize, minimize/maximize/restore with taskbar-suck + scale-from-icon animations, edge snapping (left/right/top), aspect-lock for games, focus shields on iframes, and a 12-window LRU cap. This is the hard part and it's done.
+- **A proper shell.** Column-major icon grid with drag + snap-to-grid + ghost preview, rubber-band marquee selection, Alt+Tab switcher with reverse cycling, roving-tabindex keyboard nav, F6 region cycling, and desktop/icon right-click menus.
+- **A believable boot ceremony.** BIOS → wordmark+marquee → Luna login tile → desktop, with a real session FSM (restart returns to login, not full boot), deep-links (`?boot=game`), and accessibility toggles baked into the chooser.
+- **A synthesized audio engine that works.** Shared WebAudio `tone()` system; logon chime and shutdown motif are wired, and Pinball/Bubble/Mines/Solitaire/Flappy/Dialtone/Browser all use `tone()` for their own SFX. But `sound.click()` and `sound.ding()` are defined and never called, and there is no system-wide sound scheme (window events, errors, balloons, recycle).
+- **Deep, genuinely-XP app fidelity.** Outlook-Express-style Contact, My Computer with fake C:/D: drives, Recycle Bin easter egg, a full Paint clone (Bresenham, flood-fill, 28-swatch palette, undo/redo), Dialtone IM with a pure call state-machine, and the IE-style DM Explorer browser with fake `*.dominikos.net` domains.
+- **Seven working games** on one shared `useGameLoop` pause contract: Klondike (Pasjans), Minesweeper, Space-Cadet-style Pinball, Bubble Shooter, Flappy, plus Frostbyte (Club-Penguin-style world) and game1 (Dev District portfolio-RPG).
+- **Accessibility and legal discipline most clones skip:** aria-live announcers, focus restoration, skip-links, `data-motion` reduce killswitch, a grep-based legal-gate banning MS asset fingerprints, and an "original homage" disclaimer.
+
+**The through-line of what's missing:** the OS is visually and mechanically excellent but **mostly silent outside games, mostly menu-less, and has no "system settings" surface.** Those three are where the remaining nostalgia lives.
+
+---
+
+## 2. Missing XP staples — ranked by feel-per-effort
+
+### (a) Sound & audio — *the biggest gap, and the cheapest to close*
+
+People remember XP by ear; a mostly-silent shell reads as "unfinished" instantly.
+
+| Proposition | TLDR | Why it sells the fantasy | Effort |
+|---|---|---|---|
+| **Startup/boot chime** | Soundalike "Microsoft Sound" as the desktop paints in | The most recognizable audio cue of the era; the boot sequence is currently silent until login | **S** |
+| **Wire `click()` / `ding()`** | They exist as dead code — call them (Start clicks, menu nav, dialogs) | Zero new engine code | **S** |
+| **Window event sounds** | Minimize/maximize/restore/close/error stingers | Every window interaction currently happens in silence | **S–M** |
+| **Recycle swoosh** | Delete-to-bin sound | The Recycle Bin already exists — free flavor | **S** |
+| **Balloon-tip two-tone** | Soft chime when a tray balloon pops | Pairs with balloon tips in §2b | **S** |
+| **Critical-stop sound** | Error tone paired with the classic error dialog (§2b) | The "something broke" signature | **S** |
+
+> **Legal note:** keep the existing pattern — synthesize *soundalike originals* via `tone()`, never ship actual MS `.wav` files. The XP recordings (Bill Brown compositions) carry real copyright weight, unlike generic UI chrome.
+
+### (b) Shell micro-interactions — *structural "realness" cues*
+
+| Proposition | TLDR | Why it sells the fantasy | Effort |
+|---|---|---|---|
+| **Menu bars (File / Edit / View / Help)** | Menu row on windows that lack one | The load-bearing skeleton of every XP app; Paint/Mines have one — Notepad, viewers, DocWindow don't | **M** |
+| **Classic error dialog component** | White modal, red-X icon, Tahoma, OK/Cancel | One reusable component usable everywhere; pairs with critical-stop sound | **S** |
+| **Tooltips on ~1s hover** | Delayed hover boxes on chrome + icons | Cheapest "this is a real OS" tell; only the clock has one today | **S–M** |
+| **Balloon tips from the tray** | Security-Center-style speech bubbles | Nostalgic *and* the best vehicle for portfolio jokes ("Your résumé may be at risk…") | **M** |
+| **Cascading Start Menu / All Programs flyout** | Hover-out submenus on Start | Two-column layout exists but no flyouts | **M** |
+| **Title-bar sysmenu + taskbar-button right-click** | Move/Size/Minimize/Maximize/Close menus | Muscle-memory reflexes, both currently missing | **M** |
+| **Show Desktop button; clock → Date/Time dialog** | Tray-end toggle; double-click clock opens tabbed calendar | Small period-correct "hidden depth" details | **S / M** |
+
+*Already done — do not rebuild:* marquee selection, Alt+Tab, icon-drag ghosting, right-click Refresh, snap zones, resize cursors. (Gap on Refresh: it only resets aria-live text — make it actually re-flow icons.)
+
+### (c) System apps a visitor expects
+
+| Proposition | TLDR | Why it sells the fantasy | Effort |
+|---|---|---|---|
+| **Task Manager (Ctrl+Alt+Del)** | Fake Processes tab with fluctuating CPU% for "DominikOS.exe", "resume.exe" | The Ctrl+Alt+Del reflex is universal; high dev-audience delight | **M** |
+| **Command Prompt** | Sandboxed `cmd` with `dir`, `whoami`, `help` + portfolio easter eggs | `dir C:\Projects` listing real work is a great gag for recruiters/devs | **M** |
+| **Calculator** | Standard calc, Scientific-mode easter egg | Expected accessory, self-contained | **M** |
+| **Control Panel** | Applet grid deep-linking to Display/Sounds settings | Cheap once §2d exists | **M** |
+| **Disk Defragmenter** | Purely decorative colored-block shuffle | Famously mesmerizing, near-zero functional cost (see sleeper #1) | **S–M** |
+| **Media player** | Skinnable mini-player + visualizer | Visualizer works as decoration even idle | **M–L** |
+
+### (d) Personalization / Display Properties — *a category with zero coverage today*
+
+Flagged in the audit: single hardcoded wallpaper, no selection UI, Aero theme reserved in tokens but unreachable, no screensaver.
+
+| Proposition | TLDR | Why it sells the fantasy | Effort |
+|---|---|---|---|
+| **Display Properties dialog** | Right-click desktop → Properties → tabs for wallpaper/theme/screensaver | The canonical XP customization surface | **M** |
+| **Wallpaper picker** | A few original SVG wallpapers to swap | The hill SVG already loads — make it a set | **S** |
+| **Screensaver after idle** | 3D-Pipes or Starfield-style canvas after N idle seconds | High novelty/shareability: "wait, it has a *screensaver?*" | **M** |
+| **Ship the Aero theme (or Classic toggle)** | Activate the reserved `data-theme="aero"` path | The hook already exists in tokens/SystemContext — designed, just unbuilt | **M–L** |
+
+### (e) Easter eggs & era flavor — *including the Polish angle (the biggest personalization edge)*
+
+| Proposition | TLDR | Why it sells the fantasy | Effort |
+|---|---|---|---|
+| **Gadu-Gadu tray homage** | Redesigned yellow-sunflower tray icon + original two-tone "brzęczyk"-style buzzer | For Polish visitors GG resonates harder than MSN; the standout personalization move | **S–M** |
+| **"Łączenie z Neostradą…" boot detail** | Fake dial-up/broadband connect line during boot | Instantly Polish, instantly 2001 | **S** |
+| **WP/Onet-style fake start page** | DM Explorer default page styled as an early-2000s Polish portal | Browser + DominikNet portal already exist — reskin one page | **S** |
+| **WinRAR nag-dialog gag** | Desktop icon whose only function is the never-expiring "40-day trial" reminder | Cheap, funny, universally recognized | **S** |
+| **BSOD easter egg** | Full blue error screen as a *rare/secret* trigger | Keep it hidden, not spammed | **S** |
+| **Winamp-style player** | Skinned mini-player; original catchphrase instead of "whips the llama's ass" | Strong dev/tech recognition | **M** |
+
+> **Legal note:** rename + redraw every third-party homage (GG sunflower, WinRAR, Winamp). If a Clippy-style assistant is ever added (§4), redesign the character — Microsoft trademarked the paperclip-with-eyes in 2021.
+
+---
+
+## 3. Games
+
+### What was actually popular then
+
+- **Bundled with XP:** Solitaire, **FreeCell**, **Spider Solitaire**, **Hearts**, the **Internet Games** (Checkers/Backgammon/Spades/Reversi via MSN Zone), Minesweeper, and 3D Pinball Space Cadet (XP was its last Windows release). DominikOS has the Solitaire/Mines/Pinball trio — **the rest of the card/board cohort is the real gap.**
+- **Same lineage on every school PC:** SkiFree (the unkillable Yeti), Chip's Challenge, Hover!.
+- **Casual/shareware era:** Bejeweled, Zuma, Peggle, Icy Tower, Chicken Invaders, DX-Ball, Snake.
+- **Polish scene:** **Heroes III** (near-national-game cult status), **Gothic** (CD Projekt-localized, Witcher lineage), and freeware darlings **Icy Tower** (documented Kraków/Warsaw meetup culture) and **Chicken Invaders** (the shareware-CD circuit), plus gry.pl portals and Komputer Świat cover discs. Heroes/Gothic are reference tone, not build targets.
+
+### Top 8 recommended additions (no overlap with existing games)
+
+| # | Game | TLDR | Effort | Legal note |
+|---|---|---|---|---|
+| 1 | **FreeCell** | The single most obvious gap — sat next to Solitaire on every XP box | **S** | Public-domain rules; zero risk |
+| 2 | **Chicken Invaders-style shmup** *(renamed)* | Wave-based shooter — a genre the OS lacks + huge Polish nostalgia | **M** | Original title/art; the chicken brand is proprietary |
+| 3 | **Icy Tower-style vertical jumper** *(renamed)* | Score-chase platformer — the most Poland-coded pick | **S–M** | Clone the mechanic, new name/character |
+| 4 | **Match-3 gem-swap** *(renamed)* | Fills a real mechanical gap (bubble-shooter ≠ match-3) | **S–M** | Match-3 predates Bejeweled (Shariki); don't copy PopCap art/name |
+| 5 | **Hearts vs. simple AI** | The heart of the missing "Internet Games" nostalgia | **M** | Public-domain rules |
+| 6 | **Spider Solitaire** | Completes the XP card trilogy | **M** | Public-domain rules |
+| 7 | **Snake** | Near-free to build, universally recognized | **S** | Generic; no risk |
+| 8 | **DX-Ball/Arkanoid-style breakout** | Shareware-CD staple; no paddle game exists yet | **S** | Generic brick-breaker; avoid the "Arkanoid" name |
+
+**Honorable mentions:** SkiFree-style skier with Yeti chase (cheap, meme-able), Reversi (simplest AI of the Internet-Games set), Line Rider-style sled sandbox ("toy" energy suits a portfolio). **Avoid a Tetris clone** — *Tetris Holding v. Xio* (2012) established the shapes/playfield are protectable and the rights-holder actively DMCAs clones.
+
+---
+
+## 4. Sleeper ideas — high-delight, portfolio-meets-OS
+
+1. **Defrag screensaver over project data.** The decorative Defragmenter block-shuffle where each colored block is a real project/skill. Mesmerizing *and* a stealth portfolio reel; doubles as the §2d screensaver. **(M)**
+2. **Command Prompt as a portfolio CLI.** `whoami` → bio, `dir C:\Projects` → clickable list that opens real app windows, `experience --list`, hidden easter eggs. Perfect for the developer-heavy recruiter audience. **(M)**
+3. **Redesigned Clippy-style recruiter assistant.** "It looks like you're trying to evaluate a candidate — need the résumé?" Canned-Q&A helper that links into apps. Original character shape. **(M)**
+4. **Task Manager where the processes are skills.** `React.exe — 14% CPU`, `Salesforce-SFMC.exe — running`, `imposter-syndrome.exe — not responding`. **(M)**
+5. **Balloon-tip campaign as first-boot tour.** Staged tray balloons ("New résumé detected", "Games folder now available") guide first-time visitors — onboarding disguised as period-authentic nagware. **(S–M once balloons exist)**
+
+---
+
+## 5. Suggested next 5 (if only five things get done)
+
+1. **Boot chime + wire `click()`/`ding()` + window-event sounds.** Highest ROI in the document — the engine exists and the shell is silent between login and shutdown. *(S)*
+2. **Classic error dialog + critical-stop sound.** One reusable component that unlocks the whole "something broke" comedy surface. *(S)*
+3. **FreeCell.** The most glaring, lowest-risk, instantly-recognized game gap. *(S)*
+4. **Gadu-Gadu tray homage (sunflower + buzzer).** Makes DominikOS unmistakably *yours* and Polish, not a generic XP clone. *(S–M)*
+5. **Command Prompt with portfolio commands.** Turns the OS conceit into an actual portfolio-delivery mechanism for exactly the audience most likely to be hiring. *(M)*
+
+---
+
+*Audit provenance: 15 structured code inventories over `dominikos/os/src` (shell, window system, taskbar, boot/session/sound, store/registry, mobile, core apps, browser, Dialtone/Paint, games ×2, styles/assets, plan docs, Frostbyte, game1) + 2 web-research reports. Corrections applied after verification: `sound.logon()`/`sound.shutdown()` ARE wired (LoginScreen.tsx:29, OSShell.tsx:80); only `click()`/`ding()` are dead code. Marquee selection, Alt+Tab, icon ghosting, right-click Refresh, and snap already exist and are not proposed as new.*
+
+---
+
+# Appendix A — XP-feel research report (Sonnet, web-verified)
+
+## A1. System sounds
+
+Windows XP's default scheme was composed by **Bill Brown** (recorded with the Seattle Symphony) — a full musical suite, not just beeps.
+
+The event → sound map a visitor's ear expects:
+
+| Event | XP sound | Where it fires | Feel-impact |
+|---|---|---|---|
+| Boot | Startup chime | End of BIOS/POST, as desktop paints in | **High** — the single most recognizable audio cue of the era |
+| Login success | Logon sound (distinct short chime) | After credentials clear | **High** *(already wired in DominikOS)* |
+| Logoff / Shutdown | Logoff sound | Turn Off flow | **Medium** *(already wired)* |
+| Menu/click nav | Short tick | Start clicks, menu opens, IE navigation | **Medium** — fires constantly |
+| Default beep/"ding" | `ding.wav` | Generic notification, IM alert | **Medium** |
+| Exclamation/Asterisk | `chord.wav` | Info dialogs | **Low-Medium** |
+| Critical Stop | Critical-stop + red-X dialog | Fatal error dialogs | **High** — pairs with the visual |
+| Balloon tip | Soft two-tone chime | Tray balloon pop-up | **Medium** |
+| Recycle | `recycle.wav` swoosh | Delete to Recycle Bin | **Medium** |
+
+**Licensing:** surveyed web clones (ShizukuIchi winXP, 1j01/98, etc.) bundle real WAVs with quiet risk tolerance and no documented safe harbor. For a portfolio under a real name, soundalike originals via the existing `tone()` engine are the correct pattern.
+
+## A2. Shell behaviors & micro-interactions (full checklist)
+
+High feel-impact: menu bars on every window; status bars ("Ready", item counts, zoom %); the classic error dialog; tooltips on ~1s hover; tray balloon tips; cascading Start Menu / All Programs flyout; screensavers after idle (3D Pipes, Starfield, Mystify, Marquee, Bubbles all shipped in XP).
+Medium: right-click Refresh; Explorer hover-highlight rows; icon drag ghosting; clock double-click → tabbed Date/Time dialog; Display Properties (wallpaper/theme/screensaver tabs); BSOD as a rare easter egg; Windows Update shield in tray; Luna vs Classic theme toggle.
+**Correctness note:** the "genie" minimize effect is macOS, not XP — real XP used a simple zoom-down toward the taskbar (which DominikOS already does correctly).
+
+## A3. Bundled apps homage ideas
+
+Task Manager (5 tabs; fake processes with jokey CPU%), Command Prompt (sandboxed, portfolio commands), Control Panel (applet grid), WMP/Winamp-style player with visualizer, Calculator (+Scientific easter egg), WordPad (only if truly rich-text; else skip), Character Map (glyph grid, copy-to-clipboard), Disk Defragmenter (decorative shuffle), Sound Recorder (low value), MSN Messenger signatures worth borrowing into Dialtone (window-shake Nudge, online/away/busy states, door sounds), Outlook Express (fake inbox with joke emails), Clippy (must be redesigned — trademarked 2021).
+
+## A4. Era third-party icons & Polish culture (verified)
+
+- **Winamp** — "It really whips the llama's ass" (JJ McKay, 1997). High recognition.
+- **WinRAR nag dialog** — never-expiring 40-day trial. High recognition, trivially cheap.
+- **ICQ "Uh-Oh!"** — iconic new-message sound. Good chat-app easter egg.
+- **mIRC / DC++ / Kazaa / LimeWire / Nero** — best as non-functional desktop set dressing; cumulative effect matters.
+- **Gadu-Gadu** — launched Aug 15, 2000 (Łukasz Foltyn, Radom); yellow sunflower tray icon; the two-tone "brzęczyk" was synonymous with "new message" for a generation of Poles; peaked ~10M+ users. **The single strongest Polish homage available.**
+- **Tlen.pl** — GG's biggest rival (o2.pl, Oct 2001, modified XMPP, shut down May 2016). Good insider detail.
+- **Neostrada** — TP's broadband brand from Jan 15, 2001; a fake "Łączenie…" connect line during boot is instantly period-Polish.
+- **WP / Onet / Interia** — WP was Poland's first portal (1995); a fake early-2000s portal start page in DM Explorer is an easy win.
+
+## A5. Trademark/copyright risk tiers
+
+| Risk | Items | Mitigation |
+|---|---|---|
+| Low | Generic UI shapes, taskbar layout, window chrome | Build freely; avoid the MS wordmark/flag |
+| Medium | Bliss wallpaper, exact icon art, exact Luna values | Recreate with original assets *(already done)* |
+| Medium-high | Sound **recordings** (Bill Brown compositions) | Synthesize soundalikes *(already the pattern)* |
+| High (trademark) | "Windows XP" name / MS flag as branding | "DominikOS" naming already does this work |
+| High (character) | Clippy (trademarked 2021) | Redesign the character shape |
+| Low-medium | Winamp, WinRAR, ICQ, GG, Nero brands | Rename + redraw; the joke survives |
+
+---
+
+# Appendix B — 2000s games research report (Sonnet, web-verified)
+
+## B1. XP-bundled gap audit
+
+| XP-era staple | In DominikOS? |
+|---|---|
+| Klondike Solitaire | ✅ (Pasjans) |
+| Minesweeper | ✅ |
+| 3D Pinball (Space Cadet-style) | ✅ |
+| FreeCell | ❌ |
+| Hearts | ❌ |
+| Spider Solitaire | ❌ |
+| Internet Checkers/Backgammon/Spades/Reversi | ❌ |
+| Chip's Challenge-style tile puzzler | ❌ |
+| Hover!-style 3D arcade | ❌ |
+| SkiFree-style endless skier | ❌ |
+
+Notes: 3D Pinball was a cut-down license of Maxis/Cinematronics' *Full Tilt! Pinball* (1995); XP was its last Windows release. Hearts was internally "The Microsoft Hearts Network." The Internet Games ran on MSN Zone matchmaking.
+
+## B2. Cultural reference points (not build targets)
+
+CS 1.6 (the *kawiarenka* internet-café staple that seeded Polish esports), The Sims, GTA Vice City, NFS Underground, AoE II, RollerCoaster Tycoon, Zoo Tycoon, Diablo II, Worms Armageddon, and for Poland specifically: **Heroes III** (localized 1999, thrived on hot-seat multiplayer when ~7% of Polish households had internet; still actively modded) and **Gothic** (CD Projekt-localized; cited influence on The Witcher).
+
+## B3. Feasible clone candidates — full feasibility table
+
+| Candidate | Effort | Fun/Effort | Legal note |
+|---|---|---|---|
+| FreeCell | S | High | Public domain |
+| Spider Solitaire | M | High | Public domain |
+| Hearts (vs bots) | M | High | Public domain; avoid MS chrome |
+| Reversi | S | Med-High | Avoid the "Othello" trademark name |
+| Checkers/Backgammon | M | Medium | Ancient; safe |
+| Snake | S | High | Generic |
+| Pong | S | Medium | Safe with original visuals |
+| Breakout (DX-Ball-style) | S | High | Avoid "Arkanoid" name |
+| Tetris-like | S–M | High | **Caution:** *Tetris Holding v. Xio* — actively enforced |
+| Icy Tower-style jumper | S–M | **Very high** (PL nostalgia) | Freeware original; new name/character/assets |
+| Chicken Invaders-style shmup | M | **Very high** (PL nostalgia) | Original title/art needed |
+| Match-3 (Bejeweled-style) | S–M | High | Mechanic descends from *Shariki*; avoid PopCap trade dress |
+| Zuma-style marble popper | M | Med-High | Mechanic from *Puzz Loop*; overlaps existing bubble shooter |
+| SkiFree-style skier | S–M | High (meme value) | Fresh assets/name; the Yeti *joke* isn't protectable |
+| Chip's Challenge-style puzzler | M–L | Medium | Needs level-design pipeline |
+| Line Rider-style sandbox | M | High novelty | Many open clones exist; safe as homage |
+| Peggle-style pachinko | L | Medium | Physics + content pipeline is the cost |
+| Powder-Game-style sandbox | L | Medium | Generic falling-sand genre |
+| Hover!-style 3D arcade | L | Medium | 3D-in-browser is a big lift vs the 2D stack |
+
+## B4. Polish gaming culture notes
+
+Heroes III (national-game status), Gothic (adopted via CD Projekt localization), Franko: The Crazy Revenge (1994/96, Szczecin — Polish game-dev heritage, pre-XP), Icy Tower (documented Kraków/Warsaw meetups, 11M+ downloads by 2008), Chicken Invaders (170M+ downloads series-wide; shareware-CD circuit), gry.pl / GRYOnline.pl (launched Jan 1, 2001; ~7,000 flash games — Poland's Miniclip), Komputer Świat Gry cover-disc culture (how Polish kids without internet actually got games, 2000–2003).
+Done — 18 agents (15 Haiku code auditors over every source slice, 2 Sonnets on web research, 1 Opus synthesis) analyzed the whole OS, and I verified the load-bearing claims against the source myself. The full document with both research appendices is saved at OS-ENHANCEMENT-PROPOSITIONS.md. Here's the breakdown:
+
+State of the OS — TLDR
+You've built far more than a skin, and the analysis credits it: a real window manager (drag/resize/snap/minimize animations/focus shields/12-window LRU cap), a proper shell (marquee selection, Alt+Tab, icon grid with drag-ghosting, context menus, full keyboard nav), a believable BIOS→boot→login ceremony on a real state machine, seven working games on a shared pause contract, and legal/accessibility discipline most XP clones skip entirely.
+
+The through-line of what's missing: the OS is visually and mechanically excellent but mostly silent outside the games, mostly menu-less, and has no "system settings" surface. That's where the remaining nostalgia lives.
+
+Missing XP staples, ranked by feel-per-effort
+Sound (biggest gap, cheapest to close). Your tone() engine works and games use it, but the shell is silent between login and shutdown — and I confirmed sound.click() and sound.ding() in sound.ts are literally dead code, never called. Propositions: boot chime, window min/max/close stingers, recycle swoosh, critical-stop tone. All S-effort. Keep synthesizing soundalikes — the real XP WAVs (Bill Brown compositions) are the one asset class with genuine copyright teeth.
+
+Shell micro-interactions. Menu bars (File/Edit/View/Help) on windows that lack them — the single biggest "reads as fake" tell; Paint has one, Notepad and the viewers don't. Then: a reusable classic error dialog (white, red X, OK), ~1s hover tooltips, tray balloon tips (also your best joke vehicle — "Your résumé may be at risk"), cascading Start Menu flyouts, title-bar/taskbar right-click menus, Show Desktop button, double-click-clock date dialog.
+
+System apps. Task Manager via Ctrl+Alt+Del (fake processes with jiggling CPU%), Command Prompt, Calculator, Control Panel, a decorative Disk Defragmenter, a Winamp-style player.
+
+Personalization — a category you have zero of. Display Properties dialog (right-click desktop → Properties) with wallpaper picker, screensaver (3D-Pipes/Starfield after idle — huge "wait, it has a screensaver?" shareability), and the Aero theme that's already reserved in your tokens but unreachable.
+
+Polish-era flavor (your standout edge). A redesigned Gadu-Gadu sunflower in the tray with a "brzęczyk"-style buzzer, a "Łączenie z Neostradą…" boot line, an early-2000s WP/Onet-style start page in DM Explorer, a WinRAR 40-day-trial nag gag, a hidden BSOD. All researched and verified (GG launched Aug 2000, Neostrada Jan 2001).
+
+Games that were popular then
+Bundled with XP: Solitaire, FreeCell, Spider, Hearts, the MSN Zone Internet Games (Checkers/Backgammon/Spades/Reversi), Minesweeper, 3D Pinball (XP was its last release). You have the Solitaire/Mines/Pinball trio — the rest of the card cohort is the real gap. Around them: SkiFree, Chip's Challenge, PopCap shareware (Bejeweled, Zuma), and the Polish scene specifically: Heroes III (near-national-game status), Gothic, Icy Tower (documented Kraków/Warsaw meetup culture), Chicken Invaders, gry.pl, Komputer Świat cover discs.
+
+Top adds: 1. FreeCell (most obvious gap, trivial, zero risk) · 2. Chicken Invaders-style shmup (renamed — new genre + Polish nostalgia) · 3. Icy Tower-style jumper (the most Poland-coded pick) · 4. Match-3 gem-swap (real mechanical gap; mechanic predates Bejeweled) · 5. Hearts · 6. Spider · 7. Snake · 8. Breakout. One warning: skip a Tetris clone — Tetris Holding v. Xio made the shapes/playfield protectable and they actively DMCA.
+
+Sleeper ideas (portfolio × OS)
+Defrag screensaver where the blocks are your real projects; Command Prompt as a portfolio CLI (dir C:\Projects opens real windows); a redesigned Clippy-like recruiter assistant ("It looks like you're trying to evaluate a candidate…"); Task Manager listing your skills as processes (imposter-syndrome.exe — not responding); balloon tips as a first-boot tour.
+
+If you only do five things
+Boot chime + wire the dead sounds + window-event stingers (S)
+Classic error dialog + critical-stop sound (S)
+FreeCell (S)
+Gadu-Gadu tray homage (S–M)
+Command Prompt with portfolio commands (M)
+The saved doc includes the full appendices: the complete XP sound-event map, the shell-behavior checklist, verified Polish culture facts with sources, and a 19-game feasibility table with legal notes per game.
+
+Remote Control is active. View and control this session at https://claude.ai/code/session_01H7KCuTBJWkJEDNvuDny1fT
+
+okay, first task: you will change the pasjans game into a card game hub. Bring it out of the folder and put it on the desktop. Instead of clicking into pasjans , you are clicking into the card game hub, which brings up four separate elements, which will be all of the card games you mentioned, name them the polish names
+You can spawn, at max, one opus agent to analyse, draft up a plan to do this, alongside one sonnet agent for help with one haiku agent for help as well. I don't want the agents doing random user stuff. If they're not needed, you do not spawn them. Someone needs to research, analyze, and make the plan. Someone else can add on to the plan, separate it out into steps, maybe even prompts, so it's self-contained and does not take much work.
+Straightforward orchestration: I'll gather the key registry/code facts inline first, then run a small 3-agent chain — Haiku verifies the authentic Polish Windows names for the four card games, Opus researches the code and drafts the plan, Sonnet restructures it into self-contained steps with prompts. No agent touches anything outside that.
+
+First, the facts I need for precise prompts:
+
+Bash Read games folder and pasjans registry manifests
+IN
+DST="C:/Users/domin/AppData/Local/Temp/claude/c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework/95c0835a-7f10-46ea-8718-aecb979c9211/scratchpad/dominikos"
+echo "=== games.json ==="; cat "$DST/os-registry/games.json"
+echo "=== pasjans.json ==="; cat "$DST/os-registry/pasjans.json" 2>/dev/null || ls "$DST/os-registry"
+
+OUT
+=== games.json ===
+{
+  "id": "games",
+  "title": "Games",
+  "kind": "folder",
+  "icon": "/os/icons/folder-games.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 4 },
+  "startMenu": { "show": true, "group": "Places" },
+  "window": { "width": 540, "height": 420, "minWidth": 360, "minHeight": 280, "singleton": true },
+  "children": "auto:games"
+}
+=== pasjans.json ===
+{
+  "id": "pasjans",
+  "title": "Pasjans",
+  "kind": "react",
+  "icon": "/os/icons/pasjans.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Games" },
+  "window": { "width": 780, "height": 580, "minWidth": 620, "minHeight": 460, "singleton": true, "maximizedOnMobile": true }
+}
+Read C:\Users\domin\AppData\Local\Temp\claude\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\scratchpad\dominikos\os-src\os\registry.ts
+Workflow
+IN
+{
+  "script": "export const meta = {\n  name: 'card-hub-plan',\n  description: 'Research Polish card-game names, analyze DominikOS registry/game code, produce a self-contained Card Game Hub implementation plan',\n  phases: [\n    { title: 'Names', detail: 'Haiku verifies Polish Windows XP card game names', model: 'haiku' },\n    { title: 'Draft', detail: 'Opus analyzes code + drafts the plan', model: 'opus' },\n    { title: 'Refine', detail: 'Sonnet restructures into self-contained steps + prompts', model: 'sonnet' },\n  ],\n}\n\nconst SCRATCH = 'C:/Users/domin/AppData/Local/Temp/claude/c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework/95c0835a-7f10-46ea-8718-aecb979c9211/scratchpad/dominikos'\n\nconst NAMES_SCHEMA = {\n  type: 'object',\n  required: ['klondike', 'freecell', 'spider', 'hearts', 'hubCandidates', 'notes'],\n  properties: {\n    klondike: { type: 'string', description: 'Polish name for Klondike Solitaire as used in Polish Windows' },\n    freecell: { type: 'string', description: 'Polish name for FreeCell as used in Polish Windows' },\n    spider: { type: 'string', description: 'Polish name for Spider Solitaire as used in Polish Windows' },\n    hearts: { type: 'string', description: 'Polish name for Hearts as used in Polish Windows' },\n    hubCandidates: { type: 'array', items: { type: 'string' }, description: '3 candidate Polish names for the card-games hub app, best first' },\n    notes: { type: 'string', description: 'Verification sources and any caveats (e.g. if XP kept an English name)' },\n  },\n}\n\nphase('Names')\nconst names = await agent(\n  'Research task (read-only, WebSearch/WebFetch only — do NOT touch any files): find the authentic POLISH-language names used in the Polish edition of Windows XP (and if XP is ambiguous, Polish Windows Vista/7) for these four bundled card games:\\n' +\n  '1. Solitaire (Klondike)\\n2. FreeCell\\n3. Spider Solitaire\\n4. Hearts\\n\\n' +\n  'Verify via Polish Wikipedia (pl.wikipedia.org — e.g. articles \"Pasjans\", \"Kierki\", \"Pasjans Pająk\", \"FreeCell\") and any screenshots/documentation of Polish Windows XP you can find. Expected candidates to confirm or refute: Pasjans, FreeCell (possibly kept English in PL Windows), Pasjans Pająk, Kierki.\\n\\n' +\n  'Also propose 3 candidate Polish names for a desktop \"card game hub\" app that will contain all four games in a Windows-XP-style OS (short, period-appropriate, fits a desktop icon label; e.g. \"Gry Karciane\", \"Kącik Karciany\", \"Salon Gier\" — judge and rank these or better alternatives, best first).\\n' +\n  'In notes, cite what you verified and where, and flag anything uncertain.',\n  { label: 'names:polish', phase: 'Names', model: 'haiku', effort: 'medium', schema: NAMES_SCHEMA }\n)\nlog('Polish names verified: ' + names.klondike + ', ' + names.freecell + ', ' + names.spider + ', ' + names.hearts + ' | hub: ' + names.hubCandidates[0])\n\nphase('Draft')\nconst draft = await agent(\n  'You are the lead architect for DominikOS — a Windows-XP-style web OS (React 18 + Vite + TypeScript strict + Zustand) that is a personal portfolio. Your task: ANALYZE the code and DRAFT an implementation plan for the change below. You are READ-ONLY: read files and return the plan as your final text. Do NOT edit, write, create, or delete any files. Do not run builds.\\n\\n' +\n  '=== THE CHANGE (user request, verbatim intent) ===\\n' +\n  'Convert the Pasjans (Klondike solitaire) game into a \"Card Game Hub\". Move it out of the Games folder and put it on the DESKTOP. Clicking the hub opens a window with FOUR separate elements — the four card games — using their Polish names. Three of the four games (FreeCell, Spider, Hearts) do not exist yet and must be built; Klondike (Pasjans) already exists.\\n\\n' +\n  '=== VERIFIED POLISH NAMES (from research agent) ===\\n' + JSON.stringify(names, null, 2) + '\\n\\n' +\n  '=== CODE FACTS ALREADY ESTABLISHED (verified) ===\\n' +\n  '- Read-only source copy for you to analyze: ' + SCRATCH + '/os-src (the OS source), ' + SCRATCH + '/os-registry (JSON app manifests), ' + SCRATCH + '/*.md (plan docs incl. DOMINIKOS-PLAN.md master contracts and OS-INTEGRATION-PLAN.md vendoring pipeline).\\n' +\n  '- REAL implementation lives at c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os (source repo; registry JSONs at <root>/registry/*.json, icons in public or deploy assets) and the BUILT bundle is vendored into c:/Users/domin/OneDrive/Desktop/Websites/portfolio-rework/public/os. The plan must reference the REAL paths for implementation steps.\\n' +\n  '- App = JSON manifest + icon SVG + (for kind react) one componentById lazy-import line in os-src/os/registry.ts.\\n' +\n  '- The Games folder manifest (games.json) uses children: \"auto:games\" which auto-lists byCategory(\"games\"). pasjans.json is kind react, category games, desktop.show false, startMenu group Games, singleton.\\n' +\n  '- folderChildren()/resolveComponent() in registry.ts are the join points. FolderApp renders kind folder windows.\\n\\n' +\n  '=== WHAT YOUR PLAN MUST DECIDE AND COVER ===\\n' +\n  '1. Hub architecture: reuse kind \"folder\" with explicit children vs. a small custom \"react\" hub app (e.g. a green-felt launcher with four large tiles). Read FolderApp.tsx and decide; justify in one paragraph. The user wants \"four separate elements\" visible on open — pick what best matches XP feel and least code.\\n' +\n  '2. Category/registry mechanics: how the four card games are listed under the hub WITHOUT also flooding the Games folder via auto:games (e.g. a new category \"cards\" + hub in category games, or explicit children lists — check what breaks: byCategory, StartMenu groups, MobileShell/MobileStartLauncher listings, Alt+Tab, desktop order collisions). Read StartMenu.tsx, MobileStartLauncher.tsx, and every manifest in os-registry to check desktop.order slots in use.\\n' +\n  '3. Desktop placement: hub icon on desktop (pick a free order slot), pasjans removed from wherever it shows today; what happens to existing localStorage icon positions (read desktop/iconPosStore.ts + iconLayout.ts to see if a new icon breaks saved layouts).\\n' +\n  '4. The three new games: FreeCell, Spider (1-suit default is fine, note difficulty options), Hearts (vs 3 simple AI opponents). For each: engine.ts + App.tsx + engine.test.ts following the existing pasjans pattern — read os-src/os/games/pasjans/engine.ts, SolitaireApp.tsx and cards.tsx and state exactly what is reusable (card rendering, drag interactions, win detection, useGameLoop or not — note Solitaire likely does not use useGameLoop). Estimate LOC and effort per game honestly.\\n' +\n  '5. Naming: apply the verified Polish names as window titles + icon labels; manifest ids stay kebab-case ASCII (e.g. freecell, pajak, kierki — decide and lock ids; NO Polish diacritics in ids/filenames, diacritics OK in titles). Also lock the hub name from the candidates.\\n' +\n  '6. Icons: 4 new SVGs needed (hub + 3 games) in the established icon style — describe each briefly (read 2-3 existing icon SVGs in ' + SCRATCH + '/../../scratchpad or portfolio public/os/icons via c:/Users/domin/OneDrive/Desktop/Websites/portfolio-rework/public/os/icons/pasjans.svg for style reference).\\n' +\n  '7. Sound: the OS has a WebAudio tone() engine (os-src/os/sound.ts); note 1-line per game where card-deal/win chimes could hook in (optional polish, keep small).\\n' +\n  '8. Build + vendor: final step re-runs the OS build and re-vendors into portfolio-rework/public/os per OS-INTEGRATION-PLAN.md — read it and state the exact commands/paths.\\n' +\n  '9. Constraints from DOMINIKOS-PLAN.md master contracts (window sizing, singleton, maximizedOnMobile, a11y patterns like aria-live announcements and keyboard nav that pasjans already has — new games must match; legal: standard 52-card games are public domain, but do NOT copy Microsoft card-face art).\\n' +\n  '10. Risks/gotchas list: anything you found reading the code that could bite (e.g. singleton focus behavior when launching a game from the hub while it is open, mobile single-window mode behavior for the hub, the 12-window LRU cap, tests/CI legal-gate).\\n\\n' +\n  'OUTPUT: a complete draft plan in markdown. Include a short \"Decisions locked\" table up top (hub name, ids, architecture choice, category mechanics). Be precise with real file paths (dominikos repo) for every change. Aim for enough detail that a competent agent could execute without re-doing your research, but do NOT write the actual game-engine code — spec it (state shapes, key functions, rule references).',\n  { label: 'draft:plan', phase: 'Draft', model: 'opus', effort: 'high' }\n)\nlog('Draft plan complete (' + draft.length + ' chars). Refining into self-contained steps.')\n\nphase('Refine')\nconst finalPlan = await agent(\n  'You are the plan editor for DominikOS (Windows-XP-style web OS, React/Vite/TS). Below is a DRAFT implementation plan written by the lead architect for converting Pasjans into a desktop \"Card Game Hub\" with four Polish-named card games. Your job: restructure and tighten it into a SELF-CONTAINED, step-by-step execution document. You are READ-ONLY: you may read files under ' + SCRATCH + ' (source copy) to verify any path or claim you doubt, but do NOT edit/write/create any files. Return the final document as your final text.\\n\\n' +\n  '=== DRAFT PLAN ===\\n' + draft + '\\n\\n' +\n  '=== YOUR EDITING BRIEF ===\\n' +\n  '1. Keep every locked decision and all real file paths. Verify at least the 5 most load-bearing file paths against the source copy (map c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src → ' + SCRATCH + '/os-src, <root>/registry → ' + SCRATCH + '/os-registry); silently fix any that are wrong, and flag in a Corrections note if you changed anything substantive.\\n' +\n  '2. Restructure into numbered STEPS (Step 0, 1, 2...), each with: Goal (one line), Files touched (exact paths in the dominikos repo), What to do (tight bullets), and Done-when (verifiable acceptance criteria — tests pass, icon visible, etc.). Order steps so the plan is incrementally shippable: registry/hub rewiring first (hub works with just Pasjans inside), then one game per step (FreeCell, Spider, Hearts), then icons/polish, then build+vendor into portfolio-rework last.\\n' +\n  '3. For each step add a PROMPT block: a copy-paste instruction (3-8 sentences) that a fresh coding agent with no prior context could execute — it must name the repo root, the exact files, the pattern to follow (e.g. \"mirror os/games/pasjans/engine.ts structure\"), and the acceptance criteria. The prompts must be fully self-contained.\\n' +\n  '4. Keep total length lean: cut architectural musings that do not change what an executor types; keep the Decisions table, the risks list (trim to real ones), and the plan-doc conventions the repo already uses (this repo has docs like MINESWEEPER-PLAN.md — match that plain, imperative style).\\n' +\n  '5. End with a \"Verification checklist\" for the whole feature (desktop icon present, hub opens with 4 Polish-named tiles, each game launches/wins correctly, Games folder not polluted, mobile mode OK, tests green, vendored bundle updated).\\n' +\n  'OUTPUT: the final markdown document titled \"CARD-HUB-PLAN — Pasjans → Gry Karciane\" (use the locked hub name).',\n  { label: 'refine:steps', phase: 'Refine', model: 'sonnet', effort: 'high' }\n)\n\nreturn { names, finalPlan }"
+}
+OUT
+Workflow launched in background. Task ID: wmdz2prt1
+Summary: Research Polish card-game names, analyze DominikOS registry/game code, produce a self-contained Card Game Hub implementation plan
+Transcript dir: C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\subagents\workflows\wf_0b7d73b7-832
+Script file: C:\Users\domin\.claude\projects\C--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-plan-wf_0b7d73b7-832.js
+(Edit this file with Write/Edit and re-invoke Workflow with {scriptPath: "C:\Users\domin\.claude\projects\C--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-plan-wf_0b7d73b7-832.js"} to iterate without resending the script.)
+Run ID: wf_0b7d73b7-832
+To resume after editing the script: Workflow({scriptPath: "C:\Users\domin\.claude\projects\C--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-plan-wf_0b7d73b7-832.js", resumeFromRunId: "wf_0b7d73b7-832"}) — completed agents return cached results (cached results may themselves be empty — inspect journal.jsonl before assuming there is something to recover).
+
+You will be notified when it completes. Use /workflows to watch live progress.
+The plan workflow is running — three agents in sequence, exactly as scoped:
+
+Haiku is verifying the authentic Polish Windows names for the four card games (expected: Pasjans, FreeCell, Pasjans Pająk, Kierki) and ranking hub-name candidates.
+Opus then reads the actual source (registry mechanics, FolderApp, the pasjans engine/cards code, plan-doc contracts, vendoring pipeline) and drafts the plan — including the one tricky design decision I flagged for it: the Games folder auto-lists everything with category: 'games', so nesting four card games under a hub without polluting that folder needs a deliberate registry choice.
+Sonnet restructures the draft into numbered, incrementally-shippable steps, each with exact file paths, done-when criteria, and a self-contained copy-paste prompt — so executing it later takes minimal work.
+All three are read-only; nobody edits anything. When it finishes I'll save the plan as a doc and give you the summary.
+
+The plan is complete — all 3 agents finished, Sonnet verified the draft's paths byte-for-byte against the source and applied corrections. Let me extract the full document and save it.
+
+Bash Extract finalPlan from workflow output JSON to scratchpad markdown
+IN
+cd "C:/Users/domin/AppData/Local/Temp/claude/c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework/95c0835a-7f10-46ea-8718-aecb979c9211/scratchpad" && node -e "
+const fs = require('fs');
+const j = JSON.parse(fs.readFileSync('C:/Users/domin/AppData/Local/Temp/claude/c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework/95c0835a-7f10-46ea-8718-aecb979c9211/tasks/wmdz2prt1.output', 'utf8'));
+fs.writeFileSync('CARD-HUB-PLAN.md', j.result.finalPlan, 'utf8');
+console.log('written, chars:', j.result.finalPlan.length);
+"
+
+OUT
+written, chars: 30825
+Read C:\Users\domin\AppData\Local\Temp\claude\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\scratchpad\CARD-HUB-PLAN.md
+Bash Copy CARD-HUB-PLAN.md into dominikos repo next to the other plan docs
+IN
+cp "C:/Users/domin/AppData/Local/Temp/claude/c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework/95c0835a-7f10-46ea-8718-aecb979c9211/scratchpad/CARD-HUB-PLAN.md" "c:/Users/domin/OneDrive/Desktop/Websites/dominikos/CARD-HUB-PLAN.md" && ls "c:/Users/domin/OneDrive/Desktop/Websites/dominikos/" | grep -i plan
+
+OUT
+BROWSER-PLAN.md
+CARD-HUB-PLAN.md
+CONTENT-MIGRATION-PLAN.md
+DOMINIKOS-PLAN.md
+FROSTBYTE-HOME-PLAN.md
+FROSTBYTE-PLAN.md
+MINESWEEPER-PLAN.md
+OS-INTEGRATION-PLAN.md
+PAINT-PLAN.md
+SKYPE-PLAN.md
+pinball_graphics_plan.md
+The plan is done and saved at dominikos/CARD-HUB-PLAN.md, next to your other plan docs. All three agents were used exactly as scoped: Haiku verified the Polish names against Polish Wikipedia and Windows localization docs, Opus read the actual source and drafted the plan, and Sonnet restructured it into self-contained steps — verifying the draft's file paths and line numbers byte-for-byte against the real repo before finalizing.
+
+The locked decisions:
+
+Hub name: "Gry Karciane" — a custom kind:'react' launcher (CardHubApp.tsx), not a reused folder: a green-felt panel with a 2×2 grid of four big tiles. It goes on the desktop at the free order: 8 slot.
+The four games, verified Polish names: Pasjans (existing Klondike, unchanged id), FreeCell (it kept its English name even in Polish Windows — that's the authentic choice), Pasjans Pająk (Spider, id pajak), and Kierki (Hearts, id kierki). Diacritics in titles, ASCII in ids/filenames.
+The registry trick: the Games folder currently auto-lists everything with category: 'games'. Rather than inventing a new category (which would silently lose the mobile-chromeless rendering, isGame window styling, and LRU-eviction immunity that all key off category === 'games'), the plan keeps all four card games in that category and switches games.json from "auto:games" to an explicit ["pinball","mines","game1"] children list. Card games get desktop:false + startMenu:false so they're reachable only through the hub.
+The structure — 9 steps, each independently shippable: Step 0 re-verifies five baseline facts in your checkout; Steps 1–2 rewire the registry and build the hub (shippable with just Pasjans inside); Steps 3–5 add one game each in rising-risk order — FreeCell (heaviest reuse of the pasjans engine/cards/drag shell, including the supermove formula), Spider (1-suit default with a 2/4-suit menu), Hearts last (click-to-play UI + a small heuristic AI, the least reuse); Steps 6–7 cover four original house-style SVG icons and synthesized sound effects; Step 8 runs npm run ci and vendors into portfolio-rework/public/os via the deploy-rework.mjs script Sonnet confirmed already exists.
+
+Every step has exact file paths, done-when acceptance criteria, and a copy-paste PROMPT block a fresh agent could execute with zero prior context — so executing this later is just feeding prompts in order.
+
+One honest flag from the risks section: this is roughly 2,000 lines of new tested code across three games — a genuine multi-session build, with Hearts deliberately last since it's its own mini-project. Say the word when you want to start executing, and I'd begin with Steps 0–2 to get the hub live on the desktop.
+
+edit the plan and structure it in a way that it is going to be run on Fable in Ultra Code. Per section, I want the section labeled clearly with the pro. In that section, I just say, "Do Step 1." The agents know:
+- what they're doing
+- what agents are going to be small
+- what each sub-agent is doing
+- when it's done
+It's all cost-effective and doesn't absolutely destroy the session all at once, so it's being deployed as stable and matches the sub-agents to the task. Don't be excessive.
+This is a document restructuring I have full context for, so I'll do it inline — no agents needed (spawning them to edit a doc I just produced would be exactly the excess you're warning against). I'll recast each step as a self-contained "Do Step N" section with an explicit agent protocol: who runs (orchestrator inline vs subagents), which model tier each subagent gets, what each one does, and the done-when gate.
+
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\CARD-HUB-PLAN.md
+Write c:\Users\domin\OneDrive\Desktop\Websites\dominikos\CARD-HUB-PLAN.md
+249 lines
+# CARD-HUB-PLAN — Pasjans → Gry Karciane
+
+Status: **PLAN ONLY — not built.** Root: `C:\Users\domin\OneDrive\Desktop\Websites\dominikos\os`. Matches the conventions of `MINESWEEPER-PLAN.md` / `OS-INTEGRATION-PLAN.md`.
+
+Converts Pasjans into a desktop "Card Game Hub" — a small launcher (**Gry Karciane**) opening four Polish-named card games: existing Pasjans, plus new FreeCell, Spider (Pająk), and Hearts (Kierki).
+
+---
+
+## How to run this plan (Fable + Ultracode)
+
+This plan is executed by Fable one step at a time. The user's entire input per step is: **"Do Step N."** Each step section below is self-contained — it tells the orchestrator what to build, which subagents to spawn (if any), what each subagent does, and the gate that must pass before the step is reported done.
+
+**Rules for the orchestrator:**
+
+1. **One step per message.** Never chain steps, even if the current one finishes quickly. Steps 3, 4, and 5 are each a full session's work; running two in one session risks a mid-build context compaction.
+2. **Spawn only what the step's AGENTS block lists.** Most steps run inline with zero subagents — that is deliberate. Do not "go wide" on trivial steps.
+3. **Agent tier guide** (match tier to task, never over-provision):
+   - **haiku** — mechanical verification, rule-checking against a written spec, running greps/tests and reporting.
+   - **sonnet** — well-specified builds where a pattern to clone exists in-repo (all three game builds clone the pasjans shell).
+   - **opus** — reserved for the one genuinely novel-logic task in this plan: the Hearts engine + AI (Step 5).
+4. **The orchestrator itself** always does: registry wiring, `npm run ci`, the in-app done-when verification (dev server + clicking through), and the final report. Subagents never run the dev server, never deploy, never touch `portfolio-rework`.
+5. **Sequential builders, parallel verifiers.** Builder agents in a step run one after another (they touch shared files: `registry.ts`, `CardHubApp.tsx` TILES). Verifier agents may run in parallel — they are read-only.
+6. **Budget shape per step:** trivial steps ≈ inline only; game steps ≈ 1 builder + 1 verifier (Step 5: 2 builders + 2 verifiers). If a verifier refutes something, fix inline and re-verify — do not spawn a fresh fan-out.
+7. If any baseline fact from Step 0 no longer matches the repo, **stop and report** before writing code. Do not silently adapt.
+
+---
+
+## Decisions locked
+
+| Decision | Value |
+|---|---|
+| Hub display name (title + icon label) | **Gry Karciane** |
+| Hub architecture | Custom `kind:'react'` hub, `CardHubApp.tsx` — green-felt panel, 2×2 grid of large tiles, no folder reuse |
+| Hub id / icon / component | id `cards` · icon `/os/icons/cards.svg` · `src/os/games/cardhub/CardHubApp.tsx` |
+| Hub desktop slot | `desktop:{show:true,order:8}`, `category:'apps'` |
+| Klondike (existing) | id **`pasjans`** unchanged, title `Pasjans` |
+| FreeCell | id **`freecell`**, title `FreeCell`, `src/os/games/freecell/FreeCellApp.tsx` |
+| Spider | id **`pajak`**, title `Pasjans Pająk`, `src/os/games/pajak/SpiderApp.tsx` |
+| Hearts | id **`kierki`**, title `Kierki`, `src/os/games/kierki/HeartsApp.tsx` |
+| Category mechanics | All 4 card games keep `category:'games'` (LRU-protected, mobile-chromeless). `registry/games.json` `"children"` switches from `"auto:games"` → explicit `["pinball","mines","game1"]` |
+| Start Menu / mobile launcher | 4 card games get `startMenu:{show:false}` + `desktop:{show:false}`; hub gets `startMenu:{show:true,group:'Places'}` + `desktop:{show:true}`. Desktop Start Menu is hardcoded (`RIGHT_PLACE_IDS` in `StartMenu.tsx`) and unaffected either way. |
+
+Polish names verified against Polish Wikipedia + Polish Windows localization: Pasjans, FreeCell (kept its English name even in Polish Windows — authentic), Pasjans Pająk, Kierki.
+
+All paths below are under `c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/` unless stated.
+
+---
+
+## Step 0 — Confirm baseline facts
+
+**Say: "Do Step 0."**
+
+**Goal:** Re-verify the five facts every later step depends on (repo state can drift).
+
+**AGENTS: none — orchestrator inline.** Pure reading; a subagent would just re-derive context the orchestrator needs anyway.
+
+**What to do (read-only):**
+- Confirm `desktop.order` slots in use: 0 `my-computer`, 1 `resume`, 2 `about`, 3 `my-projects`, 4 `games`, 5 `experience`, 6 `explorer`/`paint` (tie), 7 `dialtone`, 98 `recycle-bin` → **order 8 is free**.
+- Confirm `registry/pasjans.json` has `startMenu:{show:true,group:'Games'}` and `desktop:{show:false}`.
+- Confirm `byCategory('games')` has exactly one caller: `folderChildren()` in `src/os/registry.ts` (the `auto:games` sentinel).
+- Confirm `category==='games'` drives: `MobileShell.tsx:28` (chromeless), `Window.tsx:117` + `IframeHost.tsx:74` (`isGame` styling), `osStore.ts:104` (LRU never evicts `games`).
+- Confirm `iconPosStore.ts` uses `sessionStorage` and `iconLayout.ts` is sparse (only dragged icons get explicit positions) — adding the hub cannot displace a user's dragged icons.
+
+**Done-when:** all five facts confirmed, reported in one short list. Any mismatch → stop; later steps must be re-checked before proceeding.
+
+---
+
+## Step 1 — Registry rewiring: remove card games from the Games folder
+
+**Say: "Do Step 1."**
+
+**Goal:** Stop the Games folder auto-listing card games.
+
+**AGENTS: none — orchestrator inline.** This is a one-line data change; spawning anything for it is waste.
+
+**What to do:**
+- In `registry/games.json`, change `"children": "auto:games"` → `"children": ["pinball","mines","game1"]`.
+- Touch nothing else. Run `npm run typecheck` in `os/`.
+
+**Done-when:** typecheck green; Games folder shows only Pinball, Minesweeper, `game1`. Pasjans temporarily disappears from everywhere — expected, fixed in Step 2.
+
+---
+
+## Step 2 — Build the hub (`CardHubApp.tsx`) and wire Pasjans into it
+
+**Say: "Do Step 2."**
+
+**Goal:** A working "Gry Karciane" desktop app with one Polish-named tile (Pasjans). Shippable on its own.
+
+**AGENTS: none — orchestrator inline.** One small presentational component plus data wiring; the orchestrator holds all the registry context already. (Optional: 1 **haiku** verifier to double-check the manifest fields against `pasjans.json`'s shape — only if the orchestrator is low on confidence.)
+
+**Files touched:** `src/os/games/cardhub/CardHubApp.tsx` (new) · `registry/cards.json` (new) · `registry/pasjans.json` (edit) · `src/os/registry.ts` · `src/styles/globals.css` · `public/icons/cards.svg` (placeholder felt-green square OK until Step 6).
+
+**What to do:**
+- `CardHubApp.tsx`: static `TILES = [{id:'pasjans'}]` (grows to 4 in later steps); pull `title`/`icon` via `byId(id)` from `src/os/registry.ts`; green-felt (`#0b8a2e`) panel, `role="group"` `aria-label="Gry Karciane"`, one focusable `<button>` per tile; `onClick={(e) => useOSStore.getState().open(id, { trigger: e.currentTarget })}` — the exact call `FolderApp.tsx:17` uses. No `useGameLoop`, no drag (pure launcher).
+- `registry/cards.json`: `id:"cards"`, `title:"Gry Karciane"`, `kind:"react"`, `icon:"/os/icons/cards.svg"`, `category:"apps"`, `desktop:{show:true,order:8}`, `startMenu:{show:true,group:"Places"}`, `window:{width:520,height:420,minWidth:360,minHeight:300,singleton:true,maximizedOnMobile:true}`.
+- `registry/pasjans.json`: `startMenu.show` → `false` (leave `desktop.show:false`).
+- `registry.ts`: add `cards: lazy(() => import('./games/cardhub/CardHubApp')),` to `componentById`.
+
+**Done-when:**
+- `npm run ci` green.
+- Desktop shows "Gry Karciane" at slot 8; opening it shows one "Pasjans" tile; clicking opens the real Pasjans (singleton-focuses if already open).
+- Pasjans gone from Games folder and mobile Start launcher; Games folder still shows Pinball/Mines/`game1`.
+- Dragged-icon layouts (sessionStorage) undisturbed.
+
+---
+
+## Step 3 — FreeCell (`freecell`)
+
+**Say: "Do Step 3."**
+
+**Goal:** FreeCell as the second hub tile — closest to Pasjans in shape, lowest risk.
+
+**AGENTS: 1 sonnet builder + 1 haiku verifier.**
+- **Builder (sonnet):** builds the complete game — `src/os/games/freecell/engine.ts`, `engine.test.ts`, `FreeCellApp.tsx` — following the spec below and cloning the in-repo pattern (`src/os/games/pasjans/engine.ts` structure; `SolitaireApp.tsx` shell; import `CardFace`/`CardBack` from `../pasjans/cards` **unmodified**). Runs `npm test` on its own suites before returning.
+- **Verifier (haiku, read-only, after builder):** adversarially checks the engine against the rules spec — deal shape (7,7,7,7,6,6,6,6 all face-up), `maxMovable = (freeCellsFree+1) * 2^emptyColumns`, build-down-alternating-color, foundation build-up-by-suit, win at 4×13, undo round-trip. Tries to refute with concrete counterexamples; reports pass/refuted per rule.
+- **Orchestrator:** wires `freecell` into `componentById` in `src/os/registry.ts` + adds `{id:'freecell'}` to `TILES` + `registry/freecell.json` + `ASSET-CREDITS.md` row, then runs `npm run ci` and plays a game in the dev server.
+
+**Spec for the builder:**
+- `engine.ts` (pure TS, no DOM): `freeCells:(Card|null)[4]`, `foundations:Card[][4]`, `tableau:Card[][8]` dealt all-face-up 7/7/7/7/6/6/6/6; `score`, `moves`, `history`. Copy the seeded-LCG shuffle, full-snapshot undo, `bumpScore`, `PileRef`/`canMove…`/`moveStack` idioms from the pasjans engine. Key function: `maxMovable` (supermove capacity) — unit-test it directly.
+- `FreeCellApp.tsx`: clone the `SolitaireApp.tsx` shell — pointer-drag engine, pause contract (`active = focused && visible && !minimized`, cancel-drag on blur), `ResizeObserver` metrics, XP "Game" menu, sunken status bar, reuse the Pasjans `sfx` map wholesale, `aria-live sr-only` region, roving-tabindex hotspot layer (16 hotspots: 4 cells, 4 foundations, 8 columns). No stock, no flip sfx.
+- `registry/freecell.json`: mirror `pasjans.json` — `category:"games"`, `desktop:{show:false}`, `startMenu:{show:false}`, `window:{width:820,height:600,minWidth:660,minHeight:480,singleton:true,maximizedOnMobile:true}`.
+
+**Done-when:** engine tests cover deal shape / supermove math / move legality / win / undo and pass; verifier reports no refuted rules; `npm run ci` green; FreeCell tile opens a playable, winnable game with mouse and keyboard-only.
+
+---
+
+## Step 4 — Spider / Pasjans Pająk (`pajak`)
+
+**Say: "Do Step 4."**
+
+**Goal:** Spider as the third hub tile.
+
+**AGENTS: 1 sonnet builder + 1 haiku verifier.** Same shape as Step 3.
+- **Builder (sonnet):** `src/os/games/pajak/engine.ts`, `engine.test.ts`, `SpiderApp.tsx` per spec below, cloning the pasjans engine pattern and `SolitaireApp.tsx` shell (drag + hotspot layer: 10 column handles + stock handle). Difficulty menu: `role="menuitemradio"` One/Two/Four suits, mirroring Pasjans' Draw-one/Draw-three menu pattern.
+- **Verifier (haiku, read-only, after builder):** adversarially checks — unique ids `0..103` (never reset per deck), deal 6/6/6/6/5/5/5/5/5/5 with tops face-up + 50-card stock, same-suit-run-only unit moves (mixed-suit descending run must reject), K→A same-suit auto-completion, stock deal blocked while any column is empty, win at 8 runs, all three `suitCount` variants deal correctly.
+- **Orchestrator:** wires `pajak` into `componentById` + `TILES` + `registry/pajak.json` (`title:"Pasjans Pająk"`, `category:"games"`, `desktop:{show:false}`, `startMenu:{show:false}`, `window:{width:900,height:620,minWidth:720,minHeight:500,singleton:true,maximizedOnMobile:true}`) + `ASSET-CREDITS.md` row; `npm run ci`; plays a 1-suit game in the dev server.
+
+**Spec for the builder:**
+- State: two decks = 104 cards, **globally unique ids `0..103`** (engine snapshot/undo and drag `Map<id,el>` keying require it); `tableau:Card[][10]`; `stock:Card[]` (5 deals × 10); `completed:number` (0–8); `suitCount:1|2|4` (**1-suit default**); `score`, `moves`, `history`.
+- Rules: build down regardless of color; only same-suit descending runs move as a unit; full K→A same-suit run auto-removes to `completed`; stock deal requires no empty column, deals one face-up card per column; win = 8 runs.
+
+**Done-when:** engine tests cover the verifier's checklist and pass; verifier reports no refuted rules; `npm run ci` green; 1-suit game winnable start-to-finish in the running app.
+
+---
+
+## Step 5 — Hearts / Kierki (`kierki`)
+
+**Say: "Do Step 5."**
+
+**Goal:** Hearts as the fourth hub tile — highest-risk, lowest-reuse (no drag layer, new AI, new trick logic). Treat as its own mini-project; do not start before Steps 3–4 are green.
+
+**AGENTS: 2 builders (opus, then sonnet) + 2 parallel haiku verifiers.** This is the one step that earns opus.
+- **Builder 1 (opus):** `src/os/games/kierki/engine.ts` + `engine.test.ts` — full rules + the heuristic AI (the novel-logic core). Pure TS, no DOM. Runs its own tests before returning.
+- **Builder 2 (sonnet, after builder 1):** `HeartsApp.tsx` — click-to-play UI on top of the finished engine API. **No drag layer.** Four hands around a felt table (human fanned face-up at bottom, opponents face-down), center trick area, scoreboard; click-to-select-then-confirm for passing; reuse the pause contract, `Game` menu, `aria-live` region and `sfx` pattern from `SolitaireApp.tsx`; keyboard: tab-through-legal-cards, Enter plays.
+- **Verifiers (2 haiku, parallel, read-only, after builders):** split the rule surface —
+  - *Verifier A (rules):* pass-direction rotation (left/right/across/hold), 2♣ leads trick 1, must-follow-suit, no hearts/Q♠ on trick 1, no hearts lead until broken.
+  - *Verifier B (scoring + AI legality):* hearts=+1, Q♠=+13, shoot-the-moon = 0/+26 split, game ends at 100 with lowest winning, and AI never plays an illegal card in any tested state.
+- **Orchestrator:** wires `kierki` into `componentById` + `TILES` + `registry/kierki.json` (`title:"Kierki"`, `category:"games"`, `desktop:{show:false}`, `startMenu:{show:false}`, `window:{width:720,height:640,minWidth:560,minHeight:520,singleton:true,maximizedOnMobile:true}`) + `ASSET-CREDITS.md`; `npm run ci`; plays a full round in the dev server including a forced shoot-the-moon check.
+
+**Spec for builder 1:**
+- State: `hands:Card[][4]` (13 each), `trick:{player:number,card:Card}[]`, `tricksTaken:Card[][4]`, `scores:number[4]`, `roundScores:number[4]`, `phase:'passing'|'playing'|'roundEnd'|'gameOver'`, `passDir:'left'|'right'|'across'|'hold'` (rotates each round), `pendingPass:Card[]`, `leader:number`, `heartsBroken:boolean`. Undo is not meaningful mid-trick — "new round" replaces it.
+- AI (3 opponents, heuristic not search, ~40–60 LOC): follow suit low; void-dump Q♠/high hearts when off-suit; avoid taking trick-with-hearts; dump Q♠ on the leader when safe.
+
+**Done-when:** engine tests cover both verifiers' checklists and pass; both verifiers report no refuted rules; `npm run ci` green; a full 4-player round plays to completion with correct scoring in the running app.
+
+---
+
+## Step 6 — Icons (4 original SVGs)
+
+**Say: "Do Step 6."**
+
+**Goal:** House-style, original 48×48 icons for hub + 3 games; Pasjans keeps its existing icon.
+
+**AGENTS: 1 sonnet builder.** All four icons in one agent (they must share a visual language — splitting across agents produces mismatched styles). No verifier: `npm run gate` and the orchestrator's visual check are the gate.
+- **Builder (sonnet):** create `public/icons/cards.svg`, `freecell.svg`, `pajak.svg`, `kierki.svg` per spec; add one credit row each to `ASSET-CREDITS.md`, mirroring the Pasjans/Minesweeper rows.
+- **Orchestrator:** `npm run gate`; render-check all four on desktop + hub tiles at 1x and 2x.
+
+**Spec:** house style = `viewBox="0 0 48 48"`, rounded-rect base, gradient fills, top comment `<!-- Original SVG authored for DominikOS. Nothing traced. -->`; palette from `pasjans.svg` (felt `#0b8a2e`/`#065c1d`, card-back navy `#1f3f8f`).
+- `cards.svg`: felt rounded-rect + fanned 4-card poker hand with visible ♠♥♦♣ pips.
+- `freecell.svg`: felt base; 4 tiny empty-cell outlines above one face-up ♦ card.
+- `pajak.svg`: felt base; a card with a small code-drawn spider (line legs, circle body).
+- `kierki.svg`: felt base; a card with a large red heart (reuse `pasjans.svg`'s heart path).
+
+**Done-when:** `npm run gate` passes; all four icons render correctly on desktop and hub tiles.
+
+---
+
+## Step 7 — Sound polish (optional)
+
+**Say: "Do Step 7."**
+
+**Goal:** Audio feedback for the new games, consistent with the OS.
+
+**AGENTS: none — orchestrator inline.** Pure wiring of an existing pattern; ~30 lines total across three files.
+
+**What to do:**
+- FreeCell/Spider: reuse the Pasjans `sfx` map wholesale (draw/flip/move/foundation/win) via shared `tone()` from `src/os/sound.ts`, gated on `prefs.muted` — if Step 3/4 builders already did this, just audit.
+- Hearts: soft play click per card (`tone(0,180,0.04,0.06)`); reuse the `'win'` triad on round end.
+- Zero new audio files (consistent with the "Sounds: None shipped" `ASSET-CREDITS.md` row).
+
+**Done-when:** `prefs.muted` silences everything; `npm run gate` still passes.
+
+---
+
+## Step 8 — Build, test, vendor into `portfolio-rework`
+
+**Say: "Do Step 8."**
+
+**Goal:** Ship through the existing pipeline into the live Astro site.
+
+**AGENTS: none — orchestrator inline.** Commands + inspection only; never delegate deploys.
+
+**What to do:**
+1. In `os/`: `npm run ci` (typecheck + all vitest suites incl. the three new engine suites + `vite build` + `npm run gate`).
+2. `node scripts/deploy-rework.mjs` (exists at `os/scripts/`; delete-then-copy `dist → portfolio-rework/public/os`, also re-vendors `game1`/`frostbyte`). Optionally add `"deploy:rework"` to `os/package.json` first.
+3. In `portfolio-rework/`: `npm20 run build`.
+4. Verify `portfolio-rework/public/os/assets` contains `FreeCellApp-*.js`, `SpiderApp-*.js`, `HeartsApp-*.js`, `CardHubApp-*.js` and no orphaned old-hash chunks.
+
+**Done-when:** built site serves the hub + all four games at `/os/`; no console errors; no stale chunks.
+
+---
+
+## Risks & gotchas
+
+1. **Singleton re-focus, not reopen:** clicking a hub tile for an open game focuses/un-minimizes it (`osStore.ts:90-96`). Expected.
+2. **Hub is LRU-evictable:** the 12-window cap skips `category:'games'` victims; the hub is `category:'apps'` → evictable. Harmless (cheap re-open); leave as `apps`.
+3. **`games.json` explicit children abandons `auto:games`.** Future arcade games need manual addition to that array. Intentional; `byCategory('games')` becomes dead-but-harmless API surface.
+4. **Spider ids must be globally unique across both decks** (`0..103`). Never reset per-deck.
+5. **Legal gate is mandatory in `npm run ci`** — a stray banned token in a new comment/title/icon fails the build. The four Polish titles + "FreeCell" are clean.
+6. **Never hand-edit the vendored copy** — all edits in `dominikos/os/`; `deploy-rework.mjs` re-vendors. Direct edits to `portfolio-rework/public/os` get overwritten and evade the legal gate.
+7. **Effort realism:** ~2,000 LOC of new tested code across three games plus 4 icons. Ship in order (FreeCell → Spider → Hearts); do not start Hearts before FreeCell/Spider are green.
+
+---
+
+## Verification checklist (whole feature)
+
+- [ ] Desktop shows one "Gry Karciane" icon (slot 8); no card-game icons directly on the desktop.
+- [ ] Games folder contains only Pinball, Minesweeper, `game1`.
+- [ ] Hub opens to a felt panel with exactly 4 tiles: Pasjans, FreeCell, Pasjans Pająk, Kierki.
+- [ ] Each tile opens its game in a singleton window; reclicking focuses rather than duplicates.
+- [ ] Each game winnable/playable with mouse and keyboard-only.
+- [ ] Focus-loss/minimize/background pauses every game cleanly.
+- [ ] Mobile: games open chromeless full-screen; hub keeps its title bar and appears in the mobile Start launcher; the 4 games do not appear there individually.
+- [ ] `npm run ci` green, including all three new `engine.test.ts` suites.
+- [ ] `npm run gate` passes.
+- [ ] `portfolio-rework/public/os/assets` has the four new hashed bundles, no orphaned old-hash chunks.
+- [ ] `ASSET-CREDITS.md` has a row for each new game and icon.
+Restructured — dominikos/CARD-HUB-PLAN.md is now an Ultracode execution plan. Each step section opens with "Say: 'Do Step N.'" and carries its own AGENTS block, so that's genuinely all you need to type.
+
+The agent economics, matched to task difficulty rather than spread evenly:
+
+Step	Agents	Why
+0 (verify facts), 1 (one-line JSON), 2 (hub component), 7 (sfx wiring), 8 (build+vendor)	none — inline	Trivial or orchestrator-context-heavy work; spawning anything would be waste
+3 FreeCell, 4 Spider	1 sonnet builder + 1 haiku verifier	Well-specified clones of the existing pasjans pattern; the haiku adversarially checks the rules (supermove math, deal shapes, run legality) against the written spec
+5 Hearts	1 opus + 1 sonnet + 2 parallel haikus	The only novel-logic task in the plan: opus builds engine + AI, sonnet builds the click-to-play UI on the finished engine API, two haikus split the rule surface (game rules vs. scoring/AI legality)
+6 Icons	1 sonnet	All four SVGs in one agent so they share a visual language; npm run gate is the verifier
+A "How to run this plan" header at the top locks the stability rules for whichever session executes it: one step per message (Steps 3–5 are each a full session, so no mid-build compaction), sequential builders / parallel verifiers (builders share registry.ts and the TILES array, so they can't run concurrently), the orchestrator always keeps deploys, npm run ci, and in-app verification to itself, and a refuted finding gets fixed inline rather than triggering a fresh fan-out.
+
+All the load-bearing content survived the restructure — locked decisions, verified Polish names, engine state shapes, rules specs, exact paths, risks, and the final checklist. The old standalone PROMPT blocks are gone; their content was folded into the builder-agent specs since Fable is now the executor rather than a context-free agent.
+
+Ready when you are — "Do Step 0" kicks it off.
+
+/compact
+do step 0
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\CARD-HUB-PLAN.md
+Step 0 — verifying the five baseline facts against the live repo, read-only.
+
+Grep ""desktop"|"order"" (in c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\registry)
+18 lines of output
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\registry\pasjans.json
+Grep "byCategory" (in c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src)
+4 lines of output
+Grep "'games'|"games"|category === |category===" (in c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src, glob: *.{ts,tsx})
+12 lines of output
+Facts 1–4 confirmed. Checking fact 5 (icon position persistence):
+
+Grep "sessionStorage|localStorage" (in c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src)
+29 lines of output
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\store\iconPosStore.ts
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\desktop\iconPosStore.ts
+Globpattern: "src/os/desktop/iconLayout*"
+No files found
+Globpattern: "**/iconLayout*"
+Found 2 files
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\desktop\iconLayout.ts
+Step 0 complete — all five baseline facts re-verified against the live repo, no drift. The plan is safe to execute as written.
+
+Order 8 is free. Desktop slots in use: 0 my-computer, 1 resume, 2 about, 3 my-projects, 4 games, 5 experience, 6 explorer + paint (tie), 7 dialtone, 98 recycle-bin. Nothing occupies 8.
+pasjans.json matches: desktop:{show:false}, startMenu:{show:true,group:"Games"} — exactly the shape Step 2 will edit (pasjans.json:7-8).
+byCategory('games') has exactly one caller: folderChildren() at registry.ts:57 (the auto:games sentinel). Switching games.json to explicit children in Step 1 orphans nothing else.
+category === 'games' drives all four expected behaviors at the exact lines the plan cites: MobileShell.tsx:28 (chromeless), Window.tsx:117 and IframeHost.tsx:74 (isGame styling), osStore.ts:104 (LRU never evicts games). No other consumers — so keeping category:'games' on the four card games preserves everything.
+Icon layout is safe: iconPosStore.ts (at src/os/desktop/, note — not src/os/store/) persists via sessionRead/sessionWrite (sessionStorage, dies with the tab), and the layout is sparse — only dragged icons get explicit cells; resolveLayout() places explicit entries first, then flows the rest. Adding the hub at slot 8 cannot displace a user's dragged icons.
+One trivial note, no plan impact: the only path correction is iconPosStore.ts living under desktop/ rather than store/. Everything else matches line-for-line.
+
+Ready for "Do Step 1" whenever you are.
+
+do step 1
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\registry\games.json
+Edit c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\registry\games.json
+Modified
+PowerShell Run TypeScript typecheck in the OS repo
+IN
+Set-Location "c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os"; npm run typecheck
+
+OUT
+> dominikos@0.1.0 typecheck
+> tsc --noEmit
+Shell cwd was reset to c:\Users\domin\OneDrive\Desktop\Websites\portfolio-rework
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\registry.ts (lines 45-64)
+Step 1 complete.
+
+games.json:10 changed from "children": "auto:games" to "children": ["pinball", "mines", "game1"]. Nothing else touched.
+npm run typecheck in os/ — green.
+Confirmed the explicit-array path at registry.ts:58 resolves ids via byId, so the Games folder now lists exactly Pinball, Minesweeper, and the game1 entry.
+As the plan predicted, Pasjans is now out of the Games folder (it still sits in the Start Menu's Games group until Step 2 flips startMenu.show to false — that's the expected interim state, one step away from resolution).
+
+Say "Do Step 2" to build the hub and wire Pasjans into it.
+
+do step two.
+Step 2 — building the hub inline. First, reading the reference files I'll clone from.
+
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\apps\FolderApp.tsx
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\registry.ts
+Grep "folder-grid|folder-item" (in c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\styles\globals.css)
+38 lines of output
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\public\icons\pasjans.svg
+I have the pattern. Checking the AppProps type shape, then writing the four files.
+
+Grep "AppProps" (in c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\types.ts)
+13 lines of output
+Write c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\games\cardhub\CardHubApp.tsx
+31 lines
+// Card Game Hub — "Gry Karciane" (CARD-HUB-PLAN Step 2): a pure launcher panel with one
+// large tile per card game. Titles/icons come from the registry manifests (single source of
+// truth); the games themselves stay category:'games' and open as normal singleton windows.
+import { byId } from '../../registry';
+import { useOSStore } from '../../store/osStore';
+
+// Grows to 4 tiles as games ship: pasjans → freecell → pajak → kierki (CARD-HUB-PLAN Steps 3–5).
+const TILES = [{ id: 'pasjans' }];
+
+export default function CardHubApp() {
+  return (
+    <div className="cardhub" role="group" aria-label="Gry Karciane">
+      {TILES.map(({ id }) => {
+        const m = byId(id);
+        if (!m) return null;
+        return (
+          <button
+            key={id}
+            type="button"
+            className="cardhub__tile"
+            onClick={(e) => useOSStore.getState().open(id, { trigger: e.currentTarget })}
+          >
+            <img src={m.icon} alt="" draggable={false} />
+            <span>{m.title}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+Write c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\registry\cards.json
+11 lines
+{
+  "id": "cards",
+  "title": "Gry Karciane",
+  "kind": "react",
+  "icon": "/os/icons/cards.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 8 },
+  "startMenu": { "show": true, "group": "Places" },
+  "window": { "width": 520, "height": 420, "minWidth": 360, "minHeight": 300, "singleton": true, "maximizedOnMobile": true }
+}
+Edit c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\registry\pasjans.json
+Modified
+Edit c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\registry.ts
+Added 1 line
+Now the styles and the placeholder icon:
+
+Edit c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\styles\globals.css
+Edit failed
+Write c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\public\icons\cards.svg
+20 lines
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Original SVG authored for DominikOS. Nothing traced. Placeholder for the Gry Karciane
+       hub (CARD-HUB-PLAN Step 2) — replaced by the full fanned-hand icon in Step 6. -->
+  <defs>
+    <linearGradient id="chback" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a5fc4"/><stop offset="1" stop-color="#1f3f8f"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="8" fill="#0b8a2e" stroke="#065c1d" stroke-width="1.6"/>
+  <g transform="rotate(-10 20 26)">
+    <rect x="10" y="11" width="18" height="26" rx="3" fill="url(#chback)" stroke="#0e2a66" stroke-width="1.3"/>
+    <path d="M13 14 l12 20 M25 14 l-12 20" stroke="#7ea0e8" stroke-width="1" opacity=".7"/>
+  </g>
+  <g transform="rotate(10 30 26)">
+    <rect x="21" y="11" width="18" height="26" rx="3" fill="#fdfdf6" stroke="#4a4a52" stroke-width="1.3"/>
+    <path d="M30 17 c-2.4 3-4.3 4.1-4.3 6.1 a2.5 2.5 0 0 0 4 2 l-1 2.7 h2.6 l-1-2.7 a2.5 2.5 0 0 0 4-2 c0-2-1.9-3.1-4.3-6.1 z" fill="#c8102e"/>
+    <path d="M30 28.5 l2.3 3.5 -2.3 3.5 -2.3-3.5 z" fill="#1c1c1c"/>
+  </g>
+</svg>
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\styles\globals.css (lines 595-608)
+Edit c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\styles\globals.css
+Added 26 lines
+All six files are in place. Running the full CI gate:
+
+PowerShell Run typecheck, tests, build, and legal gate in the OS repo
+IN
+Set-Location "c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os"; npm run ci
+
+OUT
+> dominikos@0.1.0 ci
+> npm run typecheck && npm test && vite build && npm run gate
+
+
+> dominikos@0.1.0 typecheck
+> tsc --noEmit
+
+
+> dominikos@0.1.0 test
+> vitest run
+
+
+ RUN  v0.34.6 C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os
+
+ ✓ src/os/games/mines/engine.test.ts  (17 tests) 73ms
+ ✓ src/os/games/pasjans/engine.test.ts  (34 tests) 147ms
+ ✓ src/os/games/bubble/engine.test.ts  (32 tests) 144ms
+ ✓ src/os/games/flappy/engine.test.ts  (22 tests) 311ms
+ ✓ src/os/apps/dialtone/callMachine.test.ts  (17 tests) 30ms
+ ✓ src/os/desktop/iconLayout.test.ts  (15 tests) 11ms
+ ✓ src/os/apps/browser/history.test.ts  (12 tests) 9ms
+ ✓ src/os/store/osStore.test.ts  (16 tests) 17ms
+ ✓ src/os/apps/paint/canvas.test.ts  (9 tests) 11ms
+ ✓ src/os/games/pinball/physics.test.ts  (8 tests) 1862ms
+
+ Test Files  10 passed (10)
+      Tests  182 passed (182)
+   Start at  21:32:15
+   Duration  3.32s (transform 1.67s, setup 2ms, collect 2.38s, tests 2.62s, environment 2ms, prepare 4.02s)
+
+vite v4.5.14 building for production...
+transforming...
+
+/os/wallpaper/hills.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/tokens.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/fonts/DejaVuSans.woff2 referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/min.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/max.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/restore.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/full.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/close.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/games/pinball/panel-bg.jpg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+node_modules/gray-matter/lib/engines.js (43:13) Use of eval in "node_modules/gray-matter/lib/engines.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+✓ 255 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                   4.72 kB │ gzip:  2.15 kB
+dist/assets/ms_sans_serif_bold-5f3fbc57.woff2     6.26 kB
+dist/assets/ms_sans_serif-11b5a68a.woff2          6.51 kB
+dist/assets/ms_sans_serif_bold-e7b28b60.woff      8.30 kB
+dist/assets/ms_sans_serif-11318ea1.woff           8.54 kB
+dist/assets/PerfectDOSVGA437Win-1499ed0e.woff2   17.35 kB
+dist/assets/PerfectDOSVGA437Win-16b1c3a4.woff    23.62 kB
+dist/assets/index-24624b32.css                    1.88 kB │ gzip:  0.75 kB
+dist/assets/OSShell-522d41ae.css                318.31 kB │ gzip: 51.34 kB
+dist/assets/useGameLoop-9ba651ac.js               0.32 kB │ gzip:  0.24 kB
+dist/assets/usePageVisible-1d7e248e.js            0.35 kB │ gzip:  0.22 kB
+dist/assets/ImageViewApp-7f026432.js              0.49 kB │ gzip:  0.29 kB
+dist/assets/NotepadApp-1ad038cf.js                0.52 kB │ gzip:  0.39 kB
+dist/assets/CardHubApp-7fa7b2f6.js                0.53 kB │ gzip:  0.37 kB
+dist/assets/PdfApp-53969e78.js                    0.66 kB │ gzip:  0.39 kB
+dist/assets/FolderApp-47e385dc.js                 1.01 kB │ gzip:  0.56 kB
+dist/assets/RecycleBinApp-b15b8bbf.js             1.14 kB │ gzip:  0.62 kB
+dist/assets/MyComputerApp-a949adb6.js             1.19 kB │ gzip:  0.59 kB
+dist/assets/ExperienceApp-57911dde.js             1.20 kB │ gzip:  0.64 kB
+dist/assets/IframeHost-294fe7da.js                2.56 kB │ gzip:  1.12 kB
+dist/assets/ContactApp-88f57dc3.js                3.12 kB │ gzip:  1.30 kB
+dist/assets/MobileShell-6745d959.js               4.50 kB │ gzip:  1.74 kB
+dist/assets/index-5bbf82a8.js                     8.34 kB │ gzip:  3.46 kB
+dist/assets/BrowserApp-7461efbf.js               11.59 kB │ gzip:  4.12 kB
+dist/assets/FlappyApp-58fc018c.js                11.77 kB │ gzip:  4.94 kB
+dist/assets/Taskbar-6c127c7d.js                  11.98 kB │ gzip:  4.42 kB
+dist/assets/MinesApp-3fda2554.js                 12.54 kB │ gzip:  4.93 kB
+dist/assets/Desktop-b8cdf1df.js                  13.07 kB │ gzip:  4.77 kB
+dist/assets/DialtoneApp-ff5b9862.js              14.91 kB │ gzip:  5.13 kB
+dist/assets/PaintApp-3f9be219.js                 16.02 kB │ gzip:  5.53 kB
+dist/assets/BubbleApp-2c2de8df.js                18.29 kB │ gzip:  7.02 kB
+dist/assets/PinballApp-e6a8616c.js               22.05 kB │ gzip:  8.12 kB
+dist/assets/SolitaireApp-0397fc55.js             22.08 kB │ gzip:  7.92 kB
+dist/assets/OSShell-004554de.js                  65.84 kB │ gzip: 21.63 kB
+dist/assets/DocWindow-361931ce.js               133.85 kB │ gzip: 41.57 kB
+dist/assets/vendor-1cf99640.js                  141.34 kB │ gzip: 45.37 kB
+✓ built in 4.17s
+
+> dominikos@0.1.0 gate
+> node scripts/legal-gate.mjs
+
+✔ legal gate clean (272 text files scanned)
+Shell cwd was reset to c:\Users\domin\OneDrive\Desktop\Websites\portfolio-rework
+Grep "startMenu" (in c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src)
+2 lines of output
+Step 2 complete — the hub exists, Pasjans is wired into it, and npm run ci is fully green (typecheck, 182 tests, build, legal gate).
+
+What was built:
+
+CardHubApp.tsx (new) — pure launcher: TILES = [{id:'pasjans'}], titles/icons pulled from the registry via byId, one focusable button per tile, opening via the exact useOSStore.getState().open(id, { trigger }) call FolderApp uses. No game loop, no drag.
+cards.json (new) — Gry Karciane, desktop:{show:true,order:8}, startMenu:{show:true,group:"Places"}, singleton 520×420 window, spec verbatim.
+pasjans.json:8 — startMenu.show → false (desktop was already false).
+registry.ts:35 — cards: lazy-import line added to componentById.
+globals.css — .cardhub radial felt panel (#0b8a2e family) + 2×2 tile grid with XP-style hover/focus states.
+cards.svg (new) — original placeholder in the house style (felt base, card back + heart/spade card); Step 6 replaces it with the full fanned-hand design.
+Done-when status:
+
+npm run ci green; the build emitted CardHubApp-7fa7b2f6.js as its own chunk. ✓
+Pasjans excluded from the mobile Start launcher — its filter is startMenu?.show || desktop?.show (MobileStartLauncher.tsx:14), and both are now false; the hub passes both. Games folder lists only Pinball/Mines/game1 (Step 1). Dragged icons safe (sessionStorage, sparse — Step 0). ✓
+The one thing I can verify only at the data level, not by literally clicking: the visual click-through. Everything that drives it (slot 8 ordering, tile → singleton open) is the same code path as existing folders, but if you want to eyeball it, npm run dev in dominikos/os/ and look for Gry Karciane next to Dialtone on the desktop.
+The hub is shippable as-is with one tile. "Do Step 3" adds FreeCell.
+
+do step 3
+
+once you paste that last message of done
+
+
+do step 4
+Step 3 kicks off now — per the plan's AGENTS block, that's 1 sonnet builder + 1 haiku verifier, orchestrated through a workflow (Ultracode is on). I'll do the registry wiring and CI myself when the agents finish, paste the done message, then roll straight into Step 4 as you asked.
+
+Workflow
+IN
+{
+  "script": "export const meta = {\n  name: 'card-hub-step3-freecell',\n  description: 'Step 3: sonnet builds the FreeCell engine/tests/app, then a haiku adversarially verifies the rules',\n  phases: [\n    { title: 'Build', detail: 'sonnet: engine.ts + engine.test.ts + FreeCellApp.tsx, cloned from the pasjans pattern', model: 'sonnet' },\n    { title: 'Verify', detail: 'haiku: adversarial rule-check of the engine against the written spec', model: 'haiku' },\n  ],\n}\n\nconst BUILD_SCHEMA = {\n  type: 'object',\n  required: ['filesCreated', 'typecheckPass', 'testsPass', 'testCount', 'notes'],\n  properties: {\n    filesCreated: { type: 'array', items: { type: 'string' } },\n    typecheckPass: { type: 'boolean' },\n    testsPass: { type: 'boolean' },\n    testCount: { type: 'number' },\n    notes: { type: 'string', description: 'new CSS classes added, spec deviations and why, anything the orchestrator must know' },\n  },\n}\n\nconst VERDICT_SCHEMA = {\n  type: 'object',\n  required: ['rules', 'overall'],\n  properties: {\n    rules: {\n      type: 'array',\n      items: {\n        type: 'object',\n        required: ['rule', 'verdict', 'detail'],\n        properties: {\n          rule: { type: 'string' },\n          verdict: { type: 'string', enum: ['pass', 'refuted', 'untested'] },\n          detail: { type: 'string', description: 'concrete counterexample if refuted; which assertion covers it if pass' },\n        },\n      },\n    },\n    overall: { type: 'string', enum: ['pass', 'refuted'] },\n  },\n}\n\nphase('Build')\nconst build = await agent(`You are building FreeCell for DominikOS, a Windows-XP-style web OS (React 18 + Vite 4 + TypeScript strict + vitest). Repo root: c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os — all paths below are relative to it.\n\nREAD FIRST (the patterns you are cloning):\n- src/os/games/pasjans/engine.ts — engine idioms: seeded-LCG shuffle, full-snapshot undo history, PileRef / canMove... / moveStack, bumpScore.\n- src/os/games/pasjans/engine.test.ts — test style to mirror.\n- src/os/games/pasjans/SolitaireApp.tsx — the app shell you will clone: pointer-drag engine, pause contract, ResizeObserver metrics, XP-style \"Game\" menu, sunken status bar, sfx map (WebAudio tone()), aria-live sr-only region, roving-tabindex hotspot layer.\n- src/os/games/pasjans/cards.tsx — CardFace/CardBack renderer. Import and use UNMODIFIED via relative import '../pasjans/cards'. Do not edit it.\n- src/os/types.ts — the AppProps contract your component must satisfy (default export).\n- The pasjans CSS block in src/styles/globals.css.\n\nCREATE exactly three files:\n\n1. src/os/games/freecell/engine.ts — pure TS, no DOM, no React.\n   State: { freeCells: (Card|null)[] length 4; foundations: Card[][] length 4; tableau: Card[][] length 8; score: number; moves: number; history of full snapshots }.\n   Deal: 52 cards, seeded-LCG shuffle (same idiom as pasjans), dealt one card at a time round-robin across the 8 columns, so columns 0-3 get 7 cards and columns 4-7 get 6, ALL face-up.\n   Rules:\n   - Tableau builds DOWN in alternating colors.\n   - Foundations build UP by suit starting at Ace.\n   - A free cell holds exactly one card; only a single exposed card may enter one.\n   - Supermove capacity: maxMovable = (freeCellsFree + 1) * 2^emptyColumns. When the DESTINATION is itself an empty column, that column is EXCLUDED from the multiplier: (freeCellsFree + 1) * 2^(emptyColumns - 1). Export maxMovable so tests can hit it directly.\n   - A multi-card move requires the cards to already form a valid descending alternating-color run AND count <= capacity.\n   - Win exactly when all four foundations hold 13 cards.\n   - Full-snapshot undo like pasjans.\n\n2. src/os/games/freecell/engine.test.ts — vitest. MUST cover: deal shape (7/7/7/7/6/6/6/6, 52 unique cards, all face-up, deterministic per seed), maxMovable math INCLUDING the empty-destination case, tableau/foundation/free-cell move legality (accept AND reject cases), win detection, undo round-trip.\n\n3. src/os/games/freecell/FreeCellApp.tsx — default export matching AppProps; clone the SolitaireApp.tsx shell:\n   - pointer-drag with the same card-element registry approach; cancel any in-flight drag on window blur.\n   - pause contract: active = focused && visible && !minimized (mirror however pasjans wires it).\n   - ResizeObserver layout metrics; XP-style \"Game\" menu mirroring pasjans (New game, Undo, ...); sunken status bar showing moves/score.\n   - sfx: copy the pasjans sfx map wholesale (tone() from src/os/sound.ts, same mute gating pasjans uses). No stock/flip sounds — FreeCell has neither.\n   - Accessibility: aria-live sr-only region announcing moves; roving-tabindex hotspot layer with 16 hotspots — 4 free cells, 4 foundations, 8 columns — mirroring the pasjans keyboard model.\n   - Layout: top row = 4 free cells (left) + 4 foundations (right); below = 8 tableau columns.\n\nCSS: reuse existing pasjans classes wherever possible. If new classes are genuinely needed, append ONE clearly-commented block to src/styles/globals.css starting with /* freecell (CARD-HUB-PLAN Step 3) */ — keep it minimal.\n\nDO NOT touch: src/os/registry.ts, registry/*.json, src/os/games/cardhub/CardHubApp.tsx, anything in src/os/games/pasjans/. The orchestrator wires the app into the registry afterwards. Do not run the dev server. Do not deploy. Do not create icons.\n\nLEGAL (hard CI gate): never write the words \"Windows\", \"Microsoft\", or \"Luna\" anywhere, comments included. Say \"XP-style\" if needed.\n\nVERIFY before returning: from the repo root run npx vitest run src/os/games/freecell/engine.test.ts, then npm run typecheck. Iterate until both are green.\n\nReturn structured data per the schema: files created, typecheck/tests status, test count, and notes (new CSS classes, any spec deviation and why).`, { label: 'build:freecell', phase: 'Build', model: 'sonnet', schema: BUILD_SCHEMA })\n\nif (!build || !build.testsPass || !build.typecheckPass) {\n  return { build, verdict: null, aborted: 'builder did not reach green — orchestrator must inspect before verification' }\n}\n\nphase('Verify')\nconst verdict = await agent(`Read-only adversarial review of a freshly built FreeCell engine. Repo root: c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os.\n\nRead src/os/games/freecell/engine.ts and src/os/games/freecell/engine.test.ts (skim src/os/games/pasjans/engine.ts to understand the idioms it clones). Do NOT edit any file. You may run: npx vitest run src/os/games/freecell/engine.test.ts.\n\nYour job is to try to REFUTE each rule below with a concrete counterexample — a specific state plus move where the implementation gives the wrong answer. Trace the actual code; do not trust names or comments.\n\n1. Deal shape: columns 0-3 have 7 cards, columns 4-7 have 6; 52 unique cards; all face-up; deterministic for a fixed seed.\n2. maxMovable = (freeCellsFree+1) * 2^emptyColumns, AND the destination empty column is excluded from the multiplier when the move target is an empty column.\n3. Tableau legality: only descending alternating-color runs may move; wrong color or wrong rank is rejected.\n4. Foundations: build up by suit starting from Ace; wrong suit/rank rejected.\n5. Free cells: max one card each; only a single exposed card may enter.\n6. Win: reported exactly when all 4 foundations reach 13, not before.\n7. Undo: full round-trip (deal, N moves, N undos, state identical to the original deal).\n\nAlso check the TEST SUITE actually asserts each rule — a rule can be implemented correctly but untested; report those as 'untested' rather than 'pass'.\n\nReturn per-rule verdicts with specific card values in any counterexample.`, { label: 'verify:freecell', phase: 'Verify', model: 'haiku', schema: VERDICT_SCHEMA })\n\nreturn { build, verdict }"
+}
+OUT
+Workflow launched in background. Task ID: wdvlgoybk
+Summary: Step 3: sonnet builds the FreeCell engine/tests/app, then a haiku adversarially verifies the rules
+Transcript dir: C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\subagents\workflows\wf_321f2be2-212
+Script file: C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-step3-freecell-wf_321f2be2-212.js
+(Edit this file with Write/Edit and re-invoke Workflow with {scriptPath: "C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-step3-freecell-wf_321f2be2-212.js"} to iterate without resending the script.)
+Run ID: wf_321f2be2-212
+To resume after editing the script: Workflow({scriptPath: "C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-step3-freecell-wf_321f2be2-212.js", resumeFromRunId: "wf_321f2be2-212"}) — completed agents return cached results (cached results may themselves be empty — inspect journal.jsonl before assuming there is something to recover).
+
+You will be notified when it completes. Use /workflows to watch live progress.
+The Step 3 build is running in the background — sonnet is writing the FreeCell engine, tests, and app shell now, with the haiku verifier queued to attack the rules once the build goes green. When the workflow notifies me, I'll wire freecell into the registry and hub tiles, run npm run ci, post the Step 3 done message, and immediately launch Step 4 (Spider) the same way, as you asked.
+
+Step 3 build is green — 34 FreeCell tests pass, typecheck clean, verifier passed all 7 rules. Now the orchestrator wiring: manifest, registry line, hub tile, credits row, then CI.
+
+Read c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\ASSET-CREDITS.md
+Write c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\registry\freecell.json
+11 lines
+{
+  "id": "freecell",
+  "title": "FreeCell",
+  "kind": "react",
+  "icon": "/os/icons/freecell.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": false },
+  "window": { "width": 820, "height": 600, "minWidth": 660, "minHeight": 480, "singleton": true, "maximizedOnMobile": true }
+}
+Edit c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\registry.ts
+Added 1 line
+Edit c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\src\os\games\cardhub\CardHubApp.tsx
+Modified
+Edit c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\ASSET-CREDITS.md
+Added 1 line
+Write c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os\public\icons\freecell.svg
+16 lines
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Original SVG authored for DominikOS. Nothing traced. Placeholder for FreeCell
+       (CARD-HUB-PLAN Step 3) — refined in Step 6: felt base, 4 empty cells over a diamond card. -->
+  <rect x="2" y="2" width="44" height="44" rx="8" fill="#0b8a2e" stroke="#065c1d" stroke-width="1.6"/>
+  <g fill="none" stroke="#d9f2df" stroke-width="1.4" opacity=".85">
+    <rect x="7" y="8" width="7.5" height="10" rx="1.5"/>
+    <rect x="16.5" y="8" width="7.5" height="10" rx="1.5"/>
+    <rect x="26" y="8" width="7.5" height="10" rx="1.5"/>
+    <rect x="35.5" y="8" width="7.5" height="10" rx="1.5"/>
+  </g>
+  <g transform="rotate(-4 24 31)">
+    <rect x="16" y="21" width="16" height="21" rx="2.6" fill="#fdfdf6" stroke="#4a4a52" stroke-width="1.3"/>
+    <path d="M24 25.5 l4.4 6 -4.4 6 -4.4-6 z" fill="#c8102e"/>
+  </g>
+</svg>
+PowerShell Run typecheck, tests, build, and legal gate in the OS repo
+IN
+Set-Location "c:\Users\domin\OneDrive\Desktop\Websites\dominikos\os"; npm run ci
+
+OUT
+> dominikos@0.1.0 ci
+> npm run typecheck && npm test && vite build && npm run gate
+
+
+> dominikos@0.1.0 typecheck
+> tsc --noEmit
+
+
+> dominikos@0.1.0 test
+> vitest run
+
+
+ RUN  v0.34.6 C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os
+
+ ✓ src/os/apps/dialtone/callMachine.test.ts  (17 tests) 46ms
+ ✓ src/os/games/mines/engine.test.ts  (17 tests) 23ms
+ ✓ src/os/games/bubble/engine.test.ts  (32 tests) 96ms
+ ✓ src/os/games/flappy/engine.test.ts  (22 tests) 203ms
+ ✓ src/os/games/pasjans/engine.test.ts  (34 tests) 28ms
+ ✓ src/os/games/freecell/engine.test.ts  (34 tests) 91ms
+ ✓ src/os/apps/paint/canvas.test.ts  (9 tests) 11ms
+ ✓ src/os/store/osStore.test.ts  (16 tests) 16ms
+ ✓ src/os/desktop/iconLayout.test.ts  (15 tests) 13ms
+ ✓ src/os/apps/browser/history.test.ts  (12 tests) 9ms
+ ✓ src/os/games/pinball/physics.test.ts  (8 tests) 1618ms
+
+ Test Files  11 passed (11)
+      Tests  216 passed (216)
+   Start at  21:55:05
+   Duration  2.33s (transform 1.47s, setup 0ms, collect 2.01s, tests 2.15s, environment 3ms, prepare 2.18s)
+
+vite v4.5.14 building for production...
+transforming...
+
+/os/wallpaper/hills.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/tokens.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/fonts/DejaVuSans.woff2 referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/min.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/max.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/restore.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/full.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/chrome/xp/close.svg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+/os/games/pinball/panel-bg.jpg referenced in C:/Users/domin/OneDrive/Desktop/Websites/dominikos/os/src/styles/globals.css didn't resolve at build time, it will remain unchanged to be resolved at runtime
+node_modules/gray-matter/lib/engines.js (43:13) Use of eval in "node_modules/gray-matter/lib/engines.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+✓ 258 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                   4.72 kB │ gzip:  2.15 kB
+dist/assets/ms_sans_serif_bold-5f3fbc57.woff2     6.26 kB
+dist/assets/ms_sans_serif-11b5a68a.woff2          6.51 kB
+dist/assets/ms_sans_serif_bold-e7b28b60.woff      8.30 kB
+dist/assets/ms_sans_serif-11318ea1.woff           8.54 kB
+dist/assets/PerfectDOSVGA437Win-1499ed0e.woff2   17.35 kB
+dist/assets/PerfectDOSVGA437Win-16b1c3a4.woff    23.62 kB
+dist/assets/index-24624b32.css                    1.88 kB │ gzip:  0.75 kB
+dist/assets/OSShell-f1290e35.css                320.68 kB │ gzip: 51.52 kB
+dist/assets/useGameLoop-9ba651ac.js               0.32 kB │ gzip:  0.24 kB
+dist/assets/usePageVisible-1d7e248e.js            0.35 kB │ gzip:  0.22 kB
+dist/assets/ImageViewApp-71e38421.js              0.49 kB │ gzip:  0.29 kB
+dist/assets/NotepadApp-e9aa6287.js                0.52 kB │ gzip:  0.38 kB
+dist/assets/CardHubApp-dc68b3bd.js                0.54 kB │ gzip:  0.38 kB
+dist/assets/PdfApp-af956957.js                    0.66 kB │ gzip:  0.39 kB
+dist/assets/FolderApp-1b24dd0f.js                 1.01 kB │ gzip:  0.56 kB
+dist/assets/RecycleBinApp-55e19098.js             1.14 kB │ gzip:  0.62 kB
+dist/assets/MyComputerApp-d9367213.js             1.19 kB │ gzip:  0.60 kB
+dist/assets/ExperienceApp-37ba7c4b.js             1.20 kB │ gzip:  0.64 kB
+dist/assets/IframeHost-cc3e7b83.js                2.56 kB │ gzip:  1.12 kB
+dist/assets/ContactApp-b03cdeca.js                3.12 kB │ gzip:  1.30 kB
+dist/assets/cards-36d28951.js                     4.17 kB │ gzip:  1.52 kB
+dist/assets/MobileShell-62dd733d.js               4.50 kB │ gzip:  1.74 kB
+dist/assets/index-5d21154c.js                     8.34 kB │ gzip:  3.46 kB
+dist/assets/BrowserApp-54105a0e.js               11.59 kB │ gzip:  4.12 kB
+dist/assets/FlappyApp-24ca51f1.js                11.77 kB │ gzip:  4.94 kB
+dist/assets/Taskbar-a1ad67d3.js                  11.98 kB │ gzip:  4.42 kB
+dist/assets/MinesApp-e081b96f.js                 12.54 kB │ gzip:  4.93 kB
+dist/assets/Desktop-777a4e58.js                  13.07 kB │ gzip:  4.77 kB
+dist/assets/FreeCellApp-7467e65c.js              13.80 kB │ gzip:  5.02 kB
+dist/assets/DialtoneApp-54aeef26.js              14.91 kB │ gzip:  5.13 kB
+dist/assets/PaintApp-c35d8b9b.js                 16.02 kB │ gzip:  5.53 kB
+dist/assets/SolitaireApp-5c28dea3.js             17.97 kB │ gzip:  6.54 kB
+dist/assets/BubbleApp-81beb330.js                18.29 kB │ gzip:  7.02 kB
+dist/assets/PinballApp-276d1a7e.js               22.05 kB │ gzip:  8.12 kB
+dist/assets/OSShell-76c73145.js                  66.41 kB │ gzip: 21.77 kB
+dist/assets/DocWindow-15b65048.js               133.85 kB │ gzip: 41.57 kB
+dist/assets/vendor-1cf99640.js                  141.34 kB │ gzip: 45.37 kB
+✓ built in 3.95s
+
+> dominikos@0.1.0 gate
+> node scripts/legal-gate.mjs
+
+✔ legal gate clean (279 text files scanned)
+Shell cwd was reset to c:\Users\domin\OneDrive\Desktop\Websites\portfolio-rework
+Workflow
+IN
+{
+  "script": "export const meta = {\n  name: 'card-hub-step4-spider',\n  description: 'Step 4: sonnet builds the Spider (Pasjans Pajak) engine/tests/app, then a haiku adversarially verifies the rules',\n  phases: [\n    { title: 'Build', detail: 'sonnet: engine.ts + engine.test.ts + SpiderApp.tsx, cloned from the pasjans pattern', model: 'sonnet' },\n    { title: 'Verify', detail: 'haiku: adversarial rule-check of the engine against the written spec', model: 'haiku' },\n  ],\n}\n\nconst BUILD_SCHEMA = {\n  type: 'object',\n  required: ['filesCreated', 'typecheckPass', 'testsPass', 'testCount', 'notes'],\n  properties: {\n    filesCreated: { type: 'array', items: { type: 'string' } },\n    typecheckPass: { type: 'boolean' },\n    testsPass: { type: 'boolean' },\n    testCount: { type: 'number' },\n    notes: { type: 'string', description: 'new CSS classes added, spec deviations and why, anything the orchestrator must know' },\n  },\n}\n\nconst VERDICT_SCHEMA = {\n  type: 'object',\n  required: ['rules', 'overall'],\n  properties: {\n    rules: {\n      type: 'array',\n      items: {\n        type: 'object',\n        required: ['rule', 'verdict', 'detail'],\n        properties: {\n          rule: { type: 'string' },\n          verdict: { type: 'string', enum: ['pass', 'refuted', 'untested'] },\n          detail: { type: 'string', description: 'concrete counterexample if refuted; which assertion covers it if pass' },\n        },\n      },\n    },\n    overall: { type: 'string', enum: ['pass', 'refuted'] },\n  },\n}\n\nphase('Build')\nconst build = await agent(`You are building Spider solitaire (\"Pasjans Pajak\") for DominikOS, a Windows-XP-style web OS (React 18 + Vite 4 + TypeScript strict + vitest). Repo root: c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os — all paths below are relative to it.\n\nREAD FIRST (the patterns you are cloning):\n- src/os/games/pasjans/engine.ts — engine idioms: seeded-LCG shuffle, full-snapshot undo history, PileRef / canMove... / moveStack, bumpScore, face-down flip handling.\n- src/os/games/pasjans/engine.test.ts — test style to mirror.\n- src/os/games/pasjans/SolitaireApp.tsx — the app shell you will clone: pointer-drag engine, pause contract, ResizeObserver metrics, XP-style \"Game\" menu WITH the Draw-one/Draw-three role=\"menuitemradio\" pattern (you will mirror it for suit difficulty), sunken status bar, sfx map (WebAudio tone()), aria-live sr-only region, roving-tabindex hotspot layer.\n- src/os/games/freecell/FreeCellApp.tsx and the /* freecell (CARD-HUB-PLAN Step 3) */ block in src/styles/globals.css — a just-shipped sibling that did the same cloning exercise; useful second reference. Do NOT edit it.\n- src/os/games/pasjans/cards.tsx — CardFace/CardBack renderer. Import UNMODIFIED via '../pasjans/cards'. Do not edit it.\n- src/os/types.ts — the AppProps contract your component must satisfy (default export).\n\nCREATE exactly three files:\n\n1. src/os/games/pajak/engine.ts — pure TS, no DOM, no React.\n   State: { tableau: Card[][] length 10; stock: Card[] (50 cards = 5 deals of 10); completed: number (0-8 finished runs); suitCount: 1|2|4 (DEFAULT 1); score; moves; history of full snapshots }.\n   Two decks = 104 cards with GLOBALLY UNIQUE ids 0..103 — never reset ids per deck (snapshot/undo and the drag element registry key on id).\n   Suit composition: 1 suit = 8 sequences worth of spades (104 spade cards); 2 suits = spades + hearts, 52 each; 4 suits = 2 full decks. Seeded-LCG shuffle, same idiom as pasjans.\n   Deal: columns 0-3 get 6 cards, columns 4-9 get 5 (= 54); ONLY the top card of each column is face-up; remaining 50 go to stock.\n   Rules:\n   - Any face-up card may be built onto a card one rank higher REGARDLESS of suit/color; kings only onto empty columns or nothing above them.\n   - Only a SAME-SUIT descending run moves as a unit (a mixed-suit descending run must be rejected as a multi-card move).\n   - Any single face-up card or legal same-suit run may move to an empty column.\n   - When a full K-to-A same-suit face-up run forms on a column, it auto-removes to completed (+1), flipping any newly exposed card.\n   - Removing/moving cards that expose a face-down top card flips it face-up.\n   - Stock deal: BLOCKED while any column is empty; deals exactly one face-up card onto each of the 10 columns.\n   - Win when completed === 8.\n   - Scoring, classic Spider: start at 500, -1 per move, +100 per completed run (floor at 0 not required).\n   - Full-snapshot undo like pasjans (undo must correctly restore completed runs, flips, and stock deals).\n   - Changing suitCount starts a new deal.\n\n2. src/os/games/pajak/engine.test.ts — vitest. MUST cover: unique ids 0..103; deal shape 6/6/6/6/5/5/5/5/5/5 with only tops face-up and a 50-card stock; all three suitCount variants deal the right suit composition; single-card any-suit build legality; mixed-suit multi-card run REJECTED while same-suit run accepted; K-to-A same-suit auto-completion (including the exposed-card flip); stock deal blocked with an empty column and dealing 10 face-up cards otherwise; win at completed === 8; undo round-trip across a move, a flip, a stock deal, and a completed run.\n\n3. src/os/games/pajak/SpiderApp.tsx — default export matching AppProps; clone the SolitaireApp.tsx shell:\n   - pointer-drag with the same card-element registry approach; cancel any in-flight drag on window blur (see FreeCellApp's explicit blur listener).\n   - pause contract: active = focused && visible && !minimized.\n   - ResizeObserver metrics; sunken status bar showing score/moves and completed runs (e.g. \"Talie: 3/8\").\n   - XP-style \"Game\" menu: New Game (F2), Undo (Ctrl+Z), separator, difficulty radio group mirroring pasjans' Draw-one/Draw-three pattern with role=\"menuitemradio\": \"Jeden kolor\" (1 suit), \"Dwa kolory\" (2 suits), \"Cztery kolory\" (4 suits). Picking one starts a new deal with that suitCount.\n   - Clicking/activating the stock deals a round (blocked with the standard error sfx + aria-live message when a column is empty).\n   - sfx: reuse the pasjans sfx map wholesale (draw/flip/move/foundation-analogue for completed run/undo/error/win), same mute gating.\n   - Accessibility: aria-live sr-only region; roving-tabindex hotspot layer with 11 hotspots — 10 columns + 1 stock handle.\n   - Layout: 10 tableau columns across; stock pile bottom-right (or wherever pasjans-style metrics fit it cleanly); completed-run indicator.\n\nCSS: reuse existing pasjans/freecell classes where possible; if new classes are needed, append ONE clearly-commented block to src/styles/globals.css starting with /* pajak - spider (CARD-HUB-PLAN Step 4) */ — minimal.\n\nDO NOT touch: src/os/registry.ts, registry/*.json, src/os/games/cardhub/, src/os/games/pasjans/, src/os/games/freecell/. The orchestrator wires the app in afterwards. Do not run the dev server. Do not deploy. Do not create icons.\n\nLEGAL (hard CI gate): never write the words \"Windows\", \"Microsoft\", or \"Luna\" anywhere, comments included. Polish UI strings are welcome (the app title is \"Pasjans Pajak\" with the accented a-ogonek in user-facing text: \"Pasjans Pająk\").\n\nVERIFY before returning: from the repo root run npx vitest run src/os/games/pajak/engine.test.ts, then npm run typecheck. Iterate until both are green.\n\nReturn structured data per the schema: files created, typecheck/tests status, test count, and notes (new CSS classes, any spec deviation and why).`, { label: 'build:pajak', phase: 'Build', model: 'sonnet', schema: BUILD_SCHEMA })\n\nif (!build || !build.testsPass || !build.typecheckPass) {\n  return { build, verdict: null, aborted: 'builder did not reach green — orchestrator must inspect before verification' }\n}\n\nphase('Verify')\nconst verdict = await agent(`Read-only adversarial review of a freshly built Spider solitaire engine. Repo root: c:/Users/domin/OneDrive/Desktop/Websites/dominikos/os.\n\nRead src/os/games/pajak/engine.ts and src/os/games/pajak/engine.test.ts (skim src/os/games/pasjans/engine.ts for the idioms it clones). Do NOT edit any file. You may run: npx vitest run src/os/games/pajak/engine.test.ts.\n\nTry to REFUTE each rule below with a concrete counterexample — a specific state plus action where the implementation gives the wrong answer. Trace the actual code; do not trust names or comments.\n\n1. Card identity: 104 cards with globally unique ids 0..103 — ids must NOT repeat between the two decks, for every suitCount (1, 2, 4).\n2. Deal shape: columns 0-3 get 6 cards, 4-9 get 5; ONLY the top card of each column face-up; exactly 50 cards in stock.\n3. Suit composition: 1 suit = all one suit; 2 suits = two suits at 52 each; 4 suits = 2 of each standard suit.\n4. Build legality: single face-up card goes onto any card one rank higher regardless of suit; multi-card moves ONLY for same-suit descending runs — a mixed-suit descending run must be rejected as a unit move.\n5. Auto-completion: a full face-up K-to-A same-suit run is removed to completed, and a newly exposed face-down card flips face-up.\n6. Stock: dealing is blocked while ANY column is empty; otherwise deals exactly one face-up card to each of the 10 columns and shrinks by 10.\n7. Win: exactly when completed === 8.\n8. Undo: full round-trip across a plain move, a flip, a stock deal, and a completed-run removal.\nAlso check the TEST SUITE actually asserts each rule; report implemented-but-unasserted rules as 'untested' rather than 'pass'.\n\nReturn per-rule verdicts with specific card values in any counterexample.`, { label: 'verify:pajak', phase: 'Verify', model: 'haiku', schema: VERDICT_SCHEMA })\n\nreturn { build, verdict }"
+}
+OUT
+Workflow launched in background. Task ID: wuzlmrq3p
+Summary: Step 4: sonnet builds the Spider (Pasjans Pajak) engine/tests/app, then a haiku adversarially verifies the rules
+Transcript dir: C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\subagents\workflows\wf_ace8bc19-be3
+Script file: C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-step4-spider-wf_ace8bc19-be3.js
+(Edit this file with Write/Edit and re-invoke Workflow with {scriptPath: "C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-step4-spider-wf_ace8bc19-be3.js"} to iterate without resending the script.)
+Run ID: wf_ace8bc19-be3
+To resume after editing the script: Workflow({scriptPath: "C:\Users\domin\.claude\projects\c--Users-domin-OneDrive-Desktop-Websites-portfolio-rework\95c0835a-7f10-46ea-8718-aecb979c9211\workflows\scripts\card-hub-step4-spider-wf_ace8bc19-be3.js", resumeFromRunId: "wf_ace8bc19-be3"}) — completed agents return cached results (cached results may themselves be empty — inspect journal.jsonl before assuming there is something to recover).
+
+You will be notified when it completes. Use /workflows to watch live progress.
+Step 3 complete — FreeCell is in the hub.
+
+What shipped:
+
+Builder (sonnet) created engine.ts, engine.test.ts (34 tests), and FreeCellApp.tsx — a faithful clone of the pasjans shell: pointer-drag, pause contract, XP Game menu (New Game F2 / Undo Ctrl+Z), 16-hotspot keyboard layer, pasjans sfx map minus draw/flip, and the unmodified shared card renderer. maxMovable supermove math includes the empty-destination-column exclusion, exported and unit-tested directly. One noted, sensible scope choice: foundations are drop-only targets (no foundation→tableau pull-back) — simpler hotspots, no rule required it.
+Verifier (haiku) attacked all 7 rules (deal shape, supermove math, tableau/foundation/free-cell legality, win, undo) — all pass, none untested, overall pass.
+Orchestrator wiring: freecell.json (mirrors pasjans: hidden from desktop/Start, singleton 820×600), lazy-import line in registry.ts:36, second tile in the hub's TILES, FreeCell row in ASSET-CREDITS.md, and a placeholder original icon at freecell.svg so no tile renders broken before Step 6.
+Done-when gate: npm run ci fully green — typecheck, 216/216 tests (11 suites, freecell's 34 included), build emitting FreeCellApp-*.js + a shared cards-*.js chunk, legal gate clean across 279 files.
+Step 4 is now running — the Spider builder (sonnet) is writing the pajak engine (104 globally-unique cards, 6/6/6/6/5/5/5/5/5/5 deal, same-suit run moves, 1/2/4-suit menu) with the haiku verifier queued behind it. When it notifies me I'll wire it in, run CI, and post the Step 4 done message.
+
+You've hit your session limit · resets 1am (Europe/Warsaw)

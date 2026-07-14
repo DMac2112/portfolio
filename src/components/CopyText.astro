@@ -1,0 +1,13 @@
+---
+interface Props {
+  current: string;
+  revised: string;
+  human?: string;
+}
+
+const { current, revised, human = revised } = Astro.props;
+---
+
+<span data-copy-version="current">{current}</span>
+<span data-copy-version="revised">{revised}</span>
+<span data-copy-version="human">{human}</span>

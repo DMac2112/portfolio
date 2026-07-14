@@ -13,28 +13,240 @@ import { loadContent } from '../lib/content';
 
 // Local JSON content (src/data/*) — no network, no Sanity. Every word below ships
 // as static, crawlable HTML.
-const { site, abouts, works, skills, experiences, testimonials } = loadContent();
+const { site, abouts, works, skills, experiences, testimonials, revised, human } = loadContent();
 
 const title = site.meta.title;
 const description = site.meta.description;
 ---
 
-<Base title={title} description={description}>
-  <Navbar />
+<Base
+  title={title}
+  description={description}
+  revisedTitle={revised.meta.title}
+  revisedDescription={revised.meta.description}
+  humanTitle={human.meta.title}
+  humanDescription={human.meta.description}
+>
+  <Navbar revised={revised.navigation} human={human.navigation} />
   <main>
-    <Hero />
-    <About abouts={abouts} />
-    <Work works={works} />
-    <Skills experiences={experiences} skills={skills} />
-    <Testimonials testimonials={testimonials} />
-    <OsShowcase />
+    <Hero
+      revised={revised.hero}
+      revisedOsLaunch={revised.osLaunch}
+      human={human.hero}
+      humanOsLaunch={human.osLaunch}
+    />
+    <About abouts={abouts} revised={revised.about} human={human.about} />
+    <Work works={works} revised={revised.work} human={human.work} />
+    <Skills
+      experiences={experiences}
+      skills={skills}
+      revised={revised.experienceAndSkills}
+      human={human.experienceAndSkills}
+    />
+    <Testimonials testimonials={testimonials} revised={revised.testimonials} human={human.testimonials} />
+    <OsShowcase revised={revised.osShowcase} human={human.osShowcase} />
   </main>
-  <Contact />
+  <Contact
+    revised={revised.contact}
+    revisedFooter={revised.footer}
+    human={human.contact}
+    humanFooter={human.footer}
+  />
   <Rails />
 </Base>
 
 <script>
-  // ---- All interactivity for the page: ~130 lines of vanilla JS, no framework.
+  // ---- All page interactivity: vanilla JS, no framework.
+
+  // Original/formal/personal copy switch
+  type CopyVersion = 'current' | 'revised' | 'human';
+  const copyStorageKey = 'portfolio-copy-version';
+  const copyVersions: CopyVersion[] = ['current', 'revised', 'human'];
+  const copyLabels: Record<CopyVersion, string> = {
+    current: 'Original',
+    revised: 'Formal',
+    human: 'Personal',
+  };
+  const copyToggle = document.querySelector<HTMLButtonElement>('[data-copy-toggle]');
+  const copyToggleLabel = copyToggle?.querySelector<HTMLElement>('[data-copy-toggle-label]');
+  const copyToggleAction = copyToggle?.querySelector<HTMLElement>('[data-copy-toggle-action]');
+
+  const setCopyVersion = (version: CopyVersion, persist = true) => {
+    const nextVersion = copyVersions[(copyVersions.indexOf(version) + 1) % copyVersions.length];
+    document.documentElement.dataset.copyVersion = version;
+    copyToggle?.setAttribute('data-copy-active', version);
+    copyToggle?.setAttribute(
+      'aria-label',
+      `Copy version: ${copyLabels[version]}. Activate ${copyLabels[nextVersion].toLowerCase()} version.`
+    );
+    if (copyToggleLabel) copyToggleLabel.textContent = copyLabels[version];
+    if (copyToggleAction) {
+      copyToggleAction.textContent = `. Activate ${copyLabels[nextVersion].toLowerCase()} version.`;
+    }
+
+    const pageTitle = document.querySelector<HTMLTitleElement>('title[data-copy-current]');
+    const metaDescription = document.querySelector<HTMLMetaElement>(
+      'meta[name="description"][data-copy-current]'
+    );
+    if (pageTitle) {
+      pageTitle.textContent = pageTitle.getAttribute(`data-copy-${version}`) || '';
+    }
+    if (metaDescription) {
+      metaDescription.content = metaDescription.getAttribute(`data-copy-${version}`) || '';
+    }
+
+    if (persist) {
+      try {
+        localStorage.setItem(copyStorageKey, version);
+      } catch {
+        // The switch still works when storage is unavailable.
+      }
+    }
+
+    document.dispatchEvent(new CustomEvent('portfolio-copy-change', { detail: { version } }));
+  };
+
+  const savedCopyVersion = document.documentElement.dataset.copyVersion;
+  const initialCopyVersion: CopyVersion = savedCopyVersion === 'revised' || savedCopyVersion === 'human'
+    ? savedCopyVersion
+    : 'current';
+  setCopyVersion(initialCopyVersion, false);
+  copyToggle?.addEventListener('click', () => {
+    const activeVersion = document.documentElement.dataset.copyVersion;
+    const version: CopyVersion = activeVersion === 'revised' || activeVersion === 'human' ? activeVersion : 'current';
+    setCopyVersion(copyVersions[(copyVersions.indexOf(version) + 1) % copyVersions.length]);
+  });
+
+  // Structural style switch
+  type StyleOption = 'classic' | 'editorial' | 'glass' | 'terminal';
+  const styleStorageKey = 'portfolio-style';
+  const styleOptions: { id: StyleOption; label: string }[] = [
+    { id: 'classic', label: 'Classic' },
+    { id: 'editorial', label: 'Editorial' },
+    { id: 'glass', label: 'Glass' },
+    { id: 'terminal', label: 'Terminal' },
+  ];
+  const styleToggle = document.querySelector<HTMLButtonElement>('[data-style-toggle]');
+  const styleToggleLabel = styleToggle?.querySelector<HTMLElement>('[data-style-toggle-label]');
+  const styleToggleAction = styleToggle?.querySelector<HTMLElement>('[data-style-toggle-action]');
+
+  const setStyle = (style: StyleOption, persist = true) => {
+    const activeIndex = styleOptions.findIndex((option) => option.id === style);
+    const activeStyle = styleOptions[activeIndex];
+    const nextStyle = styleOptions[(activeIndex + 1) % styleOptions.length];
+    document.documentElement.dataset.style = style;
+    styleToggle?.setAttribute('data-style-active', style);
+    styleToggle?.setAttribute(
+      'aria-label',
+      `Style: ${activeStyle.label}. Activate ${nextStyle.label.toLowerCase()} style.`
+    );
+    if (styleToggleLabel) styleToggleLabel.textContent = activeStyle.label;
+    if (styleToggleAction) {
+      styleToggleAction.textContent = `. Activate ${nextStyle.label.toLowerCase()} style.`;
+    }
+
+    if (persist) {
+      try {
+        localStorage.setItem(styleStorageKey, style);
+      } catch {
+        // The switch still works when storage is unavailable.
+      }
+    }
+
+    document.dispatchEvent(new CustomEvent('portfolio-style-change', { detail: { style } }));
+  };
+
+  const savedStyle = document.documentElement.dataset.style;
+  const initialStyle = styleOptions.some((option) => option.id === savedStyle)
+    ? savedStyle as StyleOption
+    : 'classic';
+  setStyle(initialStyle, false);
+  styleToggle?.addEventListener('click', () => {
+    const activeStyle = document.documentElement.dataset.style;
+    const activeIndex = styleOptions.findIndex((option) => option.id === activeStyle);
+    const nextIndex = activeIndex >= 0 ? (activeIndex + 1) % styleOptions.length : 0;
+    setStyle(styleOptions[nextIndex].id);
+  });
+
+  // Colour palette switch: six light palettes followed by six dark palettes.
+  type PaletteOption =
+    | 'cloud'
+    | 'paper'
+    | 'mint'
+    | 'rose'
+    | 'sky'
+    | 'sand'
+    | 'midnight'
+    | 'oled'
+    | 'forest'
+    | 'aubergine'
+    | 'ember'
+    | 'slate';
+  const paletteStorageKey = 'portfolio-palette';
+  const paletteOptions: { id: PaletteOption; label: string; mode: 'Light' | 'Dark' }[] = [
+    { id: 'cloud', label: 'Cloud', mode: 'Light' },
+    { id: 'paper', label: 'Paper', mode: 'Light' },
+    { id: 'mint', label: 'Mint', mode: 'Light' },
+    { id: 'rose', label: 'Rose', mode: 'Light' },
+    { id: 'sky', label: 'Sky', mode: 'Light' },
+    { id: 'sand', label: 'Sand', mode: 'Light' },
+    { id: 'midnight', label: 'Midnight', mode: 'Dark' },
+    { id: 'oled', label: 'OLED', mode: 'Dark' },
+    { id: 'forest', label: 'Forest', mode: 'Dark' },
+    { id: 'aubergine', label: 'Aubergine', mode: 'Dark' },
+    { id: 'ember', label: 'Ember', mode: 'Dark' },
+    { id: 'slate', label: 'Slate', mode: 'Dark' },
+  ];
+  const paletteToggle = document.querySelector<HTMLButtonElement>('[data-palette-toggle]');
+  const paletteToggleLabel = paletteToggle?.querySelector<HTMLElement>('[data-palette-toggle-label]');
+  const paletteToggleMode = paletteToggle?.querySelector<HTMLElement>('[data-palette-toggle-mode]');
+  const paletteToggleAction = paletteToggle?.querySelector<HTMLElement>('[data-palette-toggle-action]');
+
+  const setPalette = (palette: PaletteOption, persist = true) => {
+    const activeIndex = paletteOptions.findIndex((option) => option.id === palette);
+    const activePalette = paletteOptions[activeIndex];
+    const nextPalette = paletteOptions[(activeIndex + 1) % paletteOptions.length];
+    document.documentElement.dataset.palette = palette;
+    paletteToggle?.setAttribute('data-palette-active', palette);
+    paletteToggle?.setAttribute(
+      'aria-label',
+      `Colour palette: ${activePalette.label}, ${activePalette.mode.toLowerCase()} mode. `
+        + `Activate ${nextPalette.label}, ${nextPalette.mode.toLowerCase()} mode.`
+    );
+    if (paletteToggleLabel) paletteToggleLabel.textContent = activePalette.label;
+    if (paletteToggleMode) paletteToggleMode.textContent = ` · ${activePalette.mode}`;
+    if (paletteToggleAction) {
+      paletteToggleAction.textContent = `. Activate ${nextPalette.label}, ${nextPalette.mode.toLowerCase()} mode.`;
+    }
+
+    const pageBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue('--page-bg')
+      .trim();
+    const themeColour = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (themeColour && pageBackground) themeColour.content = pageBackground;
+
+    if (persist) {
+      try {
+        localStorage.setItem(paletteStorageKey, palette);
+      } catch {
+        // The switch still works when storage is unavailable.
+      }
+    }
+
+    document.dispatchEvent(new CustomEvent('portfolio-palette-change', { detail: { palette } }));
+  };
+
+  const savedPalette = document.documentElement.dataset.palette;
+  const initialPalette = paletteOptions.some((option) => option.id === savedPalette)
+    ? savedPalette as PaletteOption
+    : 'cloud';
+  setPalette(initialPalette, false);
+  paletteToggle?.addEventListener('click', () => {
+    const activePalette = document.documentElement.dataset.palette;
+    const activeIndex = paletteOptions.findIndex((option) => option.id === activePalette);
+    const nextIndex = activeIndex >= 0 ? (activeIndex + 1) % paletteOptions.length : 0;
+    setPalette(paletteOptions[nextIndex].id);
+  });
 
   // 1) Mobile nav
   const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
@@ -60,7 +272,9 @@ const description = site.meta.description;
 
   // 2) Work filter
   const filterBtns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-  const cards = document.querySelectorAll<HTMLElement>('[data-work-grid] [data-tags]');
+  const cards = document.querySelectorAll<HTMLElement>(
+    '[data-copy-version="current"] [data-work-grid] [data-tags]'
+  );
 
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -88,6 +302,19 @@ const description = site.meta.description;
   const status = document.querySelector<HTMLElement>('[data-contact-status]');
   const submitBtn = document.querySelector<HTMLButtonElement>('[data-contact-submit]');
 
+  const activeCopy = (element: HTMLElement | null, key: string, fallback: string) => {
+    const activeVersion = document.documentElement.dataset.copyVersion;
+    const version = activeVersion === 'revised' || activeVersion === 'human' ? activeVersion : 'current';
+    return element?.getAttribute(`data-${key}-${version}`) || fallback;
+  };
+
+  document.addEventListener('portfolio-copy-change', () => {
+    if (submitBtn && !submitBtn.disabled) {
+      submitBtn.textContent = activeCopy(submitBtn, 'label', 'Send Message');
+    }
+  });
+  if (submitBtn) submitBtn.textContent = activeCopy(submitBtn, 'label', 'Send Message');
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!status || !submitBtn) return;
@@ -99,13 +326,13 @@ const description = site.meta.description;
 
     status.classList.remove('is-error', 'is-success');
     if (!name || !email || !message) {
-      status.textContent = 'Please fill in all fields.';
+      status.textContent = activeCopy(form, 'validation', 'Please fill in all fields.');
       status.classList.add('is-error');
       return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending...';
+    submitBtn.textContent = activeCopy(submitBtn, 'sending', 'Sending...');
 
     try {
       const res = await fetch('/.netlify/functions/contact', {
@@ -115,14 +342,22 @@ const description = site.meta.description;
       });
       if (!res.ok) throw new Error('Request failed');
       form.reset();
-      status.textContent = 'Thank you for getting in touch! I will get back to you soon.';
+      status.textContent = activeCopy(
+        form,
+        'success',
+        'Thank you for getting in touch! I will get back to you soon.'
+      );
       status.classList.add('is-success');
     } catch {
-      status.textContent = 'Something went wrong — please email me directly instead.';
+      status.textContent = activeCopy(
+        form,
+        'error',
+        'Something went wrong — please email me directly instead.'
+      );
       status.classList.add('is-error');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Send Message';
+      submitBtn.textContent = activeCopy(submitBtn, 'label', 'Send Message');
     }
   });
 

@@ -2,18 +2,34 @@
 // Testimonial carousel. Every quote is server-rendered (crawlers see all of
 // them); the page script only toggles which one is visible.
 import { Image } from 'astro:assets';
-import { contentImage, type Testimonial } from '../lib/content';
+import { contentImage, type HumanContent, type RevisedContent, type Testimonial } from '../lib/content';
 
 interface Props {
   testimonials: Testimonial[];
+  revised: RevisedContent['testimonials'];
+  human: HumanContent['testimonials'];
 }
 
-const { testimonials } = Astro.props;
+const { testimonials, revised, human } = Astro.props;
+const revisedHeadingWords = revised.heading.split(' ');
+const revisedHeadingAccent = revisedHeadingWords.pop() || '';
+const revisedHeadingLead = revisedHeadingWords.join(' ');
+const humanHeadingWords = human.heading.split(' ');
+const humanHeadingAccent = humanHeadingWords.pop() || '';
+const humanHeadingLead = humanHeadingWords.join(' ');
 ---
 
 {testimonials.length > 0 && (
   <section id="testimonial" class="section bg-primary" aria-labelledby="testimonial-heading">
-    <h2 id="testimonial-heading" class="head-text">What people <span>say</span></h2>
+    <h2 id="testimonial-heading" class="head-text">
+      <span class="copy-heading" data-copy-version="current">What people <span>say</span></span>
+      <span class="copy-heading" data-copy-version="revised">
+        {revisedHeadingLead}{' '}<span>{revisedHeadingAccent}</span>
+      </span>
+      <span class="copy-heading" data-copy-version="human">
+        {humanHeadingLead}{' '}<span>{humanHeadingAccent}</span>
+      </span>
+    </h2>
 
     <div class="t-stage" data-carousel>
       {testimonials.map((t, i) => (
@@ -54,6 +70,10 @@ const { testimonials } = Astro.props;
 )}
 
 <style>
+  .head-text > .copy-heading {
+    color: inherit;
+  }
+
   .t-stage {
     width: 100%;
     display: flex;

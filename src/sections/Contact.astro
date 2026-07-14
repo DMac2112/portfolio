@@ -4,19 +4,40 @@
 // The form posts to /.netlify/functions/contact — the write token lives
 // server-side in Netlify env vars, never in this bundle.
 import { Image } from 'astro:assets';
+import CopyText from '../components/CopyText.astro';
+import type { HumanContent, RevisedContent } from '../lib/content';
 import emailIcon from '../assets/email.png';
 import linkedinIcon from '../assets/linkedin.png';
 
+interface Props {
+  revised: RevisedContent['contact'];
+  revisedFooter: RevisedContent['footer'];
+  human: HumanContent['contact'];
+  humanFooter: HumanContent['footer'];
+}
+
+const { revised, revisedFooter, human, humanFooter } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
 <footer id="contact" class="section bg-white" aria-labelledby="contact-heading">
-  <h2 id="contact-heading" class="head-text">Contact me</h2>
+  <h2 id="contact-heading" class="head-text">
+    <CopyText current="Contact me" revised={revised.heading} human={human.heading} />
+  </h2>
+
+  <p class="contact-intro p-text" data-copy-version="revised">{revised.intro}</p>
+  <p class="contact-intro p-text" data-copy-version="human">{human.intro}</p>
 
   <div class="contact-cards">
     <a class="contact-card" href="mailto:dominikmachowiak101@gmail.com">
       <Image src={emailIcon} alt="" width={40} loading="lazy" />
-      <span class="p-text">dominikmachowiak101@gmail.com</span>
+      <span class="p-text">
+        <CopyText
+          current="dominikmachowiak101@gmail.com"
+          revised={revised.email.label}
+          human={human.email.label}
+        />
+      </span>
     </a>
     <a
       class="contact-card"
@@ -25,11 +46,26 @@ const year = new Date().getFullYear();
       rel="noreferrer noopener"
     >
       <Image src={linkedinIcon} alt="" width={40} loading="lazy" />
-      <span class="p-text">Dominik Machowiak</span>
+      <span class="p-text">
+        <CopyText current="Dominik Machowiak" revised={revised.linkedin.label} human={human.linkedin.label} />
+      </span>
     </a>
   </div>
 
-  <form class="contact-form" data-contact-form novalidate>
+  <form
+    class="contact-form"
+    data-contact-form
+    data-validation-current="Please fill in all fields."
+    data-validation-revised={revised.form.validationMessage}
+    data-validation-human={human.form.validationMessage}
+    data-success-current="Thank you for getting in touch! I will get back to you soon."
+    data-success-revised={revised.form.successMessage}
+    data-success-human={human.form.successMessage}
+    data-error-current="Something went wrong — please email me directly instead."
+    data-error-revised={revised.form.errorMessage}
+    data-error-human={human.form.errorMessage}
+    novalidate
+  >
     <div>
       <label class="sr-only" for="cf-name">Your name</label>
       <input class="p-text" type="text" id="cf-name" name="name" placeholder="Your Name" required />
@@ -42,19 +78,45 @@ const year = new Date().getFullYear();
       <label class="sr-only" for="cf-message">Your message</label>
       <textarea class="p-text" id="cf-message" name="message" placeholder="Your Message" required></textarea>
     </div>
-    <button type="submit" class="p-text contact-submit" data-contact-submit>Send Message</button>
+    <button
+      type="submit"
+      class="p-text contact-submit"
+      data-contact-submit
+      data-label-current="Send Message"
+      data-label-revised={revised.form.submitLabel}
+      data-label-human={human.form.submitLabel}
+      data-sending-current="Sending..."
+      data-sending-revised={revised.form.sendingLabel}
+      data-sending-human={human.form.sendingLabel}
+    >
+      Send Message
+    </button>
     <p class="contact-status p-text" role="status" aria-live="polite" data-contact-status></p>
   </form>
 
   <div class="footer-bottom">
     <a class="footer-os-link" href="/os/?boot=chooser">
-      Boot DominikOS — my portfolio as an interactive desktop &rarr;
+      <CopyText
+        current="Boot DominikOS — my portfolio as an interactive desktop →"
+        revised={revisedFooter.osLinkLabel}
+        human={humanFooter.osLinkLabel}
+      />
     </a>
     <p class="p-text footer-copy">&copy; {year} Dominik Machowiak · All rights reserved</p>
   </div>
 </footer>
 
 <style>
+  .head-text > [data-copy-version] {
+    color: inherit;
+  }
+
+  .contact-intro {
+    max-width: 42rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
   .contact-cards {
     display: flex;
     justify-content: center;

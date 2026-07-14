@@ -3,14 +3,28 @@ import '@fontsource-variable/dm-sans';
 import '@fontsource-variable/space-grotesk';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
+import '../styles/palette-options.css';
+import '../styles/style-options.css';
 
 interface Props {
   title: string;
   description: string;
+  revisedTitle: string;
+  revisedDescription: string;
+  humanTitle: string;
+  humanDescription: string;
   ogImage?: string;
 }
 
-const { title, description, ogImage = '/dominik.png' } = Astro.props;
+const {
+  title,
+  description,
+  revisedTitle,
+  revisedDescription,
+  humanTitle,
+  humanDescription,
+  ogImage = '/dominik.png',
+} = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImageAbs = new URL(ogImage, Astro.site);
@@ -67,12 +81,23 @@ const speculationRules = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html
+  lang="en"
+  data-copy-version="current"
+  data-style="classic"
+  data-palette="cloud"
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <title data-copy-current={title} data-copy-revised={revisedTitle} data-copy-human={humanTitle}>{title}</title>
+    <meta
+      name="description"
+      content={description}
+      data-copy-current={description}
+      data-copy-revised={revisedDescription}
+      data-copy-human={humanDescription}
+    />
     <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#151320" />
     <link rel="icon" href="/dominik.png" />
@@ -96,8 +121,45 @@ const speculationRules = {
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <script type="speculationrules" set:html={JSON.stringify(speculationRules)} />
 
-    <!-- js flag: reveal animations only ever hide content when JS runs -->
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <!-- Apply saved display choices before first paint; defaults remain usable without JS. -->
+    <script is:inline>
+      (() => {
+        let copyVersion = 'current';
+        let style = 'classic';
+        let palette = 'cloud';
+        const styles = ['classic', 'editorial', 'glass', 'terminal'];
+        const palettes = [
+          'cloud',
+          'paper',
+          'mint',
+          'rose',
+          'sky',
+          'sand',
+          'midnight',
+          'oled',
+          'forest',
+          'aubergine',
+          'ember',
+          'slate',
+        ];
+
+        try {
+          const savedVersion = localStorage.getItem('portfolio-copy-version');
+          const savedStyle = localStorage.getItem('portfolio-style');
+          const savedPalette = localStorage.getItem('portfolio-palette');
+          if (savedVersion === 'revised' || savedVersion === 'human') copyVersion = savedVersion;
+          if (savedStyle && styles.includes(savedStyle)) style = savedStyle;
+          if (savedPalette && palettes.includes(savedPalette)) palette = savedPalette;
+        } catch {
+          // Storage may be disabled; all switches still work for this visit.
+        }
+
+        document.documentElement.dataset.copyVersion = copyVersion;
+        document.documentElement.dataset.style = style;
+        document.documentElement.dataset.palette = palette;
+        document.documentElement.classList.add('js');
+      })();
+    </script>
 
     <slot name="head" />
   </head>

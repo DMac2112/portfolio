@@ -1,37 +1,61 @@
 ---
 import { Image } from 'astro:assets';
-import { contentImage, type AboutItem } from '../lib/content';
+import { contentImage, type AboutItem, type HumanContent, type RevisedContent } from '../lib/content';
 
 interface Props {
   abouts: AboutItem[];
+  revised: RevisedContent['about'];
+  human: HumanContent['about'];
 }
 
-const { abouts } = Astro.props;
+const { abouts, revised, human } = Astro.props;
+const variants = [
+  { version: 'current', items: abouts },
+  { version: 'revised', items: revised.items },
+  { version: 'human', items: human.items },
+];
+const humanHeadingWords = human.heading.split(' ');
+const humanHeadingAccent = humanHeadingWords.pop() || '';
+const humanHeadingLead = humanHeadingWords.join(' ');
 ---
 
 <section id="about" class="section bg-white" aria-labelledby="about-heading">
   <h2 id="about-heading" class="head-text">
-    What am I <span>About?</span><br />Well I am <span>a..</span>
+    <span class="copy-heading" data-copy-version="current">
+      What am I <span>About?</span><br />Well I am <span>a..</span>
+    </span>
+    <span class="copy-heading" data-copy-version="revised">
+      Professional <span>Profile</span>
+    </span>
+    <span class="copy-heading" data-copy-version="human">
+      {humanHeadingLead}{' '}<span>{humanHeadingAccent}</span>
+    </span>
   </h2>
 
-  <div class="profiles">
-    {abouts.map((about) => (
-      <article class="profile reveal">
-        <Image
-          src={contentImage(about.image)}
-          alt=""
-          width={512}
-          loading="lazy"
-          decoding="async"
-        />
-        <h3 class="bold-text">{about.title}</h3>
-        <p class="p-text">{about.description}</p>
-      </article>
-    ))}
-  </div>
+  {variants.map(({ version, items }) => (
+    <div class="profiles" data-copy-version={version}>
+      {items.map((about) => (
+        <article class="profile reveal">
+          <Image
+            src={contentImage(about.image)}
+            alt=""
+            width={512}
+            loading="lazy"
+            decoding="async"
+          />
+          <h3 class="bold-text">{about.title}</h3>
+          <p class="p-text">{about.description}</p>
+        </article>
+      ))}
+    </div>
+  ))}
 </section>
 
 <style>
+  .head-text > .copy-heading {
+    color: inherit;
+  }
+
   .profiles {
     display: flex;
     justify-content: center;

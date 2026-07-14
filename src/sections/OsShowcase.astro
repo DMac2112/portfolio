@@ -1,40 +1,79 @@
 ---
 // Mid-page DominikOS showcase: the recruiter-friendly "here's what it is"
 // surface. Crawlable links, restrained copy, zero heavy assets.
+import CopyText from '../components/CopyText.astro';
+import type { HumanContent, RevisedContent } from '../lib/content';
+
+interface Props {
+  revised: RevisedContent['osShowcase'];
+  human: HumanContent['osShowcase'];
+}
+
+const { revised, human } = Astro.props;
+const humanHeadingWords = human.heading.split(' ');
+const humanHeadingAccent = humanHeadingWords.pop() || '';
+const humanHeadingLead = humanHeadingWords.join(' ');
+const currentFeatures = [
+  { title: 'Desktop', description: 'Draggable windows, Start menu, my projects & CV as apps' },
+  { title: '2D game', description: 'Walk my career timeline as an explorable pixel-art town' },
+  { title: 'Pinball', description: 'An original cyberpunk table — chase the high score' },
+];
 ---
 
 <section id="dominikos" class="section bg-dark os-showcase" aria-labelledby="dominikos-heading">
   <h2 id="dominikos-heading" class="head-text os-head">
-    Prefer to explore? <span>Boot DominikOS</span>
+    <span class="copy-heading" data-copy-version="current">
+      Prefer to explore? <span>Boot DominikOS</span>
+    </span>
+    <span class="copy-heading" data-copy-version="revised">
+      Explore <span>DominikOS</span>
+    </span>
+    <span class="copy-heading" data-copy-version="human">
+      {humanHeadingLead}{' '}<span>{humanHeadingAccent}</span>
+    </span>
   </h2>
 
   <p class="os-lede">
-    I rebuilt my portfolio as a retro desktop operating system — windows, taskbar,
-    boot screen and all. Everything on this page lives in there too, plus a few
-    things that don't fit on a web page.
+    <CopyText
+      current="I rebuilt my portfolio as a retro desktop operating system — windows, taskbar, boot screen and all. Everything on this page lives in there too, plus a few things that don't fit on a web page."
+      revised={revised.lede}
+      human={human.lede}
+    />
   </p>
 
   <ul class="os-features">
-    <li>
-      <span class="os-feature-title">Desktop</span>
-      <span class="os-feature-desc">Draggable windows, Start menu, my projects &amp; CV as apps</span>
-    </li>
-    <li>
-      <span class="os-feature-title">2D game</span>
-      <span class="os-feature-desc">Walk my career timeline as an explorable pixel-art town</span>
-    </li>
-    <li>
-      <span class="os-feature-title">Pinball</span>
-      <span class="os-feature-desc">An original cyberpunk table — chase the high score</span>
-    </li>
+    {currentFeatures.map((feature, index) => (
+      <li>
+        <span class="os-feature-title">
+          <CopyText
+            current={feature.title}
+            revised={revised.features[index]?.title || feature.title}
+            human={human.features[index]?.title || feature.title}
+          />
+        </span>
+        <span class="os-feature-desc">
+          <CopyText
+            current={feature.description}
+            revised={revised.features[index]?.description || feature.description}
+            human={human.features[index]?.description || feature.description}
+          />
+        </span>
+      </li>
+    ))}
   </ul>
 
   <div class="os-actions">
     <a class="os-boot-btn" href="/os/?boot=chooser">
-      <span aria-hidden="true">&#x23FB;</span> Boot DominikOS
+      <span aria-hidden="true">&#x23FB;</span>
+      <CopyText current="Boot DominikOS" revised={revised.primaryCta.label} human={human.primaryCta.label} />
     </a>
     <span class="os-deep p-text">
-      or jump straight to the
+      <CopyText
+        current="or jump straight to the"
+        revised={revised.deepLinkPrefix}
+        human={human.deepLinkPrefix}
+      />
+      {' '}
       <a href="/os/?boot=desktop">desktop</a> ·
       <a href="/os/?boot=game">game</a>
     </span>
@@ -48,6 +87,10 @@
 
   .os-head {
     color: var(--white-color);
+  }
+
+  .os-head > .copy-heading {
+    color: inherit;
   }
 
   .os-head span {

@@ -1,0 +1,411 @@
+/* Optional palettes. Layout and typography remain controlled by their own stylesheets. */
+
+html[data-palette='cloud'] {
+  color-scheme: light;
+  --primary-color: #edf2f8;
+  --secondary-color: #313bac;
+  --accent-color: #0e7490;
+  --black-color: #111827;
+  --gray-color: #526173;
+  --white-color: #ffffff;
+  --darkBlue-color: #151320;
+  --page-bg: #edf2f8;
+  --surface-color: #ffffff;
+  --surface-muted: #e4ebf3;
+  --text-color: #111827;
+  --text-muted-color: #526173;
+  --border-color: #c7d1df;
+  --nav-bg: rgba(255, 255, 255, 0.94);
+  --hero-bg: #151320;
+  --on-hero: #f8fafc;
+  --on-accent: #ffffff;
+  --shadow-color: rgba(17, 24, 39, 0.14);
+  --selection-color: #313bac;
+}
+
+html[data-palette='paper'] {
+  color-scheme: light;
+  --primary-color: #f5f2ea;
+  --secondary-color: #5c3d92;
+  --accent-color: #9a3412;
+  --black-color: #211e1a;
+  --gray-color: #615b52;
+  --white-color: #fffdf8;
+  --darkBlue-color: #26211d;
+  --page-bg: #f5f2ea;
+  --surface-color: #fffdf8;
+  --surface-muted: #ece7dc;
+  --text-color: #211e1a;
+  --text-muted-color: #615b52;
+  --border-color: #d6cdbd;
+  --nav-bg: rgba(255, 253, 248, 0.94);
+  --hero-bg: #26211d;
+  --on-hero: #fffaf0;
+  --on-accent: #fffaf0;
+  --shadow-color: rgba(49, 41, 32, 0.16);
+  --selection-color: #5c3d92;
+}
+
+html[data-palette='mint'] {
+  color-scheme: light;
+  --primary-color: #edf8f3;
+  --secondary-color: #0f6651;
+  --accent-color: #34d399;
+  --black-color: #10261e;
+  --gray-color: #49665b;
+  --white-color: #fbfffd;
+  --darkBlue-color: #0b211a;
+  --page-bg: #edf8f3;
+  --surface-color: #fbfffd;
+  --surface-muted: #dfeee7;
+  --text-color: #10261e;
+  --text-muted-color: #49665b;
+  --border-color: #bfd8cc;
+  --nav-bg: rgba(251, 255, 253, 0.94);
+  --hero-bg: #0b211a;
+  --on-hero: #f0fdf7;
+  --on-accent: #08251c;
+  --shadow-color: rgba(16, 38, 30, 0.15);
+  --selection-color: #0f6651;
+}
+
+html[data-palette='rose'] {
+  color-scheme: light;
+  --primary-color: #fbf1f4;
+  --secondary-color: #9d2f5b;
+  --accent-color: #f59e0b;
+  --black-color: #2c1820;
+  --gray-color: #72515e;
+  --white-color: #fffafa;
+  --darkBlue-color: #2a101b;
+  --page-bg: #fbf1f4;
+  --surface-color: #fffafa;
+  --surface-muted: #f3dfe6;
+  --text-color: #2c1820;
+  --text-muted-color: #72515e;
+  --border-color: #dfbdc9;
+  --nav-bg: rgba(255, 250, 250, 0.94);
+  --hero-bg: #2a101b;
+  --on-hero: #fff5f7;
+  --on-accent: #2b1700;
+  --shadow-color: rgba(58, 24, 37, 0.15);
+  --selection-color: #9d2f5b;
+}
+
+html[data-palette='sky'] {
+  color-scheme: light;
+  --primary-color: #eef6fb;
+  --secondary-color: #075985;
+  --accent-color: #22d3ee;
+  --black-color: #102331;
+  --gray-color: #496373;
+  --white-color: #fbfdff;
+  --darkBlue-color: #071b2c;
+  --page-bg: #eef6fb;
+  --surface-color: #fbfdff;
+  --surface-muted: #dcecf6;
+  --text-color: #102331;
+  --text-muted-color: #496373;
+  --border-color: #bfd7e6;
+  --nav-bg: rgba(251, 253, 255, 0.94);
+  --hero-bg: #071b2c;
+  --on-hero: #f0f9ff;
+  --on-accent: #062b34;
+  --shadow-color: rgba(16, 35, 49, 0.15);
+  --selection-color: #075985;
+}
+
+html[data-palette='sand'] {
+  color-scheme: light;
+  --primary-color: #f6f0e3;
+  --secondary-color: #7c3e12;
+  --accent-color: #eab308;
+  --black-color: #292116;
+  --gray-color: #6a5b46;
+  --white-color: #fffaf0;
+  --darkBlue-color: #241a0e;
+  --page-bg: #f6f0e3;
+  --surface-color: #fffaf0;
+  --surface-muted: #e9dfca;
+  --text-color: #292116;
+  --text-muted-color: #6a5b46;
+  --border-color: #d8c9aa;
+  --nav-bg: rgba(255, 250, 240, 0.94);
+  --hero-bg: #241a0e;
+  --on-hero: #fff8e8;
+  --on-accent: #251a02;
+  --shadow-color: rgba(51, 39, 21, 0.16);
+  --selection-color: #7c3e12;
+}
+
+html[data-palette='midnight'] {
+  color-scheme: dark;
+  --primary-color: #0f172a;
+  --secondary-color: #7dd3fc;
+  --accent-color: #c4b5fd;
+  --black-color: #f8fafc;
+  --gray-color: #aebbd0;
+  --white-color: #172033;
+  --darkBlue-color: #070b16;
+  --page-bg: #0f172a;
+  --surface-color: #172033;
+  --surface-muted: #1e293b;
+  --text-color: #f8fafc;
+  --text-muted-color: #aebbd0;
+  --border-color: #3a4961;
+  --nav-bg: rgba(15, 23, 42, 0.94);
+  --hero-bg: #070b16;
+  --on-hero: #f8fafc;
+  --on-accent: #131b2b;
+  --shadow-color: rgba(0, 0, 0, 0.42);
+  --selection-color: #7dd3fc;
+}
+
+html[data-palette='oled'] {
+  color-scheme: dark;
+  --primary-color: #000000;
+  --secondary-color: #5eead4;
+  --accent-color: #f0abfc;
+  --black-color: #f5f5f5;
+  --gray-color: #b6b6bd;
+  --white-color: #0b0b0d;
+  --darkBlue-color: #000000;
+  --page-bg: #000000;
+  --surface-color: #0b0b0d;
+  --surface-muted: #151519;
+  --text-color: #f5f5f5;
+  --text-muted-color: #b6b6bd;
+  --border-color: #34343b;
+  --nav-bg: rgba(0, 0, 0, 0.96);
+  --hero-bg: #000000;
+  --on-hero: #ffffff;
+  --on-accent: #101011;
+  --shadow-color: rgba(0, 0, 0, 0.72);
+  --selection-color: #5eead4;
+}
+
+html[data-palette='forest'] {
+  color-scheme: dark;
+  --primary-color: #07130f;
+  --secondary-color: #6ee7b7;
+  --accent-color: #facc15;
+  --black-color: #f0fdf4;
+  --gray-color: #a7c8b5;
+  --white-color: #0d2018;
+  --darkBlue-color: #03100b;
+  --page-bg: #07130f;
+  --surface-color: #0d2018;
+  --surface-muted: #153126;
+  --text-color: #f0fdf4;
+  --text-muted-color: #a7c8b5;
+  --border-color: #315f4b;
+  --nav-bg: rgba(7, 19, 15, 0.95);
+  --hero-bg: #03100b;
+  --on-hero: #f0fdf4;
+  --on-accent: #14210a;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --selection-color: #6ee7b7;
+}
+
+html[data-palette='aubergine'] {
+  color-scheme: dark;
+  --primary-color: #190f1e;
+  --secondary-color: #f0abfc;
+  --accent-color: #fda4af;
+  --black-color: #fdf4ff;
+  --gray-color: #d3b7d8;
+  --white-color: #25152b;
+  --darkBlue-color: #100714;
+  --page-bg: #190f1e;
+  --surface-color: #25152b;
+  --surface-muted: #321c39;
+  --text-color: #fdf4ff;
+  --text-muted-color: #d3b7d8;
+  --border-color: #62406b;
+  --nav-bg: rgba(25, 15, 30, 0.95);
+  --hero-bg: #100714;
+  --on-hero: #fdf4ff;
+  --on-accent: #2b1220;
+  --shadow-color: rgba(0, 0, 0, 0.48);
+  --selection-color: #f0abfc;
+}
+
+html[data-palette='ember'] {
+  color-scheme: dark;
+  --primary-color: #1b100d;
+  --secondary-color: #fdba74;
+  --accent-color: #fca5a5;
+  --black-color: #fff7ed;
+  --gray-color: #d6b7a9;
+  --white-color: #281713;
+  --darkBlue-color: #100806;
+  --page-bg: #1b100d;
+  --surface-color: #281713;
+  --surface-muted: #382019;
+  --text-color: #fff7ed;
+  --text-muted-color: #d6b7a9;
+  --border-color: #694033;
+  --nav-bg: rgba(27, 16, 13, 0.95);
+  --hero-bg: #100806;
+  --on-hero: #fff7ed;
+  --on-accent: #321208;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --selection-color: #fdba74;
+}
+
+html[data-palette='slate'] {
+  color-scheme: dark;
+  --primary-color: #171a1f;
+  --secondary-color: #93c5fd;
+  --accent-color: #67e8f9;
+  --black-color: #f3f4f6;
+  --gray-color: #b8c0cc;
+  --white-color: #20242b;
+  --darkBlue-color: #101216;
+  --page-bg: #171a1f;
+  --surface-color: #20242b;
+  --surface-muted: #2a3038;
+  --text-color: #f3f4f6;
+  --text-muted-color: #b8c0cc;
+  --border-color: #4a5361;
+  --nav-bg: rgba(23, 26, 31, 0.95);
+  --hero-bg: #101216;
+  --on-hero: #f8fafc;
+  --on-accent: #10202a;
+  --shadow-color: rgba(0, 0, 0, 0.48);
+  --selection-color: #93c5fd;
+}
+
+/* Shared color adaptation; deliberately avoids structural/layout properties. */
+body {
+  background-color: var(--page-bg, var(--primary-color));
+  color: var(--text-color, var(--black-color));
+}
+
+::selection {
+  background-color: var(--selection-color, var(--secondary-color));
+  color: var(--white-color);
+}
+
+.bg-primary {
+  background-color: var(--page-bg, var(--primary-color)) !important;
+}
+
+.bg-white {
+  background-color: var(--surface-color, var(--white-color)) !important;
+}
+
+.bg-dark {
+  background-color: var(--hero-bg, var(--darkBlue-color)) !important;
+  color: var(--on-hero, var(--white-color));
+}
+
+.head-text,
+.bold-text {
+  color: var(--text-color, var(--black-color));
+}
+
+.p-text {
+  color: var(--text-muted-color, var(--gray-color));
+}
+
+.bg-dark .head-text,
+.bg-dark .bold-text,
+.bg-dark .p-text,
+.hero-greeting,
+.hero-h1,
+.hero-sub,
+.hero-btn,
+.os-head,
+.os-lede,
+.os-feature-title,
+.os-feature-desc,
+.os-deep {
+  color: var(--on-hero, var(--white-color)) !important;
+}
+
+.navbar {
+  background: var(--nav-bg, var(--surface-color)) !important;
+  border-bottom-color: var(--border-color, var(--lightGray-color)) !important;
+  box-shadow: 0 2px 12px var(--shadow-color, rgba(0, 0, 0, 0.08)) !important;
+}
+
+.navbar-panel,
+.work-filter-btn,
+.work-card,
+.t-card,
+.t-btns button,
+.exp-tooltip,
+.rail-social a {
+  background-color: var(--surface-color, var(--white-color)) !important;
+  border-color: var(--border-color, var(--lightGray-color)) !important;
+}
+
+.work-card,
+.t-card {
+  box-shadow: 0 4px 18px var(--shadow-color, rgba(0, 0, 0, 0.1)) !important;
+}
+
+.contact-card,
+.contact-form > div,
+.contact-form input,
+.contact-form textarea,
+.work-tag {
+  background-color: var(--surface-muted, var(--primary-color)) !important;
+}
+
+.contact-form input,
+.contact-form textarea {
+  color: var(--text-color, var(--black-color)) !important;
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: var(--text-muted-color, var(--gray-color));
+  opacity: 1;
+}
+
+.work-filter-btn {
+  color: var(--text-color, var(--black-color)) !important;
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.08)) !important;
+}
+
+.navbar-links a:hover,
+.navbar-links a:focus-visible,
+.work-filter-btn:hover,
+.work-filter-btn[aria-pressed='true'],
+.work-links a,
+.hero-btn-primary,
+.hero-btn:hover,
+.hero-btn:focus-visible,
+.contact-submit,
+.t-btns button:hover,
+.t-btns button:focus-visible,
+.rail-social a:hover,
+.rail-social a:focus-visible {
+  background-color: var(--secondary-color) !important;
+  color: var(--white-color) !important;
+}
+
+.nav-option-toggle:hover,
+.nav-option-toggle:focus-visible,
+.work-links a:hover,
+.work-links a:focus-visible {
+  background-color: var(--accent-color) !important;
+  color: var(--on-accent, var(--white-color)) !important;
+}
+
+.hero-btn {
+  border-color: color-mix(in srgb, var(--on-hero, #ffffff) 80%, transparent) !important;
+}
+
+.hero-btn-primary,
+.hero-btn:hover,
+.hero-btn:focus-visible {
+  border-color: var(--secondary-color) !important;
+}
+
+.os-features li {
+  background-color: color-mix(in srgb, var(--surface-color) 55%, transparent) !important;
+  border-color: color-mix(in srgb, var(--on-hero) 18%, transparent) !important;
+}

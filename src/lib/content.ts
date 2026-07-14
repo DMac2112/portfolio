@@ -10,6 +10,8 @@ import workData from '../data/work.json';
 import skillsData from '../data/skills.json';
 import experienceData from '../data/experience.json';
 import testimonialsData from '../data/testimonials.json';
+import revisedData from '../data/content-revised.json';
+import humanData from '../data/content-human.json';
 
 export interface AboutItem { title: string; description: string; image: string; }
 export interface WorkItem { title: string; description: string; projectLink?: string; tags: string[]; image: string; }
@@ -17,6 +19,8 @@ export interface Skill { name: string; image: string; bgColor?: string; }
 export interface WorkExperience { name: string; company: string; year?: string; desc: string; }
 export interface ExperienceGroup { type: string; works: WorkExperience[]; }
 export interface Testimonial { name: string; company: string; feedback: string; image: string; }
+export type RevisedContent = typeof revisedData;
+export type HumanContent = typeof humanData;
 
 // Eager glob so a filename string in the JSON ("about-frontend.svg") resolves to an
 // imported, build-optimisable asset. Keys look like '../assets/content/<file>'.
@@ -30,6 +34,8 @@ export function contentImage(name: string): ImageMetadata {
 }
 
 export const site = siteData;
+export const revised = revisedData;
+export const human = humanData;
 
 export function loadContent() {
   return {
@@ -39,5 +45,7 @@ export function loadContent() {
     skills: skillsData as Skill[],
     experiences: experienceData as ExperienceGroup[],
     testimonials: testimonialsData as Testimonial[],
+    revised: revisedData,
+    human: humanData,
   };
 }
