@@ -1,0 +1,29 @@
+<!-- Original SVG authored for DominikOS. Nothing traced. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="pajak-felt" x1="8" y1="5" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b8a2e"/>
+      <stop offset="1" stop-color="#065c1d"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="8" fill="url(#pajak-felt)" stroke="#044718" stroke-width="1.6"/>
+  <rect x="4" y="4" width="40" height="40" rx="6.5" fill="none" stroke="#78c98a" stroke-width=".8" opacity=".35"/>
+  <g transform="rotate(3 24 24)">
+    <rect x="13" y="5.5" width="22" height="37" rx="3" fill="#fdfdf6" stroke="#1f3f8f" stroke-width="1.4"/>
+    <rect x="15" y="7.5" width="18" height="33" rx="1.8" fill="none" stroke="#b9b9ad" stroke-width=".7"/>
+    <g fill="none" stroke="#1f3f8f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 21 17.5 17.5 14.5 17"/>
+      <path d="M20.3 24 16.5 22.5 13.8 23.5"/>
+      <path d="M20.3 27.5 16.5 29.5 14.2 32.5"/>
+      <path d="M21.5 30 18.5 34 17 37"/>
+      <path d="M27 21 30.5 17.5 33.5 17"/>
+      <path d="M27.7 24 31.5 22.5 34.2 23.5"/>
+      <path d="M27.7 27.5 31.5 29.5 33.8 32.5"/>
+      <path d="M26.5 30 29.5 34 31 37"/>
+    </g>
+    <circle cx="24" cy="21.5" r="3.1" fill="#1f3f8f"/>
+    <ellipse cx="24" cy="28" rx="4.5" ry="5.8" fill="#1f3f8f"/>
+    <circle cx="22.7" cy="20.8" r=".55" fill="#fdfdf6"/>
+    <circle cx="25.3" cy="20.8" r=".55" fill="#fdfdf6"/>
+  </g>
+</svg>

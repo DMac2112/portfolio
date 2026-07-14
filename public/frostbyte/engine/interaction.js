@@ -15,16 +15,25 @@ export const INTERACT_R = 168; // default interaction radius, world px
  * Ties (exactly equal distance) are broken deterministically: the earlier entry in the `candidates`
  * array wins — i.e. only replace the current best when a candidate is STRICTLY closer than it, never
  * on equal distance.
+ *
+ * `opts.isActionable` (default: everything is actionable, preserving pre-H1 behavior) filters
+ * candidates BEFORE the nearest computation — this is the nearest-ACTIONABLE fix (Home Plan §8.2):
+ * a non-actionable candidate (e.g. an NPC with no interact action) that happens to be closer than an
+ * actionable one (a shop/minigame/door) must never shadow it and suppress the interact prompt.
  * @param {{x:number,y:number}} pos
  * @param {Interactable[]} candidates
  * @param {number} [maxDist]
+ * @param {{isActionable?: (candidate: Interactable) => boolean}} [opts]
  * @returns {Interactable|null}
  */
-export function findNearestInteractable(pos, candidates, maxDist = INTERACT_R) {
+export function findNearestInteractable(pos, candidates, maxDist = INTERACT_R, opts = {}) {
+  const { isActionable = () => true } = opts;
   let nearest = null;
   let nearestDist = maxDist;
 
   for (const candidate of candidates) {
+    if (!isActionable(candidate)) continue; // skip non-actionable candidates before distance ever matters
+
     const dx = candidate.pos.x - pos.x;
     const dy = candidate.pos.y - pos.y;
     const dist = Math.hypot(dx, dy);

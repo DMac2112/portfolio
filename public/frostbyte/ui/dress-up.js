@@ -13,7 +13,21 @@ const TABS = [
   { id: 'held', label: 'Held' },
 ];
 
-export function createDressUp({ save, persist, onChange }) {
+// Singleton state (Home Plan §8.1): `k.scene('room', …)` re-runs on every room change and every
+// return from a minigame, and each run used to call createDressUp(...) again — the DOM lookups
+// were already idempotent (getElementById finds the same #customize-overlay every time), but
+// `overlay.addEventListener('keydown', …)` was NOT: it stacked one more listener per scene entry.
+// `instance` caches the listeners/render-closures built on the FIRST call ever; `boundOpts` is a
+// mutable ref every handler reads through, rebound on EVERY call. This matters beyond hygiene:
+// `onChange` in particular closes over that scene's own `avatar` actor, which KAPLAY destroys on
+// the next scene switch, so a stale captured `onChange` would re-composite a dead avatar.
+let instance = null;
+const boundOpts = { save: null, persist: null, onChange: null };
+
+export function createDressUp(opts) {
+  Object.assign(boundOpts, opts); // rebind every call, even repeats
+  if (instance) return instance; // already built: DOM listeners stay exactly as they are
+
   const overlay = document.getElementById('customize-overlay');
   const coinsEl = document.getElementById('customize-coins');
   const tabsEl = document.getElementById('customize-tabs');
@@ -22,27 +36,27 @@ export function createDressUp({ save, persist, onChange }) {
   let activeTab = 'color';
 
   const isEquipped = (tab, id) =>
-    tab === 'color' ? save.avatar.bodyColorId === id : save.avatar.equipped[tab] === id;
+    tab === 'color' ? boundOpts.save.avatar.bodyColorId === id : boundOpts.save.avatar.equipped[tab] === id;
 
   function commit() {
-    persist(save);
-    onChange(save);      // main.js: re-composite avatar + refresh coin HUD
+    boundOpts.persist(boundOpts.save);
+    boundOpts.onChange(boundOpts.save);      // main.js: re-composite avatar + refresh coin HUD
     render();
   }
 
   function onCellClick(tab, entry) {
-    const owned = save.ownedItems.includes(entry.id);
+    const owned = boundOpts.save.ownedItems.includes(entry.id);
     const ev = [];
     if (!owned) {
-      if (!unlockItem(save, entry.id, entry.price, ev)) return; // can't afford: no-op
+      if (!unlockItem(boundOpts.save, entry.id, entry.price, ev)) return; // can't afford: no-op
     }
-    if (tab === 'color') setBodyColor(save, entry.id, ev);
-    else equipItem(save, tab, entry.id, ev);
+    if (tab === 'color') setBodyColor(boundOpts.save, entry.id, ev);
+    else equipItem(boundOpts.save, tab, entry.id, ev);
     commit();
   }
 
   function render() {
-    coinsEl.textContent = `${save.coins} coins`;
+    coinsEl.textContent = `${boundOpts.save.coins} coins`;
 
     tabsEl.replaceChildren(...TABS.map((t) => {
       const b = document.createElement('button');
@@ -55,7 +69,7 @@ export function createDressUp({ save, persist, onChange }) {
 
     const entries = activeTab === 'color' ? BODY_COLORS : ITEM_CATALOG.filter((i) => i.slot === activeTab);
     gridEl.replaceChildren(...entries.map((entry) => {
-      const owned = save.ownedItems.includes(entry.id);
+      const owned = boundOpts.save.ownedItems.includes(entry.id);
       const equipped = isEquipped(activeTab, entry.id);
       const cell = document.createElement('button');
       cell.type = 'button';
@@ -78,5 +92,6 @@ export function createDressUp({ save, persist, onChange }) {
   closeBtn.onclick = close;
   overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 
-  return { open, close, isOpen, render };
+  instance = { open, close, isOpen, render };
+  return instance;
 }

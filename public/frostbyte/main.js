@@ -9,7 +9,7 @@ import { resolveMoveVector, clampToBounds, resolveObstacles, resolveFacing } fro
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
-import { checkDailyLogin, earnCoins } from './engine/economy.js';
+import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
@@ -20,6 +20,17 @@ import { recordCoins, remainingToday } from './engine/minigame-daily.js';
 import { newChat, addBubble, tick as tickChat, active as activeChat } from './engine/chat.js';
 import { createChat } from './ui/chat.js';
 import { createEmotes, emoteSymbol } from './ui/emotes.js';
+import { createMap } from './ui/map.js';
+import { nodeByRoom } from './content/map.js';
+import { canTravel, arriveSpawnId } from './engine/travel.js';
+import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
+import { SNAP, addToInventory, place as placeFurn, move as moveFurn, flip as flipFurn, store as storeFurn, hitTest } from './engine/home-editor.js';
+import { loadFurnitureSprites, initFurnitureLayer } from './world/furniture.js';
+import { createEditMode } from './ui/edit-mode.js';
+import { createCatalog } from './ui/catalog.js';
+import { newVisitorScheduler, tick as tickVisitors } from './engine/visitors.js';
+import { initVisitorLayer } from './world/visitor-runtime.js';
+import { ROSTER } from './content/npc-roster.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -62,7 +73,13 @@ const PLAYER_RADIUS = 12;
  * Asset loading
  * ------------------------------------------------------------------ */
 k.loadSprite('room-plaza', './assets/room-plaza.png');
+k.loadSprite('room-den', './assets/room-den.png');
+k.loadSprite('room-trail', './assets/room-trail.png');
+k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
+loadFurnitureSprites(k);
+k.loadSprite('den-sign-open', './assets/den-sign-open.png');
+k.loadSprite('den-sign-closed', './assets/den-sign-closed.png');
 k.loadSprite('snowpal', './assets/minigame/snowpal.png');
 k.loadSprite('snowball', './assets/minigame/snowball.png');
 k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
@@ -89,11 +106,56 @@ function showCoinToast(msg) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Dialogue overlay — the index.html #dialogue-overlay, wired minimally
+ * (H1: locked-door copy; NPC dialogue can reuse it in later phases).
+ * ------------------------------------------------------------------ */
+const dlgOverlay = document.getElementById('dialogue-overlay');
+const dlgTitle = document.getElementById('dialogue-title');
+const dlgBody = document.getElementById('dialogue-body');
+const dlgClose = document.getElementById('dialogue-close');
+let dlgLastFocus = null;
+function dialogueIsOpen() { return dlgOverlay ? !dlgOverlay.classList.contains('hidden') : false; }
+function showDialogue(title, body) {
+  if (!dlgOverlay) return;
+  dlgLastFocus = document.activeElement;
+  dlgTitle.textContent = title ?? '';
+  dlgBody.textContent = body ?? '';
+  dlgOverlay.classList.remove('hidden');
+  dlgClose?.focus();
+}
+function closeDialogue() {
+  dlgOverlay?.classList.add('hidden');
+  dlgLastFocus?.focus?.();
+  dlgLastFocus = null;
+}
+if (dlgClose) dlgClose.onclick = closeDialogue;
+dlgOverlay?.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDialogue(); });
+
+/* ------------------------------------------------------------------ *
+ * HUD visibility — the social/map buttons are persistent DOM, so they'd
+ * float over (and act on, via stale scene closures) the minigame scene.
+ * Hidden on minigame entry, restored on every room entry (H1 review fix).
+ * ------------------------------------------------------------------ */
+const HUD_BTN_IDS = ['map-btn', 'say-btn', 'dressup-btn', 'emote-bar'];
+let inMinigame = false;
+function setHudVisible(v) {
+  for (const id of HUD_BTN_IDS) { const el = document.getElementById(id); if (el) el.hidden = !v; }
+}
+
+/* ------------------------------------------------------------------ *
  * Room scene — parameterized by room id (Engine & World Architecture §3).
  * ------------------------------------------------------------------ */
 k.scene('room', (roomId, opts = {}) => {
   const room = ROOM_REGISTRY[roomId];
   buildRoom(k, room);
+
+  // Remember where the player is — the map's "You are here" pin reads this (H1).
+  save.prefs.lastRoom = roomId;
+  persist(save);
+
+  // Back in a room: restore the HUD the minigame hid, and let travel guards relax.
+  setHudVisible(true);
+  inMinigame = false;
 
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
@@ -145,9 +207,11 @@ k.scene('room', (roomId, opts = {}) => {
   const spawnConfig = ROOM_SPAWN[roomId];
   const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, room.scale) : null;
 
-  // Interaction: nearest hotspot/NPC scan → interact prompt → launch. Only 'minigame' and 'shop'
-  // are actionable today (NPC dialogue / landmark flavour come in later phases).
+  // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. 'minigame', 'shop'
+  // and 'door' are actionable (locked doors show their copy); NPCs/landmarks stay promptless and
+  // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
   const hotspotInteractables = (room.hotspots ?? []).map((h) => ({ id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label }));
+  const doorInteractables = (room.doors ?? []).map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
   const interactPrompt = document.getElementById('interact-prompt');
   let nearest = null;
 
@@ -155,16 +219,30 @@ k.scene('room', (roomId, opts = {}) => {
     if (!hit) return null;
     if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
     if (hit.kind === 'shop') return 'shop';
+    if (hit.kind === 'door') return 'door';
+    if (hit.kind === 'sign') return 'sign';
     return null;
   };
   function doInteract() {
-    if (dressUp.isOpen() || chatUI.isOpen()) return; // 'e' typed into the chat box must not interact
+    if (anyOverlayOpen()) return; // 'e' typed into the chat box (or any open modal) must not interact
     const action = actionFor(nearest);
     if (action === 'minigame') {
       if (interactPrompt) interactPrompt.classList.remove('show'); // hide before leaving the scene
+      setHudVisible(false); // persistent DOM buttons must not float over (or act on) the minigame
+      inMinigame = true;
       k.go(minigameForHotspot(nearest.id).sceneId, { from: roomId });
     } else if (action === 'shop') {
       dressUp.open();
+    } else if (action === 'door') {
+      const d = nearest.door;
+      if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
+      if (interactPrompt) interactPrompt.classList.remove('show');
+      k.go('room', d.targetRoom, { spawn: d.targetSpawn ?? arriveSpawnId(roomId) });
+    } else if (action === 'sign') {
+      save.home.open = !save.home.open;
+      persist(save);
+      if (signSprite) signSprite.sprite = save.home.open ? 'den-sign-open' : 'den-sign-closed';
+      showCoinToast(save.home.open ? 'Den open — visitors welcome!' : 'Den closed.');
     }
   }
   k.onKeyPress('e', doInteract);
@@ -208,10 +286,158 @@ k.scene('room', (roomId, opts = {}) => {
     announce(`You ${id}`);
   }
   const emotes = createEmotes({ onEmote: playEmote });
-  // digits typed into the chat box (or with dress-up open) must not fire emotes
+  // digits typed into the chat box (or with any modal open) must not fire emotes
   emotes.ids.forEach((id, i) => {
-    if (i < 9) k.onKeyPress(String(i + 1), () => { if (!dressUp.isOpen() && !chatUI.isOpen()) playEmote(id); });
+    if (i < 9) k.onKeyPress(String(i + 1), () => { if (!anyOverlayOpen()) playEmote(id); });
   });
+
+  /* ---------------------------------------------------------------- *
+   * Den decorating (H2) — pure rules in engine/home-editor.js; sprites
+   * mirrored by world/furniture.js; tray/catalogue are ui singletons.
+   * Canvas owns pick-to-place, click-select and drag-move below.
+   * ---------------------------------------------------------------- */
+  const isHome = roomId === 'den';
+  const furnLayer = isHome ? initFurnitureLayer(k, save.home, room.scale) : null;
+  const catalogById = Object.fromEntries(FURNITURE_CATALOG.map((it) => [it.id, it]));
+  let pickId = null;   // tray item armed for placement
+  let selIdx = -1;     // selected placed-furniture index
+  let dragging = false;
+
+  const invList = () =>
+    Object.entries(save.furniture)
+      .filter(([, n]) => n > 0)
+      .map(([id, n]) => ({ id, label: furnitureById(id)?.label ?? id, count: n }));
+
+  function syncEditUI() {
+    furnLayer?.sync();
+    editMode.refresh();
+    if (catalogUI.isOpen()) catalogUI.refresh();
+    refreshCoins();
+    persist(save);
+  }
+  const selectPlaced = (idx) => {
+    selIdx = idx;
+    editMode.setSelected(idx >= 0 ? { label: furnitureById(save.home.placed[idx].id)?.label ?? '' } : null);
+  };
+
+  const editMode = createEditMode({
+    getInventory: invList,
+    getPlacedCount: () => save.home.placed.length,
+    maxPlaced: MAX_PLACED,
+    onSelectItem: (id) => { pickId = id; selectPlaced(-1); },
+    onStoreSelected: () => {
+      if (selIdx < 0) return;
+      if (storeFurn(save.home, save.furniture, selIdx, []).ok) { selectPlaced(-1); syncEditUI(); }
+    },
+    onFlipSelected: () => { if (selIdx >= 0 && flipFurn(save.home, selIdx, []).ok) syncEditUI(); },
+    onOpenCatalog: () => catalogUI.open(),
+    onExit: () => { editMode.close(); pickId = null; dragging = false; editMode.clearPick(); selectPlaced(-1); },
+  });
+  const catalogUI = createCatalog({
+    getCoins: () => save.coins,
+    getOwnedCount: (id) => save.furniture[id] ?? 0,
+    onBuy: (id) => {
+      const item = furnitureById(id);
+      if (!item || !spendCoins(save, item.price)) return;
+      addToInventory(save.furniture, id, []);
+      syncEditUI();
+    },
+  });
+
+  // Canvas press while editing: armed item -> place; otherwise select (and start dragging) a hit.
+  function editPress(w) {
+    if (pickId) {
+      const item = furnitureById(pickId);
+      const r = placeFurn(save.home, save.furniture, item, w.x, w.y, room.bounds, MAX_PLACED, []);
+      if (r.ok) {
+        if ((save.furniture[pickId] ?? 0) <= 0) { pickId = null; editMode.clearPick(); }
+        selectPlaced(r.index);
+        syncEditUI();
+      }
+      return;
+    }
+    const hit = hitTest(save.home, catalogById, w.x, w.y);
+    selectPlaced(hit);
+    dragging = hit >= 0;
+  }
+  k.onMouseRelease(() => { if (dragging) { dragging = false; persist(save); } });
+
+  // Keyboard editing path (a11y): arrows nudge one snap step, R flips, Delete stores.
+  const nudge = (dx, dy) => {
+    if (!editMode.isOpen() || chatUI.isOpen() || selIdx < 0) return;
+    const p = save.home.placed[selIdx];
+    const item = p && furnitureById(p.id);
+    if (item && moveFurn(save.home, selIdx, p.x + dx, p.y + dy, item, room.bounds, []).ok) syncEditUI();
+  };
+  k.onKeyPress('left', () => nudge(-SNAP, 0));
+  k.onKeyPress('right', () => nudge(SNAP, 0));
+  k.onKeyPress('up', () => nudge(0, -SNAP));
+  k.onKeyPress('down', () => nudge(0, SNAP));
+  k.onKeyPress('r', () => {
+    if (editMode.isOpen() && !chatUI.isOpen() && selIdx >= 0 && flipFurn(save.home, selIdx, []).ok) syncEditUI();
+  });
+  const storeSelectedKey = () => {
+    if (!editMode.isOpen() || chatUI.isOpen() || selIdx < 0) return;
+    if (storeFurn(save.home, save.furniture, selIdx, []).ok) { selectPlaced(-1); syncEditUI(); }
+  };
+  k.onKeyPress('delete', storeSelectedKey);
+  k.onKeyPress('backspace', storeSelectedKey);
+
+  /* ---------------------------------------------------------------- *
+   * Open House visitors (H3) — the pure scheduler decides WHEN a
+   * visit happens (engine/visitors.js); the world layer renders HOW
+   * (world/visitor-runtime.js). Tips pay through economy.greetNpc,
+   * which already daily-gates +2 per persona.
+   * ---------------------------------------------------------------- */
+  const signHotspot = isHome ? room.hotspots.find((h) => h.kind === 'sign') : null;
+  const signSprite = signHotspot ? k.add([
+    k.sprite(save.home.open ? 'den-sign-open' : 'den-sign-closed'),
+    k.pos(signHotspot.x, signHotspot.y), k.anchor('center'), k.scale(room.scale), k.z(signHotspot.y),
+  ]) : null;
+  const visitorSched = isHome ? newVisitorScheduler((Date.now() % 2147483647) | 0) : null;
+  const visitorLayer = isHome
+    ? initVisitorLayer(k, { scale: room.scale, doorPos: { x: 720, y: 800 }, getPlaced: () => save.home.placed })
+    : null;
+  const visitorPersonaIds = ROSTER.map((p) => p.id);
+  k.onSceneLeave(() => visitorLayer?.clear());
+
+  // Trail pickups (H4) — walk-over coin glints, +1 each, daily-gated per id via
+  // economy.collectPickup (the last of the S2 economy fns to go live). Already-collected
+  // glints simply don't spawn today.
+  const pickupObjs = [];
+  for (const p of room.pickups ?? []) {
+    if (save.pickupsCollectedOn[p.id] === todayISO) continue;
+    const obj = k.add([k.sprite('pickup-glint'), k.pos(p.x, p.y), k.anchor('center'),
+      k.scale(room.scale), k.z(p.y), 'pickup']);
+    pickupObjs.push({ id: p.id, obj });
+  }
+
+  // Island-map travel (H1) — the ui singleton renders pins from content/map.js; the pure
+  // engine/travel.js guard decides legality so the rules stay testable headless.
+  const mapUI = createMap({
+    getCurrent: () => roomId,
+    onTravel: (target) => {
+      // frozen:false is correct (the map closed itself before calling back); inMinigame is the
+      // real module-level flag so a stale scene closure can never travel out of a running game.
+      const res = canTravel({ frozen: false, inMinigame, currentRoomId: roomId }, nodeByRoom(target));
+      if (!res.ok) return;
+      if (interactPrompt) interactPrompt.classList.remove('show');
+      k.go('room', target, { spawn: 'fromMap' });
+    },
+  });
+  const anyOverlayOpen = () =>
+    dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || dialogueIsOpen() ||
+    editMode.isOpen() || catalogUI.isOpen();
+  const mapBtn = document.getElementById('map-btn');
+  if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
+  k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
+
+  // Decorate button — den-only (kept out of HUD_BTN_IDS so setHudVisible can't unhide it elsewhere).
+  const editBtn = document.getElementById('edit-btn');
+  if (editBtn) {
+    editBtn.hidden = !isHome;
+    editBtn.onclick = () => { if (isHome && !anyOverlayOpen()) { selectPlaced(-1); editMode.open(); } };
+  }
 
   // Player speech bubble — recreated only when the visible bubble changes, opacity tracks its fade.
   let curBubbleId = null;
@@ -237,13 +463,32 @@ k.scene('room', (roomId, opts = {}) => {
     bubbleObjs.txt.opacity = top.alpha;
   }
 
-  // Movement input is ignored while an overlay (dress-up or chat) is open (frozen-flag pattern).
-  k.onMousePress(() => { if (!dressUp.isOpen()) moveTarget = k.toWorld(k.mousePos()); });
-  k.onTouchStart((pos) => { if (!dressUp.isOpen()) moveTarget = k.toWorld(pos); });
+  // Movement input is ignored while ANY overlay is open — one shared frozen predicate so
+  // pointer, keys and prompts can never disagree (H1 audit fix). Edit mode instead routes
+  // canvas presses to the furniture editor (the tray is non-modal by design).
+  k.onMousePress(() => {
+    if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
+    if (!anyOverlayOpen()) moveTarget = k.toWorld(k.mousePos());
+  });
+  k.onTouchStart((pos) => {
+    // touchToMouse:true already synthesizes a mousePress for every tap, so editPress must be
+    // routed ONLY through onMousePress — wiring it here too would double-fire on one tap
+    // (double stock burn / duplicate placement — H2 review blocker). The idempotent moveTarget
+    // assignment is safe to keep on both paths.
+    if (!anyOverlayOpen()) moveTarget = k.toWorld(pos);
+  });
 
   k.onUpdate(() => {
     const dt = Math.min(k.dt(), 0.05); // defensive clamp against tab-switch spikes
-    const frozen = dressUp.isOpen() || chatUI.isOpen();
+    const frozen = anyOverlayOpen();
+
+    // Drag-move a selected furniture piece while the mouse stays down (edit mode only).
+    if (dragging && editMode.isOpen() && selIdx >= 0 && k.isMouseDown()) {
+      const w = k.toWorld(k.mousePos());
+      const p = save.home.placed[selIdx];
+      const item = p && furnitureById(p.id);
+      if (item && moveFurn(save.home, selIdx, w.x, w.y, item, room.bounds, []).ok) furnLayer?.sync();
+    }
     const keys = frozen ? {} : {
       left: k.isKeyDown('left') || k.isKeyDown('a'),
       right: k.isKeyDown('right') || k.isKeyDown('d'),
@@ -269,6 +514,22 @@ k.scene('room', (roomId, opts = {}) => {
 
     player.z = player.pos.y; // y-sort, same as game1
 
+    // Walk-over pickup collection (H4) — squared-distance check, ~one glint radius.
+    for (let i = pickupObjs.length - 1; i >= 0; i--) {
+      const p = pickupObjs[i];
+      const pdx = player.pos.x - p.obj.pos.x;
+      const pdy = player.pos.y - p.obj.pos.y;
+      if (pdx * pdx + pdy * pdy < 40 * 40) {
+        if (collectPickup(save, p.id, todayISO, [])) {
+          refreshCoins();
+          persist(save);
+          showCoinToast('+1 coin!');
+        }
+        k.destroy(p.obj);
+        pickupObjs.splice(i, 1);
+      }
+    }
+
     const cam = computeCamPos(player.pos);
     k.setCamPos(cam.x, cam.y);
 
@@ -276,13 +537,46 @@ k.scene('room', (roomId, opts = {}) => {
     tickChat(playerChat, dt * 1000);
     renderPlayerBubble();
 
-    // Nearest-interactable scan (hotspots + live NPCs), drives the interact prompt.
+    // Open House visitors (H3) — dt-gated, so the OS pause contract holds for free.
+    if (visitorSched) {
+      const vev = [];
+      tickVisitors(visitorSched, dt * 1000, {
+        eligible: save.home.open && !anyOverlayOpen(),
+        personaIds: visitorPersonaIds,
+        placedCount: save.home.placed.length,
+      }, vev);
+      for (const e of vev) {
+        if (e.type === 'visit-tip') { // economy-only event — never forwarded to the render layer
+          if (greetNpc(save, e.personaId, todayISO, [])) {
+            refreshCoins();
+            persist(save);
+            showCoinToast('+2 coins — visitor tip!');
+          }
+          continue;
+        }
+        // a cut visit walks out like a normal departure — the layer only knows 'visit-leaving'
+        visitorLayer.handle(e.type === 'visit-cut' ? { ...e, type: 'visit-leaving' } : e);
+      }
+      visitorLayer.tick(dt);
+    }
+
+    // Nearest-ACTIONABLE scan (hotspots + doors + live NPCs) — NPCs have no action yet, so the
+    // isActionable filter keeps a nearby waddler from shadowing a shop/minigame/door prompt.
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];
-    nearest = findNearestInteractable(player.pos, mergeInteractables(hotspotInteractables, liveNpcs));
+    nearest = findNearestInteractable(
+      player.pos,
+      mergeInteractables(hotspotInteractables.concat(doorInteractables), liveNpcs),
+      undefined,
+      { isActionable: (c) => actionFor(c) !== null },
+    );
     const action = actionFor(nearest);
     if (interactPrompt) {
       if (action && !frozen) {
-        interactPrompt.textContent = action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` : '👕 Dress Up';
+        interactPrompt.textContent =
+          action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
+          action === 'shop' ? '👕 Dress Up' :
+          action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
+          nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');
       } else {
         interactPrompt.classList.remove('show');

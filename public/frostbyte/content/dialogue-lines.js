@@ -26,6 +26,16 @@ export const LINE_POOLS = {
   GREETING: [
     { id: 'grt-01', text: 'Oh — hello there!', durMs: 1600 },
   ],
+  // Open House den visitors (FROSTBYTE-HOME-PLAN §7). Lines must land whether the den is
+  // empty or fully decorated — never reference a specific furniture item or count.
+  VISITOR: [
+    { id: 'visitor-0', text: "Ooh, it's so much warmer in here than out there!", durMs: 2600 },
+    { id: 'visitor-1', text: 'Thanks for letting me in — my flippers were going numb.', durMs: 2800 },
+    { id: 'visitor-2', text: 'Cosy! It already feels like a proper home.', durMs: 2400 },
+    { id: 'visitor-3', text: 'Love the open floor plan. Very bold. Very you.', durMs: 2600 },
+    { id: 'visitor-4', text: 'A den with a view of the snow — you picked a good spot.', durMs: 2800 },
+    { id: 'visitor-5', text: "I'd best waddle home before the light goes. Lovely visit!", durMs: 3000 },
+  ],
 };
 
 export const EMOTES = [
