@@ -20,6 +20,14 @@ describe('dialogue-lines', () => {
       }
     });
 
+    it('VISITOR pool has exactly 6 entries with ids visitor-0..visitor-5 in order', () => {
+      expect(Array.isArray(LINE_POOLS.VISITOR)).toBe(true);
+      expect(LINE_POOLS.VISITOR.length).toBe(6);
+      expect(LINE_POOLS.VISITOR.map((l) => l.id)).toEqual([
+        'visitor-0', 'visitor-1', 'visitor-2', 'visitor-3', 'visitor-4', 'visitor-5',
+      ]);
+    });
+
     it('no two lines share the same id across all pools', () => {
       const allIds = new Set();
       for (const lines of Object.values(LINE_POOLS)) {

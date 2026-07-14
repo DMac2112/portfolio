@@ -102,6 +102,36 @@ describe('room configs', () => {
     }
   });
 
+  it('den: door-sign-den hotspot is inside bounds, outside every solid, and clears INTERACT_R from door-out/hearth-den', () => {
+    const den = ROOM_REGISTRY.den;
+    const sign = den.hotspots.find(h => h.id === 'door-sign-den');
+    expect(sign).toBeDefined();
+
+    // Inside bounds (also covered by the generic loop above; asserted here for clarity of intent).
+    expect(sign.x).toBeGreaterThanOrEqual(den.bounds.x0);
+    expect(sign.x).toBeLessThanOrEqual(den.bounds.x1);
+    expect(sign.y).toBeGreaterThanOrEqual(den.bounds.y0);
+    expect(sign.y).toBeLessThanOrEqual(den.bounds.y1);
+
+    // Outside every solid (the hearth is the only one today, but this stays generic).
+    for (const solid of den.solids ?? []) {
+      const leftEdge = solid.x - solid.w / 2;
+      const rightEdge = solid.x + solid.w / 2;
+      const topEdge = solid.y - solid.h / 2;
+      const bottomEdge = solid.y + solid.h / 2;
+      const isInside = sign.x >= leftEdge && sign.x <= rightEdge && sign.y >= topEdge && sign.y <= bottomEdge;
+      expect(isInside).toBe(false);
+    }
+
+    // Clears the nearest-ACTIONABLE interaction radius from the other den interactables
+    // (also covered by the generic "no two interactables" loop above; named here per-pair for a
+    // clearer failure message if the sign's position ever moves).
+    const doorOut = den.doors.find(d => d.id === 'door-out');
+    const hearth = den.hotspots.find(h => h.id === 'hearth-den');
+    expect(Math.hypot(sign.x - doorOut.x, sign.y - doorOut.y)).toBeGreaterThanOrEqual(INTERACT_R);
+    expect(Math.hypot(sign.x - hearth.x, sign.y - hearth.y)).toBeGreaterThanOrEqual(INTERACT_R);
+  });
+
   it('plaza: fromMap spawn is inside bounds and outside fountain solid', () => {
     const plaza = ROOM_REGISTRY.plaza;
     const fromMapSpawn = plaza.spawnPoints.fromMap;

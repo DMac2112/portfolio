@@ -792,6 +792,48 @@ function buildFurniture() {
   ];
 }
 
+/* ----------------------------- DEN: door sign (Home Plan §7 "Open House") --------------- */
+// 16x20 native (world 48x60 @ scale 3) — a small wooden signpost beside the den's door hotspot
+// (content/rooms.js `den.hotspots` 'door-sign-den'). The post/bracket stay warm wood in both
+// states; only the board FACE flips: warm/lit (open, tiny door-ajar glyph) vs cool/grey (closed,
+// moon glyph) — no baked text, so the toggle reads purely by color + glyph at a glance, matching
+// the furniture set's "1px dark outline, chunky pixel" convention above. Reuses F.*/ICE.* — no new
+// palette entries, and (like buildFurniture) no shared-PRNG calls, so registering this after every
+// existing builder cannot perturb their output.
+function buildSignBase(img) {
+  groundShadow(img, 8, 19, 5, 2);
+  rect(img, 3, 9, 10, 2, F.woodD);            // bracket
+  rect(img, 3, 9, 10, 1, F.wood);             // bracket highlight (top row)
+  px(img, 4, 8, F.metalD); px(img, 11, 8, F.metalD); // short hanging chain links
+  legRect(img, 7, 11, 2, 8, F.wood, F.woodD); // post
+}
+
+function buildDenSignOpen() { // 16x20
+  const img = Img(16, 20);
+  buildSignBase(img);
+  obox(img, 1, 0, 14, 8, F.glowL);            // warm/lit face
+  rect(img, 1, 0, 14, 1, [255, 255, 255, 90]); // top sheen
+  rect(img, 8, 2, 3, 5, F.dark);               // doorway, ajar — dark interior beyond the gap
+  for (let y = 2; y <= 6; y++) px(img, 7, y, y === 2 || y === 6 ? F.woodL : F.wood); // door leaf swung open
+  px(img, 10, 4, F.gold);                      // doorknob
+  return save('den-sign-open.png', img);
+}
+
+function buildDenSignClosed() { // 16x20
+  const img = Img(16, 20);
+  buildSignBase(img);
+  obox(img, 1, 0, 14, 8, F.metal);            // cool/grey face
+  rect(img, 1, 0, 14, 1, F.metalL);           // top sheen
+  disc(img, 9, 4, 3, F.iceL);                 // moon
+  disc(img, 10, 3, 3, F.metal);               // cut into a crescent
+  px(img, 4, 2, F.iceL); px(img, 5, 5, F.iceL); // stars
+  return save('den-sign-closed.png', img);
+}
+
+function buildDenSigns() {
+  return [buildDenSignOpen(), buildDenSignClosed()];
+}
+
 /* ----------------------------- run -------------------------------------- */
 const made = [
   buildPenguinBody(),
@@ -804,6 +846,7 @@ const made = [
   buildRoomDen(),
   buildMapIsle(),
   ...buildFurniture(),
+  ...buildDenSigns(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

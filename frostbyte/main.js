@@ -9,7 +9,7 @@ import { resolveMoveVector, clampToBounds, resolveObstacles, resolveFacing } fro
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
-import { checkDailyLogin, earnCoins, spendCoins } from './engine/economy.js';
+import { checkDailyLogin, earnCoins, spendCoins, greetNpc } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
@@ -28,6 +28,9 @@ import { SNAP, addToInventory, place as placeFurn, move as moveFurn, flip as fli
 import { loadFurnitureSprites, initFurnitureLayer } from './world/furniture.js';
 import { createEditMode } from './ui/edit-mode.js';
 import { createCatalog } from './ui/catalog.js';
+import { newVisitorScheduler, tick as tickVisitors } from './engine/visitors.js';
+import { initVisitorLayer } from './world/visitor-runtime.js';
+import { ROSTER } from './content/npc-roster.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -73,6 +76,8 @@ k.loadSprite('room-plaza', './assets/room-plaza.png');
 k.loadSprite('room-den', './assets/room-den.png');
 loadAvatarSprites(k);
 loadFurnitureSprites(k);
+k.loadSprite('den-sign-open', './assets/den-sign-open.png');
+k.loadSprite('den-sign-closed', './assets/den-sign-closed.png');
 k.loadSprite('snowpal', './assets/minigame/snowpal.png');
 k.loadSprite('snowball', './assets/minigame/snowball.png');
 k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
@@ -213,6 +218,7 @@ k.scene('room', (roomId, opts = {}) => {
     if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
     if (hit.kind === 'shop') return 'shop';
     if (hit.kind === 'door') return 'door';
+    if (hit.kind === 'sign') return 'sign';
     return null;
   };
   function doInteract() {
@@ -230,6 +236,11 @@ k.scene('room', (roomId, opts = {}) => {
       if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
       if (interactPrompt) interactPrompt.classList.remove('show');
       k.go('room', d.targetRoom, { spawn: d.targetSpawn ?? arriveSpawnId(roomId) });
+    } else if (action === 'sign') {
+      save.home.open = !save.home.open;
+      persist(save);
+      if (signSprite) signSprite.sprite = save.home.open ? 'den-sign-open' : 'den-sign-closed';
+      showCoinToast(save.home.open ? 'Den open — visitors welcome!' : 'Den closed.');
     }
   }
   k.onKeyPress('e', doInteract);
@@ -370,6 +381,24 @@ k.scene('room', (roomId, opts = {}) => {
   k.onKeyPress('delete', storeSelectedKey);
   k.onKeyPress('backspace', storeSelectedKey);
 
+  /* ---------------------------------------------------------------- *
+   * Open House visitors (H3) — the pure scheduler decides WHEN a
+   * visit happens (engine/visitors.js); the world layer renders HOW
+   * (world/visitor-runtime.js). Tips pay through economy.greetNpc,
+   * which already daily-gates +2 per persona.
+   * ---------------------------------------------------------------- */
+  const signHotspot = isHome ? room.hotspots.find((h) => h.kind === 'sign') : null;
+  const signSprite = signHotspot ? k.add([
+    k.sprite(save.home.open ? 'den-sign-open' : 'den-sign-closed'),
+    k.pos(signHotspot.x, signHotspot.y), k.anchor('center'), k.scale(room.scale), k.z(signHotspot.y),
+  ]) : null;
+  const visitorSched = isHome ? newVisitorScheduler((Date.now() % 2147483647) | 0) : null;
+  const visitorLayer = isHome
+    ? initVisitorLayer(k, { scale: room.scale, doorPos: { x: 720, y: 800 }, getPlaced: () => save.home.placed })
+    : null;
+  const visitorPersonaIds = ROSTER.map((p) => p.id);
+  k.onSceneLeave(() => visitorLayer?.clear());
+
   // Island-map travel (H1) — the ui singleton renders pins from content/map.js; the pure
   // engine/travel.js guard decides legality so the rules stay testable headless.
   const mapUI = createMap({
@@ -479,6 +508,29 @@ k.scene('room', (roomId, opts = {}) => {
     tickChat(playerChat, dt * 1000);
     renderPlayerBubble();
 
+    // Open House visitors (H3) — dt-gated, so the OS pause contract holds for free.
+    if (visitorSched) {
+      const vev = [];
+      tickVisitors(visitorSched, dt * 1000, {
+        eligible: save.home.open && !anyOverlayOpen(),
+        personaIds: visitorPersonaIds,
+        placedCount: save.home.placed.length,
+      }, vev);
+      for (const e of vev) {
+        if (e.type === 'visit-tip') { // economy-only event — never forwarded to the render layer
+          if (greetNpc(save, e.personaId, todayISO, [])) {
+            refreshCoins();
+            persist(save);
+            showCoinToast('+2 coins — visitor tip!');
+          }
+          continue;
+        }
+        // a cut visit walks out like a normal departure — the layer only knows 'visit-leaving'
+        visitorLayer.handle(e.type === 'visit-cut' ? { ...e, type: 'visit-leaving' } : e);
+      }
+      visitorLayer.tick(dt);
+    }
+
     // Nearest-ACTIONABLE scan (hotspots + doors + live NPCs) — NPCs have no action yet, so the
     // isActionable filter keeps a nearby waddler from shadowing a shop/minigame/door prompt.
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];
@@ -494,6 +546,7 @@ k.scene('room', (roomId, opts = {}) => {
         interactPrompt.textContent =
           action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
           action === 'shop' ? '👕 Dress Up' :
+          action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');
       } else {

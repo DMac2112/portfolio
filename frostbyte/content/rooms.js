@@ -64,6 +64,7 @@ export const ROOM_REGISTRY = {
     camera: { leadY: -50 },
     hotspots: [
       { id: 'hearth-den', label: 'The Hearth', kind: 'landmark', x: 720, y: 280 },
+      { id: 'door-sign-den', label: 'Door Sign', kind: 'sign', x: 900, y: 720 },
     ],
     doors: [
       { id: 'door-out', label: 'Chillmere Plaza', x: 720, y: 800, targetRoom: 'plaza', locked: false, targetSpawn: 'fromDen' },
