@@ -153,4 +153,90 @@ describe('room configs', () => {
     const isInFountain = fromMapSpawn.x >= leftEdge && fromMapSpawn.x <= rightEdge && fromMapSpawn.y >= topEdge && fromMapSpawn.y <= bottomEdge;
     expect(isInFountain).toBe(false);
   });
+
+  it('trail: spawn points inside bounds and outside solids', () => {
+    const trail = ROOM_REGISTRY.trail;
+    expect(trail).toBeDefined();
+
+    for (const sp of Object.values(trail.spawnPoints)) {
+      // Inside bounds
+      expect(sp.x).toBeGreaterThanOrEqual(trail.bounds.x0);
+      expect(sp.x).toBeLessThanOrEqual(trail.bounds.x1);
+      expect(sp.y).toBeGreaterThanOrEqual(trail.bounds.y0);
+      expect(sp.y).toBeLessThanOrEqual(trail.bounds.y1);
+
+      // Outside every solid
+      for (const solid of trail.solids ?? []) {
+        const leftEdge = solid.x - solid.w / 2;
+        const rightEdge = solid.x + solid.w / 2;
+        const topEdge = solid.y - solid.h / 2;
+        const bottomEdge = solid.y + solid.h / 2;
+        const isInside = sp.x >= leftEdge && sp.x <= rightEdge && sp.y >= topEdge && sp.y <= bottomEdge;
+        expect(isInside).toBe(false);
+      }
+    }
+  });
+
+  it('trail: pickup glints have unique ids, inside bounds, outside solids', () => {
+    const trail = ROOM_REGISTRY.trail;
+    expect(trail.pickups).toBeDefined();
+
+    // Unique ids
+    const pickupIds = trail.pickups.map(p => p.id);
+    const unique = new Set(pickupIds);
+    expect(unique.size).toBe(pickupIds.length);
+
+    for (const pickup of trail.pickups) {
+      // Inside bounds
+      expect(pickup.x).toBeGreaterThanOrEqual(trail.bounds.x0);
+      expect(pickup.x).toBeLessThanOrEqual(trail.bounds.x1);
+      expect(pickup.y).toBeGreaterThanOrEqual(trail.bounds.y0);
+      expect(pickup.y).toBeLessThanOrEqual(trail.bounds.y1);
+
+      // Outside every solid
+      for (const solid of trail.solids ?? []) {
+        const leftEdge = solid.x - solid.w / 2;
+        const rightEdge = solid.x + solid.w / 2;
+        const topEdge = solid.y - solid.h / 2;
+        const bottomEdge = solid.y + solid.h / 2;
+        const isInside = pickup.x >= leftEdge && pickup.x <= rightEdge && pickup.y >= topEdge && pickup.y <= bottomEdge;
+        expect(isInside).toBe(false);
+      }
+    }
+  });
+
+  it('trail and plaza: mutual door reachability (trail→plaza and plaza→trail)', () => {
+    const trail = ROOM_REGISTRY.trail;
+    const plaza = ROOM_REGISTRY.plaza;
+    expect(trail).toBeDefined();
+
+    // Trail's door-back should reach plaza
+    const trailDoorBack = trail.doors.find(d => d.id === 'door-back');
+    expect(trailDoorBack).toBeDefined();
+    expect(trailDoorBack.targetRoom).toBe('plaza');
+    expect(trailDoorBack.locked).toBe(false);
+    expect(plaza.spawnPoints[trailDoorBack.targetSpawn]).toBeDefined();
+
+    // Plaza's door-trail should reach trail
+    const plazaDoorTrail = plaza.doors.find(d => d.id === 'door-trail');
+    expect(plazaDoorTrail).toBeDefined();
+    expect(plazaDoorTrail.targetRoom).toBe('trail');
+    expect(plazaDoorTrail.locked).toBe(false);
+    expect(trail.spawnPoints[plazaDoorTrail.targetSpawn]).toBeDefined();
+  });
+
+  it('trail: hotspots and door spacing clears INTERACT_R', () => {
+    const trail = ROOM_REGISTRY.trail;
+    const interactables = [...trail.hotspots, ...trail.doors];
+
+    // falls-frostline (720, 220) to signpost-trail (1100, 760) = 660 >= 168 ✓
+    // falls-frostline (720, 220) to door-back (720, 880) = 660 >= 168 ✓
+    // signpost-trail (1100, 760) to door-back (720, 880) = 398 >= 168 ✓
+    for (let i = 0; i < interactables.length; i++) {
+      for (let j = i + 1; j < interactables.length; j++) {
+        const d = Math.hypot(interactables[i].x - interactables[j].x, interactables[i].y - interactables[j].y);
+        expect(d).toBeGreaterThanOrEqual(INTERACT_R);
+      }
+    }
+  });
 });

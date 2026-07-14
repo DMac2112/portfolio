@@ -34,7 +34,7 @@ export const ROOM_REGISTRY = {
       { id: 'bench-south', label: null, kind: 'sit', x: 552, y: 696 },
     ],
     doors: [
-      { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: true, lockedCopy: "The trail's still snowed in — check back soon." },
+      { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 456, targetRoom: 'court', locked: true, lockedCopy: "They're still smoothing the ice out there." },
       { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 360, targetRoom: 'workshop', locked: true, lockedCopy: "The workshop lamps aren't lit yet." },
       { id: 'door-den', label: 'Your Den', x: 720, y: 936, targetRoom: 'den', locked: false, targetSpawn: 'fromPlaza' },
@@ -73,5 +73,45 @@ export const ROOM_REGISTRY = {
       { id: 'hearth-den', x: 720, y: 285, w: 120, h: 90 },
     ],
     npcSpawnAnchors: [],
+  },
+
+  // H4: Frostline Trail — outdoor snowy passage with frozen falls and ancient signpost.
+  // Walk-over coin glints daily-gated via economy.collectPickup.
+  trail: {
+    id: 'trail',
+    title: 'Frostline Trail',
+    mapAsset: 'room-trail',                          // ./assets/room-trail.png
+    tile: 16, gridCols: 30, gridRows: 20,             // native map = 480x320px
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 180, y1: 880 },
+    spawnPoints: {
+      default:    { x: 720, y: 760, facing: 'up' },
+      fromPlaza:  { x: 720, y: 820, facing: 'up' },
+      fromMap:    { x: 720, y: 560, facing: 'down' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'falls-frostline', label: 'The Frozen Falls', kind: 'landmark', x: 720, y: 220 },
+      { id: 'signpost-trail', label: 'Old Signpost', kind: 'landmark', x: 1100, y: 760 },
+    ],
+    doors: [
+      { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 880, targetRoom: 'plaza', locked: false, targetSpawn: 'fromTrail' },
+    ],
+    solids: [
+      { id: 'pines-west', x: 300, y: 400, w: 120, h: 140 },
+      { id: 'pines-east', x: 1100, y: 300, w: 120, h: 140 },
+      { id: 'boulder-mid', x: 500, y: 700, w: 100, h: 80 },
+    ],
+    npcSpawnAnchors: [
+      { x: 720, y: 350, roamRadius: 70 },
+      { x: 250, y: 750, roamRadius: 70 },
+      { x: 1050, y: 550, roamRadius: 70 },
+    ],
+    pickups: [
+      { id: 'trail-glint-1', x: 300, y: 650 },
+      { id: 'trail-glint-2', x: 720, y: 300 },
+      { id: 'trail-glint-3', x: 1150, y: 500 },
+      { id: 'trail-glint-4', x: 500, y: 250 },
+    ],
   },
 };

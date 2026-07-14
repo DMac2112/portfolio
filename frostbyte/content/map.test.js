@@ -23,22 +23,22 @@ describe('MAP_NODES', () => {
     }
   });
 
-  it('has exactly two unlocked nodes', () => {
+  it('has exactly three unlocked nodes', () => {
     const unlockedCount = MAP_NODES.filter(n => n.unlocked).length;
-    expect(unlockedCount).toBe(2);
+    expect(unlockedCount).toBe(3);
   });
 
-  it('unlocked nodes are plaza and den', () => {
+  it('unlocked nodes are plaza, den, and trail', () => {
     const unlockedRoomIds = MAP_NODES.filter(n => n.unlocked).map(n => n.roomId);
-    expect(unlockedRoomIds).toEqual(expect.arrayContaining(['plaza', 'den']));
-    expect(unlockedRoomIds).toHaveLength(2);
+    expect(unlockedRoomIds).toEqual(expect.arrayContaining(['plaza', 'den', 'trail']));
+    expect(unlockedRoomIds).toHaveLength(3);
   });
 
-  it('locked node labels exactly match plaza door labels', () => {
+  it('locked node labels exactly match plaza locked door labels', () => {
     const lockedNodes = MAP_NODES.filter(n => !n.unlocked);
     const plazaRoom = ROOM_REGISTRY.plaza;
 
-    // Extract locked door labels from plaza
+    // Extract locked door labels from plaza (court and workshop only)
     const lockedDoorLabels = plazaRoom.doors
       .filter(d => d.locked)
       .map(d => d.label);

@@ -834,6 +834,101 @@ function buildDenSigns() {
   return [buildDenSignOpen(), buildDenSignClosed()];
 }
 
+/* ----------------------------- ROOM: Frostline Trail (H4) --------------- */
+// Native 480x320, same technique as the plaza. World-px landmarks /3 into native space,
+// matching content/rooms.js `trail`: falls (720,220)->(240,73), pines solids (300,400)+(1100,300)
+// -> (100,133)+(367,100) at 40x47, boulder (500,700)->(167,233) at 33x27, signpost
+// (1100,760)->(367,253). Path enters at the south door (720,880)->(240,293) and winds to the falls.
+function buildRoomTrail() {
+  const W = 480, H = 320;
+  const img = Img(W, H);
+
+  // High-altitude snowfield base — a touch brighter than the plaza.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    let col = C.snowL; const n = rnd();
+    if (n > 0.88) col = C.snowD; else if (n > 0.72) col = C.snow;
+    px(img, x, y, col);
+  }
+
+  // Winding packed-snow path, south door up to the falls pool (S-curve through the pickups' line).
+  const pathPts = [[240, 312], [232, 280], [214, 244], [204, 214], [216, 178], [242, 148], [250, 118], [240, 92]];
+  for (let i = 0; i < pathPts.length - 1; i++) {
+    const [x0, y0] = pathPts[i], [x1, y1] = pathPts[i + 1];
+    const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const cx = Math.round(x0 + (x1 - x0) * t), cy = Math.round(y0 + (y1 - y0) * t);
+      disc(img, cx, cy, 11, C.snowD);
+      disc(img, cx + 1, cy, 8, shade(C.snowD, 1.04));
+    }
+  }
+  // Sparse footprints along the path.
+  for (const [fx, fy] of [[236, 292], [226, 262], [210, 228], [212, 196], [230, 162], [246, 132]]) {
+    px(img, fx, fy, C.stoneD); px(img, fx + 2, fy + 3, C.stoneD);
+  }
+
+  // The Frozen Falls — dark rock cliff band across the top, glassy ice columns, frozen plunge pool.
+  for (let y = 0; y < 58; y++) for (let x = 0; x < W; x++) {
+    const ridge = 46 + Math.sin(x * 0.06) * 6 + (rnd() - 0.5) * 3;
+    if (y < ridge) px(img, x, y, shade([70, 78, 92], 1 - y / 90));
+  }
+  for (let x = 0; x < W; x += 3) px(img, x, Math.round(46 + Math.sin(x * 0.06) * 6), C.snowL); // snow lip
+  const fcx = 240;
+  for (const [dx, w, tint] of [[-26, 9, C.waterD], [-10, 12, C.water], [6, 10, C.waterL], [22, 8, C.water]]) {
+    for (let y = 18; y <= 78; y++) {
+      for (let i = 0; i < w; i++) {
+        const wobble = Math.sin(y * 0.22 + dx) * 1.6;
+        px(img, fcx + dx + i + wobble, y, shade(tint, 0.9 + (i / w) * 0.25));
+      }
+    }
+    px(img, fcx + dx + 1, 24, C.snowL); px(img, fcx + dx + 2, 44, C.snowL); // glassy highlights
+  }
+  disc(img, fcx, 84, 26, C.waterD); disc(img, fcx - 3, 82, 22, C.water); disc(img, fcx - 6, 80, 12, C.waterL);
+  for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; px(img, fcx + Math.round(Math.cos(a) * 24), 84 + Math.round(Math.sin(a) * 12), C.snowL); } // frozen rim
+
+  // Pine stands matching the two collision solids (clusters inside 40x47 native boxes).
+  const pineAt = (cx, cy) => {
+    disc(img, cx, cy - 6, 6, C.pineD); disc(img, cx, cy - 9, 5, C.pine); disc(img, cx, cy - 12, 4, C.pine);
+    rect(img, cx - 1, cy - 1, 2, 5, C.trunk);
+    disc(img, cx, cy - 13, 2, C.snowL);
+  };
+  for (const [cx, cy] of [[90, 140], [104, 150], [112, 130], [96, 122]]) pineAt(cx, cy);       // pines-west (100,133)
+  for (const [cx, cy] of [[357, 108], [371, 116], [379, 96], [363, 88]]) pineAt(cx, cy);       // pines-east (367,100)
+
+  // Boulder — snow-capped dark rock at (167,233), ~33x27.
+  disc(img, 167, 236, 15, C.stoneD); disc(img, 164, 232, 13, C.stone);
+  disc(img, 163, 227, 9, C.snowL); px(img, 172, 230, C.snowL);
+
+  // Old signpost at (367,253): post + two arrow boards.
+  rect(img, 366, 240, 3, 22, C.trunk);
+  rect(img, 356, 242, 18, 5, shade(C.trunk, 1.3)); px(img, 374, 244, shade(C.trunk, 0.7));   // upper board (points E)
+  rect(img, 361, 250, 16, 5, shade(C.trunk, 1.15)); px(img, 360, 252, shade(C.trunk, 0.7));  // lower board (points W)
+  disc(img, 367, 239, 2, C.snowL); // snow cap
+
+  // Exposed rocks + snow tufts scattered off-path.
+  for (const [rx, ry] of [[64, 220], [312, 190], [420, 150], [140, 90], [300, 280]]) {
+    disc(img, rx, ry, 3, C.stoneD); px(img, rx - 1, ry - 2, C.stone);
+  }
+
+  return save('room-trail.png', img);
+}
+
+/* ----------------------------- Pickup glint (H4) ------------------------ */
+// 12x12 walk-over coin token: warm gold dot + 4-point sparkle cross, dark outline.
+function buildPickupGlint() {
+  const img = Img(12, 12);
+  const gold = [244, 196, 72], goldD = [196, 142, 38], goldL = [255, 236, 168];
+  disc(img, 6, 6, 4, goldD);            // outline ring reads as the dark edge
+  disc(img, 6, 6, 3, gold);
+  px(img, 5, 5, goldL); px(img, 6, 5, goldL);
+  // sparkle cross
+  px(img, 6, 0, goldL); px(img, 6, 1, gold);
+  px(img, 6, 11, goldL); px(img, 6, 10, gold);
+  px(img, 0, 6, goldL); px(img, 1, 6, gold);
+  px(img, 11, 6, goldL); px(img, 10, 6, gold);
+  return save('pickup-glint.png', img);
+}
+
 /* ----------------------------- run -------------------------------------- */
 const made = [
   buildPenguinBody(),
@@ -847,6 +942,8 @@ const made = [
   buildMapIsle(),
   ...buildFurniture(),
   ...buildDenSigns(),
+  buildRoomTrail(),
+  buildPickupGlint(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

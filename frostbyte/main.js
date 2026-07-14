@@ -9,7 +9,7 @@ import { resolveMoveVector, clampToBounds, resolveObstacles, resolveFacing } fro
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
-import { checkDailyLogin, earnCoins, spendCoins, greetNpc } from './engine/economy.js';
+import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
@@ -74,6 +74,8 @@ const PLAYER_RADIUS = 12;
  * ------------------------------------------------------------------ */
 k.loadSprite('room-plaza', './assets/room-plaza.png');
 k.loadSprite('room-den', './assets/room-den.png');
+k.loadSprite('room-trail', './assets/room-trail.png');
+k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadFurnitureSprites(k);
 k.loadSprite('den-sign-open', './assets/den-sign-open.png');
@@ -399,6 +401,17 @@ k.scene('room', (roomId, opts = {}) => {
   const visitorPersonaIds = ROSTER.map((p) => p.id);
   k.onSceneLeave(() => visitorLayer?.clear());
 
+  // Trail pickups (H4) — walk-over coin glints, +1 each, daily-gated per id via
+  // economy.collectPickup (the last of the S2 economy fns to go live). Already-collected
+  // glints simply don't spawn today.
+  const pickupObjs = [];
+  for (const p of room.pickups ?? []) {
+    if (save.pickupsCollectedOn[p.id] === todayISO) continue;
+    const obj = k.add([k.sprite('pickup-glint'), k.pos(p.x, p.y), k.anchor('center'),
+      k.scale(room.scale), k.z(p.y), 'pickup']);
+    pickupObjs.push({ id: p.id, obj });
+  }
+
   // Island-map travel (H1) — the ui singleton renders pins from content/map.js; the pure
   // engine/travel.js guard decides legality so the rules stay testable headless.
   const mapUI = createMap({
@@ -500,6 +513,22 @@ k.scene('room', (roomId, opts = {}) => {
     syncFrame(avatar.parts, ROW_BASE[dirGroup(facing)] + walkFrame, facing === 'left');
 
     player.z = player.pos.y; // y-sort, same as game1
+
+    // Walk-over pickup collection (H4) — squared-distance check, ~one glint radius.
+    for (let i = pickupObjs.length - 1; i >= 0; i--) {
+      const p = pickupObjs[i];
+      const pdx = player.pos.x - p.obj.pos.x;
+      const pdy = player.pos.y - p.obj.pos.y;
+      if (pdx * pdx + pdy * pdy < 40 * 40) {
+        if (collectPickup(save, p.id, todayISO, [])) {
+          refreshCoins();
+          persist(save);
+          showCoinToast('+1 coin!');
+        }
+        k.destroy(p.obj);
+        pickupObjs.splice(i, 1);
+      }
+    }
 
     const cam = computeCamPos(player.pos);
     k.setCamPos(cam.x, cam.y);
