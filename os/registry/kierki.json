@@ -1,0 +1,10 @@
+{
+  "id": "kierki",
+  "title": "Kierki",
+  "kind": "react",
+  "icon": "/os/icons/kierki.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": false },
+  "window": { "width": 720, "height": 640, "minWidth": 560, "minHeight": 520, "singleton": true, "maximizedOnMobile": true }
+}

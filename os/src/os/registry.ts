@@ -32,7 +32,11 @@ export const componentById: Record<string, LazyApp> = {
   //  joined them there too, as a same-origin iframe rather than a lazy import — it never
   //  had a componentById entry since it was always kind:'iframe'.)
   pinball: lazy(() => import('./games/pinball/PinballApp')),
+  cards: lazy(() => import('./games/cardhub/CardHubApp')),
   pasjans: lazy(() => import('./games/pasjans/SolitaireApp')),
+  freecell: lazy(() => import('./games/freecell/FreeCellApp')),
+  pajak: lazy(() => import('./games/pajak/SpiderApp')),
+  kierki: lazy(() => import('./games/kierki/HeartsApp')),
   mines: lazy(() => import('./games/mines/MinesApp')),
   paint: lazy(() => import('./apps/paint/PaintApp')),
   dialtone: lazy(() => import('./apps/dialtone/DialtoneApp')),
