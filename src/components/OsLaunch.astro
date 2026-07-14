@@ -13,6 +13,7 @@ interface Props {
 const { revised, human } = Astro.props;
 ---
 
+<div class="osl-wrap">
 <a
   class="os-launch"
   href="/os/?boot=chooser"
@@ -62,6 +63,36 @@ const { revised, human } = Astro.props;
   </span>
 </a>
 
+  <!-- Straight to the CV: opens the PDF in place, no boot, no navigation. Sits outside the
+       card's <a> because interactive content can't legally nest inside a link. -->
+  <button class="osl-cv" type="button" data-cv-open aria-haspopup="dialog">
+    <span class="osl-cv__icon" aria-hidden="true">📄</span>
+    <span class="osl-cv__label">Just the CV</span>
+    <span class="osl-cv__hint">PDF · opens right here</span>
+  </button>
+</div>
+
+<dialog class="cv-dlg" data-cv-dlg aria-labelledby="cv-dlg-title">
+  <div class="cv-dlg__win">
+    <div class="cv-dlg__titlebar">
+      <span class="cv-dlg__title" id="cv-dlg-title">Dominik Machowiak - CV</span>
+      <button class="cv-dlg__x" type="button" data-cv-close aria-label="Close">&#x00D7;</button>
+    </div>
+    <div class="cv-dlg__bar">
+      <a class="cv-dlg__btn" href="/os/assets/cv.pdf" download="Dominik-Machowiak-CV.pdf">&#x2913; Download</a>
+      <a class="cv-dlg__btn" href="/os/assets/cv.pdf" target="_blank" rel="noopener">Open in new tab &#x2197;</a>
+    </div>
+    <!-- <object> renders the PDF inline on desktop; the fallback covers mobile browsers,
+         which refuse inline PDFs and would otherwise show an empty frame. -->
+    <object class="cv-dlg__frame" data="/os/assets/cv.pdf" type="application/pdf" title="Dominik Machowiak - CV">
+      <div class="cv-dlg__fallback">
+        <p>Your browser won't show PDFs inline.</p>
+        <a class="cv-dlg__btn" href="/os/assets/cv.pdf" target="_blank" rel="noopener">Open the CV &#x2197;</a>
+      </div>
+    </object>
+  </div>
+</dialog>
+
 <script>
   // Live clock + prefetch /os/ on first intent (hover/focus) so the click
   // feels instant without adding bytes to the initial load.
@@ -89,14 +120,32 @@ const { revised, human } = Astro.props;
     card.addEventListener('pointerenter', warm, { once: true });
     card.addEventListener('focus', warm, { once: true });
   }
+
+  // "Just the CV" — native <dialog> so Esc + backdrop dismissal come for free.
+  const cvBtn = document.querySelector('[data-cv-open]');
+  const cvDlg = document.querySelector('[data-cv-dlg]') as HTMLDialogElement | null;
+  const cvX = document.querySelector('[data-cv-close]');
+
+  if (cvBtn && cvDlg) {
+    cvBtn.addEventListener('click', () => cvDlg.showModal());
+    cvX?.addEventListener('click', () => cvDlg.close());
+    // click the backdrop (the dialog element itself, outside the window) to close
+    cvDlg.addEventListener('click', (e) => { if (e.target === cvDlg) cvDlg.close(); });
+  }
 </script>
 
 <style>
-  .os-launch {
-    display: block;
+  /* wrapper owns the centering so the CV button lines up under the card */
+  .osl-wrap {
     width: 100%;
     max-width: 360px;
     margin: 2.25rem auto 0;
+  }
+
+  .os-launch {
+    display: block;
+    width: 100%;
+    margin: 0;
     text-align: left;
     text-decoration: none;
     font-family: Tahoma, 'Segoe UI', Verdana, sans-serif;
@@ -308,7 +357,158 @@ const { revised, human } = Astro.props;
     font-variant-numeric: tabular-nums;
   }
 
+  /* ---- "Just the CV" button ---- */
+  .osl-cv {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px 12px;
+    cursor: pointer;
+    font-family: Tahoma, 'Segoe UI', Verdana, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #101a33;
+    text-align: left;
+    border: 1px solid rgba(13, 36, 88, 0.55);
+    border-radius: 7px;
+    background: linear-gradient(180deg, #fdfdfb, #e7e4d9);
+    box-shadow: inset 0 1px 0 #fff, 0 3px 10px -4px rgba(3, 12, 40, 0.5);
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+
+  .osl-cv:hover,
+  .osl-cv:focus-visible {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+  }
+
+  .osl-cv:focus-visible {
+    outline: 3px solid #22d3ee;
+    outline-offset: 3px;
+  }
+
+  .osl-cv:active { transform: translateY(1px); }
+  .osl-cv__icon { font-size: 15px; line-height: 1; }
+  .osl-cv__hint {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-weight: 400;
+    color: #5a6480;
+    white-space: nowrap;
+  }
+
+  /* ---- CV viewer: an XP window in a native <dialog> ---- */
+  .cv-dlg {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: 92vw;
+    max-height: 92vh;
+    width: 860px;
+  }
+
+  .cv-dlg::backdrop { background: rgba(3, 12, 40, 0.55); }
+
+  .cv-dlg__win {
+    display: flex;
+    flex-direction: column;
+    height: min(88vh, 900px);
+    overflow: hidden;
+    font-family: Tahoma, 'Segoe UI', Verdana, sans-serif;
+    background: #f2f0e8;
+    border: 1px solid rgba(13, 36, 88, 0.65);
+    border-radius: 9px;
+    box-shadow: 0 22px 44px -16px rgba(3, 12, 40, 0.75);
+  }
+
+  .cv-dlg__titlebar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 8px 7px 12px;
+    background: linear-gradient(180deg, #4a7ff0 0%, #2a5ade 45%, #1d47bb 100%);
+  }
+
+  .cv-dlg__title {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  }
+
+  .cv-dlg__x {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    border-radius: 4px;
+    background: linear-gradient(180deg, #f0836f, #d43d2a);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  }
+
+  .cv-dlg__x:hover { filter: brightness(1.1); }
+
+  .cv-dlg__bar {
+    flex: none;
+    display: flex;
+    gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #cdc9bb;
+    background: linear-gradient(180deg, #fbfaf5, #eeebe1);
+  }
+
+  .cv-dlg__btn {
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #101a33;
+    text-decoration: none;
+    border: 1px solid #9a9683;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #fdfdfb, #e4e1d6);
+    box-shadow: inset 0 1px 0 #fff;
+  }
+
+  .cv-dlg__btn:hover { filter: brightness(1.05); }
+
+  .cv-dlg__frame {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    border: 0;
+    background: #555;
+  }
+
+  .cv-dlg__fallback {
+    display: grid;
+    place-items: center;
+    gap: 12px;
+    height: 100%;
+    padding: 24px;
+    color: #f4f6fb;
+    font-size: 13px;
+    text-align: center;
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .osl-cv {
+      transition: none;
+    }
+
+    .osl-cv:hover,
+    .osl-cv:focus-visible {
+      transform: none;
+    }
+
     .os-launch {
       transition: none;
     }
