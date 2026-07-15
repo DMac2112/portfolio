@@ -247,9 +247,11 @@ export default function BubbleApp({ windowId, focused }: AppProps) {
   const toEngine = (e: ReactPointerEvent<HTMLCanvasElement>): { x: number; y: number } => {
     const rect = e.currentTarget.getBoundingClientRect();
     const v = view.current;
+    const pxPerClientX = rect.width > 0 ? e.currentTarget.width / rect.width : v.dpr;
+    const pxPerClientY = rect.height > 0 ? e.currentTarget.height / rect.height : v.dpr;
     return {
-      x: ((e.clientX - rect.left) * v.dpr - v.ox) / v.scale,
-      y: ((e.clientY - rect.top) * v.dpr - v.oy) / v.scale,
+      x: ((e.clientX - rect.left) * pxPerClientX - v.ox) / v.scale,
+      y: ((e.clientY - rect.top) * pxPerClientY - v.oy) / v.scale,
     };
   };
 

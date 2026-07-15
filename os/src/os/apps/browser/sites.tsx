@@ -11,6 +11,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import type { AppManifest } from '../../types';
 import { ExternalFrame } from '../../window/IframeHost';
 import { HOME } from './history';
+import FitStage from './FitStage';
 
 const FlappyApp = lazy(() => import('../../games/flappy/FlappyApp'));
 const BubbleApp = lazy(() => import('../../games/bubble/BubbleApp'));
@@ -48,9 +49,11 @@ const stub = (id: string, title: string, icon: string, w: number, h: number): Ap
 const FLAPPY_STUB = stub('flappy', 'Sky Hopper', '/os/icons/flappy.svg', 400, 700);
 const BUBBLE_STUB = stub('bubble', 'Bubble Shooter', '/os/icons/bubble.svg', 440, 720);
 
-function GamePage({ ctx, name, blurb, w, h, children }: {
-  ctx: SiteCtx; name: string; blurb: string; w: number; h: number; children: JSX.Element;
+function GamePage({ ctx, name, blurb, w, h, fluid = false, children }: {
+  ctx: SiteCtx; name: string; blurb: string; w: number; h: number; fluid?: boolean; children: JSX.Element;
 }) {
+  const game = <Suspense fallback={<p className="arcade__loading">Loading game…</p>}>{children}</Suspense>;
+
   return (
     <div className="webpage arcade">
       <div className="arcade__banner">
@@ -59,9 +62,11 @@ function GamePage({ ctx, name, blurb, w, h, children }: {
       </div>
       <h1>{name}</h1>
       <p className="arcade__blurb">{blurb}</p>
-      <div className="arcade__stage" style={{ width: w, height: h }}>
-        <Suspense fallback={<p className="arcade__loading">Loading game…</p>}>{children}</Suspense>
-      </div>
+      {fluid ? (
+        <div className="arcade__stage arcade__stage--fluid" style={{ width: w, height: h }}>{game}</div>
+      ) : (
+        <FitStage width={w} height={h}>{game}</FitStage>
+      )}
       <p className="arcade__foot">
         More free games on the <button type="button" className="weblink" onClick={() => ctx.go(HOME)}>DominikNet portal</button>.
       </p>
@@ -167,7 +172,7 @@ const SITES: Site[] = [
     title: 'Frostbyte — DominikNet Arcade',
     favicon: '/os/icons/frostbyte.svg',
     render: (ctx) => (
-      <GamePage ctx={ctx} name="Frostbyte" blurb="Waddle around, dress up your avatar, and win coins in daily minigames. Your save follows you home." w={960} h={640}>
+      <GamePage ctx={ctx} name="Frostbyte" blurb="Waddle around, dress up your avatar, and win coins in daily minigames. Your save follows you home." w={960} h={640} fluid>
         <FrostbyteFrame key={ctx.reloadToken} focused={ctx.active} />
       </GamePage>
     ),

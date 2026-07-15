@@ -14,12 +14,12 @@ import { lookup, SKY_URL, BUBBLE_URL, FROSTBYTE_URL, REAL_URL } from './sites';
 
 interface Load { url: string; progress: number }
 
-const FAVORITES: { label: string; url: string; icon: string }[] = [
-  { label: 'Frostbyte', url: FROSTBYTE_URL, icon: '/os/icons/frostbyte.svg' },
-  { label: 'Sky Hopper', url: SKY_URL, icon: '/os/icons/flappy.svg' },
-  { label: 'Bubble Shooter', url: BUBBLE_URL, icon: '/os/icons/bubble.svg' },
-  { label: 'DominikNet Home', url: HOME, icon: '/os/icons/explorer.svg' },
-  { label: 'dominikmachowiak.com', url: REAL_URL, icon: '/os/icons/ie-doc.svg' },
+const FAVORITES: { label: string; shortLabel: string; url: string; icon: string }[] = [
+  { label: 'Frostbyte', shortLabel: 'Frostbyte', url: FROSTBYTE_URL, icon: '/os/icons/frostbyte.svg' },
+  { label: 'Sky Hopper', shortLabel: 'Sky Hopper', url: SKY_URL, icon: '/os/icons/flappy.svg' },
+  { label: 'Bubble Shooter', shortLabel: 'Bubble', url: BUBBLE_URL, icon: '/os/icons/bubble.svg' },
+  { label: 'DominikNet Home', shortLabel: 'Home', url: HOME, icon: '/os/icons/explorer.svg' },
+  { label: 'dominikmachowiak.com', shortLabel: 'Portfolio', url: REAL_URL, icon: '/os/icons/ie-doc.svg' },
 ];
 
 export default function BrowserApp({ windowId, focused, setTitle, props }: AppProps) {
@@ -146,12 +146,12 @@ export default function BrowserApp({ windowId, focused, setTitle, props }: AppPr
   return (
     <div className="browser">
       <div className="browser__toolbar" role="toolbar" aria-label="Navigation">
-        <button type="button" className="browser__tb" onClick={goBack} disabled={!canBack(nav)} aria-label="Back">◀ Back</button>
-        <button type="button" className="browser__tb" onClick={goForward} disabled={!canForward(nav)} aria-label="Forward">▶</button>
+        <button type="button" className="browser__tb" onClick={goBack} disabled={!canBack(nav)} aria-label="Back"><span aria-hidden="true">◀</span><span className="browser__tb-label"> Back</span></button>
+        <button type="button" className="browser__tb" onClick={goForward} disabled={!canForward(nav)} aria-label="Forward"><span aria-hidden="true">▶</span></button>
         <span className="browser__sep" />
-        <button type="button" className="browser__tb" onClick={stopLoad} disabled={!loading} aria-label="Stop">■ Stop</button>
-        <button type="button" className="browser__tb" onClick={refresh} aria-label="Refresh">⟳ Refresh</button>
-        <button type="button" className="browser__tb" onClick={() => go(HOME)} aria-label="Home">⌂ Home</button>
+        <button type="button" className="browser__tb browser__stop" onClick={stopLoad} disabled={!loading} aria-label="Stop"><span aria-hidden="true">■</span><span className="browser__tb-label"> Stop</span></button>
+        <button type="button" className="browser__tb" onClick={refresh} aria-label="Refresh"><span aria-hidden="true">⟳</span><span className="browser__tb-label"> Refresh</span></button>
+        <button type="button" className="browser__tb" onClick={() => go(HOME)} aria-label="Home"><span aria-hidden="true">⌂</span><span className="browser__tb-label"> Home</span></button>
         <span className={loading ? 'browser__throb is-loading' : 'browser__throb'} aria-hidden="true"><b>DM</b></span>
       </div>
 
@@ -172,9 +172,10 @@ export default function BrowserApp({ windowId, focused, setTitle, props }: AppPr
       <div className="browser__favbar" role="toolbar" aria-label="Links">
         <span className="browser__favlabel">Links</span>
         {FAVORITES.map((f) => (
-          <button key={f.url} type="button" className="browser__fav" onClick={() => go(f.url)} title={f.url}>
+          <button key={f.url} type="button" className="browser__fav" onClick={() => go(f.url)} title={f.url} aria-label={f.label}>
             <img src={f.icon} alt="" width={16} height={16} draggable={false} />
-            {f.label}
+            <span className="browser__fav-full" aria-hidden="true">{f.label}</span>
+            <span className="browser__fav-short" aria-hidden="true" style={{ display: 'none' }}>{f.shortLabel}</span>
           </button>
         ))}
       </div>
