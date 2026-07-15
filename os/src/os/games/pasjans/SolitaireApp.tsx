@@ -48,7 +48,7 @@ interface Metrics { cardW: number; cardH: number; gap: number; y0: number; colX:
 /** Column geometry from the board width; the gap comes from a provisional boardW/8 card. */
 function metrics(boardW: number): Metrics {
   const gap = Math.round((boardW / 8) * 0.16);
-  const cardW = Math.min(110, Math.max(52, Math.floor((boardW - 8 * gap) / 7)));
+  const cardW = Math.min(110, Math.max(36, Math.floor((boardW - 8 * gap) / 7))); // fit the 360px mobile floor
   const cardH = cardW * CARD_RATIO;
   return { cardW, cardH, gap, y0: cardH + 34, colX: (i) => gap + i * (cardW + gap) };
 }

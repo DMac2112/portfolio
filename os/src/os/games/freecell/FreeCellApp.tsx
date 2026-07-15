@@ -30,7 +30,7 @@ interface Metrics { cardW: number; cardH: number; gap: number; y0: number; colX:
  *  8 tableau columns below), same idiom as pasjans' metrics(). */
 function metrics(boardW: number): Metrics {
   const gap = Math.round((boardW / 8) * 0.16);
-  const cardW = Math.min(110, Math.max(52, Math.floor((boardW - 8 * gap) / 8)));
+  const cardW = Math.min(110, Math.max(36, Math.floor((boardW - 8 * gap) / 8))); // fit the 360px mobile floor
   const cardH = cardW * CARD_RATIO;
   return { cardW, cardH, gap, y0: cardH + 34, colX: (i) => gap + i * (cardW + gap) };
 }
