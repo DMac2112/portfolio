@@ -114,6 +114,7 @@ export default function BubbleApp({ windowId, focused }: AppProps) {
   const sprites = useRef(new Map<number, HTMLCanvasElement>());
   const view = useRef({ scale: 1, ox: 0, oy: 0, dpr: 1 });
   const held = useRef({ left: false, right: false });
+  const touchAim = useRef<number | null>(null); // pointerId of the touch/pen steering the aim
 
   const visible = usePageVisible();
   const minimized = useOSStore((st) => st.windows[windowId]?.state === 'minimized');
@@ -219,7 +220,7 @@ export default function BubbleApp({ windowId, focused }: AppProps) {
 
   // keyboard — attached only while this window is the active game (§8.4 booleans)
   useEffect(() => {
-    if (!active) { held.current.left = false; held.current.right = false; return; }
+    if (!active) { held.current.left = false; held.current.right = false; touchAim.current = null; return; }
     canvasRef.current?.focus({ preventScroll: true });
     const down = (e: KeyboardEvent) => {
       const s = game.current!;
@@ -255,23 +256,43 @@ export default function BubbleApp({ windowId, focused }: AppProps) {
     };
   };
 
+  const aimAt = (e: ReactPointerEvent<HTMLCanvasElement>): void => {
+    const p = toEngine(e);
+    if (p.y < SHOOTER_Y - 2) setAim(game.current!, aimFromPointer(p.x, p.y)); // ignore points at/below the muzzle
+  };
+
+  // Touch (and pen) shoot on RELEASE: hold steers the guide, letting go fires. A mouse keeps the
+  // classic hover-to-aim / click-to-fire, so desktop behaviour is unchanged.
   const onPointerMove = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
     const s = game.current!;
     if (!activeRef.current || s.phase !== 'aim') return;
-    const p = toEngine(e);
-    if (p.y < SHOOTER_Y - 2) setAim(s, aimFromPointer(p.x, p.y)); // ignore points at/below the muzzle
+    if (e.pointerType !== 'mouse' && touchAim.current !== e.pointerId) return;
+    aimAt(e);
   }, []);
 
   const onPointerDown = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
     e.currentTarget.focus({ preventScroll: true });
     const s = game.current!;
-    if (!activeRef.current) return;
-    if (s.phase === 'aim') {
-      const p = toEngine(e);
-      if (p.y < SHOOTER_Y - 2) setAim(s, aimFromPointer(p.x, p.y));
-      doFire();
-    }
+    if (!activeRef.current || s.phase !== 'aim') return;
+    if (e.pointerType === 'mouse') { aimAt(e); doFire(); return; }
+    if (touchAim.current !== null) return; // one steering finger at a time
+    touchAim.current = e.pointerId;
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* touch is implicitly captured */ }
+    aimAt(e);
   }, [doFire]);
+
+  const onPointerUp = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (touchAim.current !== e.pointerId) return;
+    touchAim.current = null;
+    const s = game.current!;
+    if (!activeRef.current || s.phase !== 'aim') return;
+    aimAt(e); // a release below the muzzle keeps the last steered angle
+    doFire();
+  }, [doFire]);
+
+  const onPointerCancel = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (touchAim.current === e.pointerId) touchAim.current = null;
+  }, []);
 
   // the loop: aim, physics, fx, draw. No rAF while inactive (§8.4).
   useGameLoop(
@@ -445,7 +466,9 @@ export default function BubbleApp({ windowId, focused }: AppProps) {
           tabIndex={0}
           onPointerMove={onPointerMove}
           onPointerDown={onPointerDown}
-          aria-label="Bubble Shooter — arrow keys or pointer to aim, Space or Up to fire, S or Down to swap the next bubble, Enter for a new game after a win or loss"
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
+          aria-label="Bubble Shooter — arrow keys or pointer to aim, Space or Up to fire, on touch hold to aim and release to fire, S or Down to swap the next bubble, Enter for a new game after a win or loss"
           aria-describedby="bubble-keys"
         />
         {!active && (
