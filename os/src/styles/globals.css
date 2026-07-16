@@ -1081,13 +1081,14 @@ body {
 .mines__frame { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: safe center; gap: 8px; padding: 9px; }
 
 .mines__hud {
-  display: flex; align-items: center; justify-content: center; gap: 16px;
-  padding: 5px 9px; background: #c0c0c0;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 4px 6px; background: #c0c0c0;
   border: 3px solid; border-color: #808080 #ffffff #ffffff #808080; /* sunken */
 }
 .mines__led {
   font: bold 22px/1 var(--font-mono, monospace); letter-spacing: 2px;
-  color: #ff2a2a; background: #240000; padding: 3px 6px; min-width: 50px; text-align: right; border: 1px solid #000;
+  color: #ff0000; background: #000000; padding: 3px 6px; min-width: 50px; text-align: right;
+  border: 1px solid; border-color: #808080 #ffffff #ffffff #808080; /* sunken */
 }
 .mines__face {
   width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;
@@ -1101,23 +1102,26 @@ body {
 }
 .mines__cell {
   width: 100%; height: 100%; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center;
-  font-weight: bold; line-height: 1; color: #1a1a1a;
+  font-size: inherit; font-weight: bold; line-height: 1; color: #1a1a1a; /* inherit board font-size (buttons don't by default) */
   background: #c0c0c0; border: 3px solid; border-color: #ffffff #808080 #808080 #ffffff; /* raised */
   cursor: pointer;
   /* touch: no double-tap-zoom delay, and no iOS callout/selection on hold-to-flag */
   touch-action: manipulation; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
 }
-.mines__cell.is-open { border: 1px solid #999; }
-.mines__cell.is-boom { background: #d62a2a; border-color: #b01e1e; }
+/* opened cell: flat + recessed — XP draws only a thin grey line on the top and left edges */
+.mines__cell.is-open { border-width: 1px 0 0 1px; border-style: solid; border-color: #808080; background: #c0c0c0; }
+.mines__cell.is-boom { background: #ff0000; border-color: #808080; } /* detonated: bright red face, grey recess line kept */
 .mines__cell.is-cursor, .mines__cell:focus-visible { outline: 2px solid #1a44d6; outline-offset: -3px; z-index: 1; }
 .mines__px { width: 84%; height: 84%; display: block; image-rendering: pixelated; shape-rendering: crispEdges; }
-.mines__num { height: 66%; width: auto; display: block; image-rendering: pixelated; shape-rendering: crispEdges; }
+/* smooth bold digits like the XP reference (the rest of the OS uses the pixel font; the board numbers do not) */
+.mines__num { font-family: Tahoma, "Segoe UI", Verdana, Arial, sans-serif; font-weight: 700; line-height: 1; }
 .mines__face .mines__px { width: 90%; height: 90%; }
 .mines__misflag { position: relative; display: inline-flex; width: 80%; height: 80%; }
-.mines__misflag::after {
-  content: ''; position: absolute; left: 50%; top: 8%; width: 2px; height: 84%;
-  background: #d62a2a; transform: translateX(-50%) rotate(45deg);
+.mines__misflag::before, .mines__misflag::after {
+  content: ''; position: absolute; left: 50%; top: 8%; width: 2px; height: 84%; background: #ff0000;
 }
+.mines__misflag::before { transform: translateX(-50%) rotate(45deg); }
+.mines__misflag::after { transform: translateX(-50%) rotate(-45deg); }
 
 .mines__overlay {
   position: absolute; inset: 0; z-index: 30;
@@ -1128,9 +1132,8 @@ body {
 .mines__overlay span { font-size: 12px; }
 
 @media (max-width: 520px) {
-  /* trim chrome so the board (sized to fill by MinesApp) runs nearly edge-to-edge */
-  .mines__frame { padding: 5px; gap: 6px; }
-  .mines__hud { gap: 12px; padding: 4px 8px; }
+  /* board is ~85% width (sized by MinesApp); centre it in the page, vertically too when it fits */
+  .mines__frame { padding: 5px; gap: 6px; justify-content: safe center; }
 }
 
 /* ==== Paint ==== */

@@ -109,13 +109,7 @@ const FLAG_ROWS = [
   '     KKKKKK  ', '    KKKKKKKK ', '             ',
 ];
 const FACE_ROWS: Record<string, string[]> = { play: buildFace('play'), press: buildFace('press'), won: buildFace('won'), lost: buildFace('lost') };
-const NUM_ROWS: Record<number, string[]> = {
-  1: [' # ', '## ', ' # ', ' # ', '###'], 2: ['###', '  #', '###', '#  ', '###'],
-  3: ['###', '  #', '###', '  #', '###'], 4: ['# #', '# #', '###', '  #', '  #'],
-  5: ['###', '#  ', '###', '  #', '###'], 6: ['###', '#  ', '###', '# #', '###'],
-  7: ['###', '  #', '  #', ' # ', ' # '], 8: ['###', '# #', '###', '# #', '###'],
-};
-const MINE_MAP = { o: '#141414', W: '#ffffff' };
+const MINE_MAP = { o: '#000000', W: '#ffffff' };
 const FLAG_MAP = { R: '#d62a2a', K: '#1a1a1a' };
 const FACE_MAP = { Y: '#ffd23e', o: '#c99a1a', K: '#1a1a1a' };
 
@@ -124,12 +118,9 @@ const FlagIco = (): JSX.Element => <Px rows={FLAG_ROWS} map={FLAG_MAP} n={13} cl
 function Face({ face }: { face: 'play' | 'press' | 'won' | 'lost' }): JSX.Element {
   return <Px rows={FACE_ROWS[face]} map={FACE_MAP} n={13} cls="mines__px" />;
 }
+/** XP renders 1-8 as bold font digits (not pixel art), coloured by the classic palette. */
 function Num({ n }: { n: number }): JSX.Element {
-  return (
-    <svg viewBox="0 0 3 5" className="mines__num" shapeRendering="crispEdges" aria-hidden="true">
-      {runs(NUM_ROWS[n] ?? []).map((r, i) => <rect key={i} x={r.x} y={r.y} width={r.w} height={1} fill={NUMBER_COLORS[n]} />)}
-    </svg>
-  );
+  return <span className="mines__num" style={{ color: NUMBER_COLORS[n] }} aria-hidden="true">{n}</span>;
 }
 
 /* -------------------------------- component ------------------------------- */
@@ -155,7 +146,6 @@ export default function MinesApp({ windowId, focused }: AppProps) {
   const [live, setLive] = useState('');
 
   const frameRef = useRef<HTMLDivElement>(null);
-  const hudRef = useRef<HTMLDivElement>(null);
   const menuWrapRef = useRef<HTMLDivElement>(null);
   // Touch flagging: on a phone there is no right-click, so a press held past LONG_MS flags the cell.
   // A mouse keeps the classic left-reveal / right-flag / middle-chord, so desktop play is unchanged.
@@ -235,18 +225,16 @@ export default function MinesApp({ windowId, focused }: AppProps) {
     return () => clearInterval(id);
   }, [active, status]);
 
-  // responsive tile size. Desktop: fit the board width, 16..26px (unchanged). Mobile (≤520px): fill
-  // the window — fit BOTH available width and height so the board runs nearly edge-to-edge, 18..46px.
+  // responsive tile size. Desktop: fit the board width, 16..26px (unchanged). Mobile (≤520px): size
+  // from WIDTH only so the board is ~85% of the page width with natural (auto) height, min 20px so
+  // taps stay usable; the 0.85 factor self-limits the width, so no upper cap.
   useEffect(() => {
     const el = frameRef.current;
     if (!el) return;
     const measure = () => {
       const mobile = window.matchMedia('(max-width: 520px)').matches;
       if (mobile) {
-        const availW = el.clientWidth - 8;
-        const availH = el.clientHeight - (hudRef.current?.offsetHeight ?? 44) - 18;
-        const t = Math.floor(Math.min(availW / s.w, availH / s.h));
-        setTile(Math.max(18, Math.min(46, t)));
+        setTile(Math.max(20, Math.floor((0.85 * (el.clientWidth - 8)) / s.w)));
       } else {
         setTile(Math.max(16, Math.min(26, Math.floor((el.clientWidth - 12) / s.w))));
       }
@@ -255,7 +243,7 @@ export default function MinesApp({ windowId, focused }: AppProps) {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [s.w, s.h]);
+  }, [s.w]);
 
   // window-level keys: F2 new game; also close the menu on Esc / outside click
   useEffect(() => {
@@ -389,7 +377,7 @@ export default function MinesApp({ windowId, focused }: AppProps) {
       </div>
 
       <div className="mines__frame" ref={frameRef}>
-        <div className="mines__hud" ref={hudRef}>
+        <div className="mines__hud" style={{ width: s.w * tile + 6 }}>
           <span className="mines__led" aria-hidden="true">{led(remaining(s))}</span>
           <button type="button" className="mines__face" data-face={face} onClick={newGameNow} aria-label="New game (smiley reset)"><Face face={face} /></button>
           <span className="mines__led" aria-hidden="true">{led(time)}</span>
@@ -402,7 +390,7 @@ export default function MinesApp({ windowId, focused }: AppProps) {
           aria-activedescendant={`mines-c-${cursor}`}
           tabIndex={0}
           onKeyDown={onBoardKey}
-          style={{ gridTemplateColumns: `repeat(${s.w}, ${tile}px)`, gridAutoRows: `${tile}px`, fontSize: Math.round(tile * 0.56) }}
+          style={{ gridTemplateColumns: `repeat(${s.w}, ${tile}px)`, gridAutoRows: `${tile}px`, fontSize: Math.round(tile * 0.72) }}
         >
           {s.cells.map((cell, i) => {
             const r = Math.floor(i / s.w), c = i % s.w;

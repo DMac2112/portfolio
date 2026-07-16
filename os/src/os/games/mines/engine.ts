@@ -30,14 +30,14 @@ export const MAX_TIME = 999; // UI clock cap (the engine itself is timeless)
 // Classic functional number colours (a convention, not copyrightable) — index === adjacency count.
 export const NUMBER_COLORS: readonly string[] = [
   '',        // 0 (blank)
-  '#1a44d6', // 1 blue
-  '#2e8b2e', // 2 green
-  '#d62a2a', // 3 red
-  '#1a1a8c', // 4 navy
-  '#8b1a1a', // 5 maroon
-  '#118b8b', // 6 teal
-  '#2a2a2a', // 7 near-black
-  '#7a7a7a', // 8 grey
+  '#0000ff', // 1 blue
+  '#008000', // 2 green
+  '#ff0000', // 3 red
+  '#000080', // 4 navy
+  '#800000', // 5 maroon
+  '#008080', // 6 teal
+  '#000000', // 7 black
+  '#808080', // 8 grey
 ];
 
 // --------------------------------- types ----------------------------------
