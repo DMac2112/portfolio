@@ -1104,6 +1104,8 @@ body {
   font-weight: bold; line-height: 1; color: #1a1a1a;
   background: #c0c0c0; border: 3px solid; border-color: #ffffff #808080 #808080 #ffffff; /* raised */
   cursor: pointer;
+  /* touch: no double-tap-zoom delay, and no iOS callout/selection on hold-to-flag */
+  touch-action: manipulation; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
 }
 .mines__cell.is-open { border: 1px solid #999; }
 .mines__cell.is-boom { background: #d62a2a; border-color: #b01e1e; }
@@ -1124,6 +1126,12 @@ body {
 }
 .mines__overlay strong { font-size: 24px; letter-spacing: 3px; }
 .mines__overlay span { font-size: 12px; }
+
+@media (max-width: 520px) {
+  /* trim chrome so the board (sized to fill by MinesApp) runs nearly edge-to-edge */
+  .mines__frame { padding: 5px; gap: 6px; }
+  .mines__hud { gap: 12px; padding: 4px 8px; }
+}
 
 /* ==== Paint ==== */
 

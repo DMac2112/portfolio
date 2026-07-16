@@ -2,7 +2,7 @@
 // canvas games, this is turn-based, so it renders a DOM grid (like Pasjans) — no useGameLoop / no
 // rAF. The only time-based thing is the 1-second clock, a setInterval gated on the §8.4 active
 // booleans. Rules live in ./engine (a locked, unit-tested contract); all art is drawn in code/SVG.
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import type { AppProps } from '../../types';
 import { useOSStore } from '../../store/osStore';
 import { usePageVisible } from '../../hooks/usePageVisible';
@@ -17,6 +17,8 @@ import {
 type DiffKey = 'beginner' | 'intermediate' | 'expert';
 const DIFFS: Record<DiffKey, Difficulty> = { beginner: BEGINNER, intermediate: INTERMEDIATE, expert: EXPERT };
 const PREF_KEY = 'dmos.v1.mines';
+const LONG_MS = 450;   // touch long-press duration that flags a covered cell
+const MOVE_TOL = 12;   // px of finger drift that cancels a long-press (treated as a scroll)
 
 interface Prefs { diff: DiffKey; marks: boolean; best: Record<DiffKey, number>; }
 function loadPrefs(): Prefs {
@@ -153,7 +155,12 @@ export default function MinesApp({ windowId, focused }: AppProps) {
   const [live, setLive] = useState('');
 
   const frameRef = useRef<HTMLDivElement>(null);
+  const hudRef = useRef<HTMLDivElement>(null);
   const menuWrapRef = useRef<HTMLDivElement>(null);
+  // Touch flagging: on a phone there is no right-click, so a press held past LONG_MS flags the cell.
+  // A mouse keeps the classic left-reveal / right-flag / middle-chord, so desktop play is unchanged.
+  const lp = useRef({ timer: 0, fired: false, x: 0, y: 0 });
+  const lastType = useRef<string>('mouse');
 
   const visible = usePageVisible();
   const minimized = useOSStore((st) => st.windows[windowId]?.state === 'minimized');
@@ -228,17 +235,27 @@ export default function MinesApp({ windowId, focused }: AppProps) {
     return () => clearInterval(id);
   }, [active, status]);
 
-  // responsive tile size: fit the board width, clamped 16..26px
+  // responsive tile size. Desktop: fit the board width, 16..26px (unchanged). Mobile (≤520px): fill
+  // the window — fit BOTH available width and height so the board runs nearly edge-to-edge, 18..46px.
   useEffect(() => {
     const el = frameRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => {
-      const avail = el.clientWidth - 12;
-      setTile(Math.max(16, Math.min(26, Math.floor(avail / s.w))));
-    });
+    const measure = () => {
+      const mobile = window.matchMedia('(max-width: 520px)').matches;
+      if (mobile) {
+        const availW = el.clientWidth - 8;
+        const availH = el.clientHeight - (hudRef.current?.offsetHeight ?? 44) - 18;
+        const t = Math.floor(Math.min(availW / s.w, availH / s.h));
+        setTile(Math.max(18, Math.min(46, t)));
+      } else {
+        setTile(Math.max(16, Math.min(26, Math.floor((el.clientWidth - 12) / s.w))));
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [s.w]);
+  }, [s.w, s.h]);
 
   // window-level keys: F2 new game; also close the menu on Esc / outside click
   useEffect(() => {
@@ -272,6 +289,48 @@ export default function MinesApp({ windowId, focused }: AppProps) {
     toggleFlag(game.current!, r, c, ev);
     afterAction(ev);
   }, [active, over, afterAction]);
+
+  /* ---- pointer input (mouse: click reveal / right-click flag / middle chord; touch: tap reveal /
+          hold-to-flag). One long-press timer at a time, cancelled if the finger drifts (a scroll). */
+  const clearLongPress = useCallback(() => {
+    if (lp.current.timer) { clearTimeout(lp.current.timer); lp.current.timer = 0; }
+  }, []);
+
+  const onCellPointerDown = useCallback((e: ReactPointerEvent, r: number, c: number, i: number) => {
+    lastType.current = e.pointerType || 'mouse';
+    if (game.current!.cells[i].state !== 'revealed') setPressing(true);
+    if (e.pointerType === 'mouse') return; // mouse flags via right-click, not a hold
+    lp.current.fired = false;
+    lp.current.x = e.clientX;
+    lp.current.y = e.clientY;
+    clearLongPress();
+    lp.current.timer = window.setTimeout(() => {
+      lp.current.timer = 0;
+      lp.current.fired = true; // suppresses the trailing tap so the cell flags instead of opening
+      setPressing(false);
+      doFlag(r, c);
+    }, LONG_MS);
+  }, [doFlag, clearLongPress]);
+
+  const onCellPointerMove = useCallback((e: ReactPointerEvent) => {
+    if (!lp.current.timer) return;
+    if (Math.hypot(e.clientX - lp.current.x, e.clientY - lp.current.y) > MOVE_TOL) clearLongPress();
+  }, [clearLongPress]);
+
+  const endPress = useCallback(() => { clearLongPress(); setPressing(false); }, [clearLongPress]);
+
+  const onCellClick = useCallback((r: number, c: number, i: number) => {
+    setCursor(i);
+    if (lp.current.fired) { lp.current.fired = false; return; } // a hold already flagged this cell
+    doReveal(r, c);
+  }, [doReveal]);
+
+  const onCellContextMenu = useCallback((e: ReactMouseEvent, r: number, c: number, i: number) => {
+    e.preventDefault(); // kill the native menu on both mouse and touch long-press
+    if (lastType.current !== 'mouse') return; // touch flagging is the long-press timer's job
+    setCursor(i);
+    doFlag(r, c);
+  }, [doFlag]);
 
   const onBoardKey = useCallback((e: ReactKeyboardEvent) => {
     const w = s.w, h = s.h;
@@ -330,7 +389,7 @@ export default function MinesApp({ windowId, focused }: AppProps) {
       </div>
 
       <div className="mines__frame" ref={frameRef}>
-        <div className="mines__hud">
+        <div className="mines__hud" ref={hudRef}>
           <span className="mines__led" aria-hidden="true">{led(remaining(s))}</span>
           <button type="button" className="mines__face" data-face={face} onClick={newGameNow} aria-label="New game (smiley reset)"><Face face={face} /></button>
           <span className="mines__led" aria-hidden="true">{led(time)}</span>
@@ -367,12 +426,14 @@ export default function MinesApp({ windowId, focused }: AppProps) {
                 aria-label={cellLabel(i)}
                 tabIndex={-1}
                 className={cls.join(' ')}
-                onClick={() => { setCursor(i); doReveal(r, c); }}
-                onContextMenu={(e) => { e.preventDefault(); setCursor(i); doFlag(r, c); }}
+                onClick={() => onCellClick(r, c, i)}
+                onContextMenu={(e) => onCellContextMenu(e, r, c, i)}
                 onAuxClick={(e) => { if (e.button === 1) { e.preventDefault(); setCursor(i); if (game.current!.cells[i].state === 'revealed') doReveal(r, c); } }}
-                onPointerDown={() => { if (!open) setPressing(true); }}
-                onPointerUp={() => setPressing(false)}
-                onPointerLeave={() => setPressing(false)}
+                onPointerDown={(e) => onCellPointerDown(e, r, c, i)}
+                onPointerMove={onCellPointerMove}
+                onPointerUp={endPress}
+                onPointerCancel={endPress}
+                onPointerLeave={endPress}
               >
                 {content}
               </button>
