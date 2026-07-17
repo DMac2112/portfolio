@@ -1,7 +1,8 @@
 // Entry (§0.5): eager BootChooser; OSShell is React.lazy behind the choice. Deep links:
 //   /os/?boot=desktop → boot→login→desktop     /os/?boot=game → desktop with game1, login skipped
 //   /os/?boot=resume  → classic site           /os/?boot=chooser → always show the chooser
-// With "skip intro" saved, dmos.v1.lastBoot auto-routes (the chooser link clears it).
+// With "skip intro" saved, dmos.v1.lastBoot auto-routes to the DESKTOP (never into a game, even if
+// 'game' was the saved choice) — the chooser link clears it.
 import { StrictMode, Suspense, lazy, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles/chooser.css';
@@ -34,7 +35,9 @@ function initialLaunch(): Launch | null {
     window.location.replace('/');
     return null;
   }
-  if (last === 'desktop' || last === 'game') return launchFor(last);
+  // A remembered choice never auto-launches a game: skip-intro lands on the desktop, whatever was
+  // saved. Jumping straight into game1 stays deliberate — the chooser's card, or ?boot=game.
+  if (last === 'desktop' || last === 'game') return launchFor('desktop');
   return null;
 }
 
