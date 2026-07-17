@@ -1070,6 +1070,12 @@ body {
   position: relative; height: 100%; display: flex; flex-direction: column;
   background: #c0c0c0; user-select: none; -webkit-user-select: none; font-family: var(--font-ui);
 }
+/* xp.css skins every <button> with min-width:75px/min-height:23px. That blows every board cell out
+   to 75px inside its ~36px grid track: neighbours overpaint the overflow (burying the bottom-right
+   bevel) and the last column juts past the board edge. It stretches the 34px smiley too. Reset
+   inside Minesweeper, exactly as Paint does above. */
+.mines button { box-sizing: border-box; min-width: 0; min-height: 0; }
+
 .mines__menu { position: relative; display: flex; gap: 2px; padding: 2px 4px; background: #d6d6d6; border-bottom: 1px solid #9a9a9a; }
 .mines__menubtn { font: 12px var(--font-ui); padding: 2px 9px; background: transparent; border: 1px solid transparent; }
 .mines__menubtn:hover, .mines__menubtn[aria-expanded="true"] { background: var(--select-bg); color: var(--select-ink); }
