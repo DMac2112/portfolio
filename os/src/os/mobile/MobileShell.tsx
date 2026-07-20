@@ -23,9 +23,10 @@ function MobileWindow({ instanceId, visible }: { instanceId: string; visible: bo
   const win = useOSStore((s) => s.windows[instanceId]);
   const manifest = win ? byId(win.appId) : undefined;
   if (!win || !manifest) return null;
-  // §10.5: games open chromeless full-viewport (they carry their own HUD); the dock below
-  // stays reachable and browser Back / Home close or hide them.
-  const chromeless = manifest.category === 'games';
+  // §10.5: only immersive games (canvas/iframe with their own HUD) open chromeless full-viewport,
+  // closed via Back / Home. Everything else — windowed games like the card games and Minesweeper
+  // included — gets the standard titlebar with the red close ✕, so it can always be shut.
+  const chromeless = manifest.window.immersive === true;
   return (
     <div className="mwin" data-visible={visible} role="dialog" aria-modal="false" aria-label={win.title}>
       {!chromeless && (

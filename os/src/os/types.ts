@@ -38,6 +38,10 @@ export interface AppManifest {
     singleton?: boolean;                          // focus existing instead of 2nd instance
     aspectRatio?: number;                         // games lock ratio (e.g. 4/3); letterbox rules §8.5
     maximizedOnMobile?: boolean;                  // default true
+    /** phone: open full-viewport with NO titlebar (own HUD, close via Back/Home). Default false →
+     *  the app gets the standard mobile titlebar + red close ✕. Only true immersive arcade games
+     *  (canvas/iframe) set this; windowed apps like the card games and Minesweeper leave it off. */
+    immersive?: boolean;
   };
   // exactly one payload field, by kind:
   content?: string;   // 'document'|'notepad': path to .md/.txt
