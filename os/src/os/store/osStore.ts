@@ -6,8 +6,12 @@ import type { AppManifest, Rect, SnapZone, WindowDisplayState, WindowInstance } 
 import { byId } from '../registry';
 import { getWorkspace, isFreeFloat } from '../env';
 
-/** Desktop hard cap (§9.3). Phone/tablet single-window mode never evicts. */
+/** Desktop hard cap (§9.3): LRU-evicts the least-recently-focused non-game window. */
 export const WINDOW_CAP = 12;
+/** Phone/tablet single-window cap: the dock shows one chip per window and side-scrolls past ~4,
+ *  so we hold the line at 4. Rather than evict (a game in progress would vanish), a 5th open is
+ *  refused and raises the "resources low" alert — close a program (red ✕), then reopen. */
+export const MOBILE_WINDOW_CAP = 4;
 
 export interface OpenOptions {
   maximized?: boolean;
@@ -23,8 +27,11 @@ export interface OSStore {
   focusedId: string | null;
   nextZ: number;
   windowCount: number;           // total ever opened (drives cascade offset)
+  resourceAlert: boolean;        // phone: a 5th-window open was refused (MOBILE_WINDOW_CAP)
 
   open: (appId: string, opts?: OpenOptions) => string | null;
+  /** dismiss the "system resources are low" alert */
+  dismissResourceAlert: () => void;
   close: (instanceId: string) => void;
   focus: (instanceId: string) => void;
   move: (instanceId: string, x: number, y: number) => void;       // commit-on-drop only (§4.3)
@@ -80,6 +87,9 @@ export const useOSStore = create<OSStore>((set, get) => ({
   focusedId: null,
   nextZ: 1,
   windowCount: 0,
+  resourceAlert: false,
+
+  dismissResourceAlert: () => set({ resourceAlert: false }),
 
   open: (appId, opts) => {
     const m = byId(appId);
@@ -98,11 +108,18 @@ export const useOSStore = create<OSStore>((set, get) => ({
 
     const free = isFreeFloat();
 
-    // window cap (§9.6/§9.3): desktop LRU-closes the least-recently-focused non-game window;
-    // on phone/tablet the cap does not evict (single-window model keeps all mounted+hidden).
+    // window cap (§9.6/§9.3): desktop LRU-closes the least-recently-focused non-game window.
     if (free && s.order.length >= WINDOW_CAP) {
       const victim = s.order.find((id) => byId(s.windows[id].appId)?.category !== 'games');
       if (victim) get().close(victim);
+    }
+    // phone/tablet: hold at MOBILE_WINDOW_CAP so the dock never side-scrolls. Refuse the open (never
+    // evict — a game in progress would vanish) and raise the "resources low" alert instead. The
+    // singleton re-focus above already returned, so re-opening an app that's already up is unaffected.
+    if (!free && s.order.length >= MOBILE_WINDOW_CAP) {
+      set({ resourceAlert: true });
+      announce('System resources are low. Close a program before opening another.');
+      return null;
     }
 
     // on phone/tablet, force maximized (§0.3)

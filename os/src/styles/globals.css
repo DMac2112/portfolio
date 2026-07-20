@@ -899,6 +899,36 @@ body {
   font: bold 13px var(--font-ui); color: var(--ink); text-decoration: none;
 }
 
+/* "System resources are low" modal (§10, MOBILE_WINDOW_CAP) */
+.mdlg-back {
+  position: fixed; inset: 0; z-index: 99998;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  background: rgba(20, 30, 60, .45);
+}
+.mdlg {
+  width: 100%; max-width: 320px;
+  background: var(--surface); border: 1px solid #0a246a;
+  box-shadow: 0 8px 30px rgba(0,0,0,.4);
+}
+.mdlg__titlebar {
+  padding: 5px 9px; font: bold 13px var(--font-ui); color: var(--ink-on-blue);
+  background: linear-gradient(180deg, var(--luna-blue-2) 0%, var(--luna-blue-1) 14%, var(--luna-blue-3) 72%, var(--luna-blue-4) 100%);
+  text-shadow: 1px 1px 1px rgba(10,40,100,.9);
+}
+.mdlg__body { padding: 16px 16px 14px; }
+.mdlg__body p {
+  margin: 0 0 16px; display: flex; align-items: center; gap: 12px;
+  font: 13px/1.45 var(--font-ui); color: var(--ink);
+}
+.mdlg__icon { flex: none; font-size: 30px; line-height: 1; color: #e6a300; }
+.mdlg__ok {
+  display: block; margin-left: auto; min-width: 88px; min-height: var(--hit); padding: 4px 18px;
+  font: 13px var(--font-ui); color: var(--ink);
+  background: var(--surface); border: 2px solid; border-color: #ffffff #808080 #808080 #ffffff; /* raised */
+}
+.mdlg__ok:active { border-color: #808080 #ffffff #ffffff #808080; }
+.mdlg__ok:focus-visible { outline: 2px solid var(--focus-ring, #1a44d6); outline-offset: 1px; }
+
 /* ============================ Space Pinball ============================ */
 
 .pinball {

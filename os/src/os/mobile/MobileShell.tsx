@@ -52,9 +52,28 @@ function MobileWindow({ instanceId, visible }: { instanceId: string; visible: bo
   );
 }
 
+/** XP-style "resources low" modal, shown when a 5th window is refused (§10, MOBILE_WINDOW_CAP). */
+function ResourceAlert({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="mdlg-back" role="presentation" onClick={onClose}>
+      <div className="mdlg" role="alertdialog" aria-modal="true" aria-labelledby="mdlg-title" aria-describedby="mdlg-body" onClick={(e) => e.stopPropagation()}>
+        <div className="mdlg__titlebar" id="mdlg-title">DominikOS</div>
+        <div className="mdlg__body">
+          <p id="mdlg-body">
+            <span className="mdlg__icon" aria-hidden="true">⚠</span>
+            <span>System resources are low.<br />Close a program before opening another.</span>
+          </p>
+          <button type="button" className="mdlg__ok" onClick={onClose} autoFocus>OK</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MobileShell({ onLogOff, onShutDown }: Props) {
   const order = useOSStore((s) => s.order);
   const windows = useOSStore((s) => s.windows);
+  const resourceAlert = useOSStore((s) => s.resourceAlert);
   const [launcherOpen, setLauncherOpen] = useStartMenuState();
 
   // the visible app = top-most non-minimized window; none → home grid
@@ -101,6 +120,7 @@ export default function MobileShell({ onLogOff, onShutDown }: Props) {
       {launcherOpen && (
         <MobileStartLauncher onClose={() => setLauncherOpen(false)} onLogOff={onLogOff} onShutDown={onShutDown} />
       )}
+      {resourceAlert && <ResourceAlert onClose={() => useOSStore.getState().dismissResourceAlert()} />}
       <div id="os-announce" className="sr-only" aria-live="polite" />
     </div>
   );
