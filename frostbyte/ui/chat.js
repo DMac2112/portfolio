@@ -30,28 +30,39 @@ function injectStyles() {
   const style = document.createElement('style');
   style.textContent = `
     #chat-overlay { position:fixed; inset:0; z-index:32; display:flex; align-items:center;
-      justify-content:center; padding:16px; background:#0009; font-family:inherit; }
+      justify-content:center; padding:16px; background:#020914b8; font-family:inherit;
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
     #chat-overlay.hidden { display:none; }
-    #chat-panel { width:min(420px, 96vw); max-height:90vh; overflow:auto; background:#fbfbfe;
-      color:#1a1a22; border-radius:16px; box-shadow:0 18px 50px #000a;
-      border:3px solid var(--panel, #0d1c2b); padding:16px 18px; }
+    #chat-panel { width:min(420px, 96vw); max-height:90vh; overflow:auto;
+      color:var(--ink, #edf8ff); background:linear-gradient(155deg, #193d59f2, #0d2238f7 55%, #091827fa);
+      border:1px solid var(--rim, #7fd6ff55); border-radius:18px; padding:16px 18px;
+      box-shadow:inset 0 1px 0 #ffffff20, 0 22px 70px #020914cc; animation:chat-panel-in .18s ease-out; }
+    @keyframes chat-panel-in { from { opacity:0; transform:translateY(6px) scale(.98); } to { opacity:1; transform:none; } }
     #chat-panel header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-    #chat-title { margin:0; font-size:20px; flex:1; }
-    #chat-close { font:inherit; font-weight:700; border:2px solid var(--panel, #0d1c2b);
-      background:var(--bg, #122a42); color:#fff; border-radius:10px; padding:7px 12px; cursor:pointer; }
+    #chat-title { margin:0; font-size:20px; flex:1; color:#f7fbff; }
+    #chat-close { font:inherit; font-weight:700; color:var(--ink, #edf8ff); cursor:pointer;
+      border:1px solid var(--rim, #7fd6ff55); border-radius:10px; padding:7px 12px;
+      background:linear-gradient(180deg, #245373, #122a42); box-shadow:inset 0 1px 0 #ffffff18; }
     #chat-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:8px;
       margin-bottom:14px; }
-    .chat-phrase-btn { font:inherit; font-weight:700; font-size:13px; border:2px solid #cdd6e0;
-      background:#fff; color:#1a1a22; border-radius:10px; padding:8px 10px; cursor:pointer; text-align:left; }
+    .chat-phrase-btn { font:inherit; font-weight:700; font-size:13px; color:#dcecff;
+      border:1px solid #7fd6ff36; background:linear-gradient(155deg, #193d59a6, #0d2238d9);
+      border-radius:10px; padding:8px 10px; cursor:pointer; text-align:left; box-shadow:inset 0 1px 0 #ffffff0f; }
     .chat-phrase-btn:hover, .chat-phrase-btn:focus-visible { border-color:var(--accent, #7fd6ff);
-      background:#eef9ff; outline:none; }
+      background:linear-gradient(155deg, #245373c2, #122a42e8); outline:none; }
     #chat-form { display:flex; gap:8px; }
-    #chat-input { flex:1; min-width:0; font:inherit; font-size:14px; border:2px solid #cdd6e0;
-      border-radius:10px; padding:8px 10px; background:#fff; color:#1a1a22; }
-    #chat-say { font:inherit; font-weight:700; border:2px solid var(--panel, #0d1c2b);
-      background:var(--accent, #7fd6ff); color:#0d1c2b; border-radius:10px; padding:8px 14px;
+    #chat-input { flex:1; min-width:0; font:inherit; font-size:14px; color:#edf8ff;
+      border:1px solid #7fd6ff55; border-radius:10px; padding:8px 10px; background:#091827cc;
+      box-shadow:inset 0 2px 8px #02091488; }
+    #chat-input::placeholder { color:#8eacc6; }
+    #chat-input:focus { outline:2px solid var(--accent, #7fd6ff); outline-offset:1px; }
+    #chat-say { font:inherit; font-weight:800; border:1px solid #c8f4ff;
+      background:linear-gradient(135deg, #c8f4ff, #7fd6ff); color:#091827; border-radius:10px; padding:8px 14px;
       cursor:pointer; white-space:nowrap; }
+    #chat-close:hover { border-color:#7fd6ffaa; background:linear-gradient(180deg, #2a5e80, #193d59); }
+    #chat-close:focus-visible, #chat-say:focus-visible { outline:2px solid var(--accent, #7fd6ff); outline-offset:3px; }
     #chat-say:active { transform:translateY(1px); }
+    @media (prefers-reduced-motion: reduce) { #chat-panel { animation:none; } }
   `;
   document.head.appendChild(style);
 }
