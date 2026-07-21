@@ -3,6 +3,7 @@
 // {aimX,aimY,toss} + dt into tick() each frame and renders whatever state/events come back. No
 // scoring math here beyond calling the engine's own coinsFor() once at game-over.
 import { newGame, tick, coinsFor } from '../engine/minigame-snowdrift.js';
+import { fadeIn, fadeTo } from './game-feel.js';
 
 // Fixed world-space play rect. toss-bg is 480x270 and gets scaled 2x to fill it exactly.
 const BOUNDS = { x0: 0, x1: 960, y0: 0, y1: 540 };
@@ -12,7 +13,7 @@ const TARGET_SCALE = 1.5;
 const HIT_FLASH_S = 0.18;
 const COMBO_PULSE_S = 0.15;
 
-export function registerMinigameSnowdrift(k) {
+export function registerMinigameSnowdrift(k, { reducedMotion = false } = {}) {
   k.scene('minigame-snowdrift', ({ from } = {}) => {
     /* ---------------------------------------------------------------- *
      * Backdrop + camera (fixed play rect, fit-to-viewport zoom, same
@@ -24,6 +25,7 @@ export function registerMinigameSnowdrift(k) {
       k.scale((BOUNDS.x1 - BOUNDS.x0) / BG_NATIVE_W),
       k.z(-1000),
     ]);
+    fadeIn(k, reducedMotion);
 
     function fitCam() {
       const scale = Math.min(
@@ -42,6 +44,7 @@ export function registerMinigameSnowdrift(k) {
     const targetSprites = new Map(); // target id -> kaplay game object
     let coinsEarned = 0;
     let endHandled = false;
+    let leaving = false;
     let endPanelObjs = [];
     let endHit = null; // { collectRect, leaveRect } in screen space, set once the end panel exists
 
@@ -61,9 +64,11 @@ export function registerMinigameSnowdrift(k) {
     k.onKeyPress('escape', () => goToPlaza(0));
 
     function goToPlaza(coins) {
+      if (leaving) return;
+      leaving = true;
       // The plaza is the parameterized 'room' scene (main.js: k.scene('room', (roomId, opts) => …)),
       // entered as k.go('room', 'plaza', opts) — not a standalone 'plaza' scene.
-      k.go('room', from || 'plaza', { spawn: 'fromMinigame', coinsEarned: coins });
+      fadeTo(k, reducedMotion, () => k.go('room', from || 'plaza', { spawn: 'fromMinigame', coinsEarned: coins }));
     }
 
     /* ---------------------------------------------------------------- *
@@ -91,6 +96,7 @@ export function registerMinigameSnowdrift(k) {
       targetSprites.delete(id);
     }
     function spawnHitFlash(x, y) {
+      if (reducedMotion) return;
       const flash = k.add([
         k.rect(10, 10, { radius: 5 }),
         k.anchor('center'),
@@ -127,6 +133,7 @@ export function registerMinigameSnowdrift(k) {
     ]);
 
     function pulseCombo() {
+      if (reducedMotion) return;
       comboText.scale = k.vec2(1.3);
       k.wait(COMBO_PULSE_S, () => { comboText.scale = k.vec2(1); });
     }
@@ -252,6 +259,7 @@ export function registerMinigameSnowdrift(k) {
      * Main loop — feed input+dt into the pure engine, render what comes back.
      * ---------------------------------------------------------------- */
     k.onUpdate(() => {
+      if (leaving) return;
       const aim = k.toWorld(k.mousePos());
 
       if (state.phase !== 'over') {

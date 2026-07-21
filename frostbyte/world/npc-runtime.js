@@ -62,14 +62,18 @@ function showSpeechBubble(k, actor, text) {
   if (!text) return;
   const w = Math.min(160, Math.max(50, text.length * 6 + 16));
   const bg = actor.root.add([
-    k.rect(w, 24, { radius: 6 }), k.pos(0, -76), k.anchor('center'),
-    k.color(k.Color.fromHex('#fbfbfe')), k.opacity(0.94), k.z(99999),
+    k.rect(w, 24, { radius: 9 }), k.pos(0, -76), k.anchor('center'),
+    k.color(k.Color.fromHex('#eaf7ff')), k.opacity(0.96), k.z(99999),
+  ]);
+  const tail = actor.root.add([
+    k.text('▼', { size: 11 }), k.pos(0, -61), k.anchor('center'),
+    k.color(k.Color.fromHex('#eaf7ff')), k.z(99999),
   ]);
   const label = actor.root.add([
     k.text(text, { size: 9, width: w - 10 }), k.pos(0, -76), k.anchor('center'),
-    k.color(k.Color.fromHex('#1a1a22')), k.z(100000),
+    k.color(k.Color.fromHex('#122a42')), k.z(100000),
   ]);
-  return { bg, label };
+  return { bg, label, tail };
 }
 
 /**
@@ -99,7 +103,7 @@ export function initRoomCrowd(k, roomId, config, scale) {
 
   function clearBubble(npcId) {
     const b = bubbles.get(npcId);
-    if (b) { b.bg.destroy(); b.label.destroy(); bubbles.delete(npcId); }
+    if (b) { b.bg.destroy(); b.label.destroy(); b.tail?.destroy(); bubbles.delete(npcId); }
   }
 
   k.onUpdate(() => {

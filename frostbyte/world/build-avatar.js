@@ -22,6 +22,10 @@ export function loadAvatarSprites(k) {
  */
 export function makeAvatarActor(k, cfg, pos, scale) {
   const root = k.add([k.pos(pos.x, pos.y), k.z(pos.y), 'avatar']);
+  root.add([
+    k.rect(12 * scale, 3 * scale, { radius: 4 * scale }), k.pos(0, -1.5 * scale),
+    k.anchor('center'), k.color(k.Color.fromHex('#091827')), k.opacity(0.24), k.z(-20),
+  ]);
   let parts = [];
 
   function apply(nextCfg) {
