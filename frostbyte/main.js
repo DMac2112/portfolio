@@ -5,7 +5,7 @@ import kaplay from './vendor/kaplay.mjs';
 import { ROOM_REGISTRY } from './content/rooms.js';
 import { buildRoom } from './world/build-room.js';
 import { loadAvatarSprites, makeAvatarActor } from './world/build-avatar.js';
-import { resolveMoveVector, clampToBounds, resolveObstacles, resolveFacing } from './engine/movement.js';
+import { resolveMoveVector, resolveFacing } from './engine/movement.js';
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
@@ -32,6 +32,7 @@ import { newVisitorScheduler, tick as tickVisitors } from './engine/visitors.js'
 import { initVisitorLayer } from './world/visitor-runtime.js';
 import { ROSTER } from './content/npc-roster.js';
 import { addSnowfall, createWalkPuffs, fadeIn, fadeTo, showCoinSparkle, showMovePing } from './world/game-feel.js';
+import { resolveRoomCollision } from './world/room-collision.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -323,6 +324,7 @@ k.scene('room', (roomId, opts = {}) => {
   const isHome = roomId === 'den';
   const furnLayer = isHome ? initFurnitureLayer(k, save.home, room.scale) : null;
   const catalogById = Object.fromEntries(FURNITURE_CATALOG.map((it) => [it.id, it]));
+  const collidePlayer = (pos) => resolveRoomCollision(room, pos, PLAYER_RADIUS, save.home.placed, catalogById);
   let pickId = null;   // tray item armed for placement
   let selIdx = -1;     // selected placed-furniture index
   let dragging = false;
@@ -506,7 +508,7 @@ k.scene('room', (roomId, opts = {}) => {
   k.onMousePress(() => {
     if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
     if (!anyOverlayOpen()) {
-      moveTarget = k.toWorld(k.mousePos());
+      moveTarget = collidePlayer(k.toWorld(k.mousePos()));
       showMovePing(k, moveTarget, reduceMotion);
     }
   });
@@ -515,7 +517,7 @@ k.scene('room', (roomId, opts = {}) => {
     // routed ONLY through onMousePress — wiring it here too would double-fire on one tap
     // (double stock burn / duplicate placement — H2 review blocker). The idempotent moveTarget
     // assignment is safe to keep on both paths.
-    if (!anyOverlayOpen()) moveTarget = k.toWorld(pos);
+    if (!anyOverlayOpen()) moveTarget = collidePlayer(k.toWorld(pos));
   });
 
   k.onUpdate(() => {
@@ -542,8 +544,7 @@ k.scene('room', (roomId, opts = {}) => {
     if (arrived) moveTarget = null;
 
     let next = { x: player.pos.x + dxPx, y: player.pos.y + dyPx };
-    next = resolveObstacles(next, PLAYER_RADIUS, room.solids ?? []);
-    next = clampToBounds(next, room.bounds);
+    next = collidePlayer(next);
     player.pos.x = next.x;
     player.pos.y = next.y;
 
