@@ -62,15 +62,24 @@ let SEED = 2600;
 function rnd() { SEED = (SEED * 1664525 + 1013904223) >>> 0; return (SEED >>> 16) / 0xffff; }
 
 /* ----------------------------- palette --------------------------------- */
-const C = {
-  out: [22, 28, 38],
-  snow: [235, 242, 248], snowD: [214, 224, 234], snowL: [250, 252, 255],
-  water: [110, 178, 214], waterD: [80, 140, 180], waterL: [168, 220, 244],
-  stone: [186, 192, 202], stoneD: [148, 154, 166],
-  pine: [46, 110, 86], pineD: [30, 80, 64], trunk: [92, 64, 42],
-  belly: [246, 249, 252], beak: [255, 176, 64], beakD: [222, 140, 38],
-};
 const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const ARCTIC_DUSK = Object.freeze({
+  ink: hex('#122a42'), inkDeep: hex('#091827'), night: hex('#0d2238'), nightL: hex('#193d59'),
+  snow: hex('#dcecff'), snowD: hex('#b9d2e7'), snowL: hex('#f7fbff'), frost: hex('#8eacc6'),
+  ice: hex('#7fd6ff'), iceD: hex('#3b8fb8'), iceL: hex('#c8f4ff'), water: hex('#4fa9d2'),
+  pine: hex('#245c62'), pineD: hex('#173c49'), wood: hex('#76513d'), woodL: hex('#a97550'),
+  stone: hex('#60758b'), stoneL: hex('#8ca1b5'), amber: hex('#ffba5c'), amberL: hex('#ffe2a1'),
+  ember: hex('#ff784f'), aurora: hex('#72e2bd'), violet: hex('#a78bfa'), mist: hex('#eaf7ff'),
+  belly: hex('#f7fbff'), beak: hex('#ffad4a'), beakD: hex('#d8792e'),
+});
+const C = {
+  out: ARCTIC_DUSK.inkDeep,
+  snow: ARCTIC_DUSK.snow, snowD: ARCTIC_DUSK.snowD, snowL: ARCTIC_DUSK.snowL,
+  water: ARCTIC_DUSK.water, waterD: ARCTIC_DUSK.iceD, waterL: ARCTIC_DUSK.iceL,
+  stone: ARCTIC_DUSK.stoneL, stoneD: ARCTIC_DUSK.stone,
+  pine: ARCTIC_DUSK.pine, pineD: ARCTIC_DUSK.pineD, trunk: ARCTIC_DUSK.wood,
+  belly: ARCTIC_DUSK.belly, beak: ARCTIC_DUSK.beak, beakD: ARCTIC_DUSK.beakD,
+};
 const shade = (c, f) => [Math.max(0, Math.min(255, c[0] * f)), Math.max(0, Math.min(255, c[1] * f)), Math.max(0, Math.min(255, c[2] * f))];
 
 /* ----------------------------- PENGUIN (layered) ---------------------- */
@@ -84,24 +93,33 @@ const CW = 16, CH = 16, COLS = 4, ROWS = 3;
 const LEG_A = [0, -1, 0, 1]; // waddle bob per walk frame
 
 // grayscale body palette (tinted at runtime)
-const G = { hi: [230, 230, 234], mid: [174, 174, 180], lo: [112, 112, 120], out: [46, 46, 54] };
+const mono = (c) => { const v = Math.round((c[0] + c[1] + c[2]) / 3); return [v, v, v]; };
+const G = {
+  hi: mono(ARCTIC_DUSK.snowL), mid: mono(ARCTIC_DUSK.frost),
+  lo: mono(ARCTIC_DUSK.stone), out: mono(ARCTIC_DUSK.inkDeep),
+};
 // untinted detail palette
-const D = { belly: [246, 249, 252], eye: [26, 32, 42], beak: [255, 176, 64], beakD: [222, 140, 38], foot: [255, 176, 64], footD: [222, 140, 38] };
+const D = {
+  belly: ARCTIC_DUSK.belly, bellyD: ARCTIC_DUSK.snowD,
+  eye: ARCTIC_DUSK.inkDeep, eyeHi: ARCTIC_DUSK.snowL,
+  beak: ARCTIC_DUSK.beak, beakD: ARCTIC_DUSK.beakD,
+  foot: ARCTIC_DUSK.beak, footD: ARCTIC_DUSK.beakD,
+};
 
 function eggBody(p) {
-  for (let y = 3; y <= 14; y++) {
-    const halfW = y < 8 ? 3 + (y - 3) * 0.4 : 4.3 - (y - 8) * 0.35;
-    const xL = Math.round(8 - halfW), xR = Math.round(8 + halfW);
+  const rows = [[6, 9], [5, 10], [4, 11], [4, 11], [3, 12], [3, 12], [3, 12], [3, 12], [4, 11], [4, 11], [5, 10], [6, 9]];
+  for (let i = 0; i < rows.length; i++) {
+    const y = i + 2, [xL, xR] = rows[i];
     for (let x = xL; x <= xR; x++) p(x, y, G.mid);
-    p(xL, y, G.out); p(xR, y, G.out);       // side outline
-    p(xL + 1, y, G.lo); p(xR - 1, y, G.hi);  // inner shade / light
+    p(xL, y, G.out); p(xR, y, G.out);
+    if (xR - xL > 3) { p(xL + 1, y, G.lo); p(xR - 1, y, G.hi); }
   }
-  for (let x = 6; x <= 10; x++) { p(x, 3, G.out); p(x, 14, G.out); } // top/bottom caps
 }
 function bellyPatch(p) {
-  for (let y = 7; y <= 13; y++) {
-    const halfW = 2.6 - Math.abs(y - 10) * 0.35;
-    for (let x = Math.round(8 - halfW); x <= Math.round(8 + halfW); x++) p(x, y, D.belly);
+  const rows = [[6, 9], [5, 10], [5, 10], [5, 10], [6, 9], [7, 8]];
+  for (let i = 0; i < rows.length; i++) {
+    const y = i + 8, [xL, xR] = rows[i];
+    for (let x = xL; x <= xR; x++) p(x, y, x === xL ? D.bellyD : D.belly);
   }
 }
 function footG(p, x, y) { p(x, y, G.mid); p(x + 1, y, G.lo); }
@@ -125,9 +143,18 @@ function buildPenguinBelly() {
   for (let f = 0; f < COLS; f++) {
     const la = LEG_A[f], lb = -LEG_A[f];
     // down: belly + two eyes + centred beak + orange feet
-    cell(f, 0, (p) => { bellyPatch(p); p(6, 5, D.eye); p(9, 5, D.eye); p(7, 6, D.beak); p(8, 6, D.beak); p(7, 7, D.beakD); p(8, 7, D.beakD); footD(p, 6, 14 + la); footD(p, 9, 14 + lb); });
+    cell(f, 0, (p) => {
+      bellyPatch(p);
+      for (const x of [5, 9]) { p(x, 4, D.eyeHi); p(x + 1, 4, D.eye); p(x, 5, D.eye); p(x + 1, 5, D.eye); }
+      p(7, 6, D.beak); p(8, 6, D.beak); p(7, 7, D.beakD); p(8, 7, D.beakD);
+      footD(p, 6, 14 + la); footD(p, 9, 14 + lb);
+    });
     // side: belly + one eye + side beak + orange feet
-    cell(f, 1, (p) => { bellyPatch(p); p(10, 5, D.eye); p(10, 6, D.beak); p(11, 6, D.beak); p(10, 7, D.beakD); footD(p, 7 + la, 14); footD(p, 9 + lb, 14); });
+    cell(f, 1, (p) => {
+      bellyPatch(p); p(10, 4, D.eyeHi); p(11, 4, D.eye); p(10, 5, D.eye); p(11, 5, D.eye);
+      p(11, 6, D.beak); p(12, 6, D.beak); p(11, 7, D.beakD);
+      footD(p, 7 + la, 14); footD(p, 9 + lb, 14);
+    });
     // up: back of head — no belly/eyes/beak, just orange feet
     cell(f, 2, (p) => { footD(p, 6, 14 + la); footD(p, 9, 14 + lb); });
   }
@@ -212,26 +239,129 @@ function buildCosmetic(item) {
 function buildRoomPlaza() {
   const W = 480, H = 320;
   const img = Img(W, H);
+  const A = ARCTIC_DUSK;
+
+  // Blue-hour snow: quiet texture in the middle, deeper blue at the perimeter.
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    let col = C.snow; const n = rnd();
-    if (n > 0.9) col = C.snowD; else if (n > 0.8) col = C.snowL;
+    const edge = Math.min(1, Math.hypot((x - W / 2) / (W / 2), (y - H / 2) / (H / 2)));
+    let col = shade(A.snow, 1.02 - edge * 0.1); const n = rnd();
+    if (n > 0.965) col = shade(A.snowD, 0.96 + edge * 0.03);
+    else if (n > 0.91) col = A.snowL;
     px(img, x, y, col);
   }
-  // scattered snow-dusted pines near the four corners (kept clear of the pond + spawn path)
-  const pineAt = (cx, cy) => {
-    disc(img, cx, cy - 6, 6, C.pineD); disc(img, cx, cy - 9, 5, C.pine); disc(img, cx, cy - 12, 4, C.pine);
-    rect(img, cx - 1, cy - 1, 2, 5, C.trunk);
-    disc(img, cx, cy - 13, 2, C.snowL); // snow cap
-  };
-  for (const [cx, cy] of [[18, 20], [38, 22], [462, 20], [442, 22], [18, 300], [38, 296], [462, 300], [442, 296]]) pineAt(cx, cy);
 
-  // Driftback's Fountain — world (792,264) -> native (264,88), matches content/rooms.js hotspot + solid.
+  const stroke = (points, radius, color) => {
+    for (let i = 0; i < points.length - 1; i++) {
+      const [x0, y0] = points[i], [x1, y1] = points[i + 1];
+      const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+      for (let s = 0; s <= steps; s++) {
+        const t = steps ? s / steps : 0;
+        disc(img, Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), radius, color);
+      }
+    }
+  };
+
+  // Four packed paths meet at the social square while preserving authored door coordinates.
+  const paths = [
+    [[240, -6], [240, 50], [225, 108], [228, 158]],
+    [[240, 326], [240, 273], [220, 222], [228, 158]],
+    [[-6, 120], [68, 126], [136, 146], [228, 158]],
+    [[486, 152], [406, 154], [332, 148], [228, 158]],
+  ];
+  for (const pathPts of paths) { stroke(pathPts, 15, [...A.frost, 125]); stroke(pathPts, 11, [...A.snowL, 178]); }
+  oval(img, 228, 158, 63, 45, [...A.frost, 95]);
+  oval(img, 228, 156, 58, 40, [...A.snowL, 150]);
+  for (let i = 0; i < 34; i++) {
+    const a = (i / 34) * Math.PI * 2;
+    px(img, 228 + Math.round(Math.cos(a) * 53), 156 + Math.round(Math.sin(a) * 36), A.iceL);
+  }
+
+  const glow = (cx, cy, r = 12) => {
+    for (let rr = r; rr >= 3; rr -= 3) disc(img, cx, cy, rr, [...A.amber, Math.round(16 + (r - rr) * 2.5)]);
+  };
+  const lampAt = (cx, cy) => {
+    glow(cx, cy - 9, 14); rect(img, cx - 1, cy - 8, 3, 15, A.ink);
+    rect(img, cx - 4, cy - 12, 9, 7, A.inkDeep); rect(img, cx - 3, cy - 11, 7, 5, A.amberL);
+    px(img, cx - 2, cy - 10, A.snowL); rect(img, cx - 4, cy + 6, 9, 2, A.inkDeep);
+  };
+  for (const p of [[184, 114], [318, 129], [169, 202], [303, 211]]) lampAt(...p);
+
+  const pineAt = (cx, cy, s = 1) => {
+    rect(img, cx - Math.max(1, Math.round(s)), cy - 3, Math.max(2, Math.round(s * 2)), 7, A.wood);
+    for (const [oy, r, c] of [[-5, 8, A.pineD], [-10, 7, A.pine], [-15, 5, A.pine]]) disc(img, cx, cy + oy * s, r * s, c);
+    disc(img, cx - 2 * s, cy - 17 * s, 3 * s, A.snowL);
+    px(img, cx + Math.round(3 * s), cy - Math.round(10 * s), A.snowD);
+  };
+  for (const [cx, cy, s] of [[18, 30, 1.15], [42, 25, 0.9], [457, 28, 1.1], [435, 21, 0.82], [18, 306, 1.05], [42, 298, 0.82], [460, 307, 1.15], [435, 299, 0.86]]) pineAt(cx, cy, s);
+
+  const benchAt = (cx, cy, flip = 1) => {
+    oval(img, cx, cy + 5, 18, 4, [...A.inkDeep, 45]);
+    rect(img, cx - 17, cy - 5, 34, 6, A.wood); rect(img, cx - 17, cy - 5, 34, 2, A.woodL);
+    rect(img, cx - 14, cy + 1, 28, 4, shade(A.wood, 0.88));
+    rect(img, cx - 13, cy + 5, 3, 5, A.ink); rect(img, cx + 10, cy + 5, 3, 5, A.ink);
+    px(img, cx + flip * 13, cy - 4, A.snowL); px(img, cx + flip * 12, cy - 4, A.snowL);
+  };
+  benchAt(136, 88); benchAt(184, 232, -1);
+
+  // North: open trail gate with a dark timber arch, lit signboard, and snow-heavy roof.
+  rect(img, 198, 0, 84, 26, A.nightL); rect(img, 204, 0, 72, 6, A.ink);
+  disc(img, 240, 16, 24, A.inkDeep); rrect(img, 227, 5, 26, 34, A.night);
+  rect(img, 219, 1, 42, 7, A.wood); rect(img, 224, 2, 32, 4, A.amberL);
+  for (let x = 197; x <= 283; x += 5) disc(img, x, 0, 5, A.snowL);
+  glow(216, 19, 9); glow(264, 19, 9); disc(img, 216, 19, 3, A.amberL); disc(img, 264, 19, 3, A.amberL);
+
+  // South: the player's welcoming igloo entrance, clipped naturally by the canvas edge.
+  disc(img, 240, 325, 51, A.frost); disc(img, 240, 321, 47, A.snowL);
+  for (let y = 283; y < 320; y += 8) for (let x = 198 + ((y / 8) % 2) * 5; x < 282; x += 12) rect(img, x, y, 10, 1, A.snowD);
+  rrect(img, 226, 286, 28, 38, A.ink); rrect(img, 230, 290, 20, 32, A.nightL);
+  glow(240, 302, 16); rect(img, 232, 282, 16, 5, A.wood); rect(img, 235, 283, 10, 2, A.amberL);
+
+  // West/east locked destinations: distinct silhouettes under opaque wind-blown frost.
+  rect(img, 0, 91, 43, 61, A.nightL); rect(img, 0, 97, 37, 49, A.wood);
+  rrect(img, 0, 106, 28, 35, A.inkDeep); rect(img, 2, 109, 24, 28, A.ember);
+  rect(img, 3, 112, 21, 23, shade(A.ember, 0.48)); rect(img, 0, 91, 43, 8, A.snowL);
+  rect(img, 7, 102, 25, 5, A.woodL); px(img, 18, 103, A.amberL); px(img, 20, 103, A.amberL);
+  for (const [x, y, r] of [[5, 111, 11], [17, 121, 14], [8, 137, 12]]) disc(img, x, y, r, [...A.mist, 205]);
+  rect(img, 6, 115, 2, 23, A.iceL); rect(img, 20, 110, 2, 26, A.iceL);
+
+  rect(img, 443, 119, 37, 67, A.iceD); disc(img, 463, 137, 31, A.frost);
+  rrect(img, 451, 132, 29, 43, A.inkDeep); rect(img, 457, 139, 23, 31, A.night);
+  rect(img, 444, 119, 36, 8, A.iceL); rect(img, 450, 125, 28, 5, A.violet);
+  for (const [x, y, r] of [[474, 137, 13], [460, 151, 16], [476, 167, 14]]) disc(img, x, y, r, [...A.mist, 210]);
+  rect(img, 459, 140, 2, 27, A.iceL); rect(img, 471, 136, 2, 33, A.iceL);
+
+  // Shop awning, toss kiosk, chronicle board, snow piles, and an ice sculpture.
+  rect(img, 13, 170, 42, 30, A.wood); rrect(img, 19, 177, 30, 23, A.nightL);
+  for (let x = 12; x < 56; x += 8) rect(img, x, 166, 8, 8, (x / 8) % 2 ? A.ice : A.amber);
+  rect(img, 18, 181, 32, 3, A.amberL); glow(34, 186, 11);
+
+  disc(img, 376, 188, 24, A.frost); disc(img, 376, 185, 21, A.snowL);
+  rrect(img, 365, 175, 22, 28, A.nightL); rect(img, 369, 178, 14, 11, A.iceD);
+  disc(img, 376, 183, 5, A.snowL); px(img, 374, 182, A.ink); px(img, 378, 182, A.ink); px(img, 376, 184, A.beak);
+
+  rect(img, 54, 249, 4, 29, A.wood); rect(img, 36, 250, 40, 24, A.wood);
+  rect(img, 39, 253, 34, 18, A.amberL); rect(img, 42, 256, 28, 2, A.wood); rect(img, 42, 262, 22, 2, A.wood);
+  disc(img, 56, 247, 5, A.snowL);
+
+  for (const [x, y, rx, ry] of [[103, 285, 22, 8], [397, 274, 26, 9], [91, 47, 19, 7], [386, 64, 18, 7]]) {
+    oval(img, x, y, rx, ry, A.snowD); oval(img, x - 3, y - 2, rx - 3, Math.max(2, ry - 2), A.snowL);
+  }
+  oval(img, 344, 264, 19, 5, [...A.inkDeep, 50]); disc(img, 344, 248, 12, A.iceD);
+  disc(img, 350, 239, 7, A.ice); rect(img, 342, 248, 5, 18, A.ice); px(img, 353, 237, A.iceL); px(img, 355, 239, A.iceL);
+
+  // Driftback's Fountain: exact authored center (792,264 world -> 264,88 native).
   const fx = 264, fy = 88;
-  disc(img, fx, fy, 42, C.water);
-  disc(img, fx, fy, 42, C.waterD); disc(img, fx - 6, fy - 6, 36, C.water); // shoreline shading
-  for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; px(img, fx + Math.round(Math.cos(a) * 30), fy + Math.round(Math.sin(a) * 30), C.waterL); }
-  disc(img, fx, fy, 11, C.stoneD); disc(img, fx, fy, 9, C.stone);
-  px(img, fx, fy - 12, C.waterL); px(img, fx - 1, fy - 10, C.waterL); px(img, fx + 1, fy - 9, C.waterL); // spray
+  oval(img, fx, fy + 3, 40, 29, A.frost); oval(img, fx, fy, 37, 26, A.iceD);
+  oval(img, fx - 2, fy - 2, 33, 22, A.water);
+  for (const [x, y, w] of [[246, 78, 20], [266, 91, 18], [252, 99, 13]]) rect(img, x, y, w, 2, [...A.iceL, 175]);
+  disc(img, fx, fy, 11, A.ink); disc(img, fx, fy - 1, 9, A.stoneL);
+  glow(fx, fy - 10, 8); px(img, fx, fy - 14, A.iceL); px(img, fx - 1, fy - 12, A.iceL); px(img, fx + 1, fy - 11, A.iceL);
+
+  // A restrained navy vignette frames the room without obscuring the walkable center.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const d = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (d > 0.78) px(img, x, y, [...A.inkDeep, Math.round((d - 0.78) * 190)]);
+  }
 
   return save('room-plaza.png', img);
 }
@@ -241,14 +371,14 @@ function buildRoomPlaza() {
 // the hearth solid sits at world (720,240,120,90) -> native (240,80,40,30) /scale(3), matching
 // content/rooms.js `den.solids`, so the painted ember glow lines up with the real collision box.
 const ICE = {
-  floor: [220, 233, 244], floorD: [198, 215, 230], floorL: [240, 248, 254],
-  wall: [172, 202, 222], wallD: [132, 166, 190], wallEdge: [92, 128, 156],
-  mat: [178, 108, 70], matD: [140, 82, 54],
-  stone: [156, 156, 166], stoneD: [116, 116, 128],
-  ember: [255, 150, 58], emberL: [255, 210, 132], emberD: [176, 62, 38],
-  aurora: [140, 232, 214],
-  crate: [150, 108, 74], crateD: [114, 80, 52],
-  void: [22, 32, 46],
+  floor: ARCTIC_DUSK.snowD, floorD: ARCTIC_DUSK.frost, floorL: ARCTIC_DUSK.snowL,
+  wall: ARCTIC_DUSK.ice, wallD: ARCTIC_DUSK.iceD, wallEdge: ARCTIC_DUSK.ink,
+  mat: ARCTIC_DUSK.woodL, matD: ARCTIC_DUSK.wood,
+  stone: ARCTIC_DUSK.stoneL, stoneD: ARCTIC_DUSK.stone,
+  ember: ARCTIC_DUSK.ember, emberL: ARCTIC_DUSK.amberL, emberD: ARCTIC_DUSK.beakD,
+  aurora: ARCTIC_DUSK.aurora,
+  crate: ARCTIC_DUSK.woodL, crateD: ARCTIC_DUSK.wood,
+  void: ARCTIC_DUSK.inkDeep,
 };
 
 function buildRoomDen() {
@@ -267,11 +397,22 @@ function buildRoomDen() {
   for (let y = -rFloor; y <= rFloor; y++) for (let x = -rFloor; x <= rFloor; x++) {
     if (x * x + y * y > rFloor * rFloor + rFloor * 0.6) continue;
     let col = ICE.floor; const n = rnd();
-    if (n > 0.9) col = ICE.floorD; else if (n > 0.8) col = ICE.floorL;
+    if (n > 0.965) col = ICE.floorD; else if (n > 0.91) col = ICE.floorL;
     px(img, cx + x, cy + y, col);
   }
 
-  // Ice-block ring wall: angular "blocks" (alternating tint) with light-from-above gradation.
+  // The hearth warms the ice underfoot; restrained alpha keeps furniture readable above it.
+  for (let y = -rFloor; y <= rFloor; y++) for (let x = -rFloor; x <= rFloor; x++) {
+    if (x * x + y * y > rFloor * rFloor) continue;
+    const d = Math.hypot(x, y + 78);
+    if (d < 118) px(img, cx + x, cy + y, [...ARCTIC_DUSK.amber, Math.round((1 - d / 118) * 78)]);
+  }
+  for (let yy = 66; yy <= 270; yy += 22) {
+    const half = Math.sqrt(Math.max(0, rFloor * rFloor - (yy - cy) ** 2));
+    for (let x = Math.ceil(cx - half + 8); x < cx + half - 8; x += 7) px(img, x, yy, [...ICE.floorL, 100]);
+  }
+
+  // Ice-block ring wall: angular blocks with alternating tint and top light.
   const segs = 30, bands = 2;
   for (let y = -rWall; y <= rWall; y++) for (let x = -rWall; x <= rWall; x++) {
     const r = Math.hypot(x, y);
@@ -312,7 +453,25 @@ function buildRoomDen() {
     for (let layer = 12; layer >= 3; layer -= 3) disc(img, Math.round(sx), Math.round(sy), layer, [...ICE.aurora, Math.round(80 * (1 - layer / 12))]);
   }
 
-  // Hearth — matches the world (720,240,120,90) solid, native (240,80,40,30): stone ring + embers.
+  // One readable window replaces the placeholder-like slits: night, stars, and an aurora ribbon.
+  const wx = 155, wy = 72;
+  oval(img, wx, wy, 36, 24, ARCTIC_DUSK.iceL); oval(img, wx, wy, 32, 20, ARCTIC_DUSK.ink); oval(img, wx, wy, 28, 16, ARCTIC_DUSK.night);
+  for (let x = -24; x <= 24; x++) {
+    const y = Math.round(Math.sin(x * 0.12) * 3);
+    px(img, wx + x, wy + y, [...ARCTIC_DUSK.aurora, 175]);
+    px(img, wx + x, wy + y + 1, [...ARCTIC_DUSK.violet, 95]);
+  }
+  for (const [sx, sy] of [[-18, -9], [-7, 7], [6, -7], [18, 4], [23, -10]]) px(img, wx + sx, wy + sy, ARCTIC_DUSK.snowL);
+  rect(img, wx, wy - 16, 2, 33, ICE.wallD); rect(img, wx - 28, wy, 57, 2, ICE.wallD);
+  rect(img, wx - 33, wy + 20, 66, 5, ICE.wallD); rect(img, wx - 29, wy + 20, 58, 2, ICE.floorL);
+
+  // A sparse string of amber bulbs ties the cool shell to the hearth.
+  for (const deg of [205, 225, 245, 285, 305, 325]) {
+    const a = (deg * Math.PI) / 180, lx = Math.round(cx + Math.cos(a) * 118), ly = Math.round(cy + Math.sin(a) * 118);
+    disc(img, lx, ly, 4, [...ARCTIC_DUSK.amber, 65]); disc(img, lx, ly, 2, ARCTIC_DUSK.amberL);
+  }
+
+  // Hearth matches the world (720,240,120,90) solid at native (240,80,40,30).
   const hx = 240, hy = 80;
   disc(img, hx, hy, 21, ICE.stoneD); disc(img, hx, hy, 18, ICE.stone);
   for (let layer = 16; layer >= 3; layer -= 3) disc(img, hx, hy, layer, [...ICE.ember, Math.round(70 * (1 - layer / 16))]);
@@ -332,16 +491,16 @@ function buildRoomDen() {
 
 /* ----------------------------- MAP: Chillmere Isle ---------------------- */
 // 480x320 painted-look travel map (island only — pins/labels are DOM, content/map.js owns them).
-// The three mist patches are centered exactly on MAP_NODES' locked x/y so the future-area pins land
+// The two mist patches are centered exactly on MAP_NODES' locked x/y so the future-area pins land
 // on the cloud cover; the plaza/den glyphs sit under the 'plaza'/'den' pins for the same reason.
 const ISLE = {
-  sea: [42, 66, 92], seaD: [30, 50, 72], seaL: [64, 98, 128],
-  land: [204, 219, 234], landD: [176, 195, 214], landL: [226, 238, 248],
-  coast: [126, 158, 184],
-  plaza: [200, 202, 212], plazaD: [166, 168, 180], fountain: [110, 178, 214],
-  dome: [236, 244, 250], domeSh: [176, 202, 220], domeDoor: [96, 72, 52],
-  roof: [176, 92, 84], roofD: [140, 68, 62],
-  mist: [250, 251, 253], mistShadow: [172, 194, 214],
+  sea: ARCTIC_DUSK.night, seaD: ARCTIC_DUSK.inkDeep, seaL: ARCTIC_DUSK.nightL,
+  land: ARCTIC_DUSK.snowD, landD: ARCTIC_DUSK.frost, landL: ARCTIC_DUSK.snowL,
+  coast: ARCTIC_DUSK.iceD,
+  plaza: ARCTIC_DUSK.stoneL, plazaD: ARCTIC_DUSK.stone, fountain: ARCTIC_DUSK.ice,
+  dome: ARCTIC_DUSK.snowL, domeSh: ARCTIC_DUSK.frost, domeDoor: ARCTIC_DUSK.wood,
+  roof: ARCTIC_DUSK.amber, roofD: ARCTIC_DUSK.wood,
+  mist: ARCTIC_DUSK.mist, mistShadow: ARCTIC_DUSK.frost,
 };
 
 function buildMapIsle() {
@@ -357,6 +516,12 @@ function buildMapIsle() {
     if (n > 0.96) col = shade(ISLE.seaL, 1 + (1 - t) * 0.1); else if (n > 0.9) col = ISLE.seaD;
     px(img, x, y, col);
   }
+  // Aurora strokes and sparse stars make the surrounding sea feel like a night chart.
+  for (let x = 22; x < W - 22; x++) {
+    const y = 20 + Math.round(Math.sin(x * 0.028) * 5);
+    px(img, x, y, [...ARCTIC_DUSK.aurora, 90]); px(img, x, y + 1, [...ARCTIC_DUSK.violet, 52]);
+  }
+  for (const [x, y] of [[25, 35], [55, 279], [107, 28], [392, 284], [445, 38], [421, 248], [74, 72]]) px(img, x, y, ARCTIC_DUSK.iceL);
 
   // Island landmass — a union of overlapping blobs, sized to host every map node (incl. locked ones).
   const blobs = [
@@ -378,11 +543,21 @@ function buildMapIsle() {
     px(img, x, y, land ? ISLE.coast : [...ISLE.seaL, 190]);
   }
 
+  // Dotted snow routes connect the three available destinations without duplicating DOM labels.
+  const route = (x0, y0, x1, y1) => {
+    const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+    for (let s = 0; s <= steps; s += 8) {
+      const t = s / steps;
+      disc(img, Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), 2, [...ARCTIC_DUSK.iceD, 150]);
+    }
+  };
+  route(221, 128, 298, 237); route(221, 128, 182, 38);
+
   // Pine clusters — flavor only, a scaled-down version of the plaza's disc-stack pine.
   const pineAt = (px0, py0, s) => {
-    disc(img, px0, py0 - 3 * s, 3.4 * s, [30, 80, 64]);
-    disc(img, px0, py0 - 5 * s, 2.7 * s, [46, 110, 86]);
-    disc(img, px0, py0 - 6.6 * s, 2 * s, [46, 110, 86]);
+    disc(img, px0, py0 - 3 * s, 3.4 * s, ARCTIC_DUSK.pineD);
+    disc(img, px0, py0 - 5 * s, 2.7 * s, ARCTIC_DUSK.pine);
+    disc(img, px0, py0 - 6.6 * s, 2 * s, ARCTIC_DUSK.pine);
   };
   for (const [bx, by] of [[150, 210], [270, 200], [320, 145], [175, 100]]) pineAt(bx, by, 1.15);
 
@@ -411,11 +586,22 @@ function buildMapIsle() {
   disc(img, dpx, dpy - 2, 11, ISLE.dome);
   rect(img, dpx - 3, dpy + 5, 6, 4, ISLE.domeDoor);
 
+  // Trail glyph: a tiny waterfall between two pines under the unlocked north pin.
+  const tpx = Math.round(0.38 * W), tpy = Math.round(0.12 * H);
+  rect(img, tpx - 3, tpy - 7, 7, 15, ARCTIC_DUSK.iceD); rect(img, tpx - 1, tpy - 7, 3, 15, ARCTIC_DUSK.iceL);
+  disc(img, tpx, tpy + 8, 6, ARCTIC_DUSK.water); pineAt(tpx - 11, tpy + 7, 0.8); pineAt(tpx + 12, tpy + 7, 0.8);
+
+  // Small compass rose in open water, kept away from every pin.
+  const crx = 432, cry = 263;
+  disc(img, crx, cry, 13, [...ARCTIC_DUSK.inkDeep, 150]); ovalRing(img, crx, cry, 11, 11, ARCTIC_DUSK.iceD, 90);
+  rect(img, crx, cry - 9, 1, 19, ARCTIC_DUSK.iceL); rect(img, crx - 9, cry, 19, 1, ARCTIC_DUSK.iceL);
+  px(img, crx, cry - 11, ARCTIC_DUSK.amber); px(img, crx - 1, cry - 9, ARCTIC_DUSK.amber);
+
   // Mist/cloud patches over the three locked areas — centers match MAP_NODES exactly. Painted as
   // tight scalloped puffs (not a broad soft glow) so each patch reads as a discrete cloud sitting
   // on the island, rather than washing the whole map out to white-on-white.
   const puffs = [[0, -2, 17], [-13, 5, 14], [13, 5, 14], [0, 10, 13]];
-  for (const [nx, ny] of [[0.38, 0.12], [0.80, 0.38], [0.14, 0.46]]) {
+  for (const [nx, ny] of [[0.80, 0.38], [0.14, 0.46]]) {
     const mx = Math.round(nx * W), my = Math.round(ny * H);
     // faint haze rim so the cloud doesn't have a hard cutoff against the land
     for (let layer = 30; layer >= 20; layer -= 5) disc(img, mx, my, layer, [...ISLE.mist, Math.round(60 * (1 - layer / 30))]);
@@ -432,7 +618,10 @@ function buildMapIsle() {
 
 /* ----------------------------- MINIGAME: Snowdrift Toss ------------------ */
 // Extra tones not already in C, matching the spec for this minigame's art.
-const MG = { shadow: [170, 190, 210], dark: [40, 46, 54], orange: [255, 150, 60], sky: [214, 228, 240] };
+const MG = {
+  shadow: ARCTIC_DUSK.frost, dark: ARCTIC_DUSK.inkDeep,
+  orange: ARCTIC_DUSK.beak, sky: ARCTIC_DUSK.nightL,
+};
 
 function buildSnowpal() {
   const img = Img(32, 32);
@@ -443,10 +632,15 @@ function buildSnowpal() {
     }
   };
   // body (bottom, larger), then head (top, smaller) drawn after so it sits cleanly on the body
-  disc(img, 16, 23, 10, C.snow);
+  oval(img, 16, 30, 12, 2, [...ARCTIC_DUSK.inkDeep, 55]);
+  disc(img, 16, 23, 11, MG.dark); disc(img, 16, 23, 10, C.snow);
   shadeDiscSide(16, 23, 10, MG.shadow);
-  disc(img, 16, 9, 7, C.snow);
+  disc(img, 16, 9, 8, MG.dark); disc(img, 16, 9, 7, C.snow);
   shadeDiscSide(16, 9, 7, MG.shadow);
+
+  // Twig arms and a tiny violet scarf keep the target readable at native scale.
+  for (let i = 0; i < 7; i++) { px(img, 6 - i, 19 - Math.floor(i / 2), ARCTIC_DUSK.wood); px(img, 26 + i, 19 - Math.floor(i / 2), ARCTIC_DUSK.wood); }
+  rect(img, 10, 14, 12, 3, ARCTIC_DUSK.violet); rect(img, 20, 16, 3, 7, shade(ARCTIC_DUSK.violet, 0.78));
 
   // dot eyes
   px(img, 13, 8, MG.dark); px(img, 19, 8, MG.dark);
@@ -460,7 +654,7 @@ function buildSnowpal() {
 
 function buildSnowball() {
   const img = Img(12, 12);
-  disc(img, 6, 6, 5, C.snow);
+  disc(img, 6, 6, 5, ARCTIC_DUSK.ink); disc(img, 6, 6, 4, C.snow);
   // lighter highlight, top-left
   px(img, 4, 3, C.snowL); px(img, 3, 4, C.snowL);
   // faint blue-grey shadow arc, bottom-right
@@ -470,24 +664,64 @@ function buildSnowball() {
 }
 
 function buildMinigameBg() {
-  const W = 480, H = 270;
-  const img = Img(W, H);
-  const bandH = Math.round(H * 0.4); // upper ~40% gradient band; lower ~60% is solid snow ground
-  for (let y = 0; y < H; y++) {
-    const t = y / bandH;
-    const base = y <= bandH
-      ? MG.sky.map((v, i) => v + (C.snow[i] - v) * t)
-      : C.snow;
-    for (let x = 0; x < W; x++) {
-      let col = base;
-      const n = rnd();
-      if (n > 0.97) col = C.snowD; else if (n > 0.94) col = C.snowL;
+  const W = 480, H = 270, horizon = 112;
+  const img = Img(W, H), A = ARCTIC_DUSK;
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (y < horizon) {
+      const t = y / horizon;
+      const sky = A.night.map((v, i) => v + (A.nightL[i] - v) * t);
+      px(img, x, y, sky);
+    } else {
+      const t = (y - horizon) / (H - horizon);
+      let col = A.snowD.map((v, i) => v + (A.snow[i] - v) * t * 0.65);
+      const n = rnd(); if (n > 0.965) col = A.snowL; else if (n > 0.92) col = A.frost;
       px(img, x, y, col);
     }
   }
-  // subtle horizon line
-  const horizonC = shade(C.snow, 0.94);
-  for (let x = 0; x < W; x++) px(img, x, bandH, horizonC);
+
+  for (const [x, y] of [[32, 28], [74, 62], [128, 20], [203, 48], [279, 18], [338, 58], [411, 24], [454, 72]]) {
+    px(img, x, y, A.iceL); if (x % 2) px(img, x + 1, y, [...A.iceL, 110]);
+  }
+  for (let x = 0; x < W; x++) {
+    const y1 = 28 + Math.round(Math.sin(x * 0.022) * 8), y2 = 42 + Math.round(Math.sin(x * 0.018 + 1.4) * 7);
+    px(img, x, y1, [...A.aurora, 115]); px(img, x, y1 + 1, [...A.aurora, 55]);
+    px(img, x, y2, [...A.violet, 72]);
+  }
+
+  // Layered ridge and pines add depth without competing with the target lane.
+  for (let x = 0; x < W; x++) {
+    const ridge = 80 + Math.sin(x * 0.017) * 13 + Math.sin(x * 0.051) * 6;
+    for (let y = Math.round(ridge); y < horizon + 8; y++) px(img, x, y, y < ridge + 4 ? A.frost : A.stone);
+    px(img, x, Math.round(ridge), A.snowL);
+  }
+  const pine = (cx, cy, s) => {
+    rect(img, cx - 1, cy - 3, 2, 7, A.wood);
+    disc(img, cx, cy - 5 * s, 7 * s, A.pineD); disc(img, cx, cy - 11 * s, 6 * s, A.pine); disc(img, cx, cy - 16 * s, 4 * s, A.pine);
+    disc(img, cx - 2, cy - 18 * s, 2 * s, A.snowL);
+  };
+  for (const p of [[44, 119, 0.9], [70, 115, 0.65], [415, 117, 0.85], [444, 120, 0.65], [357, 114, 0.5]]) pine(...p);
+
+  // A cool packed lane points toward the snowpal, with warm pennants as contrast.
+  for (let y = 132; y < H; y++) {
+    const t = (y - 132) / (H - 132), half = Math.round(27 + t * 82);
+    for (let x = 240 - half; x <= 240 + half; x++) px(img, x, y, [...A.iceL, 56]);
+    if (y % 18 === 0) for (let x = 240 - half + 8; x < 240 + half - 8; x += 12) px(img, x, y, [...A.iceD, 115]);
+  }
+  for (const x of [136, 344]) {
+    rect(img, x, 126, 3, 48, A.wood); disc(img, x + 1, 125, 3, A.snowL);
+    for (let y = 131; y <= 161; y += 10) {
+      rect(img, x + (x < 240 ? 3 : -9), y, 7, 5, y % 20 ? A.amber : A.violet);
+    }
+  }
+  for (const [x, y, rx, ry] of [[82, 211, 78, 20], [405, 218, 72, 22]]) {
+    oval(img, x, y, rx, ry, A.frost); oval(img, x - 4, y - 4, rx - 4, ry - 5, A.snowL);
+  }
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const d = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (d > 0.84) px(img, x, y, [...A.inkDeep, Math.round((d - 0.84) * 160)]);
+  }
   return save(path.join('minigame', 'toss-bg.png'), img);
 }
 
@@ -504,12 +738,12 @@ const F = {
   wood: ICE.crate, woodD: ICE.crateD, woodL: shade(ICE.crate, 1.25),
   ice: ICE.floor, iceD: ICE.floorD, iceL: ICE.floorL,
   wall: ICE.wall, wallD: ICE.wallD,
-  cush: [222, 140, 82], cushD: [186, 106, 58], cushL: [242, 178, 122],
-  metal: [104, 116, 130], metalD: [76, 86, 98], metalL: [154, 166, 180],
+  cush: ARCTIC_DUSK.amber, cushD: ARCTIC_DUSK.beakD, cushL: ARCTIC_DUSK.amberL,
+  metal: ARCTIC_DUSK.stone, metalD: ARCTIC_DUSK.ink, metalL: ARCTIC_DUSK.stoneL,
   glow: ICE.ember, glowL: ICE.emberL, glowD: ICE.emberD,
-  aur: ICE.aurora, aurD: [92, 176, 160],
-  gold: [214, 176, 88], goldD: [170, 132, 58],
-  dark: [40, 46, 54],
+  aur: ICE.aurora, aurD: shade(ARCTIC_DUSK.aurora, 0.72),
+  gold: ARCTIC_DUSK.amber, goldD: ARCTIC_DUSK.woodL,
+  dark: ARCTIC_DUSK.inkDeep,
   cream: D.belly,
 };
 
@@ -536,7 +770,7 @@ function ovalRing(img, cx, cy, rx, ry, c, steps = 180) {
   }
 }
 // Soft grounding shadow for front-facing items (mirrors the penguin body's under-foot shadow).
-function groundShadow(img, cx, cy, rx, ry) { oval(img, cx, cy, rx, ry, [0, 0, 0, 50]); }
+function groundShadow(img, cx, cy, rx, ry) { oval(img, cx, cy, rx, ry, [...ARCTIC_DUSK.inkDeep, 50]); }
 
 /* seating */
 function furnSnowSofa() { // 32x24
@@ -692,7 +926,7 @@ function furnFrostFern() { // 16x28
   obox(img, 4, 20, 8, 6, F.wood);
   rect(img, 4, 20, 8, 1, F.woodL);
   const fronds = [[-6, -14], [-3, -18], [0, -20], [3, -18], [6, -14]];
-  const green = [64, 132, 108], greenD = [40, 96, 78], greenL = [124, 196, 172];
+  const green = ARCTIC_DUSK.pine, greenD = ARCTIC_DUSK.pineD, greenL = ARCTIC_DUSK.aurora;
   for (const [dx, dy] of fronds) {
     for (let i = 0; i <= 10; i++) {
       const t = i / 10;
@@ -840,76 +1074,102 @@ function buildDenSigns() {
 // -> (100,133)+(367,100) at 40x47, boulder (500,700)->(167,233) at 33x27, signpost
 // (1100,760)->(367,253). Path enters at the south door (720,880)->(240,293) and winds to the falls.
 function buildRoomTrail() {
-  const W = 480, H = 320;
-  const img = Img(W, H);
+  const W = 480, H = 320, horizon = 96;
+  const img = Img(W, H), A = ARCTIC_DUSK;
 
-  // High-altitude snowfield base — a touch brighter than the plaza.
+  // Night sky above a softly rising snowfield.
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    let col = C.snowL; const n = rnd();
-    if (n > 0.88) col = C.snowD; else if (n > 0.72) col = C.snow;
-    px(img, x, y, col);
+    if (y < horizon) {
+      const t = y / horizon;
+      px(img, x, y, A.night.map((v, i) => v + (A.nightL[i] - v) * t));
+    } else {
+      const edge = Math.abs(x - W / 2) / (W / 2);
+      let col = shade(A.snow, 0.99 - edge * 0.055); const n = rnd();
+      if (n > 0.965) col = A.snowL; else if (n > 0.91) col = A.snowD;
+      px(img, x, y, col);
+    }
+  }
+  for (const [x, y] of [[31, 24], [79, 47], [130, 18], [313, 31], [378, 15], [447, 54]]) px(img, x, y, A.iceL);
+  for (let x = 0; x < W; x++) {
+    const ay = 27 + Math.round(Math.sin(x * 0.025) * 7);
+    px(img, x, ay, [...A.aurora, 90]); px(img, x, ay + 1, [...A.violet, 55]);
   }
 
-  // Winding packed-snow path, south door up to the falls pool (S-curve through the pickups' line).
-  const pathPts = [[240, 312], [232, 280], [214, 244], [204, 214], [216, 178], [242, 148], [250, 118], [240, 92]];
+  // Two ridge layers create distance, capped with irregular snow lips.
+  for (let x = 0; x < W; x++) {
+    const far = 59 + Math.sin(x * 0.018) * 12 + Math.sin(x * 0.047) * 5;
+    for (let y = Math.round(far); y < horizon + 18; y++) px(img, x, y, y < far + 5 ? A.frost : A.stone);
+    px(img, x, Math.round(far), A.snowL);
+  }
+  for (let x = 0; x < W; x++) {
+    const near = 86 + Math.sin(x * 0.013 + 1.1) * 10 + Math.sin(x * 0.039) * 4;
+    for (let y = Math.round(near); y < horizon + 30; y++) px(img, x, y, A.snowD);
+    px(img, x, Math.round(near), A.snowL);
+  }
+
+  // Winding packed path from the plaza door to the falls.
+  const pathPts = [[240, 325], [238, 292], [224, 256], [210, 223], [214, 190], [235, 156], [247, 125], [240, 94]];
   for (let i = 0; i < pathPts.length - 1; i++) {
     const [x0, y0] = pathPts[i], [x1, y1] = pathPts[i + 1];
     const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
     for (let s = 0; s <= steps; s++) {
-      const t = s / steps;
-      const cx = Math.round(x0 + (x1 - x0) * t), cy = Math.round(y0 + (y1 - y0) * t);
-      disc(img, cx, cy, 11, C.snowD);
-      disc(img, cx + 1, cy, 8, shade(C.snowD, 1.04));
+      const t = s / steps, cx = Math.round(x0 + (x1 - x0) * t), cy = Math.round(y0 + (y1 - y0) * t);
+      disc(img, cx, cy, 13, [...A.frost, 150]); disc(img, cx + 1, cy - 1, 9, [...A.snowL, 160]);
     }
   }
-  // Sparse footprints along the path.
-  for (const [fx, fy] of [[236, 292], [226, 262], [210, 228], [212, 196], [230, 162], [246, 132]]) {
-    px(img, fx, fy, C.stoneD); px(img, fx + 2, fy + 3, C.stoneD);
+  for (const [fx, fy, turn] of [[238, 296, 1], [229, 271, -1], [216, 239, 1], [211, 208, -1], [222, 178, 1], [240, 144, -1]]) {
+    oval(img, fx, fy, 2, 4, [...A.stone, 135]); oval(img, fx + turn * 5, fy + 5, 2, 4, [...A.stone, 135]);
   }
 
-  // The Frozen Falls — dark rock cliff band across the top, glassy ice columns, frozen plunge pool.
-  for (let y = 0; y < 58; y++) for (let x = 0; x < W; x++) {
-    const ridge = 46 + Math.sin(x * 0.06) * 6 + (rnd() - 0.5) * 3;
-    if (y < ridge) px(img, x, y, shade([70, 78, 92], 1 - y / 90));
+  // Frozen falls, aligned to the authored landmark center at (240,73 native).
+  for (let x = 190; x <= 290; x++) {
+    const top = 48 + Math.round(Math.sin(x * 0.13) * 4);
+    for (let y = top; y < 91; y++) px(img, x, y, y < top + 4 ? A.snowL : A.ink);
   }
-  for (let x = 0; x < W; x += 3) px(img, x, Math.round(46 + Math.sin(x * 0.06) * 6), C.snowL); // snow lip
-  const fcx = 240;
-  for (const [dx, w, tint] of [[-26, 9, C.waterD], [-10, 12, C.water], [6, 10, C.waterL], [22, 8, C.water]]) {
-    for (let y = 18; y <= 78; y++) {
-      for (let i = 0; i < w; i++) {
-        const wobble = Math.sin(y * 0.22 + dx) * 1.6;
-        px(img, fcx + dx + i + wobble, y, shade(tint, 0.9 + (i / w) * 0.25));
-      }
+  for (const [dx, w, c] of [[-24, 10, A.iceD], [-9, 13, A.ice], [8, 11, A.iceL], [23, 8, A.water]]) {
+    for (let y = 52; y <= 92; y++) for (let i = 0; i < w; i++) {
+      const wobble = Math.round(Math.sin(y * 0.18 + dx) * 1.2);
+      px(img, 240 + dx + i + wobble, y, i === 1 ? A.iceL : c);
     }
-    px(img, fcx + dx + 1, 24, C.snowL); px(img, fcx + dx + 2, 44, C.snowL); // glassy highlights
   }
-  disc(img, fcx, 84, 26, C.waterD); disc(img, fcx - 3, 82, 22, C.water); disc(img, fcx - 6, 80, 12, C.waterL);
-  for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; px(img, fcx + Math.round(Math.cos(a) * 24), 84 + Math.round(Math.sin(a) * 12), C.snowL); } // frozen rim
+  oval(img, 240, 96, 34, 16, A.iceD); oval(img, 237, 93, 29, 12, A.water);
+  for (const [x, y, w] of [[220, 90, 20], [244, 98, 22], [228, 103, 15]]) rect(img, x, y, w, 2, [...A.iceL, 180]);
 
-  // Pine stands matching the two collision solids (clusters inside 40x47 native boxes).
-  const pineAt = (cx, cy) => {
-    disc(img, cx, cy - 6, 6, C.pineD); disc(img, cx, cy - 9, 5, C.pine); disc(img, cx, cy - 12, 4, C.pine);
-    rect(img, cx - 1, cy - 1, 2, 5, C.trunk);
-    disc(img, cx, cy - 13, 2, C.snowL);
+  // Layered drifts make the snowfield feel carved by wind.
+  for (const [x, y, rx, ry] of [[73, 184, 74, 13], [401, 199, 86, 15], [85, 286, 82, 17], [395, 286, 76, 14]]) {
+    oval(img, x, y, rx, ry, A.frost); oval(img, x - 4, y - 4, rx - 4, Math.max(3, ry - 4), A.snowL);
+  }
+
+  const pineAt = (cx, cy, s = 1) => {
+    oval(img, cx, cy + 3, 8 * s, 3 * s, [...A.inkDeep, 48]);
+    rect(img, cx - Math.max(1, Math.round(s)), cy - 3, Math.max(2, Math.round(s * 2)), 8, A.wood);
+    disc(img, cx, cy - 7 * s, 8 * s, A.pineD); disc(img, cx, cy - 14 * s, 7 * s, A.pine); disc(img, cx, cy - 20 * s, 5 * s, A.pine);
+    disc(img, cx - 2 * s, cy - 22 * s, 3 * s, A.snowL); px(img, cx + 3 * s, cy - 13 * s, A.snowD);
   };
-  for (const [cx, cy] of [[90, 140], [104, 150], [112, 130], [96, 122]]) pineAt(cx, cy);       // pines-west (100,133)
-  for (const [cx, cy] of [[357, 108], [371, 116], [379, 96], [363, 88]]) pineAt(cx, cy);       // pines-east (367,100)
+  for (const p of [[90, 145, 1], [104, 151, 0.9], [112, 132, 0.95], [96, 122, 0.8], [357, 111, 1], [371, 118, 0.9], [379, 99, 0.95], [363, 89, 0.8]]) pineAt(...p);
+  for (const p of [[46, 113, 0.55], [429, 150, 0.58], [61, 244, 0.62], [420, 245, 0.56]]) pineAt(...p);
 
-  // Boulder — snow-capped dark rock at (167,233), ~33x27.
-  disc(img, 167, 236, 15, C.stoneD); disc(img, 164, 232, 13, C.stone);
-  disc(img, 163, 227, 9, C.snowL); px(img, 172, 230, C.snowL);
-
-  // Old signpost at (367,253): post + two arrow boards.
-  rect(img, 366, 240, 3, 22, C.trunk);
-  rect(img, 356, 242, 18, 5, shade(C.trunk, 1.3)); px(img, 374, 244, shade(C.trunk, 0.7));   // upper board (points E)
-  rect(img, 361, 250, 16, 5, shade(C.trunk, 1.15)); px(img, 360, 252, shade(C.trunk, 0.7));  // lower board (points W)
-  disc(img, 367, 239, 2, C.snowL); // snow cap
-
-  // Exposed rocks + snow tufts scattered off-path.
-  for (const [rx, ry] of [[64, 220], [312, 190], [420, 150], [140, 90], [300, 280]]) {
-    disc(img, rx, ry, 3, C.stoneD); px(img, rx - 1, ry - 2, C.stone);
+  // Snow-capped boulder at the tested solid, plus the old signpost at its authored hotspot.
+  oval(img, 167, 246, 19, 5, [...A.inkDeep, 45]); disc(img, 167, 236, 16, A.ink);
+  disc(img, 164, 232, 13, A.stoneL); oval(img, 161, 228, 10, 5, A.snowL);
+  rect(img, 366, 239, 4, 25, A.wood); rect(img, 354, 241, 22, 6, A.woodL); px(img, 377, 244, A.wood);
+  rect(img, 361, 250, 18, 6, A.wood); px(img, 360, 253, A.woodL); disc(img, 368, 238, 4, A.snowL);
+  glowTrail: {
+    for (let r = 9; r >= 3; r -= 3) disc(img, 368, 250, r, [...A.amber, Math.round(18 + (9 - r) * 4)]);
+    px(img, 369, 249, A.amberL);
   }
 
+  // South trailhead posts visually anchor the return door without changing its DOM label.
+  for (const x of [220, 260]) {
+    rect(img, x, 292, 4, 28, A.wood); rect(img, x - 3, 291, 10, 5, A.snowL);
+    disc(img, x + 2, 300, 5, [...A.amber, 55]); disc(img, x + 2, 300, 2, A.amberL);
+  }
+  rect(img, 222, 294, 38, 5, A.wood); rect(img, 228, 295, 26, 2, A.iceL);
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const d = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (d > 0.84) px(img, x, y, [...A.inkDeep, Math.round((d - 0.84) * 155)]);
+  }
   return save('room-trail.png', img);
 }
 
@@ -917,7 +1177,7 @@ function buildRoomTrail() {
 // 12x12 walk-over coin token: warm gold dot + 4-point sparkle cross, dark outline.
 function buildPickupGlint() {
   const img = Img(12, 12);
-  const gold = [244, 196, 72], goldD = [196, 142, 38], goldL = [255, 236, 168];
+  const gold = ARCTIC_DUSK.amber, goldD = ARCTIC_DUSK.beakD, goldL = ARCTIC_DUSK.amberL;
   disc(img, 6, 6, 4, goldD);            // outline ring reads as the dark edge
   disc(img, 6, 6, 3, gold);
   px(img, 5, 5, goldL); px(img, 6, 5, goldL);
