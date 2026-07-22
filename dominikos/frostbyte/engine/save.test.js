@@ -19,6 +19,8 @@ describe('DEFAULT_SAVE', () => {
     expect(s.coins).toBe(50);
     expect(s.ownedItems).toEqual(['classic-charcoal', 'powder-blue', 'blush-pink', 'mint']);
     expect(s.avatar.equipped).toEqual({ hat: null, eyewear: null, neck: null, held: null });
+    expect(s.curios).toEqual({ found: {}, roomRewards: {}, isleRewardClaimed: false });
+    expect(s.favors).toEqual({});
     expect(s.createdAt).toBe('2026-07-12T00:00:00.000Z');
   });
 });
@@ -55,6 +57,24 @@ describe('migrateSave', () => {
     expect(s.home.open).toBe(true);
     expect(s.home.shell).toBe('dome-basic');
     expect(s.home.placed).toEqual([]);
+  });
+  it('forward-defaults W0 curios/favors without changing schemaVersion', () => {
+    const s = migrateSave({ coins: 77 }, '2026-07-22T00:00:00.000Z');
+    expect(s.schemaVersion).toBe(1);
+    expect(s.curios).toEqual({ found: {}, roomRewards: {}, isleRewardClaimed: false });
+    expect(s.favors).toEqual({});
+  });
+  it('preserves partial W0 state while backfilling nested Curio fields', () => {
+    const s = migrateSave({
+      curios: { found: { 'fixture-curio': true } },
+      favors: { 'fixture-favor': { status: 'in-progress', stepIndex: 1 } },
+    }, '2026-07-22T00:00:00.000Z');
+    expect(s.curios).toEqual({
+      found: { 'fixture-curio': true },
+      roomRewards: {},
+      isleRewardClaimed: false,
+    });
+    expect(s.favors['fixture-favor']).toEqual({ status: 'in-progress', stepIndex: 1 });
   });
 });
 

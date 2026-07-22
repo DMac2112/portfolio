@@ -5,6 +5,7 @@
 // Testable without jsdom: load/persist take an optional `store` (defaults to real localStorage)
 // and an optional `now` timestamp. Tests pass a Map-backed fake store + fixed timestamps.
 import { starterDyeIds } from '../content/cosmetics.js';
+import { createCurioState } from './curios.js';
 
 export const OS_NS = 'dmos.v1';                    // MUST match os/src/os/storage.ts NS exactly
 export const SAVE_KEY = `${OS_NS}.frostbyte.save`;
@@ -32,6 +33,8 @@ export function DEFAULT_SAVE(now = nowISO()) {
     dailyCoins: {},                                // { "YYYY-MM-DD": minigame coins earned that day }
     home: { open: false, shell: 'dome-basic', placed: [] }, // den decorating (H2): placed = [{id,x,y,flip}] world coords
     furniture: {},                                 // { itemId: count } owned-but-not-placed stock (H2)
+    curios: createCurioState(),                     // Curio Log (W0): found ids + once-only completion rewards
+    favors: {},                                     // { favorId: {status,stepIndex} } cross-room threads (W0)
     lastLoginDate: null,
     loginStreak: 0,
     prefs: { muted: false, reducedMotion: prefersReducedMotion(), lastRoom: 'plaza' },
@@ -47,6 +50,12 @@ export function migrateSave(raw, now = nowISO()) {
   if (s.schemaVersion == null) s = migrateLegacyToV1(s);
   // Future: if (s.schemaVersion === 1) s = migrateV1ToV2(s);
   const base = DEFAULT_SAVE(now);
+  const savedCurios = s.curios && typeof s.curios === 'object' && !Array.isArray(s.curios) ? s.curios : {};
+  const savedFavors = s.favors && typeof s.favors === 'object' && !Array.isArray(s.favors) ? s.favors : {};
+  const savedFound = savedCurios.found && typeof savedCurios.found === 'object' && !Array.isArray(savedCurios.found)
+    ? savedCurios.found : {};
+  const savedRoomRewards = savedCurios.roomRewards && typeof savedCurios.roomRewards === 'object' && !Array.isArray(savedCurios.roomRewards)
+    ? savedCurios.roomRewards : {};
   return {
     ...base,
     ...s,
@@ -59,6 +68,13 @@ export function migrateSave(raw, now = nowISO()) {
     },
     prefs: { ...base.prefs, ...(s.prefs ?? {}) },
     home: { ...base.home, ...(s.home ?? {}) },
+    curios: {
+      ...base.curios,
+      ...savedCurios,
+      found: { ...base.curios.found, ...savedFound },
+      roomRewards: { ...base.curios.roomRewards, ...savedRoomRewards },
+    },
+    favors: { ...savedFavors },
   };
 }
 

@@ -26,6 +26,8 @@ import { newChat, addBubble, tick as tickChat, active as activeChat } from './en
 import { createChat } from './ui/chat.js';
 import { createEmotes, emoteSymbol } from './ui/emotes.js';
 import { createMap } from './ui/map.js';
+import { createJournal } from './ui/journal.js';
+import { createDialogue } from './ui/dialogue.js';
 import { nodeByRoom } from './content/map.js';
 import { canTravel, arriveSpawnId, findAutoEnterDoor } from './engine/travel.js';
 import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
@@ -38,6 +40,9 @@ import { initVisitorLayer } from './world/visitor-runtime.js';
 import { ROSTER } from './content/npc-roster.js';
 import { addSnowfall, createWalkPuffs, fadeIn, fadeTo, showCoinSparkle, showMovePing } from './world/game-feel.js';
 import { resolveRoomCollision } from './world/room-collision.js';
+import { CURIO_REGISTRY } from './content/curios.js';
+import { curioById, discoverCurio } from './engine/curios.js';
+import { spawnClickables } from './world/clickable.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -125,34 +130,17 @@ function showCoinToast(msg) {
  * Dialogue overlay — the index.html #dialogue-overlay, wired minimally
  * (H1: locked-door copy; NPC dialogue can reuse it in later phases).
  * ------------------------------------------------------------------ */
-const dlgOverlay = document.getElementById('dialogue-overlay');
-const dlgTitle = document.getElementById('dialogue-title');
-const dlgBody = document.getElementById('dialogue-body');
-const dlgClose = document.getElementById('dialogue-close');
-let dlgLastFocus = null;
-function dialogueIsOpen() { return dlgOverlay ? !dlgOverlay.classList.contains('hidden') : false; }
+const dialogueUI = createDialogue();
 function showDialogue(title, body) {
-  if (!dlgOverlay) return;
-  dlgLastFocus = document.activeElement;
-  dlgTitle.textContent = title ?? '';
-  dlgBody.textContent = body ?? '';
-  dlgOverlay.classList.remove('hidden');
-  dlgClose?.focus();
+  dialogueUI.open({ title, name: title, pages: [body ?? ''] });
 }
-function closeDialogue() {
-  dlgOverlay?.classList.add('hidden');
-  dlgLastFocus?.focus?.();
-  dlgLastFocus = null;
-}
-if (dlgClose) dlgClose.onclick = closeDialogue;
-dlgOverlay?.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDialogue(); });
 
 /* ------------------------------------------------------------------ *
  * HUD visibility — the social/map buttons are persistent DOM, so they'd
  * float over (and act on, via stale scene closures) the minigame scene.
  * Hidden on minigame entry, restored on every room entry (H1 review fix).
  * ------------------------------------------------------------------ */
-const HUD_BTN_IDS = ['map-btn', 'say-btn', 'dressup-btn', 'emote-bar'];
+const HUD_BTN_IDS = ['map-btn', 'journal-btn', 'say-btn', 'dressup-btn', 'emote-bar'];
 let inMinigame = false;
 function setHudVisible(v) {
   for (const id of HUD_BTN_IDS) { const el = document.getElementById(id); if (el) el.hidden = !v; }
@@ -477,12 +465,43 @@ k.scene('room', (roomId, opts = {}) => {
       changeScene(() => k.go('room', target, { spawn: 'fromMap' }));
     },
   });
+  const journalUI = createJournal({
+    registry: CURIO_REGISTRY,
+    getState: () => save.curios,
+    getRoomLabel: (id) => ROOM_REGISTRY[id]?.title ?? id,
+  });
   const anyOverlayOpen = () =>
-    transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || dialogueIsOpen() ||
-    editMode.isOpen() || catalogUI.isOpen();
+    transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || journalUI.isOpen() ||
+    dialogueUI.isOpen() || editMode.isOpen() || catalogUI.isOpen();
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
+  const journalBtn = document.getElementById('journal-btn');
+  if (journalBtn) journalBtn.onclick = () => {
+    if (journalUI.isOpen()) journalUI.close();
+    else if (!anyOverlayOpen()) journalUI.open();
+  };
+  k.onKeyPress('j', () => { if (!anyOverlayOpen()) journalUI.open(); });
+
+  // Direct-click props use one scene-scoped mouse path. touchToMouse synthesizes that path for taps,
+  // so no parallel touch listener exists and a Curio can never register twice from one tap.
+  spawnClickables(k, {
+    props: room.clickables ?? [],
+    anyOverlayOpen,
+    reducedMotion: reduceMotion,
+    onCurio: (curioId) => {
+      const events = [];
+      if (!discoverCurio(save, CURIO_REGISTRY, curioId, events)) return;
+      persist(save);
+      journalUI.refresh();
+      const coinEvent = events.find((event) => event.type === 'coins-earned');
+      if (coinEvent) refreshCoins(true);
+      const curio = curioById(CURIO_REGISTRY, curioId);
+      showCoinToast(coinEvent
+        ? `${curio?.label ?? 'Curio'} found — room complete! +${coinEvent.amount} coins`
+        : `Curio found: ${curio?.label ?? 'new discovery'}`);
+    },
+  });
 
   // Decorate button — den-only (kept out of HUD_BTN_IDS so setHudVisible can't unhide it elsewhere).
   const editBtn = document.getElementById('edit-btn');
