@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" shape-rendering="crispEdges">
+  <!-- Original Paint icon authored for DominikOS: a pixel palette with colour wells and a brush.
+       Nothing traced from any product. -->
+  <!-- palette body -->
+  <ellipse cx="21" cy="26" rx="17" ry="13" fill="#e9e2cf" stroke="#8a7f63" stroke-width="2"/>
+  <!-- thumb hole -->
+  <ellipse cx="27" cy="30" rx="4" ry="3" fill="#c0b79a" stroke="#8a7f63" stroke-width="1"/>
+  <!-- colour wells -->
+  <circle cx="12" cy="20" r="2.8" fill="#e8483f"/>
+  <circle cx="20" cy="17" r="2.8" fill="#f2a33c"/>
+  <circle cx="28" cy="18" r="2.8" fill="#4fb85f"/>
+  <circle cx="14" cy="29" r="2.8" fill="#3fa9e8"/>
+  <circle cx="10" cy="24" r="2.5" fill="#a866d8"/>
+  <circle cx="22" cy="26" r="2.5" fill="#f5d94a"/>
+  <!-- brush: handle + ferrule + bristles dipping into the palette -->
+  <rect x="30" y="6" width="4" height="20" fill="#8a6d1a" transform="rotate(28 32 16)"/>
+  <rect x="27" y="24" width="6" height="4" fill="#9aa4b8" transform="rotate(28 30 26)"/>
+  <path d="M24 28 l6 3 l-2 4 l-6 -3 z" fill="#e8483f" stroke="#8a1a1a" stroke-width="1"/>
+</svg>

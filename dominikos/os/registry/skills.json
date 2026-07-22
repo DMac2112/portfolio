@@ -1,0 +1,11 @@
+{
+  "id": "skills",
+  "title": "Skills & Certifications",
+  "kind": "document",
+  "icon": "/os/icons/skills.svg",
+  "category": "apps",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Documents" },
+  "window": { "width": 540, "height": 480, "minWidth": 360, "minHeight": 300, "singleton": true },
+  "content": "/os/content/skills-en.md"
+}

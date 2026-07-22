@@ -1,0 +1,10 @@
+{
+  "id": "dialtone",
+  "title": "Skajp",
+  "kind": "react",
+  "icon": "/os/icons/skajp.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 7 },
+  "startMenu": { "show": true, "group": "Programs" },
+  "window": { "width": 520, "height": 600, "minWidth": 380, "minHeight": 440, "singleton": true, "maximizedOnMobile": true }
+}

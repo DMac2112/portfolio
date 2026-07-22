@@ -1,0 +1,11 @@
+# DominikOS headers (DOMINIKOS-PLAN §12.4) — place at the site publish root.
+[[headers]]
+  for = "/os/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/os/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Content-Security-Policy = "frame-src 'self' https://dominikmachowiak.com; frame-ancestors 'self'"

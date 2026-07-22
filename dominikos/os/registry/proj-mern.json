@@ -1,0 +1,10 @@
+{
+  "id": "proj-mern",
+  "title": "MERN Project — In Progress",
+  "kind": "document",
+  "icon": "/os/icons/code.svg",
+  "category": "apps",
+  "startMenu": { "show": false },
+  "window": { "width": 620, "height": 520, "minWidth": 360, "minHeight": 300 },
+  "content": "/os/content/projects/mern-en.md"
+}

@@ -1,0 +1,11 @@
+[
+  { "path": "dist/assets/index-*.js", "limit": "4 KB" },
+  { "path": "dist/assets/vendor-*.js", "limit": "52 KB" },
+  { "path": "dist/assets/OSShell-*.js", "limit": "24 KB" },
+  { "path": "dist/assets/OSShell-*.css", "limit": "53 KB" },
+  { "path": "dist/assets/Desktop-*.js", "limit": "6 KB" },
+  { "path": "dist/assets/Taskbar-*.js", "limit": "5 KB" },
+  { "path": "dist/assets/MobileShell-*.js", "limit": "2 KB" },
+  { "path": "dist/assets/DocWindow-*.js", "limit": "48 KB" },
+  { "path": "dist/assets/PinballApp-*.js", "limit": "10 KB" }
+]

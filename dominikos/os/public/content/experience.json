@@ -1,0 +1,7 @@
+[
+  { "year": "2018–2021", "org": "The Open University", "role": "BSc Computing & IT Software", "kind": "education", "body": "Where it began — a solid, theory-grounded foundation." },
+  { "year": "2021", "org": "Hawthorne Electronics", "role": "Intern Front-end Web Developer", "body": "Volunteer internship improving web pages' feel and functionality." },
+  { "year": "2022–2023", "org": "Rubicall", "role": "Front-end Web Developer", "live": "https://www.rubicall.co.uk/", "body": "Designed & built the cleaning-company site; brought back to expand it for their Airbnb business." },
+  { "year": "2023–2024", "org": "Welcom-Inn", "role": "Web Developer", "live": "https://welcom-inn.co.uk/", "body": "Designed & built a live property-management website (HTML/CSS/JS)." },
+  { "year": "2024–Present", "org": "Deloitte", "role": "Salesforce Marketing Cloud Developer", "star": true, "body": "Led a marketing-automation project for a Polish automotive client; built ~300 email & SMS messages in Email Studio using HTML/CSS/JS and AMPScript across a multi-brand transformation." }
+]

@@ -1,0 +1,92 @@
+/* chooser.css — BootChooser only (DOMINIKOS-PLAN §10.3). Deliberately standalone and tiny:
+ * plain semantic HTML, NO XP.css, no tokens dependency — this ships in the eager entry chunk. */
+.chooser {
+  min-height: 100dvh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px;
+  background: radial-gradient(120% 90% at 50% 0%, #17337c 0%, #0d1b3e 55%, #080f24 100%);
+  color: #eef2fb;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+.chooser main { width: min(520px, 100%); }
+.chooser__brand { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+.chooser__brand img { width: 52px; height: 52px; }
+.chooser h1 { font-size: 30px; margin: 0; font-weight: 650; letter-spacing: .3px; }
+.chooser h1 em { font-style: normal; color: #8fb8ff; }
+.chooser__tag { margin: 4px 0 26px; color: #a9b8dc; font-size: 14.5px; line-height: 1.5; }
+
+.chooser__options { display: flex; flex-direction: column; gap: 10px; margin: 0 0 20px; }
+.chooser__opt {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; text-align: left;
+  background: #16295c; color: #eef2fb;
+  border: 1px solid #2c4a94; border-radius: 10px;
+  padding: 14px 16px;
+  font: inherit; font-size: 15px;
+  cursor: pointer;
+  min-height: 60px;
+}
+.chooser__opt:hover, .chooser__opt:focus-visible { background: #1d3573; border-color: #5b83d6; outline: none; }
+.chooser__opt:focus-visible { box-shadow: 0 0 0 3px #ffd54a; }
+.chooser__opt .glyph { font-size: 24px; width: 34px; text-align: center; flex: none; }
+.chooser__opt strong { display: block; font-size: 15.5px; }
+.chooser__opt small { display: block; color: #a9b8dc; font-size: 12.5px; margin-top: 2px; }
+.chooser__opt--primary { background: #1d47a8; border-color: #3f6fd0; }
+.chooser__opt--primary:hover, .chooser__opt--primary:focus-visible { background: #2554c0; }
+.chooser__opt--primary small { color: #d3ddf5; } /* ≥4.5:1 on the brighter primary card */
+
+.chooser__toggles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+.chooser__toggles label { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: #c6d2ec; cursor: pointer; }
+.chooser__toggles input { width: 17px; height: 17px; accent-color: #3f6fd0; cursor: pointer; }
+
+.chooser__legal {
+  border-top: 1px solid #223462;
+  padding-top: 14px;
+  color: #8291b4; font-size: 11.5px; line-height: 1.55;
+}
+.chooser__legal a { color: #a9c4f5; }
+
+/* ---- "Just the CV": the PDF read in place, no booting, no navigation ----
+   Full-screen by design (best use of a phone); modern, deliberately NOT XP —
+   the XP treatment belongs to the PDF app inside the desktop. */
+.cvview {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column;
+  background: #0d1b3e;
+}
+.cvview__bar {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; padding-top: max(10px, env(safe-area-inset-top));
+  background: #16295c; border-bottom: 1px solid #2c4a94;
+}
+.cvview__name {
+  font-size: 14px; font-weight: 650; color: #eef2fb;
+  margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cvview__btn {
+  flex: none; padding: 8px 12px; border-radius: 8px;
+  background: #1d3573; border: 1px solid #2c4a94; color: #eef2fb;
+  font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.cvview__btn:hover, .cvview__btn:focus-visible { background: #2554c0; border-color: #5b83d6; outline: none; }
+.cvview__btn:focus-visible, .cvview__close:focus-visible { box-shadow: 0 0 0 3px #ffd54a; }
+.cvview__close {
+  flex: none; width: 40px; height: 40px; border-radius: 8px;
+  display: grid; place-items: center; cursor: pointer;
+  background: #1d3573; border: 1px solid #2c4a94; color: #eef2fb;
+  font-size: 16px; line-height: 1;
+}
+.cvview__close:hover { background: #2554c0; border-color: #5b83d6; }
+.cvview__frame { flex: 1; width: 100%; min-height: 0; border: 0; background: #555; }
+.cvview__fallback {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  height: 100%; padding: 24px; text-align: center;
+  color: #eef2fb; font-size: 14px; background: #0d1b3e;
+}
+.cvview__btn--big { padding: 12px 20px; font-size: 15px; background: #1d47a8; border-color: #3f6fd0; }
+
+/* Phones: the label can go, the touch targets stay. */
+@media (max-width: 520px) {
+  .cvview__name { font-size: 13px; }
+  .cvview__btn { padding: 8px 10px; font-size: 12.5px; }
+}

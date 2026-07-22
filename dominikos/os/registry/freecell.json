@@ -1,0 +1,10 @@
+{
+  "id": "freecell",
+  "title": "FreeCell",
+  "kind": "react",
+  "icon": "/os/icons/freecell.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": false },
+  "window": { "width": 820, "height": 600, "minWidth": 660, "minHeight": 480, "singleton": true, "maximizedOnMobile": true }
+}

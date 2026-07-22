@@ -1,0 +1,23 @@
+<!-- Original SVG authored for DominikOS. Nothing traced. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="freecell-felt" x1="8" y1="5" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b8a2e"/>
+      <stop offset="1" stop-color="#065c1d"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="8" fill="url(#freecell-felt)" stroke="#044718" stroke-width="1.6"/>
+  <rect x="4" y="4" width="40" height="40" rx="6.5" fill="none" stroke="#78c98a" stroke-width=".8" opacity=".35"/>
+  <g fill="#075b24" stroke="#d9f2df" stroke-width="1.3">
+    <rect x="6" y="7" width="7.5" height="10" rx="1.5"/>
+    <rect x="15.5" y="7" width="7.5" height="10" rx="1.5"/>
+    <rect x="25" y="7" width="7.5" height="10" rx="1.5"/>
+    <rect x="34.5" y="7" width="7.5" height="10" rx="1.5"/>
+  </g>
+  <g transform="rotate(-4 24 31)">
+    <rect x="15.5" y="20" width="17" height="23" rx="2.5" fill="#fdfdf6" stroke="#1f3f8f" stroke-width="1.4"/>
+    <rect x="17.5" y="22" width="13" height="19" rx="1.4" fill="none" stroke="#b9b9ad" stroke-width=".7"/>
+    <path d="m24 24.5 5.1 7-5.1 7-5.1-7Z" fill="#c8102e"/>
+    <path d="m19 24 1.3 1.8L19 27.6l-1.3-1.8Z" fill="#c8102e"/>
+  </g>
+</svg>

@@ -1,0 +1,38 @@
+/* tokens.css — the ONE token source (DOMINIKOS-PLAN §5.3). No component hardcodes a color,
+ * gradient, radius, blur, or font. "Luna" appears ONLY as internal token names (never in
+ * user-facing copy — §6). Aero is deferred and NOT built (§15.7); the data-theme hook stays. */
+:root, :root[data-theme="xp"] {
+  /* Luna palette */
+  --luna-blue-1:#2f71cd; --luna-blue-2:#3f8cf3; --luna-blue-3:#1c5fc4; --luna-blue-4:#0a3d91;
+  --luna-blue-edge:#0831d9; --luna-inactive-1:#7ba2e0; --luna-inactive-2:#6d94d4;
+  --luna-start-green-1:#61c25a; --luna-start-green-2:#379437; --luna-start-green-3:#2a7d2e;
+  --taskbar-1:#245edb; --taskbar-2:#3f8cf3; --taskbar-3:#2056c8; --tray-1:#0b9dea; --tray-2:#1287d4;
+  /* surfaces */
+  --surface:#ece9d8; --surface-face:#f6f5ee; --field-bg:#fff;
+  /* ink */
+  --ink:#000; --ink-subtle:#4a4a4a; --ink-on-blue:#fff; --link:#0033cc; --link-visited:#551a8b;
+  /* selection/focus */
+  --select-bg:#316ac5; --select-ink:#fff; --focus-ring:#ffd54a; --hover-tint:#e3ebfa;
+  /* geometry */
+  --win-radius:8px 8px 0 0; --btn-radius:3px; --title-h:30px; --taskbar-h:40px; --icon-cell:88px; --border-3d:2px;
+  /* glass (XP = none) */
+  --glass-blur:0px; --glass-bg:var(--surface); --glass-border:transparent;
+  /* wallpaper — ORIGINAL, never a photo of that hill */
+  --wallpaper:url("/os/wallpaper/hills.svg"); --wallpaper-solid:#3a6ea5;
+  /* type */
+  --font-ui:"Trebuchet MS","Segoe UI",Tahoma,"DejaVu Sans",sans-serif;
+  --font-body:Tahoma,"DejaVu Sans","Segoe UI",sans-serif;
+  --font-mono:"Lucida Console","Consolas",monospace;
+  --fs-ui:11px; --fs-title:12px; --fs-body:13px;   /* content apps override to ≥14px, §11 */
+  /* motion */
+  --dur-window:160ms; --dur-menu:90ms; --ease-win:cubic-bezier(.2,.7,.3,1);
+  --shadow-win:0 6px 18px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.4) inset;
+  --shadow-menu:0 8px 22px rgba(0,0,0,.4);
+
+  /* ---- additions beyond §5.3 (documented) ---- */
+  --letterbox-bg:#1c1c22;          /* §8.5 letterbox bars for aspect-locked games */
+  --hit:44px;                       /* §10.2 touch-target floor, used by touch.css */
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur-window:0ms; --dur-menu:0ms; } }
+/* JS-driven motion toggle (BootChooser / prefs) — same killswitch, attribute-keyed (§11.3) */
+:root[data-motion="reduce"]{ --dur-window:0ms; --dur-menu:0ms; }

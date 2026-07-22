@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Original login avatar (generic developer bust, authored for DominikOS). -->
+  <defs>
+    <linearGradient id="avbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9cc8f4"/>
+      <stop offset="1" stop-color="#3f74c4"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="9" fill="url(#avbg)"/>
+  <path d="M13.5 56.5 c0-11.5 8.5-17 18.5-17 s18.5 5.5 18.5 17 z" fill="#2f71cd" stroke="#173e78" stroke-width="1.6"/>
+  <path d="M25 41.5 l7 6.5 7-6.5 v-4 h-14 z" fill="#ffe8cd" stroke="#173e78" stroke-width="1.4"/>
+  <circle cx="32" cy="24.5" r="11.5" fill="#ffe8cd" stroke="#173e78" stroke-width="1.6"/>
+  <path d="M20.6 23.5 c.6-7 5.4-10.6 11.4-10.6 s10.8 3.6 11.4 10.6 c-2.6-4.6-6.8-6.6-11.4-6.6 s-8.8 2-11.4 6.6 z" fill="#5d4126"/>
+  <circle cx="27.5" cy="24.5" r="1.5" fill="#2b2b33"/>
+  <circle cx="36.5" cy="24.5" r="1.5" fill="#2b2b33"/>
+  <path d="M28.5 30.5 q3.5 2.5 7 0" stroke="#b06a4a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</svg>

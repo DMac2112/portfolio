@@ -1,0 +1,11 @@
+{
+  "id": "my-projects",
+  "title": "My Projects",
+  "kind": "folder",
+  "icon": "/os/icons/folder-projects.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 3 },
+  "startMenu": { "show": true, "group": "Places" },
+  "window": { "width": 540, "height": 420, "minWidth": 360, "minHeight": 280, "singleton": true },
+  "children": ["proj-welcom-inn", "proj-rubicall", "proj-mern"]
+}

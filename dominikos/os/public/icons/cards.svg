@@ -1,0 +1,32 @@
+<!-- Original SVG authored for DominikOS. Nothing traced. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="cards-felt" x1="8" y1="5" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b8a2e"/>
+      <stop offset="1" stop-color="#065c1d"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="8" fill="url(#cards-felt)" stroke="#044718" stroke-width="1.6"/>
+  <rect x="4" y="4" width="40" height="40" rx="6.5" fill="none" stroke="#78c98a" stroke-width=".8" opacity=".35"/>
+  <g transform="rotate(-21 14 27)">
+    <rect x="7" y="13" width="14" height="25" rx="2.2" fill="#fdfdf6" stroke="#1f3f8f" stroke-width="1.2"/>
+    <path d="M11 18c-2 2.3-3.1 3.3-3.1 4.7 0 1.2.9 2.1 2.1 2.1.6 0 1.1-.2 1.5-.7-.1 1-.4 1.7-.9 2.5h3c-.5-.8-.8-1.5-.9-2.5.4.5.9.7 1.5.7 1.2 0 2.1-.9 2.1-2.1 0-1.4-1.1-2.4-3.1-4.7L12.1 17Z" fill="#1c1c1c"/>
+  </g>
+  <g transform="rotate(-8 20 25)">
+    <rect x="13" y="10" width="14" height="27" rx="2.2" fill="#fdfdf6" stroke="#1f3f8f" stroke-width="1.2"/>
+    <path d="M17 20.3c-.7-1.2-3.5-2.8-3.5-5.3 0-1.5.9-2.5 2.2-2.5.7 0 1.2.3 1.4.7.3-.4.8-.7 1.4-.7 1.3 0 2.2 1 2.2 2.5 0 2.5-2.9 4.1-3.7 5.3Z" fill="#c8102e"/>
+  </g>
+  <g transform="rotate(8 27 25)">
+    <rect x="20" y="9" width="14" height="28" rx="2.2" fill="#fdfdf6" stroke="#1f3f8f" stroke-width="1.2"/>
+    <path d="m24 12.5 3.2 4.5-3.2 4.5-3.2-4.5Z" fill="#c8102e"/>
+  </g>
+  <g transform="rotate(21 34 27)">
+    <rect x="27" y="12" width="14" height="26" rx="2.2" fill="#fdfdf6" stroke="#1f3f8f" stroke-width="1.2"/>
+    <g fill="#1c1c1c">
+      <circle cx="34" cy="17.2" r="2.15"/>
+      <circle cx="31.8" cy="20" r="2.15"/>
+      <circle cx="36.2" cy="20" r="2.15"/>
+      <path d="M33.2 20h1.6c0 2 .4 3 1.5 4h-4.6c1.1-1 1.5-2 1.5-4Z"/>
+    </g>
+  </g>
+</svg>

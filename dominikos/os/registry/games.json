@@ -1,0 +1,11 @@
+{
+  "id": "games",
+  "title": "Games",
+  "kind": "folder",
+  "icon": "/os/icons/folder-games.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 4 },
+  "startMenu": { "show": true, "group": "Places" },
+  "window": { "width": 540, "height": 420, "minWidth": 360, "minHeight": 280, "singleton": true },
+  "children": ["pinball", "mines", "game1"]
+}

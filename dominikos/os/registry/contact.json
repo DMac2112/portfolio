@@ -1,0 +1,11 @@
+{
+  "id": "contact",
+  "title": "New Message - Contact Dominik",
+  "kind": "contact",
+  "icon": "/os/icons/email.svg",
+  "category": "apps",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Programs" },
+  "window": { "width": 640, "height": 520, "minWidth": 420, "minHeight": 360, "singleton": true },
+  "data": "/os/content/contact.json"
+}

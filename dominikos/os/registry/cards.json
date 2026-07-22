@@ -1,0 +1,10 @@
+{
+  "id": "cards",
+  "title": "Gry Karciane",
+  "kind": "react",
+  "icon": "/os/icons/cards.svg",
+  "category": "apps",
+  "desktop": { "show": true, "order": 8 },
+  "startMenu": { "show": true, "group": "Places" },
+  "window": { "width": 520, "height": 420, "minWidth": 360, "minHeight": 300, "singleton": true, "maximizedOnMobile": true }
+}

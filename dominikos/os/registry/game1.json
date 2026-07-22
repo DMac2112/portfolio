@@ -1,0 +1,11 @@
+{
+  "id": "game1",
+  "title": "Dev District",
+  "kind": "iframe",
+  "icon": "/os/icons/game1.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Games" },
+  "window": { "width": 900, "height": 620, "minWidth": 480, "minHeight": 360, "singleton": true, "maximizedOnMobile": true, "immersive": true },
+  "src": "/game1/index.html?embedded=1"
+}

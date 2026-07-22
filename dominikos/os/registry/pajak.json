@@ -1,0 +1,10 @@
+{
+  "id": "pajak",
+  "title": "Pasjans Pająk",
+  "kind": "react",
+  "icon": "/os/icons/pajak.svg",
+  "category": "games",
+  "desktop": { "show": false },
+  "startMenu": { "show": false },
+  "window": { "width": 900, "height": 620, "minWidth": 720, "minHeight": 500, "singleton": true, "maximizedOnMobile": true }
+}

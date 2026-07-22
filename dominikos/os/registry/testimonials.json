@@ -1,0 +1,11 @@
+{
+  "id": "testimonials",
+  "title": "Testimonials",
+  "kind": "document",
+  "icon": "/os/icons/testimonials.svg",
+  "category": "apps",
+  "desktop": { "show": false },
+  "startMenu": { "show": true, "group": "Documents" },
+  "window": { "width": 560, "height": 500, "minWidth": 360, "minHeight": 300, "singleton": true },
+  "content": "/os/content/testimonials-en.md"
+}
