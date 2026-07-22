@@ -74,3 +74,44 @@ rim light, blue-hour harbor background with abstract pilings and rigging but no 
 Chunky rounded forms, thick soft outlines, painterly texture, cold navy and snow-blue palette with
 weathered timber, restrained lamp-amber, and a tiny signal-orange accent. No text, logos,
 photorealism, or recognizable existing character or franchise design.
+
+## Old Maren — Palefire Light keeper
+
+A square painted character portrait for Frostbyte, an original cosy Antarctic-island social
+adventure. Old Maren is an elderly gentoo penguin lighthouse keeper with a clear white head-band,
+one pale sea-worn eye, a salt-grey knitted keeper’s vest, a long brass lamp key, and a weathered
+field log held at the frame edge. Bust composition, patient watchful expression, warm lamp rim
+light, curved blue-grey lighthouse masonry and abstract logbook shelves behind her with no readable
+writing. Chunky rounded forms, thick soft outlines, painterly texture, cold navy and snow-blue
+palette with restrained lamp-amber. No text, logos, photorealism, or recognizable existing
+character or franchise design.
+
+## Palefire Light — Keeper’s Rest
+
+A wide 3:2 painted circular lighthouse interior for Frostbyte, viewed from a slightly elevated
+three-quarter angle at blue hour. Keeper’s Rest has curved salt-grey masonry, a small iron cedar
+stove and kettle at west, a low table with an open field log, a cot with a quilt stitched like ocean
+currents, and an iron spiral stair occupying the east curve. The dock exit is centered on the south
+edge and the stair threshold opens at east. Keep the central floor open and every landmark chunky
+enough to read at game scale. Cold navy and snow-blue stone, worn timber, one restrained stove-amber
+pool. No characters, readable text, logos, watermark, photorealism, or recognizable franchise
+design.
+
+## Palefire Light — Lantern Gallery
+
+A wide 3:2 painted circular lighthouse lantern room for Frostbyte, viewed from a slightly elevated
+three-quarter angle. The enormous faceted brass great lamp dominates the center, with frost-ribbed
+windows around the curved wall, an exposed balcony rail across the lower edge, a long brass
+telescope trained through the east windows, an orange storm pennant, a supply chest, and three
+wind-carved grooves in the southeast rail. The west stair threshold remains clear. Cold blue-hour
+ocean outside, snow-blue stone and glass, focused lamp-amber at the center; chunky rounded shapes,
+thick soft outlines, painterly handcrafted texture. No characters, readable text, logos, watermark,
+photorealism, or recognizable franchise design.
+
+## Palefire telescope vistas
+
+Three matching wide painted telescope views framed for a 16:10 aperture: a dark whale breaching
+between broken floes; a crown-shaped green-violet aurora above a pressure ridge; and The Driftwood
+Gull, a low timber work-barge under sail with an unmistakable signal-orange pennant. Blue-hour navy
+sea, snow-blue floes, restrained aurora and amber accents, chunky storybook forms and soft painterly
+texture. No text, logos, watermark, photorealism, or recognizable franchise design.

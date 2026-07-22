@@ -23,15 +23,17 @@ describe('MAP_NODES', () => {
     }
   });
 
-  it('has exactly six unlocked nodes through W3', () => {
+  it('has exactly seven unlocked nodes through W4', () => {
     const unlockedCount = MAP_NODES.filter(n => n.unlocked).length;
-    expect(unlockedCount).toBe(6);
+    expect(unlockedCount).toBe(7);
   });
 
-  it('unlocked nodes include Driftgate Docks', () => {
+  it('unlocked nodes include Palefire Light', () => {
     const unlockedRoomIds = MAP_NODES.filter(n => n.unlocked).map(n => n.roomId);
-    expect(unlockedRoomIds).toEqual(expect.arrayContaining(['plaza', 'den', 'trail', 'court', 'workshop', 'docks']));
-    expect(unlockedRoomIds).toHaveLength(6);
+    expect(unlockedRoomIds).toEqual(expect.arrayContaining([
+      'plaza', 'den', 'trail', 'court', 'workshop', 'docks', 'lighthouse-rest',
+    ]));
+    expect(unlockedRoomIds).toHaveLength(7);
   });
 
   it('locked node labels exactly match plaza locked door labels', () => {

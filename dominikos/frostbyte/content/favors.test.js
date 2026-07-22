@@ -9,6 +9,7 @@ import {
 import {
   EDDA_STORY_TIP_FAVORS,
   FAVOR_DEFINITIONS,
+  MAREN_SIGHTING_FAVORS,
   WEATHER_BELL_FAVOR,
   favorById,
 } from './favors.js';
@@ -60,5 +61,17 @@ describe('story-tip Favor content', () => {
     expect(currentFavorStep(save, WEATHER_BELL_FAVOR).id).toBe('return-to-pat');
     expect(advanceFavor(save, WEATHER_BELL_FAVOR, 'return-to-pat')).toBe(true);
     expect(save.coins).toBe(24);
+  });
+
+  it('ships three sequential Maren sighting reports with delivery rewards', () => {
+    expect(MAREN_SIGHTING_FAVORS.map((favor) => favor.id)).toEqual([
+      'maren-sighting-vista',
+      'maren-sighting-trail',
+      'maren-sighting-gull',
+    ]);
+    expect(MAREN_SIGHTING_FAVORS.every((favor) => favor.ownerId === 'old-maren')).toBe(true);
+    expect(MAREN_SIGHTING_FAVORS.every((favor) => favor.steps.at(-1).id === 'report-to-maren')).toBe(true);
+    expect(MAREN_SIGHTING_FAVORS[1].requires).toEqual(['maren-sighting-vista']);
+    expect(MAREN_SIGHTING_FAVORS[2].requires).toEqual(['maren-sighting-trail']);
   });
 });

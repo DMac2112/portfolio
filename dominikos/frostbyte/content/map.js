@@ -24,6 +24,7 @@ export const MAP_NODES = [
   { roomId: 'court',     label: 'Glasswind Court',     x: 0.80, y: 0.38, unlocked: true },
   { roomId: 'workshop',  label: 'Emberlight Workshop', x: 0.14, y: 0.46, unlocked: true },
   { roomId: 'docks',     label: 'Driftgate Docks',      x: 0.63, y: 0.18, unlocked: true },
+  { roomId: 'lighthouse-rest', label: 'Palefire Light',  x: 0.74, y: 0.08, unlocked: true },
 ];
 
 /**

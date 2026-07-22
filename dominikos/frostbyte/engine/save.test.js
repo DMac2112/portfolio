@@ -23,6 +23,7 @@ describe('DEFAULT_SAVE', () => {
     expect(s.favors).toEqual({});
     expect(s.visitedRooms).toEqual(DEFAULT_VISITED_ROOMS);
     expect(s.visitedRooms).not.toContain('docks');
+    expect(s.visitedRooms).not.toContain('lighthouse-rest');
     expect(s.createdAt).toBe('2026-07-12T00:00:00.000Z');
   });
 });

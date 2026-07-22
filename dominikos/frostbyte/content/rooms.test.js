@@ -81,7 +81,10 @@ describe('room configs', () => {
   }
 
   it('door graph: locked doors in the vignette point at real (future) ids, not typos', () => {
-    const knownFutureIds = ['plaza', 'den', 'court', 'workshop', 'trail', 'docks', 'lighthouse-rest'];
+    const knownFutureIds = [
+      'plaza', 'den', 'court', 'workshop', 'trail', 'docks',
+      'lighthouse-rest', 'lighthouse-gallery',
+    ];
     for (const room of Object.values(ROOM_REGISTRY)) {
       for (const d of room.doors) {
         expect(knownFutureIds).toContain(d.targetRoom);
@@ -347,7 +350,7 @@ describe('room configs', () => {
       .toBe('recover-trail-vane');
   });
 
-  it('docks and court: mutual W3 door reachability plus the locked Palefire trailhead', () => {
+  it('docks and court: mutual W3 reachability plus the open W4 Palefire trailhead', () => {
     const docks = ROOM_REGISTRY.docks;
     expect(ROOM_REGISTRY.court.doors.find((door) => door.id === 'door-docks')).toMatchObject({
       targetRoom: 'docks', locked: false, targetSpawn: 'fromCourt',
@@ -356,7 +359,7 @@ describe('room configs', () => {
       targetRoom: 'court', locked: false, targetSpawn: 'fromDocks',
     });
     expect(docks.doors.find((door) => door.id === 'door-lighthouse')).toMatchObject({
-      targetRoom: 'lighthouse-rest', locked: true,
+      targetRoom: 'lighthouse-rest', locked: false, targetSpawn: 'fromDocks',
     });
   });
 
@@ -400,5 +403,38 @@ describe('room configs', () => {
     expect(ledgeGap).toBeGreaterThan(24);
     const cache = docks.clickables.find((prop) => prop.id === 'underpier-cache');
     expect(contains(southWater, cache, 0)).toBe(false);
+  });
+
+  it('Palefire Light: opens the W3 trailhead and connects both lighthouse rooms in order', () => {
+    const docksDoor = ROOM_REGISTRY.docks.doors.find((door) => door.id === 'door-lighthouse');
+    const rest = ROOM_REGISTRY['lighthouse-rest'];
+    const gallery = ROOM_REGISTRY['lighthouse-gallery'];
+    expect(docksDoor).toMatchObject({
+      targetRoom: 'lighthouse-rest', targetSpawn: 'fromDocks', locked: false,
+    });
+    expect(rest.doors.find((door) => door.id === 'door-docks')).toMatchObject({
+      targetRoom: 'docks', targetSpawn: 'fromLighthouse', locked: false,
+    });
+    expect(rest.doors.find((door) => door.id === 'stairs-gallery')).toMatchObject({
+      targetRoom: 'lighthouse-gallery', targetSpawn: 'fromRest', locked: false,
+    });
+    expect(gallery.doors.find((door) => door.id === 'stairs-rest')).toMatchObject({
+      targetRoom: 'lighthouse-rest', targetSpawn: 'fromGallery', locked: false,
+    });
+  });
+
+  it('Palefire Light: ships Maren, the growing logbook, telescope, and four Curios per room', () => {
+    const rest = ROOM_REGISTRY['lighthouse-rest'];
+    const gallery = ROOM_REGISTRY['lighthouse-gallery'];
+    expect(rest.anchors).toEqual([{ characterId: 'old-maren', x: 750, y: 590 }]);
+    expect(rest.hotspots.find((hotspot) => hotspot.id === 'keeper-logbook')).toMatchObject({ kind: 'logbook' });
+    expect(gallery.hotspots.find((hotspot) => hotspot.id === 'palefire-telescope')).toMatchObject({ kind: 'telescope' });
+    expect(rest.clickables.filter((prop) => prop.curioId)).toHaveLength(4);
+    expect(gallery.clickables.filter((prop) => prop.curioId)).toHaveLength(4);
+    expect(gallery.clickables.find((prop) => prop.id === 'balcony-wind-carving')).toMatchObject({
+      reaction: 'hum', requiresProximity: true,
+    });
+    expect(ROOM_REGISTRY.trail.clickables.find((prop) => prop.id === 'palefire-trail-ribbon').favorStep)
+      .toMatchObject({ favorId: 'maren-sighting-trail', stepId: 'witness-trail-event' });
   });
 });

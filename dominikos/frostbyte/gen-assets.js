@@ -17,6 +17,7 @@ fs.mkdirSync(path.join(OUT, 'minigame'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'furniture'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'characters'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'portraits'), { recursive: true });
+fs.mkdirSync(path.join(OUT, 'vistas'), { recursive: true });
 
 /* ----------------------------- PNG encoder (verbatim technique from game1) --------------- */
 const CRC = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
@@ -395,6 +396,68 @@ function buildSalkaPortrait() {
     px(img, x, y, nextNoise() > 0.55 ? [...A.iceL, 24] : [...A.amberL, 22]);
   }
   return save(path.join('portraits', 'captain-salka.png'), img);
+}
+
+/* ----------------------------- ANCHOR: Old Maren (W4) ---------------- */
+// Elder gentoo keeper: white head-band, salt-grey vest, brass key, and a weathered field log.
+function buildMarenSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  oval(img, 12, 29, 10, 2, [A.inkDeep[0], A.inkDeep[1], A.inkDeep[2], 70]);
+  oval(img, 12, 20, 10, 12, A.inkDeep); oval(img, 12, 11, 9, 10, A.ink);
+  oval(img, 12, 13, 7, 8, A.snowL); oval(img, 12, 20, 6, 8, A.snowL);
+  // Gentoo brow-band and one pale, weathered eye.
+  rect(img, 5, 6, 4, 3, A.snowL); rect(img, 8, 5, 9, 2, A.snowL); rect(img, 16, 6, 3, 3, A.snowL);
+  disc(img, 9, 11, 1, A.inkDeep); disc(img, 15, 11, 1, A.iceD); px(img, 15, 10, A.iceL);
+  rect(img, 10, 14, 5, 2, A.beak); rect(img, 11, 16, 3, 1, A.beakD);
+  // Keeper's knit vest, lantern key, and the log tucked beneath one flipper.
+  rrect(img, 5, 19, 14, 10, A.stone); rect(img, 7, 20, 3, 8, A.stoneL);
+  rect(img, 11, 19, 2, 10, A.inkDeep); disc(img, 14, 22, 1, A.amberL);
+  rect(img, 18, 20, 5, 8, A.wood); rect(img, 19, 21, 3, 6, A.amberL);
+  ovalRing(img, 4, 24, 3, 4, A.amber, 90); rect(img, 3, 17, 2, 6, A.amber);
+  rect(img, 5, 28, 5, 2, A.beak); rect(img, 14, 28, 5, 2, A.beak);
+  return save(path.join('characters', 'old-maren.png'), img);
+}
+
+function buildMarenPortrait() {
+  const W = 128, H = 128, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x0a1d4a2e;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = y / (H - 1);
+    const base = [
+      A.nightL[0] * (1 - t) + A.inkDeep[0] * t,
+      A.nightL[1] * (1 - t) + A.inkDeep[1] * t,
+      A.nightL[2] * (1 - t) + A.inkDeep[2] * t,
+    ];
+    const grain = (nextNoise() - 0.5) * 12;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  // Curving lighthouse masonry, logbook shelves, and a warm lamp halo behind the bust.
+  for (let r = 46; r > 2; r -= 4) disc(img, 105, 32, r, [...A.amber, Math.max(3, 29 - r / 2)]);
+  rect(img, 101, 21, 9, 24, A.inkDeep); rect(img, 103, 23, 5, 18, A.amberL);
+  for (const x of [8, 19, 112]) rect(img, x, 13, 6, 103, A.stone);
+  rect(img, 9, 26, 23, 5, A.wood); rect(img, 10, 31, 21, 28, A.woodL);
+  for (const [x, c] of [[13, A.violet], [19, A.iceD], [25, A.amber]]) rect(img, x, 35, 4, 20, c);
+
+  // Salt-grey shoulders, gentoo head, brow-band, and the one pale sea-worn eye.
+  oval(img, 63, 115, 48, 43, A.amber); oval(img, 63, 116, 45, 43, A.inkDeep);
+  oval(img, 63, 113, 37, 32, A.stone); rect(img, 31, 94, 64, 8, A.stoneL);
+  rect(img, 60, 96, 7, 32, A.inkDeep); disc(img, 72, 107, 3, A.amberL);
+  oval(img, 63, 62, 39, 41, A.ink); oval(img, 63, 68, 29, 31, A.snowL);
+  rect(img, 30, 38, 18, 10, A.snowL); rect(img, 43, 32, 43, 8, A.snowL); rect(img, 80, 37, 17, 10, A.snowL);
+  disc(img, 49, 59, 4, A.inkDeep); disc(img, 77, 59, 4, A.iceD);
+  px(img, 48, 58, A.snowL); px(img, 76, 57, A.iceL);
+  oval(img, 63, 73, 9, 6, A.beak); rect(img, 57, 75, 13, 3, A.beakD);
+
+  // Field log at frame edge and a long brass lamp key.
+  rrect(img, 89, 91, 32, 35, A.wood); rect(img, 94, 96, 22, 25, A.amberL);
+  rect(img, 98, 102, 13, 2, A.wood); rect(img, 98, 109, 17, 2, A.wood);
+  ovalRing(img, 27, 102, 10, 12, A.amber, 150); rect(img, 25, 72, 4, 31, A.amber);
+  for (let i = 0; i < 90; i++) {
+    const x = 15 + Math.floor(nextNoise() * 101), y = 22 + Math.floor(nextNoise() * 103);
+    px(img, x, y, nextNoise() > 0.52 ? [...A.iceL, 25] : [...A.amberL, 22]);
+  }
+  return save(path.join('portraits', 'old-maren.png'), img);
 }
 
 /* ----------------------------- COSMETIC OVERLAYS ---------------------- */
@@ -788,6 +851,7 @@ function buildMapIsle() {
   route(221, 128, 298, 237); route(221, 128, 182, 38); route(221, 128, 384, 122);
   route(221, 128, 67, 147);
   route(384, 122, 302, 58);
+  route(302, 58, 355, 26);
 
   // Pine clusters — flavor only, a scaled-down version of the plaza's disc-stack pine.
   const pineAt = (px0, py0, s) => {
@@ -853,6 +917,15 @@ function buildMapIsle() {
   rect(img, dockX + 3, dockY - 2, 21, 5, ARCTIC_DUSK.wood);
   rect(img, dockX + 14, dockY - 13, 2, 13, ARCTIC_DUSK.stoneL);
   rect(img, dockX + 16, dockY - 11, 7, 4, ARCTIC_DUSK.ember);
+
+  // Palefire Light glyph: a narrow white tower, amber lantern, and one eastward beam.
+  const lightX = Math.round(0.74 * W), lightY = Math.round(0.08 * H);
+  rect(img, lightX - 5, lightY - 4, 11, 21, ARCTIC_DUSK.stone);
+  rect(img, lightX - 3, lightY - 3, 7, 19, ARCTIC_DUSK.snowL);
+  rect(img, lightX - 8, lightY - 9, 17, 7, ARCTIC_DUSK.inkDeep);
+  rect(img, lightX - 5, lightY - 8, 11, 5, ARCTIC_DUSK.amberL);
+  rect(img, lightX + 9, lightY - 7, 18, 2, [...ARCTIC_DUSK.amberL, 130]);
+  rect(img, lightX - 8, lightY + 16, 17, 4, ARCTIC_DUSK.inkDeep);
 
   // Small compass rose in open water, kept away from every pin.
   const crx = 432, cry = 263;
@@ -1849,6 +1922,182 @@ function buildRoomDocks(inPort) {
   return save(inPort ? 'room-docks-port.png' : 'room-docks-away.png', img);
 }
 
+/* ----------------------------- ROOMS: Palefire Light (W4) ------------ */
+function buildRoomLighthouseRest() {
+  const W = 480, H = 320, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x1a17e57;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+
+  // Round tower floor: cold masonry at the rim, worn timber and a braided rug within.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const d = Math.hypot((x - W / 2) / 1.25, y - H / 2);
+    const base = d > 178 ? A.inkDeep : d > 150 ? A.stone : d > 128 ? A.stoneL : A.wood;
+    const grain = (nextNoise() - 0.5) * 10;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  for (let r = 156; r >= 145; r -= 4) ovalRing(img, 240, 160, Math.round(r * 1.28), r, r % 8 ? A.stone : A.stoneL, 420);
+  for (let y = 52; y < 275; y += 20) {
+    const half = Math.round(Math.sqrt(Math.max(0, 146 ** 2 - (y - 160) ** 2)) * 1.25);
+    rect(img, 240 - half, y, half * 2, 2, [...A.inkDeep, 72]);
+  }
+
+  // Iron cedar stove on the west wall, kettle, stacked wood, and a gentle amber pool.
+  for (let r = 42; r > 2; r -= 4) disc(img, 120, 96, r, [...A.amber, Math.max(3, 30 - r / 2)]);
+  rrect(img, 91, 66, 58, 58, A.inkDeep); rrect(img, 97, 72, 46, 45, A.stone);
+  rrect(img, 105, 88, 31, 22, A.night); disc(img, 120, 101, 10, A.ember); disc(img, 120, 98, 5, A.amberL);
+  rect(img, 111, 39, 18, 34, A.inkDeep); rect(img, 115, 43, 10, 29, A.stoneL);
+  oval(img, 164, 94, 17, 9, A.inkDeep); oval(img, 164, 91, 14, 7, A.stoneL); rect(img, 178, 88, 8, 4, A.stone);
+  for (const [x, y] of [[71, 121], [82, 126], [93, 122]]) { rect(img, x, y, 22, 6, A.woodL); rect(img, x + 3, y + 1, 16, 2, A.amber); }
+
+  // Keeper's table and growing logbook. The blank page remains a deliberate focal point.
+  oval(img, 130, 181, 42, 12, [...A.inkDeep, 65]); rrect(img, 95, 151, 70, 36, A.inkDeep);
+  rrect(img, 101, 157, 58, 25, A.woodL); rect(img, 107, 184, 7, 32, A.wood); rect(img, 146, 184, 7, 32, A.wood);
+  rrect(img, 111, 160, 34, 20, A.amberL); rect(img, 128, 161, 2, 18, A.wood);
+  for (const y of [165, 170, 175]) { rect(img, 115, y, 10, 1, A.stone); rect(img, 133, y, 8, 1, A.stone); }
+  rect(img, 148, 153, 3, 20, A.ink); disc(img, 149, 151, 3, A.violet);
+
+  // Cot and stitched current-map quilt on the lower-right curve.
+  oval(img, 318, 253, 52, 13, [...A.inkDeep, 58]); rrect(img, 278, 220, 80, 35, A.inkDeep);
+  rrect(img, 284, 225, 68, 24, A.snowD); rrect(img, 285, 226, 23, 21, A.snowL);
+  rect(img, 310, 226, 40, 21, A.violet); rect(img, 310, 232, 40, 3, shade(A.violet, 0.72));
+  for (let x = 314; x < 348; x += 8) rect(img, x, 226, 2, 21, A.iceL);
+
+  // Spiral stair core at east, seen as a deliberate sequence of iron crescents.
+  disc(img, 370, 140, 39, A.inkDeep); disc(img, 370, 140, 29, A.stone);
+  for (let i = 0; i < 10; i++) {
+    const a = i * 0.64, x = Math.round(370 + Math.cos(a) * (17 + i * 1.5)), y = Math.round(140 + Math.sin(a) * (12 + i));
+    rrect(img, x - 14, y - 4, 28, 8, i % 2 ? A.stoneL : A.frost);
+  }
+  disc(img, 370, 140, 6, A.amber); rect(img, 367, 99, 6, 83, A.inkDeep);
+  // East stair threshold and the south door back to the docks.
+  rect(img, 438, 139, 42, 42, A.inkDeep); rect(img, 441, 145, 39, 30, A.night); rect(img, 437, 151, 6, 18, A.amber);
+  rect(img, 221, 287, 38, 33, A.inkDeep); rect(img, 228, 293, 24, 27, A.night);
+  rect(img, 215, 302, 50, 7, A.stoneL); rect(img, 221, 301, 38, 3, A.iceL);
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (edge > 0.9) px(img, x, y, [...A.inkDeep, Math.round((edge - 0.9) * 120)]);
+  }
+  return save('room-lighthouse-rest.png', img);
+}
+
+function buildRoomLighthouseGallery() {
+  const W = 480, H = 320, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x1a47e22;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+
+  // Open night beyond the glass, then the circular gallery floor and frost-ribbed window wall.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = y / H, grain = (nextNoise() - 0.5) * 9;
+    const base = A.night.map((channel, i) => channel * (1 - t * 0.22) + A.inkDeep[i] * t * 0.22 + grain);
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel))));
+  }
+  for (const [x, y] of [[44, 36], [84, 73], [145, 25], [329, 48], [421, 79], [451, 32]]) disc(img, x, y, 1, A.iceL);
+  oval(img, 240, 194, 210, 125, A.inkDeep); oval(img, 240, 190, 199, 113, A.stone);
+  oval(img, 240, 191, 187, 102, A.stoneL); oval(img, 240, 195, 174, 91, shade(A.stone, 0.9));
+  for (let y = 150; y < 280; y += 19) rect(img, 66, y, 348, 2, [...A.iceL, 45]);
+  // Window ribs and balcony rail preserve the sense of an exposed lantern room.
+  for (const x of [74, 126, 178, 302, 354, 406]) { rect(img, x, 56, 5, 109, A.inkDeep); rect(img, x + 2, 59, 2, 103, A.frost); }
+  rect(img, 59, 258, 362, 7, A.inkDeep); rect(img, 65, 254, 350, 4, A.iceL);
+  for (let x = 69; x < 416; x += 24) rect(img, x, 255, 4, 34, A.stoneL);
+  for (const x of [222, 232, 242, 252]) disc(img, x, 259, 4, A.iceL);
+
+  // The great lamp owns the room: brass carriage, faceted lens, and one pocket sunrise.
+  for (let r = 72; r > 5; r -= 5) disc(img, 240, 111, r, [...A.amber, Math.max(2, 29 - r / 3)]);
+  oval(img, 240, 114, 52, 18, A.inkDeep); rect(img, 203, 69, 74, 86, A.inkDeep);
+  rect(img, 210, 75, 60, 72, A.amber); rect(img, 216, 80, 48, 61, A.iceL);
+  for (let x = 218; x < 264; x += 9) rect(img, x, 82, 3, 56, x % 2 ? A.amberL : A.ice);
+  oval(img, 240, 74, 39, 10, A.amberL); oval(img, 240, 148, 42, 11, A.woodL);
+  rect(img, 235, 145, 10, 64, A.inkDeep); disc(img, 240, 205, 20, A.amber); disc(img, 240, 205, 13, A.inkDeep);
+  // The loose prism is drawn outside the rigid lens grid.
+  for (let i = 0; i < 9; i++) { rect(img, 275 + i, 167 + i, 13 - i, 2, [...A.violet, 175]); rect(img, 275 + i, 165 + i, 11 - i, 1, [...A.aurora, 150]); }
+
+  // Brass telescope at the right windows, trained over the floes.
+  oval(img, 382, 145, 48, 12, [...A.inkDeep, 65]);
+  for (let i = 0; i < 74; i++) {
+    const x = 354 + i, y = 111 - Math.round(i * 0.34);
+    rect(img, x, y, 4, 15, i % 13 < 3 ? A.amberL : A.woodL);
+  }
+  oval(img, 427, 92, 8, 12, A.inkDeep); oval(img, 426, 92, 5, 9, A.iceL);
+  rect(img, 378, 122, 7, 73, A.amber); rect(img, 350, 190, 65, 7, A.inkDeep);
+  rect(img, 357, 195, 5, 35, A.wood); rect(img, 405, 195, 5, 35, A.wood);
+
+  // Supply chest, orange storm pennant, west stair door, and the three-note wind carving.
+  rrect(img, 96, 221, 69, 34, A.inkDeep); rrect(img, 102, 227, 57, 22, A.wood);
+  rect(img, 124, 225, 11, 26, A.amber); disc(img, 129, 237, 3, A.amberL);
+  rect(img, 113, 48, 4, 56, A.wood); rect(img, 117, 50, 35, 5, A.inkDeep); rect(img, 120, 55, 28, 17, A.ember);
+  rect(img, 0, 139, 43, 42, A.inkDeep); rect(img, 0, 145, 39, 30, A.night); rect(img, 37, 151, 6, 18, A.amber);
+  for (const [x, len] of [[367, 15], [389, 23], [415, 31]]) {
+    rect(img, x, 266, len, 3, A.iceD); rect(img, x + 4, 263, len - 4, 1, A.iceL);
+  }
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (edge > 0.91) px(img, x, y, [...A.inkDeep, Math.round((edge - 0.91) * 125)]);
+  }
+  return save('room-lighthouse-gallery.png', img);
+}
+
+/* ----------------------------- TELESCOPE VISTAS (W4) ----------------- */
+function vistaCanvas(seed) {
+  const W = 320, H = 200, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = seed >>> 0;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = y / H;
+    const base = t < 0.57
+      ? A.night.map((channel, i) => channel + (A.nightL[i] - channel) * (t / 0.57))
+      : A.water.map((channel) => channel * (0.67 - (t - 0.57) * 0.33));
+    const grain = (nextNoise() - 0.5) * 10;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  for (let y = 118; y < H; y += 11) for (let x = (y * 3) % 31; x < W; x += 42) rect(img, x, y, 23, 1, [...A.iceL, 90]);
+  for (const [x, y] of [[22, 28], [58, 51], [105, 21], [207, 38], [274, 19], [301, 66]]) disc(img, x, y, 1, A.iceL);
+  return img;
+}
+
+function buildWhaleVista() {
+  const img = vistaCanvas(0x7a11e001), A = ARCTIC_DUSK;
+  // Broken floes frame a broad whale rising in one slow, readable arc.
+  for (const [x, y, rx, ry] of [[44, 151, 48, 13], [267, 162, 61, 16], [136, 184, 56, 10]]) {
+    oval(img, x, y, rx, ry, A.iceD); oval(img, x, y - 3, rx - 4, ry - 4, A.snowD);
+  }
+  oval(img, 173, 126, 27, 52, A.inkDeep); oval(img, 166, 123, 18, 43, A.nightL);
+  oval(img, 157, 88, 20, 14, A.inkDeep); rect(img, 166, 90, 31, 10, A.inkDeep);
+  for (let i = 0; i < 28; i++) { px(img, 141 - i, 82 - Math.round(i * 0.5), [...A.iceL, 120]); px(img, 190 + i, 82 - Math.round(i * 0.35), [...A.iceL, 110]); }
+  for (let r = 24; r > 3; r -= 4) ovalRing(img, 173, 170, r * 2, Math.round(r / 2), [...A.iceL, 55], 100);
+  return save(path.join('vistas', 'breaching-whale.png'), img);
+}
+
+function buildAuroraVista() {
+  const img = vistaCanvas(0xa0904a11), A = ARCTIC_DUSK;
+  // A crown of layered light hangs over a still pressure ridge.
+  for (let x = 18; x < 304; x++) {
+    const arch = 42 + Math.round(Math.cos((x - 160) / 150 * Math.PI) * 29);
+    for (let y = arch; y < 111; y++) {
+      const alpha = Math.max(10, Math.round(65 * (1 - (y - arch) / 77)));
+      if ((x + y) % 3 === 0) px(img, x, y, [...((x / 24) % 2 < 1 ? A.aurora : A.violet), alpha]);
+    }
+    px(img, x, arch, x % 5 ? [...A.aurora, 165] : [...A.violet, 145]);
+  }
+  oval(img, 160, 165, 143, 25, A.iceD); oval(img, 160, 159, 137, 19, A.snowD);
+  for (let x = 40; x < 281; x += 24) { rect(img, x, 142 - (x % 3) * 4, 3, 20 + (x % 3) * 4, A.iceL); }
+  return save(path.join('vistas', 'aurora-crown.png'), img);
+}
+
+function buildGullVista() {
+  const img = vistaCanvas(0x5a1ca5ea), A = ARCTIC_DUSK;
+  // The Driftwood Gull under way: low work-barge hull, cargo cabin, mast, and signal pennant.
+  oval(img, 177, 151, 78, 24, A.inkDeep); oval(img, 177, 145, 70, 18, shade(A.wood, 0.72));
+  rect(img, 112, 123, 126, 25, A.wood); rect(img, 120, 127, 109, 16, A.woodL);
+  rrect(img, 145, 104, 43, 23, A.inkDeep); rect(img, 151, 109, 31, 15, A.stone);
+  rect(img, 165, 58, 6, 67, A.inkDeep); rect(img, 170, 63, 49, 5, A.woodL);
+  rect(img, 172, 66, 40, 19, A.ember); rect(img, 176, 69, 32, 12, A.amber);
+  for (const [x, c] of [[126, A.violet], [199, A.ice]]) { rrect(img, x, 129, 21, 15, A.inkDeep); rect(img, x + 4, 132, 13, 9, c); }
+  for (let r = 40; r > 4; r -= 5) ovalRing(img, 177, 173, r * 2, Math.max(3, Math.round(r / 5)), [...A.iceL, 48], 100);
+  return save(path.join('vistas', 'driftwood-gull.png'), img);
+}
+
 /* ----------------------------- Pickup glint (H4) ------------------------ */
 // 12x12 walk-over coin token: warm gold dot + 4-point sparkle cross, dark outline.
 function buildPickupGlint() {
@@ -1890,6 +2139,13 @@ const made = [
   buildSalkaPortrait(),
   buildRoomDocks(true),
   buildRoomDocks(false),
+  buildMarenSprite(),
+  buildMarenPortrait(),
+  buildRoomLighthouseRest(),
+  buildRoomLighthouseGallery(),
+  buildWhaleVista(),
+  buildAuroraVista(),
+  buildGullVista(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

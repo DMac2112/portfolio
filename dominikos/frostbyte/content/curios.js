@@ -19,4 +19,12 @@ export const CURIO_REGISTRY = Object.freeze([
   Object.freeze({ id: 'docks-buoy-bob', roomId: 'docks', label: 'Outer Marker Nod' }),
   Object.freeze({ id: 'docks-gull-scatter', roomId: 'docks', label: 'Whitewing Commotion' }),
   Object.freeze({ id: 'docks-underpier-cache', roomId: 'docks', label: 'Ledge Below the Pier' }),
+  Object.freeze({ id: 'lighthouse-rest-stove-sigh', roomId: 'lighthouse-rest', label: 'Cedar Stove Sigh' }),
+  Object.freeze({ id: 'lighthouse-rest-kettle-tick', roomId: 'lighthouse-rest', label: 'Three Patient Ticks' }),
+  Object.freeze({ id: 'lighthouse-rest-cot-quilt', roomId: 'lighthouse-rest', label: 'Currents in the Quilt' }),
+  Object.freeze({ id: 'lighthouse-rest-stair-answer', roomId: 'lighthouse-rest', label: 'One Turn Later' }),
+  Object.freeze({ id: 'lighthouse-gallery-lamp-prism', roomId: 'lighthouse-gallery', label: 'Pocket Sunrise' }),
+  Object.freeze({ id: 'lighthouse-gallery-pennant', roomId: 'lighthouse-gallery', label: 'The Unfelt Wind' }),
+  Object.freeze({ id: 'lighthouse-gallery-rail-crystals', roomId: 'lighthouse-gallery', label: 'Glass-Step Chime' }),
+  Object.freeze({ id: 'lighthouse-gallery-wind-carving', roomId: 'lighthouse-gallery', label: 'Three Notes in the Rail' }),
 ]);

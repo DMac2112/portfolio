@@ -4,6 +4,7 @@ import {
   ANCHOR_CHARACTERS,
   ANCHOR_SLOTS,
   EDDA_DIALOGUE_TREE,
+  MAREN_DIALOGUE_TREE,
   PAT_DIALOGUE_TREE,
   SALKA_DIALOGUE_TREE,
   characterById,
@@ -62,11 +63,12 @@ describe('approved anchor contracts', () => {
     ]);
   });
 
-  it('fills every anchor slot and resolves the shipped W1-W3 anchors', () => {
+  it('fills every anchor slot and resolves the shipped W1-W4 anchors', () => {
     expect(validateCharacters(ANCHOR_CHARACTERS)).toEqual([]);
     expect(validateDialogueTree(EDDA_DIALOGUE_TREE)).toEqual([]);
     expect(validateDialogueTree(PAT_DIALOGUE_TREE)).toEqual([]);
     expect(validateDialogueTree(SALKA_DIALOGUE_TREE)).toEqual([]);
+    expect(validateDialogueTree(MAREN_DIALOGUE_TREE)).toEqual([]);
     expect(unfilledAnchorSlots()).toEqual([]);
     expect(characterByRoom('court')).toBe(characterById('edda-quill'));
     expect(characterByRoom('workshop')).toMatchObject({
@@ -76,6 +78,10 @@ describe('approved anchor contracts', () => {
     });
     expect(characterByRoom('docks')).toMatchObject({
       id: 'captain-salka', name: 'Captain Salka', dialogueTree: SALKA_DIALOGUE_TREE,
+    });
+    expect(characterByRoom('lighthouse-rest')).toMatchObject({
+      id: 'old-maren', name: 'Old Maren', dialogueTree: MAREN_DIALOGUE_TREE,
+      favorDefs: expect.arrayContaining([expect.objectContaining({ id: 'maren-sighting-gull' })]),
     });
     expect(characterById('the-echo')).toMatchObject({ portraitAsset: null, spriteAsset: null });
   });

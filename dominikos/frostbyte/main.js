@@ -30,6 +30,7 @@ import { createJournal } from './ui/journal.js';
 import { createDialogue } from './ui/dialogue.js';
 import { createNewspaper } from './ui/newspaper.js';
 import { createTraderStall } from './ui/trader-stall.js';
+import { createTelescope } from './ui/telescope.js';
 import { nodeByRoom } from './content/map.js';
 import { canTravel, arriveSpawnId, discoveredTravelNode, findAutoEnterDoor } from './engine/travel.js';
 import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
@@ -49,9 +50,11 @@ import { ANCHOR_CHARACTERS } from './content/characters.js';
 import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
 import { chooseDialogue, startDialogue } from './engine/dialogue-tree.js';
 import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
-import { EDDA_STORY_TIP_FAVORS, WEATHER_BELL_FAVOR, favorById } from './content/favors.js';
+import { EDDA_STORY_TIP_FAVORS, MAREN_SIGHTING_FAVORS, WEATHER_BELL_FAVOR, favorById } from './content/favors.js';
 import { chirperIssueForDate } from './content/chirper-issues.js';
 import { resolveDocksRoom, salkaStockForDate } from './content/docks.js';
+import { lighthouseLogbookPages, telescopeVistaForDate } from './content/lighthouse.js';
+import { addLighthouseSweep } from './world/lighthouse-lamp.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -101,6 +104,8 @@ k.loadSprite('room-court', './assets/room-court.png');
 k.loadSprite('room-workshop', './assets/room-workshop.png');
 k.loadSprite('room-docks-port', './assets/room-docks-port.png');
 k.loadSprite('room-docks-away', './assets/room-docks-away.png');
+k.loadSprite('room-lighthouse-rest', './assets/room-lighthouse-rest.png');
+k.loadSprite('room-lighthouse-gallery', './assets/room-lighthouse-gallery.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
@@ -166,6 +171,7 @@ k.scene('room', (roomId, opts = {}) => {
   const baseRoom = ROOM_REGISTRY[roomId];
   const room = roomId === 'docks' ? resolveDocksRoom(baseRoom, todayISO) : baseRoom;
   buildRoom(k, room);
+  addLighthouseSweep(k, room, reduceMotion);
   addSnowfall(k, room, reduceMotion);
   fadeIn(k, reduceMotion);
 
@@ -181,7 +187,7 @@ k.scene('room', (roomId, opts = {}) => {
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
   for (const h of room.hotspots ?? []) {
-    if (h.kind !== 'minigame' && h.kind !== 'shop' && h.kind !== 'venue' && h.kind !== 'trader') continue;
+    if (!['minigame', 'shop', 'venue', 'trader', 'telescope', 'logbook'].includes(h.kind)) continue;
     const lw = Math.max(64, (h.label?.length ?? 4) * 9 + 18);
     k.add([k.rect(lw, 22, { radius: 6 }), k.pos(h.x, h.y - 46), k.anchor('center'),
       k.color(k.Color.fromHex('#0d1c2b')), k.opacity(0.82), k.z(100000)]);
@@ -257,6 +263,8 @@ k.scene('room', (roomId, opts = {}) => {
     if (hit.kind === 'venue') return 'venue';
     if (hit.kind === 'newspaper') return 'newspaper';
     if (hit.kind === 'trader') return 'trader';
+    if (hit.kind === 'telescope') return 'telescope';
+    if (hit.kind === 'logbook') return 'logbook';
     if (hit.kind === 'character') return 'character';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
@@ -369,6 +377,33 @@ k.scene('room', (roomId, opts = {}) => {
       openCharacterDialogue(character, startNode);
       return;
     }
+    if (character.id === 'old-maren') {
+      const reportable = MAREN_SIGHTING_FAVORS.find((definition) =>
+        currentFavorStep(save, definition)?.id === 'report-to-maren');
+      if (reportable) {
+        const events = advanceTrackedFavor(reportable, 'report-to-maren');
+        showFavorReward(events, 'sighting entered in the keeper’s log');
+        const reportedNode = reportable.id === 'maren-sighting-vista' ? 'reported-vista'
+          : reportable.id === 'maren-sighting-trail' ? 'reported-trail' : 'reported-gull';
+        openCharacterDialogue(character, reportedNode);
+        return;
+      }
+      const [vista, trail, gull] = MAREN_SIGHTING_FAVORS;
+      const vistaState = favorState(save, vista.id);
+      const trailState = favorState(save, trail.id);
+      const gullState = favorState(save, gull.id);
+      const startNode = !vistaState ? 'offer-vista'
+        : vistaState.status === 'offered' ? 'greeting-vista-offered'
+          : vistaState.status === 'in-progress' ? 'reminder-vista'
+            : !trailState ? 'offer-trail'
+              : trailState.status === 'offered' ? 'greeting-trail-offered'
+                : trailState.status === 'in-progress' ? 'reminder-trail'
+                  : !gullState ? 'offer-gull'
+                    : gullState.status === 'offered' ? 'greeting-gull-offered'
+                      : gullState.status === 'in-progress' ? 'reminder-gull' : 'completed';
+      openCharacterDialogue(character, startNode);
+      return;
+    }
     if (character.id !== 'edda-quill') {
       openCharacterDialogue(character, character.dialogueTree?.start);
       return;
@@ -419,6 +454,13 @@ k.scene('room', (roomId, opts = {}) => {
       newspaperUI.open();
     } else if (action === 'trader') {
       traderUI.open();
+    } else if (action === 'telescope') {
+      telescopeUI.open();
+    } else if (action === 'logbook') {
+      dialogueUI.open({
+        name: 'Keeper’s Logbook', subtitle: 'Palefire sighting record',
+        pages: lighthouseLogbookPages(save),
+      });
     } else if (action === 'character') {
       talkToCharacter(nearest.character);
     } else if (action === 'door') {
@@ -644,9 +686,25 @@ k.scene('room', (roomId, opts = {}) => {
       return { ok: true, message: `${item.label} added and equipped.` };
     },
   });
+  const telescopeUI = createTelescope({
+    getVista: () => telescopeVistaForDate(todayISO),
+    onView: (vista) => {
+      const vistaFavor = favorById('maren-sighting-vista');
+      if (currentFavorStep(save, vistaFavor)?.id === 'view-telescope-vista') {
+        const events = advanceTrackedFavor(vistaFavor, 'view-telescope-vista');
+        if (events) showCoinToast('Vista recorded — report what stayed with you to Old Maren');
+      }
+      const gullFavor = favorById('maren-sighting-gull');
+      if (vista.id === 'salka-at-sea' && currentFavorStep(save, gullFavor)?.id === 'spot-salka-at-sea') {
+        const events = advanceTrackedFavor(gullFavor, 'spot-salka-at-sea');
+        if (events) showCoinToast('The Gull sighted — report Salka’s course to Old Maren');
+      }
+    },
+  });
   const anyOverlayOpen = () =>
     transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || journalUI.isOpen() ||
-    newspaperUI.isOpen() || dialogueUI.isOpen() || traderUI.isOpen() || editMode.isOpen() || catalogUI.isOpen();
+    newspaperUI.isOpen() || dialogueUI.isOpen() || traderUI.isOpen() || telescopeUI.isOpen() ||
+    editMode.isOpen() || catalogUI.isOpen();
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
@@ -882,6 +940,8 @@ k.scene('room', (roomId, opts = {}) => {
           action === 'shop' ? '👕 Dress Up' :
           action === 'venue' ? `🏪 ${nearest.prompt ?? `Visit ${nearest.label}`}` :
           action === 'newspaper' ? `📰 ${nearest.prompt ?? `Read ${nearest.label}`}` :
+          action === 'telescope' ? `🔭 ${nearest.prompt ?? 'Look through the telescope'}` :
+          action === 'logbook' ? `📖 ${nearest.prompt ?? 'Read the logbook'}` :
           action === 'character' ? `💬 Talk to ${nearest.label}` :
           action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;

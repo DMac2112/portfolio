@@ -123,6 +123,15 @@ export const ROOM_REGISTRY = {
         },
         onlyWhenFavorStep: true,
       },
+      {
+        id: 'palefire-trail-ribbon', reaction: 'wave', x: 840, y: 540, w: 150, h: 90,
+        line: 'A blue ribbon of light folds once between the old lenses, then returns toward Palefire.', reactionColor: '#7fd6ff',
+        favorStep: {
+          favorId: 'maren-sighting-trail', stepId: 'witness-trail-event',
+          successText: 'Sighting witnessed — report the blue ribbon to Old Maren',
+        },
+        onlyWhenFavorStep: true,
+      },
     ],
   },
 
@@ -339,8 +348,7 @@ export const ROOM_REGISTRY = {
       { id: 'door-court', label: 'Glasswind Court', x: 72, y: 480, targetRoom: 'court', locked: false, targetSpawn: 'fromDocks' },
       {
         id: 'door-lighthouse', label: 'Palefire Light', x: 1150, y: 96,
-        targetRoom: 'lighthouse-rest', locked: true,
-        lockedCopy: 'The lighthouse trail is still buried past the marker posts.',
+        targetRoom: 'lighthouse-rest', locked: false, targetSpawn: 'fromDocks',
       },
     ],
     solids: [
@@ -398,6 +406,114 @@ export const ROOM_REGISTRY = {
           favorId: 'pat-weather-bell-parts', stepId: 'recover-docks-clapper',
           successText: 'Weather Bell part 3/3 — return all three pieces to Pat',
         },
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Palefire Light — lower round keeper's room; the stairs lead to a separate gallery scene.
+  'lighthouse-rest': {
+    id: 'lighthouse-rest',
+    title: 'Palefire Light — Keeper’s Rest',
+    mapAsset: 'room-lighthouse-rest',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:     { x: 720, y: 720, facing: 'up' },
+      fromDocks:   { x: 720, y: 820, facing: 'up' },
+      fromGallery: { x: 1190, y: 480, facing: 'left' },
+      fromMap:     { x: 720, y: 720, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'keeper-logbook', label: 'Keeper’s Logbook', kind: 'logbook', x: 390, y: 510, prompt: 'Read the growing sighting log' },
+    ],
+    doors: [
+      { id: 'door-docks', label: 'Driftgate Docks', x: 720, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromLighthouse' },
+      { id: 'stairs-gallery', label: 'Lantern Gallery', x: 1320, y: 480, targetRoom: 'lighthouse-gallery', locked: false, targetSpawn: 'fromRest' },
+    ],
+    solids: [
+      { id: 'keeper-stove', x: 360, y: 285, w: 220, h: 170 },
+      { id: 'logbook-table', x: 390, y: 510, w: 190, h: 105 },
+      { id: 'spiral-stair-core', x: 1110, y: 420, w: 210, h: 240 },
+      { id: 'keeper-cot', x: 930, y: 720, w: 240, h: 105 },
+    ],
+    anchors: [
+      { characterId: 'old-maren', x: 750, y: 590 },
+    ],
+    clickables: [
+      {
+        id: 'keeper-stove-sigh', curioId: 'lighthouse-rest-stove-sigh', reaction: 'steam',
+        x: 360, y: 285, w: 220, h: 170,
+        line: 'The little iron stove exhales cedar, salt, and one tiny spark.', reactionColor: '#ffb45e',
+      },
+      {
+        id: 'keeper-kettle-tick', curioId: 'lighthouse-rest-kettle-tick', reaction: 'chime',
+        x: 620, y: 315, w: 110, h: 90,
+        line: 'The kettle lid counts three patient ticks against the wind.', reactionColor: '#ffe2a1',
+      },
+      {
+        id: 'keeper-cot-quilt', curioId: 'lighthouse-rest-cot-quilt', reaction: 'snow',
+        x: 930, y: 700, w: 240, h: 120,
+        line: 'A stitched map of old currents hides beneath the folded quilt.', reactionColor: '#a78bfa',
+      },
+      {
+        id: 'spiral-stair-answer', curioId: 'lighthouse-rest-stair-answer', reaction: 'hum',
+        x: 1110, y: 420, w: 210, h: 240,
+        line: 'The iron stair returns your tap one full turn later.', reactionColor: '#7fd6ff',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Palefire Light — upper gallery, telescope balcony, and the slowly sweeping great lamp.
+  'lighthouse-gallery': {
+    id: 'lighthouse-gallery',
+    title: 'Palefire Light — Lantern Gallery',
+    mapAsset: 'room-lighthouse-gallery',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:  { x: 240, y: 480, facing: 'right' },
+      fromRest: { x: 210, y: 480, facing: 'right' },
+      fromMap:  { x: 720, y: 720, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'great-lamp', label: 'The Great Lamp', kind: 'landmark', x: 720, y: 330 },
+      { id: 'palefire-telescope', label: 'Palefire Telescope', kind: 'telescope', x: 1140, y: 390, prompt: 'Look across the floes' },
+    ],
+    doors: [
+      { id: 'stairs-rest', label: 'Keeper’s Rest', x: 120, y: 480, targetRoom: 'lighthouse-rest', locked: false, targetSpawn: 'fromGallery' },
+    ],
+    solids: [
+      { id: 'great-lamp', x: 720, y: 330, w: 240, h: 200 },
+      { id: 'palefire-telescope', x: 1140, y: 390, w: 180, h: 110 },
+      { id: 'gallery-supply-chest', x: 390, y: 690, w: 210, h: 90 },
+    ],
+    anchors: [],
+    clickables: [
+      {
+        id: 'gallery-lamp-prism', curioId: 'lighthouse-gallery-lamp-prism', reaction: 'glimmer',
+        x: 720, y: 330, w: 250, h: 220,
+        line: 'A loose prism throws a pocket-sized sunrise across the floor.', reactionColor: '#ffe2a1',
+      },
+      {
+        id: 'gallery-pennant-snap', curioId: 'lighthouse-gallery-pennant', reaction: 'wave',
+        x: 360, y: 210, w: 150, h: 90,
+        line: 'The balcony pennant snaps once toward a wind you cannot feel.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'gallery-rail-crystals', curioId: 'lighthouse-gallery-rail-crystals', reaction: 'chime',
+        x: 720, y: 790, w: 240, h: 80,
+        line: 'Four rail crystals ring from low to high, like steps made of glass.', reactionColor: '#c8f4ff',
+      },
+      {
+        id: 'balcony-wind-carving', curioId: 'lighthouse-gallery-wind-carving', reaction: 'hum',
+        x: 1120, y: 810, w: 180, h: 72, requiresProximity: true,
+        line: 'The wind-carved groove hums the same three notes as the loose Court cobble.', reactionColor: '#6fe0b2',
       },
     ],
     npcSpawnAnchors: [],

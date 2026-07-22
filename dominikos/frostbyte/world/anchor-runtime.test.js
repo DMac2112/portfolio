@@ -25,15 +25,17 @@ describe('anchor runtime content binding', () => {
     });
   });
 
-  it('loads only anchors whose rooms currently ship through W3', () => {
+  it('loads only anchors whose rooms currently ship through W4', () => {
     const k = { loadSprite: vi.fn() };
     expect(loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY)).toEqual([
       'anchor-edda-quill',
       'anchor-pat-hocket',
       'anchor-captain-salka',
+      'anchor-old-maren',
     ]);
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-edda-quill', './assets/characters/edda-quill.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-pat-hocket', './assets/characters/pat-hocket.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-captain-salka', './assets/characters/captain-salka.png');
+    expect(k.loadSprite).toHaveBeenCalledWith('anchor-old-maren', './assets/characters/old-maren.png');
   });
 });

@@ -1,5 +1,5 @@
-// content/characters.js — approved anchor-character contracts (World Plan W0–W3).
-import { EDDA_STORY_TIP_FAVORS, WEATHER_BELL_FAVOR } from './favors.js';
+// content/characters.js — approved anchor-character contracts (World Plan W0–W4).
+import { EDDA_STORY_TIP_FAVORS, MAREN_SIGHTING_FAVORS, WEATHER_BELL_FAVOR } from './favors.js';
 
 export const ANCHOR_SLOTS = Object.freeze([
   Object.freeze({ id: 'court-editor', roomId: 'court', role: 'editor' }),
@@ -268,6 +268,96 @@ export const SALKA_DIALOGUE_TREE = Object.freeze({
   }),
 });
 
+const MAREN_DAILY_GREETING = Object.freeze({
+  daily: Object.freeze([
+    'The light sees far. A keeper learns to listen farther.',
+    'A clean lens and a patient eye settle most arguments with the horizon.',
+    'Nothing out there is empty. Some things are simply between appearances.',
+  ]),
+  salt: 'maren-greeting',
+});
+
+export const MAREN_DIALOGUE_TREE = Object.freeze({
+  id: 'maren-palefire',
+  start: 'greeting',
+  nodes: Object.freeze({
+    greeting: Object.freeze({
+      pages: Object.freeze([MAREN_DAILY_GREETING]),
+      choices: Object.freeze([Object.freeze({ id: 'leave', label: 'I’ll mind the horizon.', next: null })]),
+    }),
+    'offer-vista': Object.freeze({
+      pages: Object.freeze([MAREN_DAILY_GREETING, 'Take the spiral stair and give the telescope one unhurried look. Then tell me what stayed with you.']),
+      choices: Object.freeze([
+        Object.freeze({
+          id: 'take-vista', label: 'I’ll study the horizon.', next: 'accepted-vista',
+          effects: Object.freeze([
+            { type: 'favor-offer', favorId: 'maren-sighting-vista' },
+            { type: 'favor-start', favorId: 'maren-sighting-vista' },
+          ]),
+        }),
+        Object.freeze({ id: 'later', label: 'Another time.', next: null }),
+      ]),
+    }),
+    'greeting-vista-offered': Object.freeze({
+      pages: Object.freeze([MAREN_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'accept-vista', label: 'I’m ready to look.', next: 'accepted-vista', effects: Object.freeze([{ type: 'favor-start', favorId: 'maren-sighting-vista' }]) }),
+        Object.freeze({ id: 'later', label: 'Not yet.', next: null }),
+      ]),
+    }),
+    'accepted-vista': Object.freeze({ pages: Object.freeze(['Upstairs, past the great lamp. Let the telescope choose the sight.']) }),
+    'reminder-vista': Object.freeze({ pages: Object.freeze(['Use the telescope in the Lantern Gallery, then bring the detail back down.']) }),
+    'reported-vista': Object.freeze({ pages: Object.freeze(['Good. The log needs what a sight meant, not only what shape it made.']) }),
+    'offer-trail': Object.freeze({
+      pages: Object.freeze([MAREN_DAILY_GREETING, 'Palefire’s beam caught an answering light along Frostline Trail. Find the blue ribbon before the wind folds it away.']),
+      choices: Object.freeze([
+        Object.freeze({
+          id: 'take-trail', label: 'I’ll follow the answer.', next: 'accepted-trail',
+          effects: Object.freeze([
+            { type: 'favor-offer', favorId: 'maren-sighting-trail' },
+            { type: 'favor-start', favorId: 'maren-sighting-trail' },
+          ]),
+        }),
+        Object.freeze({ id: 'later', label: 'I’ll wait for calmer wind.', next: null }),
+      ]),
+    }),
+    'greeting-trail-offered': Object.freeze({
+      pages: Object.freeze([MAREN_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'accept-trail', label: 'I’ll take the Trail.', next: 'accepted-trail', effects: Object.freeze([{ type: 'favor-start', favorId: 'maren-sighting-trail' }]) }),
+        Object.freeze({ id: 'later', label: 'Not yet.', next: null }),
+      ]),
+    }),
+    'accepted-trail': Object.freeze({ pages: Object.freeze(['Watch the ice near the old signpost. The light will move like a ribbon, not a glint.']) }),
+    'reminder-trail': Object.freeze({ pages: Object.freeze(['Frostline Trail, near the old signpost. Look for blue light answering the lamp.']) }),
+    'reported-trail': Object.freeze({ pages: Object.freeze(['Then the old lenses still speak to one another. That belongs in the log.']) }),
+    'offer-gull': Object.freeze({
+      pages: Object.freeze([MAREN_DAILY_GREETING, 'One last watch: when Salka is away, find The Driftwood Gull under sail and note her course.']),
+      choices: Object.freeze([
+        Object.freeze({
+          id: 'take-gull', label: 'I’ll watch for the orange pennant.', next: 'accepted-gull',
+          effects: Object.freeze([
+            { type: 'favor-offer', favorId: 'maren-sighting-gull' },
+            { type: 'favor-start', favorId: 'maren-sighting-gull' },
+          ]),
+        }),
+        Object.freeze({ id: 'later', label: 'I’ll wait for an away-day.', next: null }),
+      ]),
+    }),
+    'greeting-gull-offered': Object.freeze({
+      pages: Object.freeze([MAREN_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'accept-gull', label: 'I’ll take the watch.', next: 'accepted-gull', effects: Object.freeze([{ type: 'favor-start', favorId: 'maren-sighting-gull' }]) }),
+        Object.freeze({ id: 'later', label: 'Not yet.', next: null }),
+      ]),
+    }),
+    'accepted-gull': Object.freeze({ pages: Object.freeze(['On an away-day the telescope will find Salka beyond the floes. Her pennant is signal orange.']) }),
+    'reminder-gull': Object.freeze({ pages: Object.freeze(['If the berth is empty, climb to the telescope. The Gull should be somewhere in the outer current.']) }),
+    'reported-gull': Object.freeze({ pages: Object.freeze(['Eastbound and steady. I’ll mark the course; the harbor can breathe easier.']) }),
+    completed: Object.freeze({ pages: Object.freeze(['Three careful sightings, three honest reports. The blank pages look less lonely now.']) }),
+  }),
+});
+
 export function validateCharacters(characters, slots = ANCHOR_SLOTS) {
   const errors = [];
   if (!Array.isArray(characters)) return ['characters must be an array'];
@@ -351,10 +441,13 @@ export const ANCHOR_CHARACTERS = defineCharacters([
   },
   {
     id: 'old-maren', name: 'Old Maren', slotId: 'lighthouse-keeper', roomId: 'lighthouse-rest',
+    subtitle: 'Keeper, Palefire Light',
     species: 'gentoo penguin', portraitAsset: './assets/portraits/old-maren.png',
     spriteAsset: './assets/characters/old-maren.png', spriteKey: 'anchor-old-maren',
     palette: { body: '#435669', accent: '#cfe0f2', warm: '#ffb45e' },
-    linePools: { greeting: ['The light sees far. A keeper learns to listen farther.'] }, favorDefs: [],
+    linePools: { greeting: ['The light sees far. A keeper learns to listen farther.'] },
+    favorDefs: MAREN_SIGHTING_FAVORS,
+    dialogueTree: MAREN_DIALOGUE_TREE,
   },
   {
     id: 'vesper', name: 'Vesper', slotId: 'hollow-trickster', roomId: 'whisperpine',
