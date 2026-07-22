@@ -81,7 +81,7 @@ describe('room configs', () => {
   }
 
   it('door graph: locked doors in the vignette point at real (future) ids, not typos', () => {
-    const knownFutureIds = ['plaza', 'den', 'court', 'workshop', 'trail'];
+    const knownFutureIds = ['plaza', 'den', 'court', 'workshop', 'trail', 'docks', 'lighthouse-rest'];
     for (const room of Object.values(ROOM_REGISTRY)) {
       for (const d of room.doors) {
         expect(knownFutureIds).toContain(d.targetRoom);
@@ -345,5 +345,60 @@ describe('room configs', () => {
       .toBe('recover-court-coil');
     expect(ROOM_REGISTRY.trail.clickables.find((prop) => prop.id === 'weather-bell-vane').favorStep.stepId)
       .toBe('recover-trail-vane');
+  });
+
+  it('docks and court: mutual W3 door reachability plus the locked Palefire trailhead', () => {
+    const docks = ROOM_REGISTRY.docks;
+    expect(ROOM_REGISTRY.court.doors.find((door) => door.id === 'door-docks')).toMatchObject({
+      targetRoom: 'docks', locked: false, targetSpawn: 'fromCourt',
+    });
+    expect(docks.doors.find((door) => door.id === 'door-court')).toMatchObject({
+      targetRoom: 'court', locked: false, targetSpawn: 'fromDocks',
+    });
+    expect(docks.doors.find((door) => door.id === 'door-lighthouse')).toMatchObject({
+      targetRoom: 'lighthouse-rest', locked: true,
+    });
+  });
+
+  it('docks: ships Salka, seven Curios, the under-pier ledge, and the final Bell part', () => {
+    const docks = ROOM_REGISTRY.docks;
+    expect(docks.anchors).toEqual([
+      { characterId: 'captain-salka', x: 870, y: 500, bargeState: 'in-port' },
+    ]);
+    expect(docks.hotspots.find((hotspot) => hotspot.id === 'salka-trader-stall')).toMatchObject({
+      kind: 'trader', bargeState: 'in-port',
+    });
+    expect(docks.clickables.filter((prop) => prop.curioId)).toHaveLength(7);
+    expect(docks.clickables.find((prop) => prop.id === 'underpier-cache')).toMatchObject({
+      curioId: 'docks-underpier-cache', requiresProximity: true,
+    });
+    expect(docks.clickables.find((prop) => prop.id === 'weather-bell-clapper').favorStep).toMatchObject({
+      favorId: 'pat-weather-bell-parts', stepId: 'recover-docks-clapper',
+    });
+  });
+
+  it('docks: keeps both arrival spawns, the Palefire causeway, and the under-pier ledge walkable', () => {
+    const docks = ROOM_REGISTRY.docks;
+    const contains = (solid, point, radius = 12) =>
+      point.x + radius > solid.x - solid.w / 2 && point.x - radius < solid.x + solid.w / 2 &&
+      point.y + radius > solid.y - solid.h / 2 && point.y - radius < solid.y + solid.h / 2;
+    for (const spawn of Object.values(docks.spawnPoints)) {
+      expect(docks.solids.some((solid) => contains(solid, spawn))).toBe(false);
+    }
+
+    const northWest = docks.solids.find((solid) => solid.id === 'water-north-west');
+    const northEast = docks.solids.find((solid) => solid.id === 'water-north-east');
+    const causewayGap = (northEast.x - northEast.w / 2) - (northWest.x + northWest.w / 2);
+    expect(causewayGap).toBeGreaterThan(24);
+    expect(docks.doors.find((door) => door.id === 'door-lighthouse').x)
+      .toBeGreaterThan(northWest.x + northWest.w / 2);
+    expect(docks.doors.find((door) => door.id === 'door-lighthouse').x)
+      .toBeLessThan(northEast.x - northEast.w / 2);
+
+    const southWater = docks.solids.find((solid) => solid.id === 'water-south-main');
+    const ledgeGap = docks.bounds.y1 - (southWater.y + southWater.h / 2);
+    expect(ledgeGap).toBeGreaterThan(24);
+    const cache = docks.clickables.find((prop) => prop.id === 'underpier-cache');
+    expect(contains(southWater, cache, 0)).toBe(false);
   });
 });

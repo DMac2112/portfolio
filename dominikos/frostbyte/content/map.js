@@ -8,7 +8,7 @@ export const MAP_BG = './assets/map-isle.png';
  * @property {string} label         // human-readable name, must match a plaza door label if locked
  * @property {number} x             // normalized 0..1 position over map width
  * @property {number} y             // normalized 0..1 position over map height
- * @property {boolean} unlocked     // whether player can travel here
+ * @property {boolean} unlocked     // whether the room is shipped; W3+ pins still require first walk-in
  */
 
 /**
@@ -23,6 +23,7 @@ export const MAP_NODES = [
   { roomId: 'trail',     label: 'Frostline Trail',     x: 0.38, y: 0.12, unlocked: true },
   { roomId: 'court',     label: 'Glasswind Court',     x: 0.80, y: 0.38, unlocked: true },
   { roomId: 'workshop',  label: 'Emberlight Workshop', x: 0.14, y: 0.46, unlocked: true },
+  { roomId: 'docks',     label: 'Driftgate Docks',      x: 0.63, y: 0.18, unlocked: true },
 ];
 
 /**

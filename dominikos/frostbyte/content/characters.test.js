@@ -5,6 +5,7 @@ import {
   ANCHOR_SLOTS,
   EDDA_DIALOGUE_TREE,
   PAT_DIALOGUE_TREE,
+  SALKA_DIALOGUE_TREE,
   characterById,
   characterByRoom,
   defineCharacters,
@@ -61,16 +62,20 @@ describe('approved anchor contracts', () => {
     ]);
   });
 
-  it('fills every anchor slot and resolves the shipped W1/W2 anchors', () => {
+  it('fills every anchor slot and resolves the shipped W1-W3 anchors', () => {
     expect(validateCharacters(ANCHOR_CHARACTERS)).toEqual([]);
     expect(validateDialogueTree(EDDA_DIALOGUE_TREE)).toEqual([]);
     expect(validateDialogueTree(PAT_DIALOGUE_TREE)).toEqual([]);
+    expect(validateDialogueTree(SALKA_DIALOGUE_TREE)).toEqual([]);
     expect(unfilledAnchorSlots()).toEqual([]);
     expect(characterByRoom('court')).toBe(characterById('edda-quill'));
     expect(characterByRoom('workshop')).toMatchObject({
       id: 'pat-hocket',
       name: 'Pat Hocket',
       favorDefs: [expect.objectContaining({ id: 'pat-weather-bell-parts' })],
+    });
+    expect(characterByRoom('docks')).toMatchObject({
+      id: 'captain-salka', name: 'Captain Salka', dialogueTree: SALKA_DIALOGUE_TREE,
     });
     expect(characterById('the-echo')).toMatchObject({ portraitAsset: null, spriteAsset: null });
   });

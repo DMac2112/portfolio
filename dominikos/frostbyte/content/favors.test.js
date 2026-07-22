@@ -41,7 +41,7 @@ describe('story-tip Favor content', () => {
     expect(save.coins).toBe(8);
   });
 
-  it('ships Pat’s three-part Weather Bell chain with W2 stopping at the Docks step', () => {
+  it('ships Pat’s W3-completable three-part Weather Bell chain', () => {
     const save = { coins: 0, favors: {} };
     expect(WEATHER_BELL_FAVOR.steps.map((step) => step.id)).toEqual([
       'recover-court-coil',
@@ -56,5 +56,9 @@ describe('story-tip Favor content', () => {
     expect(advanceFavor(save, WEATHER_BELL_FAVOR, 'recover-trail-vane')).toBe(true);
     expect(currentFavorStep(save, WEATHER_BELL_FAVOR).id).toBe('recover-docks-clapper');
     expect(save.coins).toBe(0);
+    expect(advanceFavor(save, WEATHER_BELL_FAVOR, 'recover-docks-clapper')).toBe(true);
+    expect(currentFavorStep(save, WEATHER_BELL_FAVOR).id).toBe('return-to-pat');
+    expect(advanceFavor(save, WEATHER_BELL_FAVOR, 'return-to-pat')).toBe(true);
+    expect(save.coins).toBe(24);
   });
 });

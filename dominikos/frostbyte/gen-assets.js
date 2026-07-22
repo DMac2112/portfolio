@@ -334,6 +334,69 @@ function buildPatPortrait() {
   return save(path.join('portraits', 'pat-hocket.png'), img);
 }
 
+/* ----------------------------- ANCHOR: Captain Salka (W3) ------------- */
+// Chinstrap markings, weathered oilskin, short captain's cap, and a coil of mooring line.
+function buildSalkaSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  oval(img, 12, 29, 10, 2, [A.inkDeep[0], A.inkDeep[1], A.inkDeep[2], 70]);
+  oval(img, 12, 20, 10, 12, A.inkDeep); oval(img, 12, 11, 9, 10, A.ink);
+  oval(img, 12, 12, 7, 7, A.snowL); oval(img, 12, 19, 6, 8, A.snowL);
+  // The crisp chinstrap and square cap make Salka distinct at room scale.
+  rect(img, 5, 14, 3, 2, A.inkDeep); rect(img, 16, 14, 3, 2, A.inkDeep);
+  rect(img, 7, 16, 10, 2, A.inkDeep); rect(img, 10, 13, 5, 2, A.beak);
+  disc(img, 9, 10, 1, A.inkDeep); disc(img, 15, 10, 1, A.inkDeep);
+  rect(img, 5, 3, 14, 4, A.wood); rect(img, 7, 1, 10, 4, A.ink);
+  rect(img, 15, 5, 6, 2, A.woodL); px(img, 12, 3, A.amberL);
+  // Short oilskin coat with brass toggles and a rope coil at one flipper.
+  rrect(img, 5, 19, 14, 10, A.wood); rect(img, 7, 20, 4, 8, A.woodL);
+  rect(img, 12, 20, 2, 9, A.inkDeep); disc(img, 14, 22, 1, A.amberL); disc(img, 14, 26, 1, A.amberL);
+  ovalRing(img, 20, 23, 4, 5, A.amber, 210); rect(img, 5, 28, 5, 2, A.beak); rect(img, 14, 28, 5, 2, A.beak);
+  return save(path.join('characters', 'captain-salka.png'), img);
+}
+
+function buildSalkaPortrait() {
+  const W = 128, H = 128, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x5a1ca731;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = y / (H - 1);
+    const base = [
+      A.nightL[0] * (1 - t) + A.inkDeep[0] * t,
+      A.nightL[1] * (1 - t) + A.inkDeep[1] * t,
+      A.nightL[2] * (1 - t) + A.inkDeep[2] * t,
+    ];
+    const grain = (nextNoise() - 0.5) * 11;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  // Harbor pilings, rigging, and an amber ship lamp behind the bust.
+  for (const x of [10, 24, 105, 117]) rect(img, x, 13, 6, 99, A.wood);
+  for (let i = 0; i < 72; i++) {
+    const x = 4 + i * 2, y = 89 + Math.round(Math.sin(i * 0.42) * 4);
+    px(img, x, y, [...A.ice, 110]); px(img, x, y + 1, [...A.iceD, 95]);
+  }
+  for (let r = 31; r > 2; r -= 3) disc(img, 105, 42, r, [...A.amber, Math.max(3, 26 - r / 2)]);
+  rect(img, 101, 34, 9, 15, A.inkDeep); rect(img, 103, 36, 5, 10, A.amberL);
+
+  // Oilskin shoulders, chinstrap face, and hard-edged captain's cap.
+  oval(img, 64, 114, 48, 43, A.amber); oval(img, 64, 115, 45, 43, A.inkDeep);
+  oval(img, 64, 112, 37, 31, A.wood); rect(img, 31, 93, 66, 9, A.woodL);
+  rect(img, 60, 95, 8, 33, A.inkDeep); disc(img, 72, 105, 3, A.amberL); disc(img, 72, 116, 3, A.amberL);
+  oval(img, 64, 62, 39, 41, A.ink); oval(img, 64, 67, 29, 31, A.snowL);
+  disc(img, 50, 58, 4, A.inkDeep); disc(img, 78, 58, 4, A.inkDeep);
+  px(img, 49, 57, A.snowL); px(img, 77, 57, A.snowL);
+  oval(img, 64, 72, 9, 6, A.beak); rect(img, 58, 74, 13, 3, A.beakD);
+  rect(img, 34, 75, 10, 5, A.inkDeep); rect(img, 84, 75, 10, 5, A.inkDeep);
+  rect(img, 42, 79, 44, 5, A.inkDeep);
+  rect(img, 30, 27, 69, 14, A.wood); rrect(img, 39, 17, 51, 18, A.ink);
+  rect(img, 86, 36, 22, 5, A.woodL); disc(img, 64, 27, 4, A.amberL);
+  ovalRing(img, 103, 106, 15, 17, A.amber, 190); ovalRing(img, 103, 106, 10, 12, A.woodL, 170);
+  for (let i = 0; i < 80; i++) {
+    const x = 16 + Math.floor(nextNoise() * 98), y = 22 + Math.floor(nextNoise() * 102);
+    px(img, x, y, nextNoise() > 0.55 ? [...A.iceL, 24] : [...A.amberL, 22]);
+  }
+  return save(path.join('portraits', 'captain-salka.png'), img);
+}
+
 /* ----------------------------- COSMETIC OVERLAYS ---------------------- */
 // Grayscale shapes, tinted per-item at runtime. Head is stationary during a walk cycle, so each
 // row's 4 frames are identical. Drawn only on facings where the item is visible.
@@ -724,6 +787,7 @@ function buildMapIsle() {
   };
   route(221, 128, 298, 237); route(221, 128, 182, 38); route(221, 128, 384, 122);
   route(221, 128, 67, 147);
+  route(384, 122, 302, 58);
 
   // Pine clusters — flavor only, a scaled-down version of the plaza's disc-stack pine.
   const pineAt = (px0, py0, s) => {
@@ -780,6 +844,15 @@ function buildMapIsle() {
   disc(img, wpx + 10, wpy - 25, 5, [...ARCTIC_DUSK.frost, 130]);
   oval(img, wpx + 8, wpy + 5, 5, 4, ARCTIC_DUSK.amberL);
   rect(img, wpx + 4, wpy + 5, 9, 2, ARCTIC_DUSK.beakD);
+
+  // Driftgate Docks glyph: a timber finger pier with The Driftwood Gull at its outer berth.
+  const dockX = Math.round(0.63 * W), dockY = Math.round(0.18 * H);
+  rect(img, dockX - 18, dockY - 2, 24, 5, ARCTIC_DUSK.woodL);
+  for (const postX of [dockX - 16, dockX - 5, dockX + 4]) rect(img, postX, dockY - 5, 2, 12, ARCTIC_DUSK.wood);
+  oval(img, dockX + 13, dockY + 2, 14, 6, ARCTIC_DUSK.inkDeep);
+  rect(img, dockX + 3, dockY - 2, 21, 5, ARCTIC_DUSK.wood);
+  rect(img, dockX + 14, dockY - 13, 2, 13, ARCTIC_DUSK.stoneL);
+  rect(img, dockX + 16, dockY - 11, 7, 4, ARCTIC_DUSK.ember);
 
   // Small compass rose in open water, kept away from every pin.
   const crx = 432, cry = 263;
@@ -1644,6 +1717,138 @@ function buildRoomWorkshop() {
   return save('room-workshop.png', img);
 }
 
+/* ----------------------------- ROOM: Driftgate Docks ------------------ */
+// One authored harbor layout with two ritual states. The shoreline, pier, ledge, and collisions stay
+// identical; only The Driftwood Gull, gangplank, cargo stall, and harbor mood change by date.
+function buildRoomDocks(inPort) {
+  const W = 480, H = 320, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0xd0c45003;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+
+  // Deep water first, with horizontal current scratches and a colder open-sea edge.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = x / W;
+    const base = shade(A.water, 0.63 + edge * 0.10 + Math.sin(y * 0.045) * 0.018);
+    const grain = (nextNoise() - 0.5) * 9;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  for (let y = 17; y < H; y += 13) {
+    for (let x = (y * 7) % 31; x < W; x += 43) rect(img, x, y, 18 + (x % 17), 1, [...A.iceL, 75]);
+  }
+
+  // Uneven snow shore on the west. Tide pools and wind-scoured shelves interrupt the clean edge.
+  for (let y = 0; y < H; y++) {
+    const shore = 183 + Math.round(Math.sin(y * 0.031) * 19 + Math.sin(y * 0.087) * 7);
+    for (let x = 0; x <= shore; x++) {
+      const n = nextNoise();
+      px(img, x, y, n > 0.94 ? A.snowL : n > 0.86 ? A.frost : A.snowD);
+    }
+    for (let x = shore - 3; x <= shore + 2; x++) px(img, x, y, x <= shore ? A.iceD : [...A.iceL, 175]);
+  }
+  oval(img, 110, 240, 27, 16, A.iceD); oval(img, 108, 239, 22, 12, shade(A.water, 0.72));
+  for (const [x, y, c] of [[101, 236, A.aurora], [115, 243, A.violet], [121, 234, A.amber]]) {
+    disc(img, x, y, 3, c); px(img, x - 2, y - 3, A.iceL); px(img, x + 2, y - 3, A.iceL);
+  }
+
+  // Packed route from Glasswind Court, marked by paired harbor posts.
+  oval(img, 66, 160, 77, 31, [...A.snowL, 180]); oval(img, 133, 165, 65, 27, [...A.frost, 130]);
+  for (const x of [23, 58]) {
+    rect(img, x, 139, 5, 42, A.wood); disc(img, x + 2, 138, 5, A.snowL);
+    rect(img, x - 3, 148, 11, 5, A.woodL);
+  }
+
+  // Old salt warehouse occupies the high west bank and makes the shore read as a working port.
+  rrect(img, 42, 42, 99, 74, A.inkDeep); rect(img, 48, 50, 87, 61, A.wood);
+  for (let x = 45; x <= 138; x += 8) disc(img, x, 43, 8, A.snowL);
+  rect(img, 58, 71, 31, 40, A.night); rect(img, 64, 77, 20, 34, A.woodL);
+  rect(img, 98, 63, 26, 22, A.ink); rect(img, 102, 67, 18, 14, shade(A.amber, 0.65));
+  rect(img, 46, 104, 91, 7, A.inkDeep);
+
+  // Bottle post and its weekly sealed dispatch.
+  rect(img, 158, 119, 5, 44, A.wood); rect(img, 147, 124, 28, 7, A.woodL);
+  rect(img, 154, 132, 13, 23, A.iceD); rect(img, 157, 136, 7, 14, A.iceL); disc(img, 160, 130, 4, A.amber);
+
+  // Main timber pier exactly fills the walkable band between the two water collision fields.
+  rect(img, 176, 110, 304, 94, A.inkDeep); rect(img, 181, 115, 299, 84, A.wood);
+  for (let y = 119; y < 199; y += 14) rect(img, 181, y, 299, 3, shade(A.woodL, 0.78));
+  for (let x = 190; x < 480; x += 31) {
+    rect(img, x, 115, 2, 84, A.inkDeep); disc(img, x + 1, 119, 2, A.amberL); disc(img, x + 1, 193, 2, A.amberL);
+  }
+  for (const x of [188, 222, 448, 474]) { rect(img, x, 101, 6, 113, A.wood); disc(img, x + 3, 101, 5, A.snowL); }
+
+  // Narrow raised causeway reaches the future Palefire trailhead through the split north water.
+  rect(img, 359, 27, 49, 91, A.inkDeep); rect(img, 364, 31, 39, 84, A.frost);
+  for (let y = 37; y < 113; y += 13) rect(img, 365, y, 37, 2, A.snowL);
+  for (const x of [360, 406]) { rect(img, x, 25, 5, 91, A.wood); disc(img, x + 2, 26, 4, A.snowL); }
+  rect(img, 365, 29, 38, 7, A.wood); rect(img, 372, 31, 24, 3, A.iceL);
+
+  // Harbor bell, working crane, crates, rope coils, and waiting gulls create six readable props.
+  rect(img, 258, 77, 5, 43, A.wood); rect(img, 244, 79, 34, 5, A.woodL);
+  oval(img, 261, 101, 9, 8, A.amber); rect(img, 252, 100, 19, 3, A.beakD); px(img, 261, 110, A.amberL);
+  rect(img, 351, 112, 40, 55, A.inkDeep); rect(img, 357, 117, 28, 47, A.wood);
+  rect(img, 368, 76, 7, 52, A.woodL); rect(img, 371, 76, 56, 7, A.woodL);
+  rect(img, 422, 81, 3, 40, A.inkDeep); ovalRing(img, 423, 123, 6, 8, A.amber, 210);
+  for (const [x, y, c] of [[214, 170, A.violet], [235, 174, A.iceD], [452, 171, A.amber]]) {
+    rrect(img, x - 9, y - 8, 18, 16, A.wood); rect(img, x - 6, y - 5, 12, 10, c);
+  }
+  ovalRing(img, 326, 176, 13, 9, A.amber, 180); ovalRing(img, 326, 176, 8, 5, A.woodL, 160);
+  for (const [x, y] of [[221, 57], [240, 60], [259, 54], [278, 62]]) {
+    rect(img, x - 5, y, 5, 2, A.snowL); rect(img, x, y - 1, 5, 2, A.snowL);
+  }
+
+  // Outer buoy remains in the open-water pocket east of the pier.
+  oval(img, 410, 211, 13, 7, [...A.inkDeep, 75]); rect(img, 405, 196, 11, 23, A.ember);
+  oval(img, 410, 197, 7, 5, A.amberL); rect(img, 402, 204, 17, 5, A.snowL); rect(img, 409, 188, 3, 9, A.inkDeep);
+
+  // The secret under-pier ledge is one-avatar wide and reached around the outer east piling.
+  rect(img, 178, 277, 255, 21, A.inkDeep); rect(img, 183, 281, 244, 13, A.stone);
+  for (let x = 188; x < 424; x += 22) rect(img, x, 283, 14, 2, A.stoneL);
+  rect(img, 402, 196, 45, 101, A.inkDeep); rect(img, 407, 199, 35, 93, A.wood);
+  for (let y = 207; y < 290; y += 14) rect(img, 408, y, 33, 3, A.woodL);
+  // Sea-glass knot at the end of the ledge.
+  disc(img, 393, 285, 7, [...A.aurora, 70]); disc(img, 393, 285, 4, A.aurora);
+  px(img, 391, 283, A.iceL); px(img, 396, 287, A.violet);
+
+  if (inPort) {
+    // The Driftwood Gull: broad work-barge hull, deck cargo, oilskin pennant, and gangplank down.
+    oval(img, 342, 245, 77, 31, A.inkDeep); oval(img, 344, 237, 71, 27, shade(A.wood, 0.72));
+    rect(img, 282, 215, 125, 31, A.wood); rect(img, 289, 219, 111, 22, A.woodL);
+    for (let x = 292; x < 398; x += 18) rect(img, x, 220, 2, 19, shade(A.wood, 0.66));
+    rect(img, 329, 161, 7, 59, A.stoneL); rect(img, 335, 166, 41, 5, A.inkDeep);
+    rect(img, 336, 168, 35, 17, A.ember); rect(img, 339, 171, 28, 11, A.amber);
+    rect(img, 300, 199, 9, 22, A.inkDeep); rect(img, 304, 197, 35, 6, A.woodL);
+    // Diagonal gangplank from main pier to the deck.
+    for (let i = 0; i < 48; i++) {
+      const x = 268 + i, y = 196 + Math.round(i * 0.43);
+      rect(img, x, y, 4, 10, A.woodL); if (i % 8 === 0) rect(img, x, y, 3, 10, A.amberL);
+    }
+    // Two open cargo crates visually match the two rotating ledger slots.
+    for (const [x, c] of [[342, A.violet], [374, A.ice]]) {
+      rrect(img, x - 12, 222, 24, 19, A.inkDeep); rect(img, x - 9, 225, 18, 13, A.wood);
+      rect(img, x - 7, 226, 14, 7, c); rect(img, x - 12, 219, 24, 4, A.woodL);
+    }
+    rect(img, 384, 178, 3, 39, A.inkDeep); rect(img, 387, 179, 19, 8, A.ember);
+    for (let r = 13; r > 2; r -= 3) disc(img, 392, 186, r, [...A.amber, Math.max(3, 26 - r)]);
+  } else {
+    // Empty berth: slack ropes, exposed bumpers, cold wake lines, and no warm cargo light.
+    for (const [x, y] of [[285, 222], [336, 239], [382, 226]]) {
+      oval(img, x, y, 31, 7, [...A.iceL, 60]); ovalRing(img, x, y, 25, 5, A.iceD, 80);
+    }
+    for (const x of [276, 319, 366]) {
+      rect(img, x, 193, 6, 32, A.wood); disc(img, x + 3, 194, 5, A.snowL);
+      ovalRing(img, x + 4, 219, 8, 6, A.amber, 150);
+    }
+    rect(img, 277, 202, 92, 3, [...A.woodL, 140]);
+  }
+
+  // Vignette seals the painted room edges without obscuring the two exits.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (edge > 0.89) px(img, x, y, [...A.inkDeep, Math.round((edge - 0.89) * 125)]);
+  }
+  return save(inPort ? 'room-docks-port.png' : 'room-docks-away.png', img);
+}
+
 /* ----------------------------- Pickup glint (H4) ------------------------ */
 // 12x12 walk-over coin token: warm gold dot + 4-point sparkle cross, dark outline.
 function buildPickupGlint() {
@@ -1681,6 +1886,10 @@ const made = [
   buildPickupGlint(),
   buildRoomCourt(),
   buildRoomWorkshop(),
+  buildSalkaSprite(),
+  buildSalkaPortrait(),
+  buildRoomDocks(true),
+  buildRoomDocks(false),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

@@ -1,4 +1,4 @@
-// content/characters.js — approved anchor-character contracts (World Plan W0–W2).
+// content/characters.js — approved anchor-character contracts (World Plan W0–W3).
 import { EDDA_STORY_TIP_FAVORS, WEATHER_BELL_FAVOR } from './favors.js';
 
 export const ANCHOR_SLOTS = Object.freeze([
@@ -72,6 +72,27 @@ export const EDDA_DIALOGUE_TREE = Object.freeze({
         Object.freeze({ id: 'leave', label: 'I’m still following the lead.', next: null }),
       ]),
     }),
+    'greeting-barge-lead': Object.freeze({
+      pages: Object.freeze([EDDA_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'ask-barge', label: 'Any word from the harbor?', next: 'offer-barge' }),
+        Object.freeze({ id: 'leave', label: 'I’ll watch the tide.', next: null }),
+      ]),
+    }),
+    'greeting-barge-offered': Object.freeze({
+      pages: Object.freeze([EDDA_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'accept-barge', label: 'I’ll check the berth.', next: 'accepted-barge', effects: Object.freeze([{ type: 'favor-start', favorId: 'edda-tip-barge-arrival' }]) }),
+        Object.freeze({ id: 'leave', label: 'The harbor can wait.', next: null }),
+      ]),
+    }),
+    'greeting-barge-progress': Object.freeze({
+      pages: Object.freeze([EDDA_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'remind-barge', label: 'What am I looking for?', next: 'reminder-barge' }),
+        Object.freeze({ id: 'leave', label: 'I’ll keep checking the berth.', next: null }),
+      ]),
+    }),
     'offer-trail': Object.freeze({
       pages: Object.freeze([
         'Frostline Trail keeps flashing like it has something to say.',
@@ -110,17 +131,42 @@ export const EDDA_DIALOGUE_TREE = Object.freeze({
     'accepted-workshop': Object.freeze({
       pages: Object.freeze(['Excellent. Stand clear of the brass end, listen closely, and come straight back.']),
     }),
+    'offer-barge': Object.freeze({
+      pages: Object.freeze([
+        'Captain Salka’s barge comes and goes on its own stubborn calendar.',
+        'If The Driftwood Gull is tied up at Driftgate Docks, bring me the arrival before the tide takes it away again.',
+      ]),
+      choices: Object.freeze([
+        Object.freeze({
+          id: 'take-barge-tip', label: 'I’ll check Driftgate Docks.', next: 'accepted-barge',
+          effects: Object.freeze([
+            { type: 'favor-offer', favorId: 'edda-tip-barge-arrival' },
+            { type: 'favor-start', favorId: 'edda-tip-barge-arrival' },
+          ]),
+        }),
+        Object.freeze({ id: 'later', label: 'I’ll wait for a clearer tide.', next: null }),
+      ]),
+    }),
+    'accepted-barge': Object.freeze({
+      pages: Object.freeze(['Look for the oilskin pennant and the cargo crane. If Salka is ashore, that is the story.']),
+    }),
     reminder: Object.freeze({
       pages: Object.freeze(['Catch one of the strange glints on Frostline Trail, then report back here.']),
     }),
     'reminder-workshop': Object.freeze({
       pages: Object.freeze(['Visit Emberlight Workshop and click the Weather Bell when Pat is not looking worried.']),
     }),
+    'reminder-barge': Object.freeze({
+      pages: Object.freeze(['Walk east through Glasswind Court to Driftgate Docks. The berth itself will tell you whether Salka is in port.']),
+    }),
     reported: Object.freeze({
       pages: Object.freeze(['A light that waits until someone notices it—yes, that earns a column. And your finder’s fee.']),
     }),
     'reported-workshop': Object.freeze({
       pages: Object.freeze(['A brass note with a wobble at the end. Perfect. That is much better than “it went bong.”']),
+    }),
+    'reported-barge': Object.freeze({
+      pages: Object.freeze(['Pennant up, gangplank down, two fresh crates. Good harbor reporting—and worth the finder’s fee.']),
     }),
     finished: Object.freeze({
       pages: Object.freeze(['Front page of the little-news section. Around here, little news travels furthest.']),
@@ -181,13 +227,43 @@ export const PAT_DIALOGUE_TREE = Object.freeze({
       pages: Object.freeze(['Next: the wind vane snagged on the old signpost along Frostline Trail.']),
     }),
     'waiting-docks': Object.freeze({
-      pages: Object.freeze(['Two parts recovered. The final clapper is cargo at Driftgate Docks—but the harbor road is still snowed shut.']),
+      pages: Object.freeze(['Two parts recovered. The final clapper is cargo at Driftgate Docks. Check Salka’s stall when the barge is in port.']),
     }),
     'return-ready': Object.freeze({
       pages: Object.freeze(['All three! Hold the pieces steady while I persuade the Bell to become one machine.']),
     }),
     completed: Object.freeze({
       pages: Object.freeze(['The Weather Bell has all its notes. Now we find out whether the weather agrees.']),
+    }),
+  }),
+});
+
+const SALKA_DAILY_GREETING = Object.freeze({
+  daily: Object.freeze([
+    'Cargo first, gossip second. Unless the gossip is perishable.',
+    'The Gull dislikes schedules. I merely keep the tide informed.',
+    'Two crates open today. Everything else stays lashed down.',
+  ]),
+  salt: 'salka-greeting',
+});
+
+export const SALKA_DIALOGUE_TREE = Object.freeze({
+  id: 'salka-docks',
+  start: 'greeting',
+  nodes: Object.freeze({
+    greeting: Object.freeze({
+      pages: Object.freeze([SALKA_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'ask-stock', label: 'What came in today?', next: 'stock' }),
+        Object.freeze({ id: 'ask-route', label: 'Where were you sailing?', next: 'route' }),
+        Object.freeze({ id: 'leave', label: 'Fair tide, Captain.', next: null }),
+      ]),
+    }),
+    stock: Object.freeze({
+      pages: Object.freeze(['Only the two pieces on the cargo ledger. Tomorrow’s tide may bring a completely different pair.']),
+    }),
+    route: Object.freeze({
+      pages: Object.freeze(['Past Palefire Light, beyond the blue floes, then home by whichever current remembers us.']),
     }),
   }),
 });
@@ -266,10 +342,12 @@ export const ANCHOR_CHARACTERS = defineCharacters([
   },
   {
     id: 'captain-salka', name: 'Captain Salka', slotId: 'docks-trader', roomId: 'docks',
+    subtitle: 'Captain, The Driftwood Gull',
     species: 'chinstrap penguin', portraitAsset: './assets/portraits/captain-salka.png',
     spriteAsset: './assets/characters/captain-salka.png', spriteKey: 'anchor-captain-salka',
     palette: { body: '#334a58', accent: '#6b4a33', warm: '#ffb45e' },
     linePools: { greeting: ['Cargo first, gossip second. Unless the gossip is perishable.'] }, favorDefs: [],
+    dialogueTree: SALKA_DIALOGUE_TREE,
   },
   {
     id: 'old-maren', name: 'Old Maren', slotId: 'lighthouse-keeper', roomId: 'lighthouse-rest',

@@ -12,4 +12,11 @@ export const CURIO_REGISTRY = Object.freeze([
   Object.freeze({ id: 'workshop-tube-thunk', roomId: 'workshop', label: 'Pneumatic Post' }),
   Object.freeze({ id: 'workshop-blueprint-cycle', roomId: 'workshop', label: 'Plans for Possible Things' }),
   Object.freeze({ id: 'workshop-snowputer', roomId: 'workshop', label: 'Snowputer Prototype' }),
+  Object.freeze({ id: 'docks-tidepool-duck', roomId: 'docks', label: 'Tidepool Vanishing Act' }),
+  Object.freeze({ id: 'docks-bottle-post', roomId: 'docks', label: 'Bottle Post Dispatch' }),
+  Object.freeze({ id: 'docks-harbor-bell', roomId: 'docks', label: 'Bell Across the Floes' }),
+  Object.freeze({ id: 'docks-crane-swing', roomId: 'docks', label: 'The Patient Crane' }),
+  Object.freeze({ id: 'docks-buoy-bob', roomId: 'docks', label: 'Outer Marker Nod' }),
+  Object.freeze({ id: 'docks-gull-scatter', roomId: 'docks', label: 'Whitewing Commotion' }),
+  Object.freeze({ id: 'docks-underpier-cache', roomId: 'docks', label: 'Ledge Below the Pier' }),
 ]);

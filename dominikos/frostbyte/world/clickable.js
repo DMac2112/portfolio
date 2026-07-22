@@ -100,6 +100,37 @@ function addVariantReaction(k, prop, color, reducedMotion) {
         piece.opacity = local >= 1 ? 0 : 0.9;
       });
     }
+  } else if (prop.reaction === 'swing') {
+    addMotionPiece(k, [
+      k.rect(9, 18, { radius: 3 }), k.pos(prop.x, prop.y + 12), k.anchor('center'),
+      k.color(color), k.opacity(0.85), k.z(100004),
+    ], quick, (piece, progress, origin) => {
+      piece.pos.x = origin.x + (reducedMotion ? 0 : Math.sin(progress * Math.PI * 2) * 44);
+      piece.pos.y = origin.y + (reducedMotion ? 0 : Math.sin(progress * Math.PI) * 9);
+      piece.opacity = 0.85 * (1 - progress);
+    });
+  } else if (prop.reaction === 'bob') {
+    for (let i = 0; i < 3; i++) {
+      addMotionPiece(k, [
+        k.rect(11, 7, { radius: 4 }), k.pos(prop.x + (i - 1) * 15, prop.y), k.anchor('center'),
+        k.color(color), k.opacity(0.8), k.z(100004),
+      ], quick, (piece, progress, origin) => {
+        piece.pos.y = origin.y + (reducedMotion ? 0 : Math.sin(progress * Math.PI * 4 + i) * 10);
+        piece.opacity = 0.8 * (1 - progress);
+      });
+    }
+  } else if (prop.reaction === 'scatter') {
+    for (let i = 0; i < (reducedMotion ? 3 : 7); i++) {
+      const direction = i % 2 ? 1 : -1;
+      addMotionPiece(k, [
+        k.text('⌃', { size: 13 }), k.pos(prop.x + (i - 3) * 14, prop.y), k.anchor('center'),
+        k.color(color), k.opacity(0.9), k.z(100004),
+      ], quick, (piece, progress, origin) => {
+        piece.pos.x = origin.x + direction * progress * (18 + i * 5);
+        piece.pos.y = origin.y - progress * (24 + (i % 3) * 8);
+        piece.opacity = 0.9 * (1 - progress);
+      });
+    }
   } else if (prop.reaction === 'hum') {
     for (let i = 0; i < 2; i++) {
       addMotionPiece(k, [

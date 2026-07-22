@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_SAVE, migrateSave, load, persist, SAVE_KEY, SCHEMA_VERSION } from './save.js';
+import { DEFAULT_SAVE, DEFAULT_VISITED_ROOMS, migrateSave, load, persist, SAVE_KEY, SCHEMA_VERSION } from './save.js';
 
 // Map-backed fake localStorage — lets save.test.js run in the node environment (no jsdom).
 function fakeStore(initial = {}) {
@@ -21,6 +21,8 @@ describe('DEFAULT_SAVE', () => {
     expect(s.avatar.equipped).toEqual({ hat: null, eyewear: null, neck: null, held: null });
     expect(s.curios).toEqual({ found: {}, roomRewards: {}, isleRewardClaimed: false });
     expect(s.favors).toEqual({});
+    expect(s.visitedRooms).toEqual(DEFAULT_VISITED_ROOMS);
+    expect(s.visitedRooms).not.toContain('docks');
     expect(s.createdAt).toBe('2026-07-12T00:00:00.000Z');
   });
 });
@@ -75,6 +77,12 @@ describe('migrateSave', () => {
       isleRewardClaimed: false,
     });
     expect(s.favors['fixture-favor']).toEqual({ status: 'in-progress', stepIndex: 1 });
+  });
+  it('backfills discovery pins and preserves unique valid visited room ids', () => {
+    expect(migrateSave({ coins: 77 }, '2026-07-22T00:00:00.000Z').visitedRooms)
+      .toEqual(DEFAULT_VISITED_ROOMS);
+    expect(migrateSave({ visitedRooms: ['plaza', 'docks', 'docks', 42] }, '2026-07-22T00:00:00.000Z').visitedRooms)
+      .toEqual(['plaza', 'docks']);
   });
 });
 

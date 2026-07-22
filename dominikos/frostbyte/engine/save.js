@@ -10,6 +10,7 @@ import { createCurioState } from './curios.js';
 export const OS_NS = 'dmos.v1';                    // MUST match os/src/os/storage.ts NS exactly
 export const SAVE_KEY = `${OS_NS}.frostbyte.save`;
 export const SCHEMA_VERSION = 1;                   // Frostbyte-internal, independent of OS_NS version
+export const DEFAULT_VISITED_ROOMS = Object.freeze(['plaza', 'den', 'trail', 'court', 'workshop']);
 
 function defaultStore() {
   try { return typeof localStorage !== 'undefined' ? localStorage : null; } catch { return null; }
@@ -35,6 +36,7 @@ export function DEFAULT_SAVE(now = nowISO()) {
     furniture: {},                                 // { itemId: count } owned-but-not-placed stock (H2)
     curios: createCurioState(),                     // Curio Log (W0): found ids + once-only completion rewards
     favors: {},                                     // { favorId: {status,stepIndex} } cross-room threads (W0)
+    visitedRooms: [...DEFAULT_VISITED_ROOMS],        // W3+: new map pins appear after first walk-in
     lastLoginDate: null,
     loginStreak: 0,
     prefs: { muted: false, reducedMotion: prefersReducedMotion(), lastRoom: 'plaza' },
@@ -56,6 +58,9 @@ export function migrateSave(raw, now = nowISO()) {
     ? savedCurios.found : {};
   const savedRoomRewards = savedCurios.roomRewards && typeof savedCurios.roomRewards === 'object' && !Array.isArray(savedCurios.roomRewards)
     ? savedCurios.roomRewards : {};
+  const savedVisitedRooms = Array.isArray(s.visitedRooms)
+    ? s.visitedRooms.filter((roomId) => typeof roomId === 'string')
+    : base.visitedRooms;
   return {
     ...base,
     ...s,
@@ -75,6 +80,7 @@ export function migrateSave(raw, now = nowISO()) {
       roomRewards: { ...base.curios.roomRewards, ...savedRoomRewards },
     },
     favors: { ...savedFavors },
+    visitedRooms: [...new Set(savedVisitedRooms)],
   };
 }
 

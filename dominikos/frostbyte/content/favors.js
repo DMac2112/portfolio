@@ -1,6 +1,6 @@
 // content/favors.js — cross-room Favor definitions. W1 seeds Edda's story-tip threads; W2 makes
-// the Workshop tip completable and adds Pat's three-part Weather Bell chain. Docks hooks remain
-// deliberately unavailable until W3.
+// the Workshop tip completable and adds Pat's three-part Weather Bell chain. W3 opens the Docks,
+// completes the third part, and activates Edda's barge-arrival lead.
 
 function freezeFavor(definition) {
   return Object.freeze({

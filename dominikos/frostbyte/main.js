@@ -9,7 +9,7 @@ import { resolveMoveVector, resolveFacing } from './engine/movement.js';
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
-import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup } from './engine/economy.js';
+import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup, unlockItem, equipItem } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
@@ -29,8 +29,9 @@ import { createMap } from './ui/map.js';
 import { createJournal } from './ui/journal.js';
 import { createDialogue } from './ui/dialogue.js';
 import { createNewspaper } from './ui/newspaper.js';
+import { createTraderStall } from './ui/trader-stall.js';
 import { nodeByRoom } from './content/map.js';
-import { canTravel, arriveSpawnId, findAutoEnterDoor } from './engine/travel.js';
+import { canTravel, arriveSpawnId, discoveredTravelNode, findAutoEnterDoor } from './engine/travel.js';
 import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
 import { SNAP, addToInventory, place as placeFurn, move as moveFurn, flip as flipFurn, store as storeFurn, hitTest } from './engine/home-editor.js';
 import { loadFurnitureSprites, initFurnitureLayer } from './world/furniture.js';
@@ -50,6 +51,7 @@ import { chooseDialogue, startDialogue } from './engine/dialogue-tree.js';
 import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
 import { EDDA_STORY_TIP_FAVORS, WEATHER_BELL_FAVOR, favorById } from './content/favors.js';
 import { chirperIssueForDate } from './content/chirper-issues.js';
+import { resolveDocksRoom, salkaStockForDate } from './content/docks.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -97,6 +99,8 @@ k.loadSprite('room-den', './assets/room-den.png');
 k.loadSprite('room-trail', './assets/room-trail.png');
 k.loadSprite('room-court', './assets/room-court.png');
 k.loadSprite('room-workshop', './assets/room-workshop.png');
+k.loadSprite('room-docks-port', './assets/room-docks-port.png');
+k.loadSprite('room-docks-away', './assets/room-docks-away.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
@@ -159,13 +163,15 @@ function setHudVisible(v) {
  * Room scene — parameterized by room id (Engine & World Architecture §3).
  * ------------------------------------------------------------------ */
 k.scene('room', (roomId, opts = {}) => {
-  const room = ROOM_REGISTRY[roomId];
+  const baseRoom = ROOM_REGISTRY[roomId];
+  const room = roomId === 'docks' ? resolveDocksRoom(baseRoom, todayISO) : baseRoom;
   buildRoom(k, room);
   addSnowfall(k, room, reduceMotion);
   fadeIn(k, reduceMotion);
 
   // Remember where the player is — the map's "You are here" pin reads this (H1).
   save.prefs.lastRoom = roomId;
+  if (!save.visitedRooms.includes(roomId)) save.visitedRooms.push(roomId);
   persist(save);
 
   // Back in a room: restore the HUD the minigame hid, and let travel guards relax.
@@ -175,7 +181,7 @@ k.scene('room', (roomId, opts = {}) => {
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
   for (const h of room.hotspots ?? []) {
-    if (h.kind !== 'minigame' && h.kind !== 'shop' && h.kind !== 'venue') continue;
+    if (h.kind !== 'minigame' && h.kind !== 'shop' && h.kind !== 'venue' && h.kind !== 'trader') continue;
     const lw = Math.max(64, (h.label?.length ?? 4) * 9 + 18);
     k.add([k.rect(lw, 22, { radius: 6 }), k.pos(h.x, h.y - 46), k.anchor('center'),
       k.color(k.Color.fromHex('#0d1c2b')), k.opacity(0.82), k.z(100000)]);
@@ -250,6 +256,7 @@ k.scene('room', (roomId, opts = {}) => {
     if (hit.kind === 'shop') return 'shop';
     if (hit.kind === 'venue') return 'venue';
     if (hit.kind === 'newspaper') return 'newspaper';
+    if (hit.kind === 'trader') return 'trader';
     if (hit.kind === 'character') return 'character';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
@@ -296,6 +303,16 @@ k.scene('room', (roomId, opts = {}) => {
     showCoinSparkle(k, player.pos, reduceMotion);
     showCoinToast(`+${reward.amount} coins — ${copy}`);
     return true;
+  }
+
+  // Walking into an occupied berth is Edda's evidence. The date-resolved room prevents this from
+  // advancing on an away day or from seeing the undiscovered map pin.
+  if (roomId === 'docks' && room.docksState?.inPort) {
+    const bargeTip = favorById('edda-tip-barge-arrival');
+    if (currentFavorStep(save, bargeTip)?.id === 'witness-barge-in-port') {
+      const events = advanceTrackedFavor(bargeTip, 'witness-barge-in-port');
+      if (events) showCoinToast('Barge sighted — report the arrival to Edda');
+    }
   }
 
   function openCharacterDialogue(character, startNode) {
@@ -363,20 +380,26 @@ k.scene('room', (roomId, opts = {}) => {
       const events = advanceTrackedFavor(reportable, 'report-to-edda');
       showFavorReward(events, 'story tip filed!');
       openCharacterDialogue(character,
-        reportable.id === 'edda-tip-workshop-test' ? 'reported-workshop' : 'reported');
+        reportable.id === 'edda-tip-workshop-test' ? 'reported-workshop'
+          : reportable.id === 'edda-tip-barge-arrival' ? 'reported-barge' : 'reported');
       return;
     }
 
     const trailTip = favorById('edda-tip-trail-glint');
     const workshopTip = favorById('edda-tip-workshop-test');
+    const bargeTip = favorById('edda-tip-barge-arrival');
     const trailStatus = favorState(save, trailTip.id)?.status;
     const workshopStatus = favorState(save, workshopTip.id)?.status;
+    const bargeStatus = favorState(save, bargeTip.id)?.status;
     const startNode = trailStatus === 'offered' ? 'greeting-offered'
       : trailStatus === 'in-progress' ? 'greeting-progress'
         : trailStatus !== 'done' ? 'greeting'
           : workshopStatus === 'offered' ? 'greeting-workshop-offered'
             : workshopStatus === 'in-progress' ? 'greeting-workshop-progress'
-              : workshopStatus === 'done' ? 'greeting-done' : 'greeting-next-tip';
+              : workshopStatus !== 'done' ? 'greeting-next-tip'
+                : bargeStatus === 'offered' ? 'greeting-barge-offered'
+                  : bargeStatus === 'in-progress' ? 'greeting-barge-progress'
+                    : bargeStatus === 'done' ? 'greeting-done' : 'greeting-barge-lead';
     openCharacterDialogue(character, startNode);
   }
 
@@ -394,6 +417,8 @@ k.scene('room', (roomId, opts = {}) => {
       enterVenue(nearest);
     } else if (action === 'newspaper') {
       newspaperUI.open();
+    } else if (action === 'trader') {
+      traderUI.open();
     } else if (action === 'character') {
       talkToCharacter(nearest.character);
     } else if (action === 'door') {
@@ -583,10 +608,13 @@ k.scene('room', (roomId, opts = {}) => {
   // engine/travel.js guard decides legality so the rules stay testable headless.
   const mapUI = createMap({
     getCurrent: () => roomId,
+    isDiscovered: (target) => save.visitedRooms.includes(target),
     onTravel: (target) => {
       // frozen:false is correct (the map closed itself before calling back); inMinigame is the
       // real module-level flag so a stale scene closure can never travel out of a running game.
-      const res = canTravel({ frozen: false, inMinigame, currentRoomId: roomId }, nodeByRoom(target));
+      const node = nodeByRoom(target);
+      const discoveredNode = discoveredTravelNode(node, save.visitedRooms);
+      const res = canTravel({ frozen: false, inMinigame, currentRoomId: roomId }, discoveredNode);
       if (!res.ok) return;
       if (interactPrompt) interactPrompt.classList.remove('show');
       changeScene(() => k.go('room', target, { spawn: 'fromMap' }));
@@ -600,9 +628,25 @@ k.scene('room', (roomId, opts = {}) => {
   const newspaperUI = createNewspaper({
     getIssue: () => chirperIssueForDate(todayISO),
   });
+  const traderUI = createTraderStall({
+    getStock: () => room.docksState?.inPort ? salkaStockForDate(todayISO) : [],
+    getCoins: () => save.coins,
+    isOwned: (itemId) => save.ownedItems.includes(itemId),
+    onBuy: (item) => {
+      const events = [];
+      if (!unlockItem(save, item.id, item.price, events)) {
+        return { ok: false, message: `You need ${item.price - save.coins} more coins.` };
+      }
+      equipItem(save, item.slot, item.id, events);
+      persist(save);
+      avatar.apply(save.avatar);
+      refreshCoins(true);
+      return { ok: true, message: `${item.label} added and equipped.` };
+    },
+  });
   const anyOverlayOpen = () =>
     transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || journalUI.isOpen() ||
-    newspaperUI.isOpen() || dialogueUI.isOpen() || editMode.isOpen() || catalogUI.isOpen();
+    newspaperUI.isOpen() || dialogueUI.isOpen() || traderUI.isOpen() || editMode.isOpen() || catalogUI.isOpen();
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
@@ -620,6 +664,7 @@ k.scene('room', (roomId, opts = {}) => {
     anyOverlayOpen,
     reducedMotion: reduceMotion,
     isEnabled: (prop) => {
+      if (prop.requiresProximity && Math.hypot(player.pos.x - prop.x, player.pos.y - prop.y) > 120) return false;
       if (!prop.onlyWhenFavorStep) return true;
       const link = prop.favorStep;
       const definition = favorById(link?.favorId);

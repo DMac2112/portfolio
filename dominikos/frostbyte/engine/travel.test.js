@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   AUTO_DOOR_R,
   canTravel,
+  discoveredTravelNode,
   travelTargets,
   arriveSpawnId,
   findAutoEnterDoor,
@@ -305,7 +306,7 @@ describe('validateWorldGraph', () => {
     expect(errors.length).toBeGreaterThan(1);
   });
 
-  it('accepts room on map even with no doors', () => {
+  it('rejects a shipped map room that cannot be reached by walking', () => {
     const nodes = [
       { roomId: 'plaza', label: 'Chillmere Plaza', x: 0.46, y: 0.40, unlocked: true },
       { roomId: 'hideout', label: 'Hideout', x: 0.3, y: 0.7, unlocked: true },
@@ -315,7 +316,16 @@ describe('validateWorldGraph', () => {
       hideout: { id: 'hideout', doors: [] },
     };
     const errors = validateWorldGraph(nodes, registry);
-    // Both rooms are on the map, so they are reachable
-    expect(errors).toEqual([]);
+    expect(errors).toContain("Unlocked room 'hideout' is not walkable from 'plaza'");
+  });
+});
+
+describe('discoveredTravelNode', () => {
+  it('keeps a shipped pin locked until its first walk-in, without mutating map content', () => {
+    const node = { roomId: 'docks', label: 'Driftgate Docks', x: 0.63, y: 0.18, unlocked: true };
+    expect(discoveredTravelNode(node, ['plaza'])).toMatchObject({ roomId: 'docks', unlocked: false });
+    expect(discoveredTravelNode(node, ['plaza', 'docks'])).toMatchObject({ roomId: 'docks', unlocked: true });
+    expect(node.unlocked).toBe(true);
+    expect(discoveredTravelNode(null, ['docks'])).toBeNull();
   });
 });

@@ -137,6 +137,7 @@ export const ROOM_REGISTRY = {
     spawnPoints: {
       default:    { x: 720, y: 420, facing: 'down' },
       fromPlaza:  { x: 168, y: 480, facing: 'right' },
+      fromDocks:  { x: 1290, y: 858, facing: 'up' },
       fromMap:    { x: 720, y: 720, facing: 'up' },
     },
     camera: { leadY: -50 },
@@ -169,6 +170,7 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 72, y: 480, targetRoom: 'plaza', locked: false, targetSpawn: 'fromCourt' },
+      { id: 'door-docks', label: 'Driftgate Docks', x: 1290, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromCourt' },
     ],
     solids: [
       { id: 'snowtail-petshop', x: 291, y: 190, w: 438, h: 188 },
@@ -306,6 +308,96 @@ export const ROOM_REGISTRY = {
       {
         id: 'dumbwaiter-hatch', reaction: 'hum', x: 390, y: 795, w: 180, h: 90,
         line: 'The hatch is locked. A draught below smells like cold stone.', reactionColor: '#6fe0b2',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Driftgate Docks — resolved to in-port/away art and content by content/docks.js.
+  docks: {
+    id: 'docks',
+    title: 'Driftgate Docks',
+    mapAsset: 'room-docks-away',
+    stateAssets: { inPort: 'room-docks-port', away: 'room-docks-away' },
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 72, x1: 1368, y0: 96, y1: 888 },
+    spawnPoints: {
+      default:        { x: 420, y: 540, facing: 'right' },
+      fromCourt:      { x: 150, y: 480, facing: 'right' },
+      fromLighthouse: { x: 1150, y: 170, facing: 'down' },
+      fromMap:        { x: 420, y: 600, facing: 'right' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      {
+        id: 'salka-trader-stall', label: 'Salka’s Cargo Stall', kind: 'trader',
+        x: 1050, y: 680, prompt: 'Browse today’s two cargo finds', bargeState: 'in-port',
+      },
+    ],
+    doors: [
+      { id: 'door-court', label: 'Glasswind Court', x: 72, y: 480, targetRoom: 'court', locked: false, targetSpawn: 'fromDocks' },
+      {
+        id: 'door-lighthouse', label: 'Palefire Light', x: 1150, y: 96,
+        targetRoom: 'lighthouse-rest', locked: true,
+        lockedCopy: 'The lighthouse trail is still buried past the marker posts.',
+      },
+    ],
+    solids: [
+      { id: 'water-north-west', x: 885, y: 220, w: 390, h: 220 },
+      { id: 'water-north-east', x: 1294, y: 220, w: 148, h: 220 },
+      { id: 'water-south-main', x: 840, y: 720, w: 540, h: 210 },
+      { id: 'dock-warehouse', x: 270, y: 240, w: 270, h: 190 },
+      { id: 'crane-base', x: 1110, y: 420, w: 120, h: 150 },
+      { id: 'harbor-bell-post', x: 780, y: 300, w: 66, h: 120 },
+    ],
+    anchors: [
+      { characterId: 'captain-salka', x: 870, y: 500, bargeState: 'in-port' },
+    ],
+    clickables: [
+      {
+        id: 'tidepool-duck', curioId: 'docks-tidepool-duck', reaction: 'wave',
+        x: 330, y: 720, w: 180, h: 120,
+        line: 'Three tiny tidepool shapes duck beneath the ice rim at once.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'bottle-post', curioId: 'docks-bottle-post', reaction: 'rattle',
+        x: 480, y: 420, w: 80, h: 110,
+        line: 'A salt-clouded bottle carries this week’s short dispatch.', reactionColor: '#7fd6ff',
+      },
+      {
+        id: 'harbor-bell', curioId: 'docks-harbor-bell', reaction: 'chime',
+        x: 780, y: 300, w: 96, h: 120,
+        line: 'The harbor bell sends one round note across the floes.', reactionColor: '#ffb45e',
+      },
+      {
+        id: 'crane-swing', curioId: 'docks-crane-swing', reaction: 'swing',
+        x: 1110, y: 390, w: 210, h: 180,
+        line: 'The cargo crane swings seaward, pauses, then remembers its manners.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'buoy-bob', curioId: 'docks-buoy-bob', reaction: 'bob',
+        x: 1230, y: 630, w: 108, h: 120,
+        line: 'The outer buoy gives the pier a solemn little nod.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'gull-scatter', curioId: 'docks-gull-scatter', reaction: 'scatter',
+        x: 720, y: 180, w: 260, h: 90,
+        line: 'A whitewing flock bursts apart and reforms one piling over.', reactionColor: '#f5fbff',
+      },
+      {
+        id: 'underpier-cache', curioId: 'docks-underpier-cache', reaction: 'glimmer',
+        x: 1180, y: 855, w: 120, h: 60, requiresProximity: true,
+        line: 'At the end of the narrow ledge: a sea-glass knot tucked beneath the pier.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'weather-bell-clapper', reaction: 'chime', x: 1010, y: 555, w: 80, h: 80,
+        line: 'A heavy brass clapper is tagged for Pat Hocket’s workshop.', reactionColor: '#ffb45e',
+        bargeState: 'in-port', onlyWhenFavorStep: true,
+        favorStep: {
+          favorId: 'pat-weather-bell-parts', stepId: 'recover-docks-clapper',
+          successText: 'Weather Bell part 3/3 — return all three pieces to Pat',
+        },
       },
     ],
     npcSpawnAnchors: [],
