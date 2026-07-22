@@ -23,7 +23,7 @@ describe('MAP_NODES', () => {
     }
   });
 
-  it('has exactly eight unlocked nodes through W5', () => {
+  it('has exactly eight surface nodes through W6', () => {
     const unlockedCount = MAP_NODES.filter(n => n.unlocked).length;
     expect(unlockedCount).toBe(8);
   });
@@ -35,6 +35,7 @@ describe('MAP_NODES', () => {
     ]));
     expect(unlockedRoomIds).toHaveLength(8);
     expect(MAP_NODES.some((node) => node.roomId === 'moonwell')).toBe(false);
+    expect(MAP_NODES.some((node) => node.roomId === 'caverns')).toBe(false);
   });
 
   it('locked node labels exactly match plaza locked door labels', () => {

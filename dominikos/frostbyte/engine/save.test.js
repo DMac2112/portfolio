@@ -21,7 +21,9 @@ describe('DEFAULT_SAVE', () => {
     expect(s.avatar.equipped).toEqual({ hat: null, eyewear: null, neck: null, held: null });
     expect(s.curios).toEqual({ found: {}, roomRewards: {}, isleRewardClaimed: false });
     expect(s.favors).toEqual({});
-    expect(s.secrets).toEqual({ vesperHints: [], moonwellUnlocked: false });
+    expect(s.secrets).toEqual({
+      vesperHints: [], moonwellUnlocked: false, cavernsUnlocked: false, auroraIntensified: false,
+    });
     expect(s.visitedRooms).toEqual(DEFAULT_VISITED_ROOMS);
     expect(s.visitedRooms).not.toContain('docks');
     expect(s.visitedRooms).not.toContain('lighthouse-rest');
@@ -87,13 +89,28 @@ describe('migrateSave', () => {
     expect(migrateSave({ visitedRooms: ['plaza', 'docks', 'docks', 42] }, '2026-07-22T00:00:00.000Z').visitedRooms)
       .toEqual(['plaza', 'docks']);
   });
-  it('forward-defaults and preserves W5 Vesper hint state', () => {
+  it('forward-defaults and preserves W5/W6 secret state', () => {
     expect(migrateSave({ coins: 77 }, '2026-07-22T00:00:00.000Z').secrets)
-      .toEqual({ vesperHints: [], moonwellUnlocked: false });
+      .toEqual({
+        vesperHints: [], moonwellUnlocked: false, cavernsUnlocked: false, auroraIntensified: false,
+      });
     expect(migrateSave({
-      secrets: { vesperHints: ['court-cobble', 'court-cobble', 42], moonwellUnlocked: true },
+      secrets: {
+        vesperHints: ['court-cobble', 'court-cobble', 42], moonwellUnlocked: true,
+        cavernsUnlocked: true, auroraIntensified: true,
+      },
     }, '2026-07-22T00:00:00.000Z').secrets).toEqual({
       vesperHints: ['court-cobble'], moonwellUnlocked: true,
+      cavernsUnlocked: true, auroraIntensified: true,
+    });
+  });
+  it('derives W6 gates from already-earned v1 contracts', () => {
+    expect(migrateSave({
+      secrets: { vesperHints: ['hollow-crack'] },
+      curios: { isleRewardClaimed: true },
+    }, '2026-07-22T00:00:00.000Z').secrets).toMatchObject({
+      cavernsUnlocked: true,
+      auroraIntensified: true,
     });
   });
 });

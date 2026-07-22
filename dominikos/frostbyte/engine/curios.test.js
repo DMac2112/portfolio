@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ISLE_REWARD_FURNITURE_ID,
+  ISLE_REWARD_ITEM_ID,
   ROOM_COMPLETION_COINS,
+  claimIsleCompletionReward,
   createCurioState,
   discoverCurio,
   isCurioFound,
@@ -50,6 +53,24 @@ describe('Curio Log progress', () => {
     const s = { coins: 0, curios: { found: { 'court-window': true } } };
     expect(() => discoverCurio(s, REGISTRY, 'court-bell')).not.toThrow();
     expect(s.curios.roomRewards.court).toBe(true);
+  });
+
+  it('claims the cosmetic, trophy, and aurora payoff only after full completion and only once', () => {
+    const s = save();
+    expect(claimIsleCompletionReward(s, REGISTRY)).toBe(false);
+    for (const curio of REGISTRY) discoverCurio(s, REGISTRY, curio.id);
+    const events = [];
+    expect(claimIsleCompletionReward(s, REGISTRY, events)).toBe(true);
+    expect(s.curios.isleRewardClaimed).toBe(true);
+    expect(s.ownedItems).toContain(ISLE_REWARD_ITEM_ID);
+    expect(s.furniture[ISLE_REWARD_FURNITURE_ID]).toBe(1);
+    expect(s.secrets.auroraIntensified).toBe(true);
+    expect(events.map((event) => event.type)).toEqual([
+      'item-unlocked', 'furniture-added', 'aurora-intensified', 'isle-reward-claimed',
+    ]);
+    expect(claimIsleCompletionReward(s, REGISTRY, events)).toBe(false);
+    expect(s.ownedItems.filter((id) => id === ISLE_REWARD_ITEM_ID)).toHaveLength(1);
+    expect(s.furniture[ISLE_REWARD_FURNITURE_ID]).toBe(1);
   });
 });
 

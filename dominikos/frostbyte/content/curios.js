@@ -34,4 +34,10 @@ export const CURIO_REGISTRY = Object.freeze([
   Object.freeze({ id: 'whisperpine-frozen-berries', roomId: 'whisperpine', label: 'Colour Without Thaw' }),
   Object.freeze({ id: 'whisperpine-will-o-glow', roomId: 'whisperpine', label: 'The Fox-Grin Lights' }),
   Object.freeze({ id: 'moonwell-reflection', roomId: 'moonwell', label: 'The Earlier Reflection' }),
+  Object.freeze({ id: 'caverns-echo-shard-root', roomId: 'caverns', label: 'Root-Tone Shard' }),
+  Object.freeze({ id: 'caverns-echo-shard-arch', roomId: 'caverns', label: 'The Listening Arch' }),
+  Object.freeze({ id: 'caverns-echo-shard-prism', roomId: 'caverns', label: 'Split-Song Prism' }),
+  Object.freeze({ id: 'caverns-echo-shard-bridge', roomId: 'caverns', label: 'Bridge Note' }),
+  Object.freeze({ id: 'caverns-echo-shard-pool', roomId: 'caverns', label: 'The Note Below' }),
+  Object.freeze({ id: 'caverns-echo-shard-threshold', roomId: 'caverns', label: 'Two-Way Chime' }),
 ]);

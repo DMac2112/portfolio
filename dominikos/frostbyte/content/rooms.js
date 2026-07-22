@@ -258,6 +258,7 @@ export const ROOM_REGISTRY = {
       default:   { x: 720, y: 690, facing: 'up' },
       fromPlaza: { x: 720, y: 820, facing: 'up' },
       fromMap:   { x: 780, y: 690, facing: 'up' },
+      fromCaverns: { x: 390, y: 720, facing: 'down' },
     },
     camera: { leadY: -50 },
     hotspots: [
@@ -265,6 +266,11 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 888, targetRoom: 'plaza', locked: false, targetSpawn: 'fromWorkshop' },
+      {
+        id: 'door-cavern-dumbwaiter', label: 'Hollowfrost Dumbwaiter', x: 390, y: 795,
+        targetRoom: 'caverns', targetSpawn: 'fromWorkshop', locked: true,
+        lockedCopy: 'The hatch is locked. A draught below smells like cold stone.',
+      },
     ],
     solids: [
       { id: 'weather-bell', x: 720, y: 390, w: 180, h: 170 },
@@ -534,6 +540,7 @@ export const ROOM_REGISTRY = {
       default:      { x: 220, y: 540, facing: 'right' },
       fromTrail:    { x: 190, y: 540, facing: 'right' },
       fromMoonwell: { x: 720, y: 200, facing: 'down' },
+      fromCaverns:  { x: 1240, y: 600, facing: 'left' },
       fromMap:      { x: 720, y: 760, facing: 'up' },
     },
     camera: { leadY: -50 },
@@ -641,6 +648,79 @@ export const ROOM_REGISTRY = {
         id: 'moonwell-reflection', curioId: 'moonwell-reflection', reaction: 'glimmer',
         x: 720, y: 450, w: 400, h: 230,
         line: 'Your reflection looks up a heartbeat before you look down.', reactionColor: '#c8f4ff',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Hollowfrost Caverns — W6 capstone reached through both previously foreshadowed entrances.
+  caverns: {
+    id: 'caverns',
+    title: 'Hollowfrost Caverns',
+    mapAsset: 'room-caverns',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:         { x: 390, y: 210, facing: 'down' },
+      fromWorkshop:    { x: 390, y: 210, facing: 'down' },
+      fromWhisperpine: { x: 1230, y: 600, facing: 'left' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      {
+        id: 'echo-resonance', label: 'A Returning Note', kind: 'echo', x: 720, y: 510,
+        prompt: 'Listen for The Echo',
+      },
+    ],
+    doors: [
+      {
+        id: 'door-workshop-lift', label: "Pat's Dumbwaiter", x: 390, y: 120,
+        targetRoom: 'workshop', targetSpawn: 'fromCaverns', locked: false,
+      },
+      {
+        id: 'door-whisperpine-crack', label: 'Whisperpine Root-Crack', x: 1320, y: 600,
+        targetRoom: 'whisperpine', targetSpawn: 'fromCaverns', locked: false,
+      },
+    ],
+    solids: [
+      { id: 'crystal-pillar-west', x: 270, y: 390, w: 180, h: 220 },
+      { id: 'crystal-arch-north', x: 720, y: 260, w: 220, h: 160 },
+      { id: 'crystal-pillar-east', x: 1080, y: 330, w: 180, h: 260 },
+      { id: 'underisle-pool', x: 720, y: 760, w: 420, h: 170 },
+      { id: 'crystal-bank-southwest', x: 300, y: 730, w: 170, h: 160 },
+    ],
+    anchors: [],
+    clickables: [
+      {
+        id: 'echo-shard-root', curioId: 'caverns-echo-shard-root', reaction: 'chime',
+        x: 270, y: 390, w: 140, h: 180,
+        line: 'A root-held shard answers low. Somewhere unseen, the note returns warm.', reactionColor: '#72e2bd',
+      },
+      {
+        id: 'echo-shard-arch', curioId: 'caverns-echo-shard-arch', reaction: 'chime',
+        x: 720, y: 260, w: 180, h: 130,
+        line: 'The arch rings from both ends at once. The Echo supplies the middle note.', reactionColor: '#c8f4ff',
+      },
+      {
+        id: 'echo-shard-prism', curioId: 'caverns-echo-shard-prism', reaction: 'chime',
+        x: 1080, y: 330, w: 150, h: 200,
+        line: 'One clear tap splits into violet, blue, and green voices.', reactionColor: '#a78bfa',
+      },
+      {
+        id: 'echo-shard-bridge', curioId: 'caverns-echo-shard-bridge', reaction: 'chime',
+        x: 910, y: 575, w: 130, h: 100,
+        line: 'The bridge shard sings toward both entrances. Both answer.', reactionColor: '#7fd6ff',
+      },
+      {
+        id: 'echo-shard-pool', curioId: 'caverns-echo-shard-pool', reaction: 'chime',
+        x: 720, y: 760, w: 180, h: 120,
+        line: 'The pool keeps the note below its surface, then gives it back brighter.', reactionColor: '#72e2bd',
+      },
+      {
+        id: 'echo-shard-threshold', curioId: 'caverns-echo-shard-threshold', reaction: 'chime',
+        x: 405, y: 570, w: 130, h: 110,
+        line: 'This shard remembers the hatch and the roots as parts of one doorway.', reactionColor: '#ffe2a1',
       },
     ],
     npcSpawnAnchors: [],

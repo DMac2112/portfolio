@@ -586,6 +586,13 @@ function drawHeld(p, id) {
   } else if (id === 'sparkler-wand') {
     for (let y = 9; y <= 12; y++) p(12, y, CG.edge);
     p(13, 6, CG.hi); p(14, 7, CG.fill); p(12, 6, CG.fill); p(13, 8, CG.hi);
+  } else if (id === 'echoglass-lantern') {
+    // Aurora-glass chamber with a dark carry loop; the catalog tint supplies its earned color.
+    p(12, 5, CG.edge); p(13, 4, CG.edge); p(14, 4, CG.edge); p(15, 5, CG.edge);
+    p(12, 6, CG.edge); p(15, 6, CG.edge);
+    for (let y = 7; y <= 12; y++) { p(11, y, CG.edge); p(15, y, CG.edge); }
+    for (let y = 8; y <= 11; y++) { p(12, y, CG.fill); p(13, y, CG.hi); p(14, y, CG.fill); }
+    for (let x = 11; x <= 15; x++) p(x, 13, CG.edge);
   }
 }
 
@@ -1370,6 +1377,22 @@ function furnTrophyShelf() { // 32x20
   }
   return save(path.join('furniture', 'trophy-shelf.png'), img);
 }
+function furnHollowfrostTrophy() { // 24x28 — earned Echo Shard trophy
+  const img = Img(24, 28);
+  groundShadow(img, 12, 26, 8, 2);
+  obox(img, 4, 21, 16, 5, F.wood);
+  rect(img, 6, 19, 12, 3, F.goldD);
+  // Faceted aurora crystal, framed by two visible response-note rings.
+  for (let y = 4; y <= 19; y++) {
+    const half = y < 9 ? Math.max(1, Math.floor((y - 2) / 2)) : Math.max(2, 7 - Math.floor((y - 9) / 3));
+    for (let x = -half; x <= half; x++) px(img, 12 + x, y, x < 0 ? F.aurD : x > 1 ? F.ice : F.aur);
+  }
+  rect(img, 11, 6, 2, 11, [255, 255, 255, 125]);
+  ovalRing(img, 12, 12, 9, 6, [...F.iceL, 140], 90);
+  ovalRing(img, 12, 12, 11, 8, [...F.aur, 95], 110);
+  px(img, 4, 7, F.gold); px(img, 20, 7, F.gold); px(img, 12, 1, F.iceL);
+  return save(path.join('furniture', 'hollowfrost-trophy.png'), img);
+}
 
 /* tech / fun */
 function furnSnowputer() { // 24x24 — chunky CRT
@@ -1415,7 +1438,7 @@ function buildFurniture() {
     furnIceSlabTable(), furnDriftwoodSideTable(),
     furnGlowlamp(), furnAuroraLantern(), furnStringLights(),
     furnOvalKnitRug(), furnFishRug(), furnStarRug(),
-    furnFrostFern(), furnSnowBonsai(), furnPenguinPortrait(), furnTrophyShelf(),
+    furnFrostFern(), furnSnowBonsai(), furnPenguinPortrait(), furnTrophyShelf(), furnHollowfrostTrophy(),
     furnSnowputer(), furnRecordBox(), furnCocoaMachine(),
   ];
 }
@@ -2268,6 +2291,110 @@ function buildRoomMoonwell() {
   return save('room-moonwell.png', img);
 }
 
+/* ----------------------------- ROOM: Hollowfrost Caverns (W6) ------- */
+function buildRoomCaverns() {
+  const W = 480, H = 320, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0xc0a7e6e1;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+
+  // Under-isle stone: nearly black at the rim, blue mineral dust toward the resonant chamber.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const center = Math.max(0, 1 - Math.hypot((x - 240) / 255, (y - 170) / 185));
+    const depth = y / H;
+    const base = A.inkDeep.map((channel, i) => channel + (A.nightL[i] - channel) * (center * 0.42 + depth * 0.08));
+    const grain = (nextNoise() - 0.5) * 13;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  // Strata bend inward like a buried amphitheatre rather than a rectangular room.
+  for (let r = 238; r >= 178; r -= 13) {
+    ovalRing(img, 240, 172, r, Math.round(r * 0.62), [...(r % 2 ? A.iceD : A.stone), 55], 420);
+  }
+  for (let y = 37; y < H; y += 29) {
+    const inset = Math.round(Math.sin(y * 0.045) * 21);
+    rect(img, 18 + inset, y, 92, 2, [...A.stoneL, 45]);
+    rect(img, 366 - inset, y + 9, 97, 2, [...A.iceD, 48]);
+  }
+
+  const crystalAt = (cx, baseY, height, halfWidth, left, right) => {
+    for (let row = 0; row < height; row++) {
+      const fromBase = row / height;
+      const width = Math.max(1, Math.round(halfWidth * (1 - fromBase * 0.78)));
+      const y = baseY - row;
+      for (let x = -width; x <= width; x++) px(img, cx + x, y, x < -1 ? left : right);
+      px(img, cx - width, y, A.inkDeep);
+      if (row % 7 === 0) px(img, cx + Math.floor(width * 0.35), y, [...A.iceL, 145]);
+    }
+    px(img, cx, baseY - height - 1, A.iceL);
+  };
+  const glow = (cx, cy, radius, color) => {
+    for (let r = radius; r > 2; r -= 4) disc(img, cx, cy, r, [...color, Math.max(3, 28 - r / 2)]);
+  };
+
+  // West, north, and east crystal architecture matches collision silhouettes but remains faceted.
+  glow(90, 130, 42, A.aurora);
+  for (const [x, h, w, c] of [[72, 58, 18, A.aurora], [91, 81, 24, A.ice], [111, 51, 17, A.violet]])
+    crystalAt(x, 165, h, w, shade(c, 0.62), c);
+
+  glow(240, 88, 45, A.ice);
+  for (const [x, h, w, c] of [[213, 46, 15, A.ice], [240, 68, 21, A.aurora], [268, 49, 16, A.violet]])
+    crystalAt(x, 116, h, w, shade(c, 0.58), c);
+  // Negative space beneath the three crystals forms the Listening Arch.
+  oval(img, 240, 103, 30, 19, A.inkDeep); oval(img, 240, 106, 22, 14, A.night);
+
+  glow(360, 111, 47, A.violet);
+  for (const [x, h, w, c] of [[341, 66, 19, A.ice], [362, 91, 24, A.violet], [382, 55, 16, A.aurora]])
+    crystalAt(x, 159, h, w, shade(c, 0.58), c);
+
+  // Black-glass pool at the cavern floor catches the aurora before the surface world does.
+  oval(img, 240, 258, 75, 34, A.inkDeep); oval(img, 240, 254, 67, 28, shade(A.water, 0.52));
+  for (let r = 58; r > 8; r -= 9) ovalRing(img, 240, 254, r, Math.round(r * 0.37), [...A.aurora, 38], 140);
+  for (let x = 190; x <= 290; x += 9) px(img, x, 250 + Math.round(Math.sin(x * 0.12) * 3), [...A.iceL, 105]);
+  // South-west bank keeps the pool approach asymmetrical.
+  for (const [x, h, w, c] of [[78, 40, 13, A.ice], [99, 63, 19, A.aurora], [121, 36, 12, A.violet]])
+    crystalAt(x, 278, h, w, shade(c, 0.56), c);
+
+  // Pat's top-left dumbwaiter: mechanical, square, and unmistakably different from the root crack.
+  rrect(img, 105, 0, 51, 47, A.stone); rect(img, 111, 0, 39, 39, A.inkDeep);
+  for (const x of [114, 146]) rect(img, x, 0, 4, 52, A.amber);
+  rect(img, 119, 24, 23, 15, A.wood); rect(img, 121, 27, 19, 9, A.woodL);
+  ovalRing(img, 130, 12, 9, 9, A.stoneL, 80); disc(img, 130, 12, 3, A.amberL);
+  rect(img, 106, 42, 49, 5, A.iceD); rect(img, 113, 42, 35, 2, A.iceL);
+
+  // Whisperpine's east entrance stays organic: a crooked seam, root fingers, and cold outside snow.
+  rect(img, 438, 171, 42, 61, A.inkDeep); rect(img, 451, 180, 29, 42, A.night);
+  for (let i = 0; i < 48; i++) px(img, 449 + Math.round(Math.sin(i * 0.37) * 7), 178 + i, i % 6 ? A.iceD : A.aurora);
+  for (const x of [437, 445, 458, 470]) {
+    rect(img, x, 168 + (x % 4) * 5, 4, 59, A.wood);
+    disc(img, x + 2, 173 + (x % 4) * 5, 7, A.pineD);
+  }
+  rect(img, 457, 217, 23, 4, A.snowD);
+
+  // Six brighter shards are the clickable Echo set. Each has its own hue and visible note-ring.
+  const echoShard = (cx, cy, color, tilt = 0) => {
+    glow(cx, cy, 16, color);
+    crystalAt(cx + tilt, cy + 10, 24, 6, shade(color, 0.58), color);
+    ovalRing(img, cx, cy, 13, 7, [...A.iceL, 100], 80);
+    px(img, cx - 2, cy - 9, A.snowL);
+  };
+  echoShard(90, 130, A.aurora, -2);
+  echoShard(240, 87, A.ice, 1);
+  echoShard(360, 110, A.violet, 2);
+  echoShard(303, 192, A.ice, 0);
+  echoShard(240, 253, A.aurora, -1);
+  echoShard(135, 190, A.amberL, 1);
+
+  // The Echo occupies no body-shaped space: only three concentric response notes at the center.
+  for (const [rx, ry, color] of [[52, 21, A.aurora], [38, 15, A.ice], [24, 9, A.violet]])
+    ovalRing(img, 240, 170, rx, ry, [...color, 88], 150);
+  disc(img, 240, 170, 3, A.iceL);
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (edge > 0.89) px(img, x, y, [...A.inkDeep, Math.round((edge - 0.89) * 150)]);
+  }
+  return save('room-caverns.png', img);
+}
+
 /* ----------------------------- TELESCOPE VISTAS (W4) ----------------- */
 function vistaCanvas(seed) {
   const W = 320, H = 200, img = Img(W, H), A = ARCTIC_DUSK;
@@ -2377,6 +2504,7 @@ const made = [
   buildVesperPortrait(),
   buildRoomWhisperpine(),
   buildRoomMoonwell(),
+  buildRoomCaverns(),
   buildWhaleVista(),
   buildAuroraVista(),
   buildGullVista(),

@@ -13,7 +13,7 @@ const registry = Array.from({ length: 24 }, (_, index) => ({
 }));
 const saveWithFound = (count) => ({
   curios: { found: Object.fromEntries(registry.slice(0, count).map((curio) => [curio.id, true])) },
-  secrets: { vesperHints: [], moonwellUnlocked: false },
+  secrets: { vesperHints: [], moonwellUnlocked: false, cavernsUnlocked: false, auroraIntensified: false },
 });
 
 describe('Vesper’s daily den', () => {
@@ -48,9 +48,11 @@ describe('Vesper’s Curio trades', () => {
     expect(claimVesperHint(save, registry, events)?.id).toBe('moonwell-gap');
     expect(save.secrets.moonwellUnlocked).toBe(true);
     expect(claimVesperHint(save, registry, events)?.id).toBe('hollow-crack');
+    expect(save.secrets.cavernsUnlocked).toBe(true);
     expect(claimVesperHint(save, registry, events)).toBeNull();
     expect(save.secrets.vesperHints).toEqual(['court-cobble', 'moonwell-gap', 'hollow-crack']);
     expect(events).toHaveLength(3);
+    expect(events[2]).toMatchObject({ hintId: 'hollow-crack', unlocks: 'caverns' });
     expect(nextVesperHint(save, registry).complete).toBe(true);
   });
 

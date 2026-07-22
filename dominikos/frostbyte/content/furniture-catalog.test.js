@@ -9,8 +9,11 @@ import {
 } from './furniture-catalog.js';
 
 describe('FURNITURE_CATALOG', () => {
-  it('has exactly 19 items', () => {
-    expect(FURNITURE_CATALOG.length).toBe(19);
+  it('has 19 purchasable items plus the W6 trophy reward', () => {
+    expect(FURNITURE_CATALOG.length).toBe(20);
+    expect(furnitureById('hollowfrost-trophy')).toMatchObject({
+      label: 'Hollowfrost Echo Trophy', cls: 'decor', price: 0, rewardOnly: true,
+    });
   });
 
   it('all ids are unique', () => {
@@ -38,8 +41,8 @@ describe('FURNITURE_CATALOG', () => {
     }
   });
 
-  it('all prices are within 50–800 inclusive', () => {
-    for (const item of FURNITURE_CATALOG) {
+  it('all purchasable prices are within 50–800 inclusive', () => {
+    for (const item of FURNITURE_CATALOG.filter((entry) => !entry.rewardOnly)) {
       expect(item.price).toBeGreaterThanOrEqual(50);
       expect(item.price).toBeLessThanOrEqual(800);
     }

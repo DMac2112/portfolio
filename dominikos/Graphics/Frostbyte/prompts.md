@@ -145,3 +145,26 @@ moon halo through the canopy, one empty weathered bench at lower-left, encirclin
 single south gap back to the forest. The pool holds a slightly early silver reflection. No
 character, settlement, quest marker, readable text, logos, watermark, photorealism, or recognizable
 franchise design. Deep navy, pine blue-green, moon-snow and restrained ice-blue only.
+
+## Hollowfrost Caverns — capstone room backdrop
+
+A wide 3:2 painted under-isle crystal cavern for Frostbyte, viewed from a slightly elevated
+three-quarter angle. Shape the chamber like a buried amphitheatre rather than a box: black-blue
+stone strata curve toward a deliberately empty resonant center, with a root-held green crystal
+bank at west, a three-prism listening arch at north, a tall violet-blue crystal organ at east, and
+a black-glass pool along the lower floor. Show two unmistakably different exits: Pat Hocket's
+square brass dumbwaiter descending at the upper-left and Whisperpine's crooked root-bound crack at
+the east edge. Place six small, brighter Echo Shards around the room, each with a subtle response
+ring, but draw no singer, silhouette, face, or ghost—the presence is entirely unseen. Deep navy,
+aurora green, ice blue, restrained violet and one tiny brass accent; chunky faceted forms, thick
+soft outlines, painterly mineral texture. No characters, readable text, logos, watermark,
+photorealism, or recognizable franchise design.
+
+## Echoglass completion rewards
+
+Two matching code-art reference objects on a transparent background: an aurora-glass hand lantern
+with a dark carry loop, brass base, and green-blue faceted light chamber; and a small den trophy
+made from one upright Echo Shard on a warm timber-and-brass plinth, surrounded by two thin
+response-note rings. Compact silhouettes that remain readable at 16×16 and 24×28 pixel scale,
+limited navy, aurora green, ice blue, violet, and restrained brass. No text, letters, numbers,
+logos, watermark, photorealism, or recognizable existing object design.

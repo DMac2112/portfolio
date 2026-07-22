@@ -344,6 +344,9 @@ describe('room configs', () => {
       favorId: 'edda-tip-workshop-test', stepId: 'witness-workshop-test',
     });
     expect(workshop.clickables.find((prop) => prop.id === 'dumbwaiter-hatch')).toMatchObject({ reaction: 'hum' });
+    expect(workshop.doors.find((door) => door.id === 'door-cavern-dumbwaiter')).toMatchObject({
+      targetRoom: 'caverns', targetSpawn: 'fromWorkshop', locked: true,
+    });
     expect(ROOM_REGISTRY.court.clickables.find((prop) => prop.id === 'weather-bell-coil').favorStep.stepId)
       .toBe('recover-court-coil');
     expect(ROOM_REGISTRY.trail.clickables.find((prop) => prop.id === 'weather-bell-vane').favorStep.stepId)
@@ -479,5 +482,42 @@ describe('room configs', () => {
     expect(moonwell.solids.map((solid) => solid.id)).toEqual(expect.arrayContaining([
       'moonwell-pool', 'moonwell-bench',
     ]));
+  });
+
+  it('Hollowfrost: converges both earned entrances and lets either route return', () => {
+    const workshopDoor = ROOM_REGISTRY.workshop.doors.find((door) => door.id === 'door-cavern-dumbwaiter');
+    const hollowDoor = ROOM_REGISTRY.whisperpine.doors.find((door) => door.id === 'door-cavern-crack');
+    const caverns = ROOM_REGISTRY.caverns;
+    expect(workshopDoor).toMatchObject({ targetRoom: 'caverns', targetSpawn: 'fromWorkshop', locked: true });
+    expect(hollowDoor).toMatchObject({ targetRoom: 'caverns', targetSpawn: 'fromWhisperpine', locked: true });
+    expect(caverns.doors.find((door) => door.id === 'door-workshop-lift')).toMatchObject({
+      targetRoom: 'workshop', targetSpawn: 'fromCaverns', locked: false,
+    });
+    expect(caverns.doors.find((door) => door.id === 'door-whisperpine-crack')).toMatchObject({
+      targetRoom: 'whisperpine', targetSpawn: 'fromCaverns', locked: false,
+    });
+  });
+
+  it('Hollowfrost: ships The Echo interaction and six chime-response Echo Shards', () => {
+    const caverns = ROOM_REGISTRY.caverns;
+    expect(caverns.hotspots.find((hotspot) => hotspot.id === 'echo-resonance')).toMatchObject({
+      kind: 'echo', prompt: 'Listen for The Echo',
+    });
+    expect(caverns.anchors).toEqual([]);
+    expect(caverns.npcSpawnAnchors).toEqual([]);
+    const shards = caverns.clickables.filter((prop) => prop.curioId);
+    expect(shards).toHaveLength(6);
+    expect(shards.every((prop) => prop.reaction === 'chime')).toBe(true);
+    expect(shards.every((prop) => prop.curioId.startsWith('caverns-echo-shard-'))).toBe(true);
+  });
+
+  it('Hollowfrost: keeps both arrival points clear of crystal collision fields', () => {
+    const caverns = ROOM_REGISTRY.caverns;
+    const contains = (solid, point, radius = 12) =>
+      point.x + radius > solid.x - solid.w / 2 && point.x - radius < solid.x + solid.w / 2 &&
+      point.y + radius > solid.y - solid.h / 2 && point.y - radius < solid.y + solid.h / 2;
+    for (const spawn of Object.values(caverns.spawnPoints)) {
+      expect(caverns.solids.some((solid) => contains(solid, spawn))).toBe(false);
+    }
   });
 });

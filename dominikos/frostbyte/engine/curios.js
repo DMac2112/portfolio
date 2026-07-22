@@ -4,6 +4,8 @@
 import { earnCoins } from './economy.js';
 
 export const ROOM_COMPLETION_COINS = 5;
+export const ISLE_REWARD_ITEM_ID = 'echoglass-lantern';
+export const ISLE_REWARD_FURNITURE_ID = 'hollowfrost-trophy';
 
 export function createCurioState() {
   return { found: {}, roomRewards: {}, isleRewardClaimed: false };
@@ -74,5 +76,31 @@ export function discoverCurio(save, registry, curioId, ev = [], roomReward = ROO
     state.roomRewards[curio.roomId] = true;
     earnCoins(save, roomReward, `curio-room:${curio.roomId}`, ev);
   }
+  return true;
+}
+
+/**
+ * Claim the once-only full-journal reward after every registered Curio has been found.
+ * The cosmetic, den trophy, and ambient flag are additive fields on the existing v1 save.
+ */
+export function claimIsleCompletionReward(save, registry, ev = []) {
+  if (!save || !Array.isArray(registry)) return false;
+  const state = ensureState(save);
+  if (state.isleRewardClaimed || !totalProgress(registry, state).complete) return false;
+
+  state.isleRewardClaimed = true;
+  save.ownedItems = Array.isArray(save.ownedItems) ? save.ownedItems : [];
+  if (!save.ownedItems.includes(ISLE_REWARD_ITEM_ID)) save.ownedItems.push(ISLE_REWARD_ITEM_ID);
+  save.furniture = save.furniture && typeof save.furniture === 'object' && !Array.isArray(save.furniture)
+    ? save.furniture : {};
+  save.furniture[ISLE_REWARD_FURNITURE_ID] = (save.furniture[ISLE_REWARD_FURNITURE_ID] ?? 0) + 1;
+  save.secrets = save.secrets && typeof save.secrets === 'object' && !Array.isArray(save.secrets)
+    ? save.secrets : {};
+  save.secrets.auroraIntensified = true;
+
+  ev.push({ type: 'item-unlocked', itemId: ISLE_REWARD_ITEM_ID, source: 'curio-isle' });
+  ev.push({ type: 'furniture-added', itemId: ISLE_REWARD_FURNITURE_ID, amount: 1, source: 'curio-isle' });
+  ev.push({ type: 'aurora-intensified' });
+  ev.push({ type: 'isle-reward-claimed' });
   return true;
 }

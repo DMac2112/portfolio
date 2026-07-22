@@ -25,7 +25,7 @@ describe('anchor runtime content binding', () => {
     });
   });
 
-  it('loads only anchors whose rooms currently ship through W5', () => {
+  it('loads only visible anchors through W6 and leaves The Echo unseen', () => {
     const k = { loadSprite: vi.fn() };
     expect(loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY)).toEqual([
       'anchor-edda-quill',
@@ -39,5 +39,6 @@ describe('anchor runtime content binding', () => {
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-captain-salka', './assets/characters/captain-salka.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-old-maren', './assets/characters/old-maren.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-vesper', './assets/characters/vesper.png');
+    expect(k.loadSprite).toHaveBeenCalledTimes(5);
   });
 });

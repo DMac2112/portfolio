@@ -157,7 +157,8 @@ export function createCatalog(opts) {
       return b;
     }));
 
-    const items = activeTab === 'all' ? FURNITURE_CATALOG : byClass(activeTab);
+    const classItems = activeTab === 'all' ? FURNITURE_CATALOG : byClass(activeTab);
+    const items = classItems.filter((item) => !item.rewardOnly || (cb.getOwnedCount?.(item.id) ?? 0) > 0);
     grid.replaceChildren(...items.map((item) => {
       const owned = cb.getOwnedCount?.(item.id) ?? 0;
       const affordable = balance >= item.price;
@@ -179,13 +180,16 @@ export function createCatalog(opts) {
       price.textContent = `🪙 ${item.price}`;
 
       const buyBtn = document.createElement('button');
+      if (item.rewardOnly) price.textContent = 'Curio reward';
       buyBtn.type = 'button';
       buyBtn.className = 'cat-buy';
-      buyBtn.textContent = 'Buy';
-      buyBtn.disabled = !affordable;
-      if (affordable) buyBtn.removeAttribute('aria-disabled'); else buyBtn.setAttribute('aria-disabled', 'true');
-      buyBtn.setAttribute('aria-label', `Buy ${item.label} for ${item.price} coins`);
-      buyBtn.onclick = () => { cb.onBuy?.(item.id); render(); };
+      buyBtn.textContent = item.rewardOnly ? 'Earned' : 'Buy';
+      buyBtn.disabled = item.rewardOnly || !affordable;
+      if (!buyBtn.disabled) buyBtn.removeAttribute('aria-disabled'); else buyBtn.setAttribute('aria-disabled', 'true');
+      buyBtn.setAttribute('aria-label', item.rewardOnly
+        ? `${item.label}, earned Curio reward`
+        : `Buy ${item.label} for ${item.price} coins`);
+      buyBtn.onclick = () => { if (!item.rewardOnly) cb.onBuy?.(item.id); render(); };
 
       card.append(img, label, price, buyBtn);
       if (owned > 0) {

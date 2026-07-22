@@ -463,9 +463,18 @@ export const ANCHOR_CHARACTERS = defineCharacters([
   },
   {
     id: 'the-echo', name: 'The Echo', slotId: 'caverns-voice', roomId: 'caverns',
+    subtitle: 'Voice beneath Hollowfrost',
     species: 'unseen presence', portraitAsset: null, spriteAsset: null,
     palette: { body: '#7fd6ff', accent: '#6fe0b2', warm: '#cfe0f2' },
-    linePools: { greeting: ['A note returns differently after someone hears it.'] }, favorDefs: [],
+    linePools: {
+      greeting: ['A note returns differently after someone hears it.'],
+      song: [
+        'Two doors opened; one song came through.',
+        'Stone remembers every careful footstep.',
+        'Carry the light upward. The sky is listening.',
+      ],
+    },
+    favorDefs: [],
   },
 ]);
 

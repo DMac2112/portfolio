@@ -44,9 +44,9 @@ import { ROSTER } from './content/npc-roster.js';
 import { addSnowfall, createWalkPuffs, fadeIn, fadeTo, showCoinSparkle, showMovePing } from './world/game-feel.js';
 import { resolveRoomCollision } from './world/room-collision.js';
 import { CURIO_REGISTRY } from './content/curios.js';
-import { curioById, discoverCurio } from './engine/curios.js';
+import { claimIsleCompletionReward, curioById, discoverCurio } from './engine/curios.js';
 import { spawnClickables } from './world/clickable.js';
-import { ANCHOR_CHARACTERS } from './content/characters.js';
+import { ANCHOR_CHARACTERS, characterById } from './content/characters.js';
 import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
 import { chooseDialogue, dailyLine, startDialogue } from './engine/dialogue-tree.js';
 import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
@@ -56,8 +56,11 @@ import { resolveDocksRoom, salkaStockForDate } from './content/docks.js';
 import { lighthouseLogbookPages, telescopeVistaForDate } from './content/lighthouse.js';
 import { addLighthouseSweep } from './world/lighthouse-lamp.js';
 import { resolveWhisperpineRoom } from './content/whisperpine.js';
+import { resolveCavernEntrances } from './content/caverns.js';
 import { claimVesperHint, nextVesperHint } from './engine/vesper.js';
 import { addDodgeWisps } from './world/will-o-wisps.js';
+import { addEchoPresence } from './world/echo-runtime.js';
+import { addAuroraAmbient } from './world/aurora-ambient.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -111,6 +114,7 @@ k.loadSprite('room-lighthouse-rest', './assets/room-lighthouse-rest.png');
 k.loadSprite('room-lighthouse-gallery', './assets/room-lighthouse-gallery.png');
 k.loadSprite('room-whisperpine', './assets/room-whisperpine.png');
 k.loadSprite('room-moonwell', './assets/room-moonwell.png');
+k.loadSprite('room-caverns', './assets/room-caverns.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
@@ -174,10 +178,14 @@ function setHudVisible(v) {
  * ------------------------------------------------------------------ */
 k.scene('room', (roomId, opts = {}) => {
   const baseRoom = ROOM_REGISTRY[roomId];
-  const room = roomId === 'docks' ? resolveDocksRoom(baseRoom, todayISO)
+  const datedRoom = roomId === 'docks' ? resolveDocksRoom(baseRoom, todayISO)
     : roomId === 'whisperpine' ? resolveWhisperpineRoom(baseRoom, todayISO, save)
       : baseRoom;
+  const room = resolveCavernEntrances(datedRoom, save);
   buildRoom(k, room);
+  const auroraLayer = addAuroraAmbient(k, room, () => save.secrets?.auroraIntensified === true, reduceMotion);
+  const echoCharacter = characterById('the-echo');
+  const echoLayer = addEchoPresence(k, room, echoCharacter?.linePools?.song, reduceMotion);
   addLighthouseSweep(k, room, reduceMotion);
   addDodgeWisps(k, room, reduceMotion);
   addSnowfall(k, room, reduceMotion);
@@ -275,6 +283,7 @@ k.scene('room', (roomId, opts = {}) => {
     if (hit.kind === 'trader') return 'trader';
     if (hit.kind === 'telescope') return 'telescope';
     if (hit.kind === 'logbook') return 'logbook';
+    if (hit.kind === 'echo') return 'echo';
     if (hit.kind === 'character') return 'character';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
@@ -300,7 +309,9 @@ k.scene('room', (roomId, opts = {}) => {
     if (!door || (!door.hidden && !door.locked)) return door ?? null;
     door.hidden = false;
     door.locked = false;
-    doorInteractables.push({
+    const existing = doorInteractables.find((entry) => entry.id === door.id);
+    if (existing) existing.door = door;
+    else doorInteractables.push({
       id: door.id, pos: { x: door.x, y: door.y }, kind: 'door', label: door.label, door,
     });
     showMovePing(k, { x: door.x, y: door.y + 34 }, reduceMotion);
@@ -440,6 +451,11 @@ k.scene('room', (roomId, opts = {}) => {
           pages.push('Moonlight threads the north pines. The gap is a door now.');
           showCoinToast('Moonwell revealed — the north-pine gap is now a door');
         }
+        if (hint.unlocks === 'caverns') {
+          revealRoomDoor('door-cavern-crack');
+          pages.push("The roots draw back. Far away, Pat's dumbwaiter answers with the same clear note. Both ways below are open.");
+          showCoinToast('Hollowfrost opened — root-crack and dumbwaiter unlocked');
+        }
         persist(save);
       } else if (trade.complete) {
         pages.push('You have heard every secret Vesper will trade for a stamped page. For now.');
@@ -513,6 +529,8 @@ k.scene('room', (roomId, opts = {}) => {
         name: 'Keeper’s Logbook', subtitle: 'Palefire sighting record',
         pages: lighthouseLogbookPages(save),
       });
+    } else if (action === 'echo') {
+      echoLayer?.singNext();
     } else if (action === 'character') {
       talkToCharacter(nearest.character);
     } else if (action === 'door') {
@@ -624,7 +642,7 @@ k.scene('room', (roomId, opts = {}) => {
     getOwnedCount: (id) => save.furniture[id] ?? 0,
     onBuy: (id) => {
       const item = furnitureById(id);
-      if (!item || !spendCoins(save, item.price)) return;
+      if (!item || item.rewardOnly || !spendCoins(save, item.price)) return;
       addToInventory(save.furniture, id, []);
       syncEditUI();
     },
@@ -781,6 +799,7 @@ k.scene('room', (roomId, opts = {}) => {
       return Boolean(definition && currentFavorStep(save, definition)?.id === link.stepId);
     },
     onReaction: (prop) => {
+      if (roomId === 'caverns' && prop.reaction === 'chime') echoLayer?.singNext();
       const link = prop.favorStep;
       if (!link) return;
       const definition = favorById(link.favorId);
@@ -793,11 +812,19 @@ k.scene('room', (roomId, opts = {}) => {
     onCurio: (curioId) => {
       const events = [];
       if (!discoverCurio(save, CURIO_REGISTRY, curioId, events)) return;
+      const isleComplete = claimIsleCompletionReward(save, CURIO_REGISTRY, events);
       persist(save);
       journalUI.refresh();
       const coinEvent = events.find((event) => event.type === 'coins-earned');
       if (coinEvent) refreshCoins(true);
       const curio = curioById(CURIO_REGISTRY, curioId);
+      if (isleComplete) {
+        auroraLayer?.refresh();
+        dressUp.render();
+        syncEditUI();
+        showCoinToast('Isle complete — Echoglass Lantern and den trophy earned');
+        return;
+      }
       showCoinToast(coinEvent
         ? `${curio?.label ?? 'Curio'} found — room complete! +${coinEvent.amount} coins`
         : `Curio found: ${curio?.label ?? 'new discovery'}`);
@@ -994,6 +1021,7 @@ k.scene('room', (roomId, opts = {}) => {
           action === 'newspaper' ? `📰 ${nearest.prompt ?? `Read ${nearest.label}`}` :
           action === 'telescope' ? `🔭 ${nearest.prompt ?? 'Look through the telescope'}` :
           action === 'logbook' ? `📖 ${nearest.prompt ?? 'Read the logbook'}` :
+          action === 'echo' ? `♪ ${nearest.prompt ?? 'Listen for The Echo'}` :
           action === 'character' ? `💬 Talk to ${nearest.label}` :
           action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;

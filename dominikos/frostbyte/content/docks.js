@@ -20,12 +20,13 @@ function hashString(value) {
 }
 
 export function salkaStockForDate(todayKey, catalog = ITEM_CATALOG) {
-  if (!bargeStateForDate(todayKey) || !Array.isArray(catalog) || catalog.length < 2) return [];
+  const saleCatalog = Array.isArray(catalog) ? catalog.filter((item) => !item.rewardOnly) : [];
+  if (!bargeStateForDate(todayKey) || saleCatalog.length < 2) return [];
   const seed = hashString(`salka-stock:${todayKey}`);
-  const first = seed % catalog.length;
-  const gap = 1 + ((seed >>> 9) % (catalog.length - 1));
-  const second = (first + gap) % catalog.length;
-  return [catalog[first], catalog[second]];
+  const first = seed % saleCatalog.length;
+  const gap = 1 + ((seed >>> 9) % (saleCatalog.length - 1));
+  const second = (first + gap) % saleCatalog.length;
+  return [saleCatalog[first], saleCatalog[second]];
 }
 
 export function bottleMessageForDate(todayKey) {

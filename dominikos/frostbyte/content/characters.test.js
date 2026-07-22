@@ -63,7 +63,7 @@ describe('approved anchor contracts', () => {
     ]);
   });
 
-  it('fills every anchor slot and resolves the shipped W1-W5 anchors', () => {
+  it('fills every anchor slot and resolves the shipped W1-W6 anchors', () => {
     expect(validateCharacters(ANCHOR_CHARACTERS)).toEqual([]);
     expect(validateDialogueTree(EDDA_DIALOGUE_TREE)).toEqual([]);
     expect(validateDialogueTree(PAT_DIALOGUE_TREE)).toEqual([]);
@@ -87,6 +87,10 @@ describe('approved anchor contracts', () => {
       id: 'vesper', name: 'Vesper', species: 'arctic fox',
       subtitle: 'Trickster of Whisperpine Hollow',
     });
-    expect(characterById('the-echo')).toMatchObject({ portraitAsset: null, spriteAsset: null });
+    expect(characterByRoom('caverns')).toMatchObject({
+      id: 'the-echo', name: 'The Echo', subtitle: 'Voice beneath Hollowfrost',
+      portraitAsset: null, spriteAsset: null,
+      linePools: { song: expect.arrayContaining(['Two doors opened; one song came through.']) },
+    });
   });
 });

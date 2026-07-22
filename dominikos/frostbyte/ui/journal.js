@@ -119,7 +119,9 @@ export function createJournal({ registry, getState, getRoomLabel }) {
   function refresh() {
     const state = cb.getState?.() ?? { found: {} };
     const total = totalProgress(cb.registry, state);
-    summary.textContent = total.total ? `${total.found} of ${total.total} discoveries` : 'Your expedition starts here';
+    summary.textContent = state.isleRewardClaimed
+      ? `${total.found} of ${total.total} discoveries — Echoglass Lantern and den trophy earned`
+      : total.total ? `${total.found} of ${total.total} discoveries` : 'Your expedition starts here';
     body.replaceChildren();
 
     if (cb.registry.length === 0) {

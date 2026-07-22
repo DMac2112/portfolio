@@ -36,7 +36,9 @@ export function DEFAULT_SAVE(now = nowISO()) {
     furniture: {},                                 // { itemId: count } owned-but-not-placed stock (H2)
     curios: createCurioState(),                     // Curio Log (W0): found ids + once-only completion rewards
     favors: {},                                     // { favorId: {status,stepIndex} } cross-room threads (W0)
-    secrets: { vesperHints: [], moonwellUnlocked: false }, // W5: persistent hint trades + hidden-room gate
+    secrets: {
+      vesperHints: [], moonwellUnlocked: false, cavernsUnlocked: false, auroraIntensified: false,
+    },                                                    // W5/W6: persistent secret gates + isle payoff
     visitedRooms: [...DEFAULT_VISITED_ROOMS],        // W3+: new map pins appear after first walk-in
     lastLoginDate: null,
     loginStreak: 0,
@@ -56,6 +58,9 @@ export function migrateSave(raw, now = nowISO()) {
   const savedCurios = s.curios && typeof s.curios === 'object' && !Array.isArray(s.curios) ? s.curios : {};
   const savedFavors = s.favors && typeof s.favors === 'object' && !Array.isArray(s.favors) ? s.favors : {};
   const savedSecrets = s.secrets && typeof s.secrets === 'object' && !Array.isArray(s.secrets) ? s.secrets : {};
+  const savedHintIds = Array.isArray(savedSecrets.vesperHints)
+    ? [...new Set(savedSecrets.vesperHints.filter((id) => typeof id === 'string'))]
+    : base.secrets.vesperHints;
   const savedFound = savedCurios.found && typeof savedCurios.found === 'object' && !Array.isArray(savedCurios.found)
     ? savedCurios.found : {};
   const savedRoomRewards = savedCurios.roomRewards && typeof savedCurios.roomRewards === 'object' && !Array.isArray(savedCurios.roomRewards)
@@ -85,10 +90,10 @@ export function migrateSave(raw, now = nowISO()) {
     secrets: {
       ...base.secrets,
       ...savedSecrets,
-      vesperHints: Array.isArray(savedSecrets.vesperHints)
-        ? [...new Set(savedSecrets.vesperHints.filter((id) => typeof id === 'string'))]
-        : base.secrets.vesperHints,
+      vesperHints: savedHintIds,
       moonwellUnlocked: savedSecrets.moonwellUnlocked === true,
+      cavernsUnlocked: savedSecrets.cavernsUnlocked === true || savedHintIds.includes('hollow-crack'),
+      auroraIntensified: savedSecrets.auroraIntensified === true || savedCurios.isleRewardClaimed === true,
     },
     visitedRooms: [...new Set(savedVisitedRooms)],
   };

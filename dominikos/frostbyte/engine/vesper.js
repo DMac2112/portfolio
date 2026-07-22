@@ -15,7 +15,7 @@ export const VESPER_HINTS = Object.freeze([
     text: 'Behind the north pines, moonlight falls through a gap that daylight refuses to admit is there.',
   }),
   Object.freeze({
-    id: 'hollow-crack', requiredCurios: 22,
+    id: 'hollow-crack', requiredCurios: 22, unlocks: 'caverns',
     text: 'Two ways run below the isle: the cold hatch in Pat’s floor, and the root-crack at Whisperpine’s east edge.',
   }),
 ]);
@@ -42,6 +42,8 @@ function ensureSecrets(save) {
     ...current,
     vesperHints: hints,
     moonwellUnlocked: current.moonwellUnlocked === true,
+    cavernsUnlocked: current.cavernsUnlocked === true,
+    auroraIntensified: current.auroraIntensified === true,
   };
   return save.secrets;
 }
@@ -70,6 +72,7 @@ export function claimVesperHint(save, registry, events = []) {
   if (secrets.vesperHints.includes(next.hint.id)) return null;
   secrets.vesperHints.push(next.hint.id);
   if (next.hint.unlocks === 'moonwell') secrets.moonwellUnlocked = true;
+  if (next.hint.unlocks === 'caverns') secrets.cavernsUnlocked = true;
   events.push({
     type: 'vesper-hint', hintId: next.hint.id,
     requiredCurios: next.hint.requiredCurios,

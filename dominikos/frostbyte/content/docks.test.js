@@ -16,8 +16,18 @@ describe('Driftgate Docks date-resolved content', () => {
       expect(stock).toHaveLength(2);
       expect(stock[0].id).not.toBe(stock[1].id);
       expect(stock.every((item) => catalogIds.has(item.id))).toBe(true);
+      expect(stock.every((item) => !item.rewardOnly)).toBe(true);
     }
     expect(new Set(rotations.map((stock) => stock.map((item) => item.id).join('|'))).size).toBeGreaterThan(1);
+  });
+
+  it('never puts earned-only cosmetics in Salka’s cargo rotation', () => {
+    const catalog = [
+      { id: 'one' }, { id: 'two' }, { id: 'reward', rewardOnly: true },
+    ];
+    for (const date of ['2026-07-22', '2026-07-25', '2026-07-28']) {
+      expect(salkaStockForDate(date, catalog).map((item) => item.id)).not.toContain('reward');
+    }
   });
 
   it('keeps one bottle message stable for a Monday–Sunday issue week', () => {

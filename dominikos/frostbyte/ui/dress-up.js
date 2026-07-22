@@ -46,6 +46,7 @@ export function createDressUp(opts) {
 
   function onCellClick(tab, entry) {
     const owned = boundOpts.save.ownedItems.includes(entry.id);
+    if (entry.rewardOnly && !owned) return;
     const ev = [];
     if (!owned) {
       if (!unlockItem(boundOpts.save, entry.id, entry.price, ev)) return; // can't afford: no-op
@@ -67,7 +68,8 @@ export function createDressUp(opts) {
       return b;
     }));
 
-    const entries = activeTab === 'color' ? BODY_COLORS : ITEM_CATALOG.filter((i) => i.slot === activeTab);
+    const entries = activeTab === 'color' ? BODY_COLORS : ITEM_CATALOG.filter((i) =>
+      i.slot === activeTab && (!i.rewardOnly || boundOpts.save.ownedItems.includes(i.id)));
     gridEl.replaceChildren(...entries.map((entry) => {
       const owned = boundOpts.save.ownedItems.includes(entry.id);
       const equipped = isEquipped(activeTab, entry.id);
