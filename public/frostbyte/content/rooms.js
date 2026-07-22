@@ -36,7 +36,7 @@ export const ROOM_REGISTRY = {
     doors: [
       { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 456, targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' },
-      { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 360, targetRoom: 'workshop', locked: true, lockedCopy: "The workshop lamps aren't lit yet." },
+      { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 360, targetRoom: 'workshop', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-den', label: 'Your Den', x: 720, y: 936, targetRoom: 'den', locked: false, targetSpawn: 'fromPlaza' },
     ],
     // Rendered + collidable in the S1 spike: fountain/pond only (what room-plaza.png actually paints).
@@ -87,6 +87,7 @@ export const ROOM_REGISTRY = {
     spawnPoints: {
       default:    { x: 720, y: 760, facing: 'up' },
       fromPlaza:  { x: 720, y: 820, facing: 'up' },
+      fromWhisperpine: { x: 1240, y: 620, facing: 'left' },
       fromMap:    { x: 720, y: 560, facing: 'down' },
     },
     camera: { leadY: -50 },
@@ -96,6 +97,7 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 880, targetRoom: 'plaza', locked: false, targetSpawn: 'fromTrail' },
+      { id: 'door-whisperpine', label: 'Whisperpine Hollow', x: 1320, y: 620, targetRoom: 'whisperpine', locked: false, targetSpawn: 'fromTrail' },
     ],
     solids: [
       { id: 'pines-west', x: 300, y: 400, w: 120, h: 140 },
@@ -113,6 +115,26 @@ export const ROOM_REGISTRY = {
       { id: 'trail-glint-3', x: 1150, y: 500 },
       { id: 'trail-glint-4', x: 500, y: 250 },
     ],
+    clickables: [
+      {
+        id: 'weather-bell-vane', reaction: 'chime', x: 1104, y: 747, w: 72, h: 72,
+        line: 'A small brass vane has twisted itself around the old signpost.', reactionColor: '#ffb45e',
+        favorStep: {
+          favorId: 'pat-weather-bell-parts', stepId: 'recover-trail-vane',
+          successText: 'Weather Bell part 2/3 — final part waits at Driftgate Docks',
+        },
+        onlyWhenFavorStep: true,
+      },
+      {
+        id: 'palefire-trail-ribbon', reaction: 'wave', x: 840, y: 540, w: 150, h: 90,
+        line: 'A blue ribbon of light folds once between the old lenses, then returns toward Palefire.', reactionColor: '#7fd6ff',
+        favorStep: {
+          favorId: 'maren-sighting-trail', stepId: 'witness-trail-event',
+          successText: 'Sighting witnessed — report the blue ribbon to Old Maren',
+        },
+        onlyWhenFavorStep: true,
+      },
+    ],
   },
 
   // Glasswind Court — a compact market square with three distinct, interactive storefronts.
@@ -126,6 +148,7 @@ export const ROOM_REGISTRY = {
     spawnPoints: {
       default:    { x: 720, y: 420, facing: 'down' },
       fromPlaza:  { x: 168, y: 480, facing: 'right' },
+      fromDocks:  { x: 1290, y: 858, facing: 'up' },
       fromMap:    { x: 720, y: 720, facing: 'up' },
     },
     camera: { leadY: -50 },
@@ -151,9 +174,14 @@ export const ROOM_REGISTRY = {
         prompt: 'Visit the restaurant',
         copy: 'Tonight\'s special is ember-roasted root stew with iceleaf rolls. A warm corner table is ready.',
       },
+      {
+        id: 'noticeboard-chirper', label: 'The Chillmere Chirper', kind: 'newspaper', x: 1095, y: 822,
+        prompt: 'Read this week’s Chirper',
+      },
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 72, y: 480, targetRoom: 'plaza', locked: false, targetSpawn: 'fromCourt' },
+      { id: 'door-docks', label: 'Driftgate Docks', x: 1290, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromCourt' },
     ],
     solids: [
       { id: 'snowtail-petshop', x: 291, y: 190, w: 438, h: 188 },
@@ -165,6 +193,535 @@ export const ROOM_REGISTRY = {
       { id: 'patio-brazier', x: 735, y: 846, w: 54, h: 54 },
       { id: 'court-bench', x: 540, y: 822, w: 108, h: 30 },
       { id: 'menu-board', x: 1095, y: 822, w: 45, h: 66 },
+      { id: 'edda-nook', x: 925, y: 790, w: 54, h: 70 },
+    ],
+    anchors: [
+      { characterId: 'edda-quill', x: 925, y: 790 },
+    ],
+    clickables: [
+      {
+        id: 'window-wave', curioId: 'court-window-wave', reaction: 'wave',
+        x: 219, y: 207, w: 228, h: 90,
+        line: 'Two tiny silhouettes wave back from the warm window.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'fountain-glimmer', curioId: 'court-fountain-glimmer', reaction: 'glimmer',
+        x: 579, y: 490, w: 300, h: 220,
+        line: 'A coin glints once beneath the frozen court.', reactionColor: '#ffb45e',
+      },
+      {
+        id: 'wind-chimes', curioId: 'court-wind-chimes', reaction: 'chime',
+        x: 846, y: 120, w: 84, h: 48,
+        line: 'The ice chimes answer in three bright notes.', reactionColor: '#7fd6ff',
+      },
+      {
+        id: 'awning-snow', curioId: 'court-awning-snow', reaction: 'snow',
+        x: 285, y: 132, w: 420, h: 48,
+        line: 'Whump. The awning looks much lighter now.', reactionColor: '#cfe0f2',
+      },
+      {
+        id: 'kettle-steam', curioId: 'court-kettle-steam', reaction: 'steam',
+        x: 705, y: 520, w: 150, h: 96,
+        line: 'The kettle answers with a determined puff.', reactionColor: '#f5fbff',
+      },
+      {
+        id: 'postbox-rattle', curioId: 'court-postbox-rattle', reaction: 'rattle',
+        x: 1095, y: 810, w: 54, h: 96,
+        line: 'Rattle-rattle. No letter takes responsibility.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'loose-cobble', reaction: 'hum', x: 900, y: 861, w: 90, h: 42,
+        line: 'A low note hums beneath the ice, then slips deeper.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'weather-bell-coil', reaction: 'chime', x: 411, y: 744, w: 60, h: 60,
+        line: 'A warm brass spiral is hiding beneath the companion pen rail.', reactionColor: '#ffb45e',
+        favorStep: {
+          favorId: 'pat-weather-bell-parts', stepId: 'recover-court-coil',
+          successText: 'Weather Bell part 1/3 — next: Frostline Trail',
+        },
+        onlyWhenFavorStep: true,
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Emberlight Workshop — Pat Hocket's forge-warm tinkering room and the Weather Bell project.
+  workshop: {
+    id: 'workshop',
+    title: 'Emberlight Workshop',
+    mapAsset: 'room-workshop',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:   { x: 720, y: 690, facing: 'up' },
+      fromPlaza: { x: 720, y: 820, facing: 'up' },
+      fromMap:   { x: 780, y: 690, facing: 'up' },
+      fromCaverns: { x: 390, y: 720, facing: 'down' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'weather-bell', label: 'The Weather Bell', kind: 'landmark', x: 720, y: 390 },
+    ],
+    doors: [
+      { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 888, targetRoom: 'plaza', locked: false, targetSpawn: 'fromWorkshop' },
+      {
+        id: 'door-cavern-dumbwaiter', label: 'Hollowfrost Dumbwaiter', x: 390, y: 795,
+        targetRoom: 'caverns', targetSpawn: 'fromWorkshop', locked: true,
+        lockedCopy: 'The hatch is locked. A draught below smells like cold stone.',
+      },
+    ],
+    solids: [
+      { id: 'weather-bell', x: 720, y: 390, w: 180, h: 170 },
+      { id: 'pat-bench', x: 1080, y: 300, w: 300, h: 120 },
+      { id: 'gizmo-shelf', x: 300, y: 270, w: 220, h: 130 },
+      { id: 'forge-bellows', x: 270, y: 600, w: 190, h: 160 },
+      { id: 'pneumatic-tube', x: 1170, y: 230, w: 84, h: 150 },
+      { id: 'snowputer', x: 1140, y: 690, w: 120, h: 90 },
+      { id: 'pat-station', x: 1080, y: 450, w: 60, h: 72 },
+    ],
+    anchors: [
+      { characterId: 'pat-hocket', x: 1080, y: 480 },
+    ],
+    clickables: [
+      {
+        id: 'bellows-puff', curioId: 'workshop-bellows-puff', reaction: 'steam',
+        x: 270, y: 600, w: 126, h: 120,
+        line: 'The bellows sighs out one coal-scented cloud.', reactionColor: '#f5fbff',
+      },
+      {
+        id: 'gizmo-chain', curioId: 'workshop-gizmo-chain', reaction: 'chain',
+        x: 300, y: 270, w: 210, h: 120,
+        line: 'Click. Zip. Bonk. Seven mechanisms celebrate doing almost nothing.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'tube-thunk', curioId: 'workshop-tube-thunk', reaction: 'rattle',
+        x: 1170, y: 230, w: 84, h: 150,
+        line: 'Thunk. The tube delivers a blank order slip and one warm washer.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'blueprint-cycle', curioId: 'workshop-blueprint-cycle', reaction: 'wave',
+        x: 720, y: 195, w: 270, h: 102, reactionColor: '#7fd6ff',
+        lines: [
+          'A rotating sketch proposes an umbrella for the lighthouse.',
+          'Next design: a kettle that whistles only when nobody is watching.',
+          'Final sheet: a tiny wheeled shelf labelled entirely in arrows.',
+        ],
+      },
+      {
+        id: 'snowputer', curioId: 'workshop-snowputer', reaction: 'snow',
+        x: 1140, y: 690, w: 120, h: 105,
+        line: 'The snowputer calculates: “probably flurries.” A tiny fan applauds.', reactionColor: '#cfe0f2',
+      },
+      {
+        id: 'weather-bell-test', reaction: 'chime', x: 720, y: 390, w: 210, h: 210,
+        line: 'The half-built Bell answers with one brave note and two nervous rattles.', reactionColor: '#ffb45e',
+        favorStep: {
+          favorId: 'edda-tip-workshop-test', stepId: 'witness-workshop-test',
+          successText: 'Story tip witnessed — report the test-firing to Edda!',
+        },
+      },
+      {
+        id: 'dumbwaiter-hatch', reaction: 'hum', x: 390, y: 795, w: 180, h: 90,
+        line: 'The hatch is locked. A draught below smells like cold stone.', reactionColor: '#6fe0b2',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Driftgate Docks — resolved to in-port/away art and content by content/docks.js.
+  docks: {
+    id: 'docks',
+    title: 'Driftgate Docks',
+    mapAsset: 'room-docks-away',
+    stateAssets: { inPort: 'room-docks-port', away: 'room-docks-away' },
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 72, x1: 1368, y0: 96, y1: 888 },
+    spawnPoints: {
+      default:        { x: 420, y: 540, facing: 'right' },
+      fromCourt:      { x: 150, y: 480, facing: 'right' },
+      fromLighthouse: { x: 1150, y: 170, facing: 'down' },
+      fromMap:        { x: 420, y: 600, facing: 'right' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      {
+        id: 'salka-trader-stall', label: 'Salka’s Cargo Stall', kind: 'trader',
+        x: 1050, y: 680, prompt: 'Browse today’s two cargo finds', bargeState: 'in-port',
+      },
+    ],
+    doors: [
+      { id: 'door-court', label: 'Glasswind Court', x: 72, y: 480, targetRoom: 'court', locked: false, targetSpawn: 'fromDocks' },
+      {
+        id: 'door-lighthouse', label: 'Palefire Light', x: 1150, y: 96,
+        targetRoom: 'lighthouse-rest', locked: false, targetSpawn: 'fromDocks',
+      },
+    ],
+    solids: [
+      { id: 'water-north-west', x: 885, y: 220, w: 390, h: 220 },
+      { id: 'water-north-east', x: 1294, y: 220, w: 148, h: 220 },
+      { id: 'water-south-main', x: 840, y: 720, w: 540, h: 210 },
+      { id: 'dock-warehouse', x: 270, y: 240, w: 270, h: 190 },
+      { id: 'crane-base', x: 1110, y: 420, w: 120, h: 150 },
+      { id: 'harbor-bell-post', x: 780, y: 300, w: 66, h: 120 },
+    ],
+    anchors: [
+      { characterId: 'captain-salka', x: 870, y: 500, bargeState: 'in-port' },
+    ],
+    clickables: [
+      {
+        id: 'tidepool-duck', curioId: 'docks-tidepool-duck', reaction: 'wave',
+        x: 330, y: 720, w: 180, h: 120,
+        line: 'Three tiny tidepool shapes duck beneath the ice rim at once.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'bottle-post', curioId: 'docks-bottle-post', reaction: 'rattle',
+        x: 480, y: 420, w: 80, h: 110,
+        line: 'A salt-clouded bottle carries this week’s short dispatch.', reactionColor: '#7fd6ff',
+      },
+      {
+        id: 'harbor-bell', curioId: 'docks-harbor-bell', reaction: 'chime',
+        x: 780, y: 300, w: 96, h: 120,
+        line: 'The harbor bell sends one round note across the floes.', reactionColor: '#ffb45e',
+      },
+      {
+        id: 'crane-swing', curioId: 'docks-crane-swing', reaction: 'swing',
+        x: 1110, y: 390, w: 210, h: 180,
+        line: 'The cargo crane swings seaward, pauses, then remembers its manners.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'buoy-bob', curioId: 'docks-buoy-bob', reaction: 'bob',
+        x: 1230, y: 630, w: 108, h: 120,
+        line: 'The outer buoy gives the pier a solemn little nod.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'gull-scatter', curioId: 'docks-gull-scatter', reaction: 'scatter',
+        x: 720, y: 180, w: 260, h: 90,
+        line: 'A whitewing flock bursts apart and reforms one piling over.', reactionColor: '#f5fbff',
+      },
+      {
+        id: 'underpier-cache', curioId: 'docks-underpier-cache', reaction: 'glimmer',
+        x: 1180, y: 855, w: 120, h: 60, requiresProximity: true,
+        line: 'At the end of the narrow ledge: a sea-glass knot tucked beneath the pier.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'weather-bell-clapper', reaction: 'chime', x: 1010, y: 555, w: 80, h: 80,
+        line: 'A heavy brass clapper is tagged for Pat Hocket’s workshop.', reactionColor: '#ffb45e',
+        bargeState: 'in-port', onlyWhenFavorStep: true,
+        favorStep: {
+          favorId: 'pat-weather-bell-parts', stepId: 'recover-docks-clapper',
+          successText: 'Weather Bell part 3/3 — return all three pieces to Pat',
+        },
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Palefire Light — lower round keeper's room; the stairs lead to a separate gallery scene.
+  'lighthouse-rest': {
+    id: 'lighthouse-rest',
+    title: 'Palefire Light — Keeper’s Rest',
+    mapAsset: 'room-lighthouse-rest',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:     { x: 720, y: 720, facing: 'up' },
+      fromDocks:   { x: 720, y: 820, facing: 'up' },
+      fromGallery: { x: 1190, y: 480, facing: 'left' },
+      fromMap:     { x: 720, y: 720, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'keeper-logbook', label: 'Keeper’s Logbook', kind: 'logbook', x: 390, y: 510, prompt: 'Read the growing sighting log' },
+    ],
+    doors: [
+      { id: 'door-docks', label: 'Driftgate Docks', x: 720, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromLighthouse' },
+      { id: 'stairs-gallery', label: 'Lantern Gallery', x: 1320, y: 480, targetRoom: 'lighthouse-gallery', locked: false, targetSpawn: 'fromRest' },
+    ],
+    solids: [
+      { id: 'keeper-stove', x: 360, y: 285, w: 220, h: 170 },
+      { id: 'logbook-table', x: 390, y: 510, w: 190, h: 105 },
+      { id: 'spiral-stair-core', x: 1110, y: 420, w: 210, h: 240 },
+      { id: 'keeper-cot', x: 930, y: 720, w: 240, h: 105 },
+    ],
+    anchors: [
+      { characterId: 'old-maren', x: 750, y: 590 },
+    ],
+    clickables: [
+      {
+        id: 'keeper-stove-sigh', curioId: 'lighthouse-rest-stove-sigh', reaction: 'steam',
+        x: 360, y: 285, w: 220, h: 170,
+        line: 'The little iron stove exhales cedar, salt, and one tiny spark.', reactionColor: '#ffb45e',
+      },
+      {
+        id: 'keeper-kettle-tick', curioId: 'lighthouse-rest-kettle-tick', reaction: 'chime',
+        x: 620, y: 315, w: 110, h: 90,
+        line: 'The kettle lid counts three patient ticks against the wind.', reactionColor: '#ffe2a1',
+      },
+      {
+        id: 'keeper-cot-quilt', curioId: 'lighthouse-rest-cot-quilt', reaction: 'snow',
+        x: 930, y: 700, w: 240, h: 120,
+        line: 'A stitched map of old currents hides beneath the folded quilt.', reactionColor: '#a78bfa',
+      },
+      {
+        id: 'spiral-stair-answer', curioId: 'lighthouse-rest-stair-answer', reaction: 'hum',
+        x: 1110, y: 420, w: 210, h: 240,
+        line: 'The iron stair returns your tap one full turn later.', reactionColor: '#7fd6ff',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Palefire Light — upper gallery, telescope balcony, and the slowly sweeping great lamp.
+  'lighthouse-gallery': {
+    id: 'lighthouse-gallery',
+    title: 'Palefire Light — Lantern Gallery',
+    mapAsset: 'room-lighthouse-gallery',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:  { x: 240, y: 480, facing: 'right' },
+      fromRest: { x: 210, y: 480, facing: 'right' },
+      fromMap:  { x: 720, y: 720, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'great-lamp', label: 'The Great Lamp', kind: 'landmark', x: 720, y: 330 },
+      { id: 'palefire-telescope', label: 'Palefire Telescope', kind: 'telescope', x: 1140, y: 390, prompt: 'Look across the floes' },
+    ],
+    doors: [
+      { id: 'stairs-rest', label: 'Keeper’s Rest', x: 120, y: 480, targetRoom: 'lighthouse-rest', locked: false, targetSpawn: 'fromGallery' },
+    ],
+    solids: [
+      { id: 'great-lamp', x: 720, y: 330, w: 240, h: 200 },
+      { id: 'palefire-telescope', x: 1140, y: 390, w: 180, h: 110 },
+      { id: 'gallery-supply-chest', x: 390, y: 690, w: 210, h: 90 },
+    ],
+    anchors: [],
+    clickables: [
+      {
+        id: 'gallery-lamp-prism', curioId: 'lighthouse-gallery-lamp-prism', reaction: 'glimmer',
+        x: 720, y: 330, w: 250, h: 220,
+        line: 'A loose prism throws a pocket-sized sunrise across the floor.', reactionColor: '#ffe2a1',
+      },
+      {
+        id: 'gallery-pennant-snap', curioId: 'lighthouse-gallery-pennant', reaction: 'wave',
+        x: 360, y: 210, w: 150, h: 90,
+        line: 'The balcony pennant snaps once toward a wind you cannot feel.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'gallery-rail-crystals', curioId: 'lighthouse-gallery-rail-crystals', reaction: 'chime',
+        x: 720, y: 790, w: 240, h: 80,
+        line: 'Four rail crystals ring from low to high, like steps made of glass.', reactionColor: '#c8f4ff',
+      },
+      {
+        id: 'balcony-wind-carving', curioId: 'lighthouse-gallery-wind-carving', reaction: 'hum',
+        x: 1120, y: 810, w: 180, h: 72, requiresProximity: true,
+        line: 'The wind-carved groove hums the same three notes as the loose Court cobble.', reactionColor: '#6fe0b2',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Whisperpine Hollow — a deep forest branch off Frostline Trail. Vesper's one daily placement
+  // and the hidden Moonwell door are resolved in content/whisperpine.js without mutating this data.
+  whisperpine: {
+    id: 'whisperpine',
+    title: 'Whisperpine Hollow',
+    mapAsset: 'room-whisperpine',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:      { x: 220, y: 540, facing: 'right' },
+      fromTrail:    { x: 190, y: 540, facing: 'right' },
+      fromMoonwell: { x: 720, y: 200, facing: 'down' },
+      fromCaverns:  { x: 1240, y: 600, facing: 'left' },
+      fromMap:      { x: 720, y: 760, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'whisperpine-heart', label: 'The Listening Pines', kind: 'landmark', x: 720, y: 480 },
+    ],
+    doors: [
+      { id: 'door-trail', label: 'Frostline Trail', x: 120, y: 540, targetRoom: 'trail', locked: false, targetSpawn: 'fromWhisperpine' },
+      {
+        id: 'door-moonwell', label: 'A Moonlit Gap', x: 720, y: 120,
+        targetRoom: 'moonwell', targetSpawn: 'fromWhisperpine', locked: true, hidden: true,
+        lockedCopy: 'Only an unbroken wall of pine shadows stands here.',
+      },
+      {
+        id: 'door-cavern-crack', label: 'Root-bound Crack', x: 1320, y: 600,
+        targetRoom: 'caverns', targetSpawn: 'fromWhisperpine', locked: true,
+        lockedCopy: 'A cold note breathes through the stone, but the roots refuse to part.',
+      },
+    ],
+    solids: [
+      { id: 'root-den-bank', x: 330, y: 255, w: 260, h: 150 },
+      { id: 'owl-den-pines', x: 900, y: 220, w: 220, h: 150 },
+      { id: 'heart-pines', x: 720, y: 465, w: 220, h: 180 },
+      { id: 'fallen-den-log', x: 1040, y: 650, w: 270, h: 100 },
+      { id: 'berry-snowbank', x: 430, y: 790, w: 180, h: 80 },
+    ],
+    vesperDens: [
+      { id: 'root-den', x: 330, y: 370 },
+      { id: 'owl-den', x: 900, y: 330 },
+      { id: 'fallen-den', x: 1040, y: 740 },
+    ],
+    anchors: [],
+    wisps: [
+      { id: 'wisp-one', x: 720, y: 560, phase: 0.2 },
+      { id: 'wisp-two', x: 780, y: 585, phase: 2.3 },
+      { id: 'wisp-three', x: 745, y: 625, phase: 4.1 },
+    ],
+    clickables: [
+      {
+        id: 'whisperpine-hare', curioId: 'whisperpine-snow-hare', reaction: 'scatter',
+        x: 250, y: 650, w: 140, h: 100,
+        line: 'A snow hare becomes three white bounds and one questioning ear.', reactionColor: '#f7fbff',
+      },
+      {
+        id: 'whisperpine-owl', curioId: 'whisperpine-ice-owl', reaction: 'glimmer',
+        x: 900, y: 225, w: 120, h: 100,
+        line: 'The ice owl blinks. Snow falls from the eye that moved second.', reactionColor: '#c8f4ff',
+      },
+      {
+        id: 'whisperpine-icicle', curioId: 'whisperpine-icicle-drop', reaction: 'snow',
+        x: 530, y: 250, w: 130, h: 120,
+        line: 'One icicle drops upward into the branch and leaves no gap behind.', reactionColor: '#7fd6ff',
+      },
+      {
+        id: 'whisperpine-echo-log', curioId: 'whisperpine-echo-log', reaction: 'hum',
+        x: 1040, y: 650, w: 250, h: 110,
+        lines: [
+          'The fallen log repeats your tap in three notes.',
+          'On the second tap, a fourth note answers from under the roots.',
+        ],
+        reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'whisperpine-berries', curioId: 'whisperpine-frozen-berries', reaction: 'rattle',
+        x: 430, y: 790, w: 160, h: 90,
+        line: 'The frozen berries rattle from blue to violet without leaving their stems.', reactionColor: '#a78bfa',
+      },
+      {
+        id: 'whisperpine-wisps', curioId: 'whisperpine-will-o-glow', reaction: 'wave',
+        x: 750, y: 590, w: 190, h: 150,
+        line: 'The will-o-glows dodge your hand, then arrange themselves into a tiny fox grin.', reactionColor: '#6fe0b2',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Moonwell Clearing never appears on the island map. Its only way in is the save-gated gap in
+  // Whisperpine, and its only resident is the moon's reflection.
+  moonwell: {
+    id: 'moonwell',
+    title: 'Moonwell Clearing',
+    mapAsset: 'room-moonwell',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 180, x1: 1260, y0: 150, y1: 850 },
+    spawnPoints: {
+      default:         { x: 720, y: 770, facing: 'up' },
+      fromWhisperpine: { x: 720, y: 790, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'moonwell-pool', label: 'The Still Pool', kind: 'landmark', x: 720, y: 450 },
+      { id: 'moonwell-bench', label: null, kind: 'sit', x: 350, y: 650 },
+    ],
+    doors: [
+      { id: 'door-whisperpine', label: 'Whisperpine Hollow', x: 720, y: 850, targetRoom: 'whisperpine', locked: false, targetSpawn: 'fromMoonwell' },
+    ],
+    solids: [
+      { id: 'moonwell-pool', x: 720, y: 450, w: 420, h: 250 },
+      { id: 'moonwell-bench', x: 350, y: 650, w: 200, h: 70 },
+    ],
+    anchors: [],
+    clickables: [
+      {
+        id: 'moonwell-reflection', curioId: 'moonwell-reflection', reaction: 'glimmer',
+        x: 720, y: 450, w: 400, h: 230,
+        line: 'Your reflection looks up a heartbeat before you look down.', reactionColor: '#c8f4ff',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Hollowfrost Caverns — W6 capstone reached through both previously foreshadowed entrances.
+  caverns: {
+    id: 'caverns',
+    title: 'Hollowfrost Caverns',
+    mapAsset: 'room-caverns',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:         { x: 390, y: 210, facing: 'down' },
+      fromWorkshop:    { x: 390, y: 210, facing: 'down' },
+      fromWhisperpine: { x: 1230, y: 600, facing: 'left' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      {
+        id: 'echo-resonance', label: 'A Returning Note', kind: 'echo', x: 720, y: 510,
+        prompt: 'Listen for The Echo',
+      },
+    ],
+    doors: [
+      {
+        id: 'door-workshop-lift', label: "Pat's Dumbwaiter", x: 390, y: 120,
+        targetRoom: 'workshop', targetSpawn: 'fromCaverns', locked: false,
+      },
+      {
+        id: 'door-whisperpine-crack', label: 'Whisperpine Root-Crack', x: 1320, y: 600,
+        targetRoom: 'whisperpine', targetSpawn: 'fromCaverns', locked: false,
+      },
+    ],
+    solids: [
+      { id: 'crystal-pillar-west', x: 270, y: 390, w: 180, h: 220 },
+      { id: 'crystal-arch-north', x: 720, y: 260, w: 220, h: 160 },
+      { id: 'crystal-pillar-east', x: 1080, y: 330, w: 180, h: 260 },
+      { id: 'underisle-pool', x: 720, y: 760, w: 420, h: 170 },
+      { id: 'crystal-bank-southwest', x: 300, y: 730, w: 170, h: 160 },
+    ],
+    anchors: [],
+    clickables: [
+      {
+        id: 'echo-shard-root', curioId: 'caverns-echo-shard-root', reaction: 'chime',
+        x: 270, y: 390, w: 140, h: 180,
+        line: 'A root-held shard answers low. Somewhere unseen, the note returns warm.', reactionColor: '#72e2bd',
+      },
+      {
+        id: 'echo-shard-arch', curioId: 'caverns-echo-shard-arch', reaction: 'chime',
+        x: 720, y: 260, w: 180, h: 130,
+        line: 'The arch rings from both ends at once. The Echo supplies the middle note.', reactionColor: '#c8f4ff',
+      },
+      {
+        id: 'echo-shard-prism', curioId: 'caverns-echo-shard-prism', reaction: 'chime',
+        x: 1080, y: 330, w: 150, h: 200,
+        line: 'One clear tap splits into violet, blue, and green voices.', reactionColor: '#a78bfa',
+      },
+      {
+        id: 'echo-shard-bridge', curioId: 'caverns-echo-shard-bridge', reaction: 'chime',
+        x: 910, y: 575, w: 130, h: 100,
+        line: 'The bridge shard sings toward both entrances. Both answer.', reactionColor: '#7fd6ff',
+      },
+      {
+        id: 'echo-shard-pool', curioId: 'caverns-echo-shard-pool', reaction: 'chime',
+        x: 720, y: 760, w: 180, h: 120,
+        line: 'The pool keeps the note below its surface, then gives it back brighter.', reactionColor: '#72e2bd',
+      },
+      {
+        id: 'echo-shard-threshold', curioId: 'caverns-echo-shard-threshold', reaction: 'chime',
+        x: 405, y: 570, w: 130, h: 110,
+        line: 'This shard remembers the hatch and the roots as parts of one doorway.', reactionColor: '#ffe2a1',
+      },
     ],
     npcSpawnAnchors: [],
   },

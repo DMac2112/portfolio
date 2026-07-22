@@ -9,7 +9,7 @@ import { resolveMoveVector, resolveFacing } from './engine/movement.js';
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
-import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup } from './engine/economy.js';
+import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup, unlockItem, equipItem } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
@@ -26,8 +26,13 @@ import { newChat, addBubble, tick as tickChat, active as activeChat } from './en
 import { createChat } from './ui/chat.js';
 import { createEmotes, emoteSymbol } from './ui/emotes.js';
 import { createMap } from './ui/map.js';
+import { createJournal } from './ui/journal.js';
+import { createDialogue } from './ui/dialogue.js';
+import { createNewspaper } from './ui/newspaper.js';
+import { createTraderStall } from './ui/trader-stall.js';
+import { createTelescope } from './ui/telescope.js';
 import { nodeByRoom } from './content/map.js';
-import { canTravel, arriveSpawnId, findAutoEnterDoor } from './engine/travel.js';
+import { canTravel, arriveSpawnId, discoveredTravelNode, findAutoEnterDoor } from './engine/travel.js';
 import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
 import { SNAP, addToInventory, place as placeFurn, move as moveFurn, flip as flipFurn, store as storeFurn, hitTest } from './engine/home-editor.js';
 import { loadFurnitureSprites, initFurnitureLayer } from './world/furniture.js';
@@ -38,6 +43,24 @@ import { initVisitorLayer } from './world/visitor-runtime.js';
 import { ROSTER } from './content/npc-roster.js';
 import { addSnowfall, createWalkPuffs, fadeIn, fadeTo, showCoinSparkle, showMovePing } from './world/game-feel.js';
 import { resolveRoomCollision } from './world/room-collision.js';
+import { CURIO_REGISTRY } from './content/curios.js';
+import { claimIsleCompletionReward, curioById, discoverCurio } from './engine/curios.js';
+import { spawnClickables } from './world/clickable.js';
+import { ANCHOR_CHARACTERS, characterById } from './content/characters.js';
+import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
+import { chooseDialogue, dailyLine, startDialogue } from './engine/dialogue-tree.js';
+import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
+import { EDDA_STORY_TIP_FAVORS, MAREN_SIGHTING_FAVORS, WEATHER_BELL_FAVOR, favorById } from './content/favors.js';
+import { chirperIssueForDate } from './content/chirper-issues.js';
+import { resolveDocksRoom, salkaStockForDate } from './content/docks.js';
+import { lighthouseLogbookPages, telescopeVistaForDate } from './content/lighthouse.js';
+import { addLighthouseSweep } from './world/lighthouse-lamp.js';
+import { resolveWhisperpineRoom } from './content/whisperpine.js';
+import { resolveCavernEntrances } from './content/caverns.js';
+import { claimVesperHint, nextVesperHint } from './engine/vesper.js';
+import { addDodgeWisps } from './world/will-o-wisps.js';
+import { addEchoPresence } from './world/echo-runtime.js';
+import { addAuroraAmbient } from './world/aurora-ambient.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -84,8 +107,17 @@ k.loadSprite('room-plaza', './assets/room-plaza.png');
 k.loadSprite('room-den', './assets/room-den.png');
 k.loadSprite('room-trail', './assets/room-trail.png');
 k.loadSprite('room-court', './assets/room-court.png');
+k.loadSprite('room-workshop', './assets/room-workshop.png');
+k.loadSprite('room-docks-port', './assets/room-docks-port.png');
+k.loadSprite('room-docks-away', './assets/room-docks-away.png');
+k.loadSprite('room-lighthouse-rest', './assets/room-lighthouse-rest.png');
+k.loadSprite('room-lighthouse-gallery', './assets/room-lighthouse-gallery.png');
+k.loadSprite('room-whisperpine', './assets/room-whisperpine.png');
+k.loadSprite('room-moonwell', './assets/room-moonwell.png');
+k.loadSprite('room-caverns', './assets/room-caverns.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
+loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
 loadFurnitureSprites(k);
 k.loadSprite('den-sign-open', './assets/den-sign-open.png');
 k.loadSprite('den-sign-closed', './assets/den-sign-closed.png');
@@ -125,34 +157,17 @@ function showCoinToast(msg) {
  * Dialogue overlay — the index.html #dialogue-overlay, wired minimally
  * (H1: locked-door copy; NPC dialogue can reuse it in later phases).
  * ------------------------------------------------------------------ */
-const dlgOverlay = document.getElementById('dialogue-overlay');
-const dlgTitle = document.getElementById('dialogue-title');
-const dlgBody = document.getElementById('dialogue-body');
-const dlgClose = document.getElementById('dialogue-close');
-let dlgLastFocus = null;
-function dialogueIsOpen() { return dlgOverlay ? !dlgOverlay.classList.contains('hidden') : false; }
+const dialogueUI = createDialogue();
 function showDialogue(title, body) {
-  if (!dlgOverlay) return;
-  dlgLastFocus = document.activeElement;
-  dlgTitle.textContent = title ?? '';
-  dlgBody.textContent = body ?? '';
-  dlgOverlay.classList.remove('hidden');
-  dlgClose?.focus();
+  dialogueUI.open({ title, name: title, pages: [body ?? ''] });
 }
-function closeDialogue() {
-  dlgOverlay?.classList.add('hidden');
-  dlgLastFocus?.focus?.();
-  dlgLastFocus = null;
-}
-if (dlgClose) dlgClose.onclick = closeDialogue;
-dlgOverlay?.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDialogue(); });
 
 /* ------------------------------------------------------------------ *
  * HUD visibility — the social/map buttons are persistent DOM, so they'd
  * float over (and act on, via stale scene closures) the minigame scene.
  * Hidden on minigame entry, restored on every room entry (H1 review fix).
  * ------------------------------------------------------------------ */
-const HUD_BTN_IDS = ['map-btn', 'say-btn', 'dressup-btn', 'emote-bar'];
+const HUD_BTN_IDS = ['map-btn', 'journal-btn', 'say-btn', 'dressup-btn', 'emote-bar'];
 let inMinigame = false;
 function setHudVisible(v) {
   for (const id of HUD_BTN_IDS) { const el = document.getElementById(id); if (el) el.hidden = !v; }
@@ -162,13 +177,23 @@ function setHudVisible(v) {
  * Room scene — parameterized by room id (Engine & World Architecture §3).
  * ------------------------------------------------------------------ */
 k.scene('room', (roomId, opts = {}) => {
-  const room = ROOM_REGISTRY[roomId];
+  const baseRoom = ROOM_REGISTRY[roomId];
+  const datedRoom = roomId === 'docks' ? resolveDocksRoom(baseRoom, todayISO)
+    : roomId === 'whisperpine' ? resolveWhisperpineRoom(baseRoom, todayISO, save)
+      : baseRoom;
+  const room = resolveCavernEntrances(datedRoom, save);
   buildRoom(k, room);
+  const auroraLayer = addAuroraAmbient(k, room, () => save.secrets?.auroraIntensified === true, reduceMotion);
+  const echoCharacter = characterById('the-echo');
+  const echoLayer = addEchoPresence(k, room, echoCharacter?.linePools?.song, reduceMotion);
+  addLighthouseSweep(k, room, reduceMotion);
+  addDodgeWisps(k, room, reduceMotion);
   addSnowfall(k, room, reduceMotion);
   fadeIn(k, reduceMotion);
 
   // Remember where the player is — the map's "You are here" pin reads this (H1).
   save.prefs.lastRoom = roomId;
+  if (!save.visitedRooms.includes(roomId)) save.visitedRooms.push(roomId);
   persist(save);
 
   // Back in a room: restore the HUD the minigame hid, and let travel guards relax.
@@ -178,7 +203,7 @@ k.scene('room', (roomId, opts = {}) => {
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
   for (const h of room.hotspots ?? []) {
-    if (h.kind !== 'minigame' && h.kind !== 'shop' && h.kind !== 'venue') continue;
+    if (!['minigame', 'shop', 'venue', 'trader', 'telescope', 'logbook'].includes(h.kind)) continue;
     const lw = Math.max(64, (h.label?.length ?? 4) * 9 + 18);
     k.add([k.rect(lw, 22, { radius: 6 }), k.pos(h.x, h.y - 46), k.anchor('center'),
       k.color(k.Color.fromHex('#0d1c2b')), k.opacity(0.82), k.z(100000)]);
@@ -233,15 +258,18 @@ k.scene('room', (roomId, opts = {}) => {
   // it's driven from this same k.onUpdate, which KAPLAY simply never calls while paused.
   const spawnConfig = ROOM_SPAWN[roomId];
   const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, room.scale) : null;
+  const anchorLayer = spawnRoomAnchors(k, room, ANCHOR_CHARACTERS, reduceMotion);
 
   // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. Minigames, shops,
-  // venues, signs and doors are actionable; NPCs/landmarks stay promptless and
+  // venues, newspapers, anchors, signs and doors are actionable; NPCs/landmarks stay promptless and
   // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
   const hotspotInteractables = (room.hotspots ?? []).map((h) => ({
     id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label,
     prompt: h.prompt, copy: h.copy, entryDirection: h.entryDirection,
   }));
-  const doorInteractables = (room.doors ?? []).map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
+  const doorInteractables = (room.doors ?? [])
+    .filter((door) => !door.hidden)
+    .map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
   const interactPrompt = document.getElementById('interact-prompt');
   let nearest = null;
   let autoVenueLatch = null;
@@ -251,6 +279,12 @@ k.scene('room', (roomId, opts = {}) => {
     if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
     if (hit.kind === 'shop') return 'shop';
     if (hit.kind === 'venue') return 'venue';
+    if (hit.kind === 'newspaper') return 'newspaper';
+    if (hit.kind === 'trader') return 'trader';
+    if (hit.kind === 'telescope') return 'telescope';
+    if (hit.kind === 'logbook') return 'logbook';
+    if (hit.kind === 'echo') return 'echo';
+    if (hit.kind === 'character') return 'character';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
     return null;
@@ -269,6 +303,209 @@ k.scene('room', (roomId, opts = {}) => {
     changeScene(() => k.go('room', door.targetRoom, { spawn: door.targetSpawn ?? arriveSpawnId(roomId) }));
     return true;
   }
+
+  function revealRoomDoor(doorId) {
+    const door = (room.doors ?? []).find((entry) => entry.id === doorId);
+    if (!door || (!door.hidden && !door.locked)) return door ?? null;
+    door.hidden = false;
+    door.locked = false;
+    const existing = doorInteractables.find((entry) => entry.id === door.id);
+    if (existing) existing.door = door;
+    else doorInteractables.push({
+      id: door.id, pos: { x: door.x, y: door.y }, kind: 'door', label: door.label, door,
+    });
+    showMovePing(k, { x: door.x, y: door.y + 34 }, reduceMotion);
+    return door;
+  }
+
+  function applyDialogueEffects(effects) {
+    const events = [];
+    for (const effect of effects) {
+      const definition = favorById(effect.favorId);
+      if (!definition) continue;
+      if (effect.type === 'favor-offer') offerFavor(save, definition, events);
+      else if (effect.type === 'favor-start') startFavor(save, definition, events);
+    }
+    if (events.length) persist(save);
+    return events;
+  }
+
+  function advanceTrackedFavor(definition, stepId) {
+    const events = [];
+    if (!definition || !advanceFavor(save, definition, stepId, events)) return null;
+    persist(save);
+    return events;
+  }
+
+  function showFavorReward(events, copy) {
+    const reward = events?.find((event) => event.type === 'coins-earned');
+    if (!reward) return false;
+    refreshCoins(true);
+    showCoinSparkle(k, player.pos, reduceMotion);
+    showCoinToast(`+${reward.amount} coins — ${copy}`);
+    return true;
+  }
+
+  // Walking into an occupied berth is Edda's evidence. The date-resolved room prevents this from
+  // advancing on an away day or from seeing the undiscovered map pin.
+  if (roomId === 'docks' && room.docksState?.inPort) {
+    const bargeTip = favorById('edda-tip-barge-arrival');
+    if (currentFavorStep(save, bargeTip)?.id === 'witness-barge-in-port') {
+      const events = advanceTrackedFavor(bargeTip, 'witness-barge-in-port');
+      if (events) showCoinToast('Barge sighted — report the arrival to Edda');
+    }
+  }
+
+  function openCharacterDialogue(character, startNode) {
+    const tree = character?.dialogueTree;
+    if (!tree) {
+      showDialogue(character?.name, character?.linePools?.greeting?.[0] ?? 'The isle is listening.');
+      return;
+    }
+    const context = () => ({ todayKey: todayISO, favors: save.favors });
+    const first = startDialogue(tree, context(), startNode);
+    if (!first) return;
+
+    const render = (session) => {
+      dialogueUI.open({
+        name: character.name,
+        subtitle: character.subtitle,
+        portraitSrc: character.portraitAsset,
+        portraitAlt: `Portrait of ${character.name}`,
+        pages: session.pages,
+        choices: session.choices.map((choice) => ({ id: choice.id, label: choice.label })),
+        onChoice: (choice) => {
+          const atFinalPage = { ...session, pageIndex: Math.max(0, session.pages.length - 1) };
+          const result = chooseDialogue(tree, atFinalPage, choice.id, context());
+          if (!result) return false;
+          applyDialogueEffects(result.effects);
+          if (result.session.complete) {
+            dialogueUI.close();
+            return false;
+          }
+          render(result.session);
+          return false;
+        },
+      });
+    };
+    render(first);
+  }
+
+  function talkToCharacter(character) {
+    if (character.id === 'pat-hocket') {
+      const step = currentFavorStep(save, WEATHER_BELL_FAVOR);
+      if (step?.id === 'return-to-pat') {
+        const events = advanceTrackedFavor(WEATHER_BELL_FAVOR, 'return-to-pat');
+        showFavorReward(events, 'Weather Bell assembled!');
+        openCharacterDialogue(character, 'completed');
+        return;
+      }
+      const status = favorState(save, WEATHER_BELL_FAVOR.id)?.status;
+      const startNode = status === 'offered' ? 'greeting-offered'
+        : status === 'done' ? 'completed'
+          : step?.id === 'recover-court-coil' ? 'reminder-court'
+            : step?.id === 'recover-trail-vane' ? 'reminder-trail'
+              : step?.id === 'recover-docks-clapper' ? 'waiting-docks'
+                : 'greeting';
+      openCharacterDialogue(character, startNode);
+      return;
+    }
+    if (character.id === 'old-maren') {
+      const reportable = MAREN_SIGHTING_FAVORS.find((definition) =>
+        currentFavorStep(save, definition)?.id === 'report-to-maren');
+      if (reportable) {
+        const events = advanceTrackedFavor(reportable, 'report-to-maren');
+        showFavorReward(events, 'sighting entered in the keeper’s log');
+        const reportedNode = reportable.id === 'maren-sighting-vista' ? 'reported-vista'
+          : reportable.id === 'maren-sighting-trail' ? 'reported-trail' : 'reported-gull';
+        openCharacterDialogue(character, reportedNode);
+        return;
+      }
+      const [vista, trail, gull] = MAREN_SIGHTING_FAVORS;
+      const vistaState = favorState(save, vista.id);
+      const trailState = favorState(save, trail.id);
+      const gullState = favorState(save, gull.id);
+      const startNode = !vistaState ? 'offer-vista'
+        : vistaState.status === 'offered' ? 'greeting-vista-offered'
+          : vistaState.status === 'in-progress' ? 'reminder-vista'
+            : !trailState ? 'offer-trail'
+              : trailState.status === 'offered' ? 'greeting-trail-offered'
+                : trailState.status === 'in-progress' ? 'reminder-trail'
+                  : !gullState ? 'offer-gull'
+                    : gullState.status === 'offered' ? 'greeting-gull-offered'
+                      : gullState.status === 'in-progress' ? 'reminder-gull' : 'completed';
+      openCharacterDialogue(character, startNode);
+      return;
+    }
+    if (character.id === 'vesper') {
+      const trade = nextVesperHint(save, CURIO_REGISTRY);
+      const events = [];
+      const hint = claimVesperHint(save, CURIO_REGISTRY, events);
+      const greeting = dailyLine(character.linePools.greeting, todayISO, 'vesper-greeting');
+      const pages = [greeting];
+      if (hint) {
+        pages.push(`You show Vesper ${trade.found} stamped Curios. The fox studies every mark before offering one secret.`);
+        pages.push(hint.text);
+        if (hint.unlocks === 'moonwell') {
+          revealRoomDoor('door-moonwell');
+          pages.push('Moonlight threads the north pines. The gap is a door now.');
+          showCoinToast('Moonwell revealed — the north-pine gap is now a door');
+        }
+        if (hint.unlocks === 'caverns') {
+          revealRoomDoor('door-cavern-crack');
+          pages.push("The roots draw back. Far away, Pat's dumbwaiter answers with the same clear note. Both ways below are open.");
+          showCoinToast('Hollowfrost opened — root-crack and dumbwaiter unlocked');
+        }
+        persist(save);
+      } else if (trade.complete) {
+        pages.push('You have heard every secret Vesper will trade for a stamped page. For now.');
+      } else {
+        pages.push(`Your Curio Log carries ${trade.found} stamps. Bring ${trade.hint.requiredCurios} and Vesper will trade the next hint.`);
+        pages.push(`${trade.remaining} more ${trade.remaining === 1 ? 'Curio' : 'Curios'} should persuade the fox.`);
+      }
+      dialogueUI.open({
+        name: character.name,
+        subtitle: character.subtitle,
+        portraitSrc: character.portraitAsset,
+        portraitAlt: `Portrait of ${character.name}`,
+        pages,
+      });
+      return;
+    }
+    if (character.id !== 'edda-quill') {
+      openCharacterDialogue(character, character.dialogueTree?.start);
+      return;
+    }
+
+    const reportable = EDDA_STORY_TIP_FAVORS.find((definition) =>
+      currentFavorStep(save, definition)?.id === 'report-to-edda');
+    if (reportable) {
+      const events = advanceTrackedFavor(reportable, 'report-to-edda');
+      showFavorReward(events, 'story tip filed!');
+      openCharacterDialogue(character,
+        reportable.id === 'edda-tip-workshop-test' ? 'reported-workshop'
+          : reportable.id === 'edda-tip-barge-arrival' ? 'reported-barge' : 'reported');
+      return;
+    }
+
+    const trailTip = favorById('edda-tip-trail-glint');
+    const workshopTip = favorById('edda-tip-workshop-test');
+    const bargeTip = favorById('edda-tip-barge-arrival');
+    const trailStatus = favorState(save, trailTip.id)?.status;
+    const workshopStatus = favorState(save, workshopTip.id)?.status;
+    const bargeStatus = favorState(save, bargeTip.id)?.status;
+    const startNode = trailStatus === 'offered' ? 'greeting-offered'
+      : trailStatus === 'in-progress' ? 'greeting-progress'
+        : trailStatus !== 'done' ? 'greeting'
+          : workshopStatus === 'offered' ? 'greeting-workshop-offered'
+            : workshopStatus === 'in-progress' ? 'greeting-workshop-progress'
+              : workshopStatus !== 'done' ? 'greeting-next-tip'
+                : bargeStatus === 'offered' ? 'greeting-barge-offered'
+                  : bargeStatus === 'in-progress' ? 'greeting-barge-progress'
+                    : bargeStatus === 'done' ? 'greeting-done' : 'greeting-barge-lead';
+    openCharacterDialogue(character, startNode);
+  }
+
   function doInteract() {
     if (anyOverlayOpen()) return; // 'e' typed into the chat box (or any open modal) must not interact
     const action = actionFor(nearest);
@@ -281,6 +518,21 @@ k.scene('room', (roomId, opts = {}) => {
       dressUp.open();
     } else if (action === 'venue') {
       enterVenue(nearest);
+    } else if (action === 'newspaper') {
+      newspaperUI.open();
+    } else if (action === 'trader') {
+      traderUI.open();
+    } else if (action === 'telescope') {
+      telescopeUI.open();
+    } else if (action === 'logbook') {
+      dialogueUI.open({
+        name: 'Keeper’s Logbook', subtitle: 'Palefire sighting record',
+        pages: lighthouseLogbookPages(save),
+      });
+    } else if (action === 'echo') {
+      echoLayer?.singNext();
+    } else if (action === 'character') {
+      talkToCharacter(nearest.character);
     } else if (action === 'door') {
       const d = nearest.door;
       if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
@@ -390,7 +642,7 @@ k.scene('room', (roomId, opts = {}) => {
     getOwnedCount: (id) => save.furniture[id] ?? 0,
     onBuy: (id) => {
       const item = furnitureById(id);
-      if (!item || !spendCoins(save, item.price)) return;
+      if (!item || item.rewardOnly || !spendCoins(save, item.price)) return;
       addToInventory(save.furniture, id, []);
       syncEditUI();
     },
@@ -468,21 +720,116 @@ k.scene('room', (roomId, opts = {}) => {
   // engine/travel.js guard decides legality so the rules stay testable headless.
   const mapUI = createMap({
     getCurrent: () => roomId,
+    isDiscovered: (target) => save.visitedRooms.includes(target),
     onTravel: (target) => {
       // frozen:false is correct (the map closed itself before calling back); inMinigame is the
       // real module-level flag so a stale scene closure can never travel out of a running game.
-      const res = canTravel({ frozen: false, inMinigame, currentRoomId: roomId }, nodeByRoom(target));
+      const node = nodeByRoom(target);
+      const discoveredNode = discoveredTravelNode(node, save.visitedRooms);
+      const res = canTravel({ frozen: false, inMinigame, currentRoomId: roomId }, discoveredNode);
       if (!res.ok) return;
       if (interactPrompt) interactPrompt.classList.remove('show');
       changeScene(() => k.go('room', target, { spawn: 'fromMap' }));
     },
   });
+  const journalUI = createJournal({
+    registry: CURIO_REGISTRY,
+    getState: () => save.curios,
+    getRoomLabel: (id) => ROOM_REGISTRY[id]?.title ?? id,
+  });
+  const newspaperUI = createNewspaper({
+    getIssue: () => chirperIssueForDate(todayISO),
+  });
+  const traderUI = createTraderStall({
+    getStock: () => room.docksState?.inPort ? salkaStockForDate(todayISO) : [],
+    getCoins: () => save.coins,
+    isOwned: (itemId) => save.ownedItems.includes(itemId),
+    onBuy: (item) => {
+      const events = [];
+      if (!unlockItem(save, item.id, item.price, events)) {
+        return { ok: false, message: `You need ${item.price - save.coins} more coins.` };
+      }
+      equipItem(save, item.slot, item.id, events);
+      persist(save);
+      avatar.apply(save.avatar);
+      refreshCoins(true);
+      return { ok: true, message: `${item.label} added and equipped.` };
+    },
+  });
+  const telescopeUI = createTelescope({
+    getVista: () => telescopeVistaForDate(todayISO),
+    onView: (vista) => {
+      const vistaFavor = favorById('maren-sighting-vista');
+      if (currentFavorStep(save, vistaFavor)?.id === 'view-telescope-vista') {
+        const events = advanceTrackedFavor(vistaFavor, 'view-telescope-vista');
+        if (events) showCoinToast('Vista recorded — report what stayed with you to Old Maren');
+      }
+      const gullFavor = favorById('maren-sighting-gull');
+      if (vista.id === 'salka-at-sea' && currentFavorStep(save, gullFavor)?.id === 'spot-salka-at-sea') {
+        const events = advanceTrackedFavor(gullFavor, 'spot-salka-at-sea');
+        if (events) showCoinToast('The Gull sighted — report Salka’s course to Old Maren');
+      }
+    },
+  });
   const anyOverlayOpen = () =>
-    transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || dialogueIsOpen() ||
+    transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || journalUI.isOpen() ||
+    newspaperUI.isOpen() || dialogueUI.isOpen() || traderUI.isOpen() || telescopeUI.isOpen() ||
     editMode.isOpen() || catalogUI.isOpen();
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
+  const journalBtn = document.getElementById('journal-btn');
+  if (journalBtn) journalBtn.onclick = () => {
+    if (journalUI.isOpen()) journalUI.close();
+    else if (!anyOverlayOpen()) journalUI.open();
+  };
+  k.onKeyPress('j', () => { if (!anyOverlayOpen()) journalUI.open(); });
+
+  // Direct-click props use one scene-scoped mouse path. touchToMouse synthesizes that path for taps,
+  // so no parallel touch listener exists and a Curio can never register twice from one tap.
+  const clickableLayer = spawnClickables(k, {
+    props: room.clickables ?? [],
+    anyOverlayOpen,
+    reducedMotion: reduceMotion,
+    isEnabled: (prop) => {
+      if (prop.requiresProximity && Math.hypot(player.pos.x - prop.x, player.pos.y - prop.y) > 120) return false;
+      if (!prop.onlyWhenFavorStep) return true;
+      const link = prop.favorStep;
+      const definition = favorById(link?.favorId);
+      return Boolean(definition && currentFavorStep(save, definition)?.id === link.stepId);
+    },
+    onReaction: (prop) => {
+      if (roomId === 'caverns' && prop.reaction === 'chime') echoLayer?.singNext();
+      const link = prop.favorStep;
+      if (!link) return;
+      const definition = favorById(link.favorId);
+      const events = advanceTrackedFavor(definition, link.stepId);
+      if (!events) return;
+      if (!showFavorReward(events, definition.title)) {
+        showCoinToast(link.successText ?? `${definition.title}: ${link.stepId}`);
+      }
+    },
+    onCurio: (curioId) => {
+      const events = [];
+      if (!discoverCurio(save, CURIO_REGISTRY, curioId, events)) return;
+      const isleComplete = claimIsleCompletionReward(save, CURIO_REGISTRY, events);
+      persist(save);
+      journalUI.refresh();
+      const coinEvent = events.find((event) => event.type === 'coins-earned');
+      if (coinEvent) refreshCoins(true);
+      const curio = curioById(CURIO_REGISTRY, curioId);
+      if (isleComplete) {
+        auroraLayer?.refresh();
+        dressUp.render();
+        syncEditUI();
+        showCoinToast('Isle complete — Echoglass Lantern and den trophy earned');
+        return;
+      }
+      showCoinToast(coinEvent
+        ? `${curio?.label ?? 'Curio'} found — room complete! +${coinEvent.amount} coins`
+        : `Curio found: ${curio?.label ?? 'new discovery'}`);
+    },
+  });
 
   // Decorate button — den-only (kept out of HUD_BTN_IDS so setHudVisible can't unhide it elsewhere).
   const editBtn = document.getElementById('edit-btn');
@@ -533,6 +880,7 @@ k.scene('room', (roomId, opts = {}) => {
   // canvas presses to the furniture editor (the tray is non-modal by design).
   k.onMousePress(() => {
     if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
+    if (clickableLayer.consumePress()) { moveTarget = null; return; }
     if (!anyOverlayOpen()) {
       moveTarget = collidePlayer(k.toWorld(k.mousePos()));
       showMovePing(k, moveTarget, reduceMotion);
@@ -543,7 +891,7 @@ k.scene('room', (roomId, opts = {}) => {
     // routed ONLY through onMousePress — wiring it here too would double-fire on one tap
     // (double stock burn / duplicate placement — H2 review blocker). The idempotent moveTarget
     // assignment is safe to keep on both paths.
-    if (!anyOverlayOpen()) moveTarget = collidePlayer(k.toWorld(pos));
+    if (!anyOverlayOpen() && !clickableLayer.contains(k.toWorld(pos))) moveTarget = collidePlayer(k.toWorld(pos));
   });
 
   k.onUpdate(() => {
@@ -610,10 +958,13 @@ k.scene('room', (roomId, opts = {}) => {
       const pdy = player.pos.y - p.obj.pos.y;
       if (pdx * pdx + pdy * pdy < 40 * 40) {
         if (collectPickup(save, p.id, todayISO, [])) {
+          const trailTip = favorById('edda-tip-trail-glint');
+          const witnessed = currentFavorStep(save, trailTip)?.id === 'witness-trail-glint'
+            && advanceFavor(save, trailTip, 'witness-trail-glint', []);
           refreshCoins(true);
           persist(save);
           showCoinSparkle(k, p.obj.pos, reduceMotion);
-          showCoinToast('+1 coin!');
+          showCoinToast(witnessed ? 'Story tip witnessed — report to Edda!' : '+1 coin!');
         }
         k.destroy(p.obj);
         pickupObjs.splice(i, 1);
@@ -656,7 +1007,7 @@ k.scene('room', (roomId, opts = {}) => {
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];
     nearest = findNearestInteractable(
       player.pos,
-      mergeInteractables(hotspotInteractables.concat(doorInteractables), liveNpcs),
+      mergeInteractables(hotspotInteractables.concat(doorInteractables, anchorLayer.interactables), liveNpcs),
       undefined,
       { isActionable: (c) => actionFor(c) !== null },
     );
@@ -667,6 +1018,11 @@ k.scene('room', (roomId, opts = {}) => {
           action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
           action === 'shop' ? '👕 Dress Up' :
           action === 'venue' ? `🏪 ${nearest.prompt ?? `Visit ${nearest.label}`}` :
+          action === 'newspaper' ? `📰 ${nearest.prompt ?? `Read ${nearest.label}`}` :
+          action === 'telescope' ? `🔭 ${nearest.prompt ?? 'Look through the telescope'}` :
+          action === 'logbook' ? `📖 ${nearest.prompt ?? 'Read the logbook'}` :
+          action === 'echo' ? `♪ ${nearest.prompt ?? 'Listen for The Echo'}` :
+          action === 'character' ? `💬 Talk to ${nearest.label}` :
           action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');

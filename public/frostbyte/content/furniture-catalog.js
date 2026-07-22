@@ -10,6 +10,7 @@
  * @property {number} price    coins; 50–800 inclusive
  * @property {number} w        native sprite width (px)
  * @property {number} h        native sprite height (px)
+ * @property {boolean} [rewardOnly] hidden from the shop until earned
  */
 
 export const FURNITURE_CLASSES = ['seating', 'tables', 'lighting', 'rugs', 'decor', 'tech'];
@@ -17,7 +18,7 @@ export const FURNITURE_CLASSES = ['seating', 'tables', 'lighting', 'rugs', 'deco
 export const MAX_PLACED = 30;  // per-home cap (perf + save size)
 
 /**
- * Complete furniture catalog: 19 home furnishing items across 6 categories.
+ * Complete furniture catalog: 20 home furnishing items across 6 categories.
  * @type {FurnitureItem[]}
  */
 export const FURNITURE_CATALOG = [
@@ -42,6 +43,7 @@ export const FURNITURE_CATALOG = [
   { id: 'snow-bonsai', label: 'Snowdrift Bonsai', cls: 'decor', price: 280, w: 20, h: 24 },
   { id: 'penguin-portrait', label: 'Penguin Portrait', cls: 'decor', price: 500, w: 24, h: 28 },
   { id: 'trophy-shelf', label: 'Trophy Shelf', cls: 'decor', price: 450, w: 32, h: 20 },
+  { id: 'hollowfrost-trophy', label: 'Hollowfrost Echo Trophy', cls: 'decor', price: 0, w: 24, h: 28, rewardOnly: true },
   // tech (3)
   { id: 'snowputer', label: 'Snowputer', cls: 'tech', price: 800, w: 24, h: 24 },
   { id: 'record-box', label: 'Record Box', cls: 'tech', price: 380, w: 20, h: 20 },

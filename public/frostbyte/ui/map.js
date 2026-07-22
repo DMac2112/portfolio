@@ -46,6 +46,7 @@ function injectStyles() {
     .map-pin { position:absolute; transform:translate(-50%, -50%); display:flex; flex-direction:column;
       align-items:center; gap:3px; font:inherit; border:none; background:none; padding:4px; margin:0;
       cursor:pointer; }
+    .map-pin[hidden] { display:none; }
     .map-pin-dot { width:16px; height:16px; border-radius:50%; background:var(--accent, #7fd6ff);
       border:2px solid #091827; box-shadow:0 0 0 3px #7fd6ff33, 0 3px 8px #020914cc; }
     .map-pin-label { font-size:11px; font-weight:800; color:#edf8ff; background:#091827df;
@@ -135,18 +136,20 @@ function buildDom() {
 // the pin click handlers close over `cb`, not over the `getCurrent`/`onTravel` params directly, so
 // rebinding never requires touching a listener.
 let instance = null;
-const cb = { getCurrent: () => null, onTravel: () => {} };
+const cb = { getCurrent: () => null, isDiscovered: () => true, onTravel: () => {} };
 
 /**
- * @param {{ getCurrent: () => string, onTravel: (roomId:string) => void }} opts
+ * @param {{ getCurrent: () => string, isDiscovered?: (roomId:string) => boolean,
+ *   onTravel: (roomId:string) => void }} opts
  *   getCurrent() returns the player's current roomId (e.g. save.lastRoom-derived); its pin renders
  *   as "You are here" and is not clickable. onTravel(roomId) is called after the overlay has already
  *   closed — the caller is responsible for the actual k.go('room', roomId, {spawn:'fromMap'}) call
  *   and any frozen/minigame guards before ever invoking open().
  * @returns {{ open:()=>void, close:()=>void, isOpen:()=>boolean }} the same instance on every call.
  */
-export function createMap({ getCurrent, onTravel }) {
+export function createMap({ getCurrent, isDiscovered = () => true, onTravel }) {
   cb.getCurrent = getCurrent;
+  cb.isDiscovered = isDiscovered;
   cb.onTravel = onTravel;
   if (instance) return instance; // DOM already built — later scene entries just rebind above.
 
@@ -160,8 +163,10 @@ export function createMap({ getCurrent, onTravel }) {
       const btn = pinEls.get(node.roomId);
       const label = btn.querySelector('.map-pin-label');
       const isCurrent = node.roomId === current;
-      const enabled = node.unlocked && !isCurrent;
+      const discovered = !node.unlocked || isCurrent || Boolean(cb.isDiscovered?.(node.roomId));
+      const enabled = node.unlocked && discovered && !isCurrent;
 
+      btn.hidden = !discovered;
       btn.classList.toggle('is-current', isCurrent);
       btn.classList.toggle('is-locked', !node.unlocked);
       btn.disabled = !enabled;

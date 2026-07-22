@@ -35,6 +35,7 @@ export const BODY_COLORS = [
  * @property {'common'|'uncommon'|'rare'|'epic'} rarity
  * @property {number} price
  * @property {string} tint  overlay tint hex (cosmetic sheets are grayscale, recoloured per item)
+ * @property {boolean} [rewardOnly] hidden from shops until earned
  */
 export const ITEM_CATALOG = [
   // hats
@@ -55,6 +56,10 @@ export const ITEM_CATALOG = [
   { id: 'bubble-wand', slot: 'held', label: 'Bubble Wand', rarity: 'uncommon', price: 40, tint: '#7fd6ff' },
   { id: 'snowball', slot: 'held', label: 'Snowball', rarity: 'uncommon', price: 40, tint: '#eef4fa' },
   { id: 'sparkler-wand', slot: 'held', label: 'Sparkler Wand', rarity: 'epic', price: 120, tint: '#ffe08a' },
+  {
+    id: 'echoglass-lantern', slot: 'held', label: 'Echoglass Lantern', rarity: 'epic', price: 0,
+    tint: '#72e2bd', rewardOnly: true,
+  },
 ];
 
 /** All equip slots (Avatar §4). Body colour is a direct property, not a slot. */

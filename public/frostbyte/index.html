@@ -31,15 +31,37 @@
     #dialogue-overlay { position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end;
       justify-content:center; padding:0 0 max(18px, env(safe-area-inset-bottom)); background:#0006; }
     #dialogue-overlay.hidden { display:none; }
-    #dialogue-box { width:min(680px, 94vw); background:#fbfbfe; color:#1a1a22; border-radius:16px;
-      box-shadow:0 18px 50px #000a; padding:18px 20px; border:3px solid #0d1c2b; }
-    #dialogue-header { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+    #dialogue-box { width:min(760px, 94vw); display:grid; grid-template-columns:1fr; gap:14px;
+      background:#fbfbfe; color:#1a1a22; border-radius:16px; box-shadow:0 18px 50px #000a;
+      padding:16px; border:3px solid #0d1c2b; }
+    #dialogue-box.has-portrait { grid-template-columns:150px minmax(0, 1fr); }
+    #dialogue-portrait-frame { align-self:stretch; min-height:176px; margin:0; overflow:hidden;
+      display:grid; place-items:end center; border:5px solid #3b281d; border-radius:10px;
+      background:linear-gradient(#cfe0f2, #7fa1ba); box-shadow:inset 0 0 0 3px #8b6042; }
+    #dialogue-portrait-frame[hidden] { display:none; }
+    #dialogue-portrait { display:block; width:100%; height:100%; object-fit:cover; }
+    #dialogue-content { min-width:0; display:flex; flex-direction:column; }
+    #dialogue-header { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+    #dialogue-name-plaque { display:inline-flex; align-items:baseline; gap:9px; padding:6px 12px;
+      border:2px solid #3b281d; border-radius:6px; background:#6b4a33; box-shadow:inset 0 0 0 2px #8b6042; }
     #dialogue-title { margin:0; font-size:19px; }
-    #dialogue-body { font-size:16px; line-height:1.55; min-height:2.6em; }
+    #dialogue-subtitle { font-size:12px; color:#cfe0f2; font-weight:700; }
+    #dialogue-body { font-size:16px; line-height:1.55; min-height:2.6em; white-space:pre-line; }
+    #dialogue-page { min-height:1.2em; margin-top:7px; color:#a9c6d9; font-size:12px; font-weight:800; }
+    #dialogue-choices { display:grid; gap:8px; margin-top:12px; }
+    #dialogue-choices:empty { display:none; }
+    #dialogue-choices button { width:100%; text-align:left; font:inherit; font-weight:750; cursor:pointer;
+      padding:9px 12px; border:2px solid #3b281d; border-radius:7px; }
+    #dialogue-choices button:focus-visible { outline:3px solid #ffb45e; outline-offset:2px; }
     #dialogue-footer { display:flex; align-items:center; gap:10px; margin-top:16px; }
     #dialogue-footer button { font:inherit; font-weight:700; border-radius:10px; padding:9px 15px;
       cursor:pointer; border:2px solid #0d1c2b; background:#fff; }
     #dialogue-close { margin-left:auto; background:#122a42 !important; color:#fff; }
+    @media (max-width:520px) {
+      #dialogue-box.has-portrait { grid-template-columns:86px minmax(0, 1fr); gap:10px; }
+      #dialogue-portrait-frame { min-height:108px; }
+      #dialogue-body { font-size:14px; }
+    }
 
     /* ---- Dress Up HUD button ---- */
     #dressup-btn { position:fixed; z-index:6; right:12px; bottom:14px; pointer-events:auto;
@@ -99,10 +121,12 @@
     #edit-btn:active { transform:translateY(1px); }
     /* Island map button — pinned bottom-left, the classic corner (FROSTBYTE-HOME-PLAN §2.1);
        the emote bar shifts right to make room. */
-    #map-btn { position:fixed; z-index:6; left:12px; bottom:14px; pointer-events:auto; font-size:18px;
+    #map-btn, #journal-btn { position:fixed; z-index:6; left:12px; pointer-events:auto; font-size:18px;
       line-height:1; width:40px; height:40px; border:none; border-radius:12px; color:#0d1c2b;
       background:var(--accent); cursor:pointer; box-shadow:0 2px 8px #0006; }
-    #map-btn:active { transform:translateY(1px); }
+    #map-btn { bottom:14px; }
+    #journal-btn { bottom:62px; }
+    #map-btn:active, #journal-btn:active { transform:translateY(1px); }
     #emote-bar { position:fixed; z-index:6; left:60px; bottom:14px; display:flex; gap:6px; pointer-events:auto; }
     #emote-bar[hidden] { display:none; }
     .emote-btn { font-size:18px; line-height:1; width:40px; height:40px; border:none; border-radius:12px;
@@ -119,41 +143,52 @@
     html, body { background:var(--bg); color:var(--ink); font-family:"Segoe UI", system-ui, sans-serif; }
     #titlebar { padding:10px 14px 24px; background:linear-gradient(180deg, #091827f5 0%, #0d2238bd 48%, transparent 100%); }
     #titlebar .name { color:#f7fbff; letter-spacing:.9px; text-shadow:0 2px 10px #7fd6ff99; }
-    #back-link, #dressup-btn, #say-btn, #edit-btn, #map-btn, .emote-btn,
+    #back-link, #dressup-btn, #say-btn, #edit-btn, #map-btn, #journal-btn, .emote-btn,
     #dialogue-footer button, #customize-close, .cz-tab {
       color:var(--ink); background:linear-gradient(180deg, #193d59ed, #0d2238f2);
       border:1px solid var(--rim); box-shadow:inset 0 1px 0 #ffffff18, 0 5px 16px #02091480;
       transition:transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
     }
-    #back-link:hover, #dressup-btn:hover, #say-btn:hover, #edit-btn:hover, #map-btn:hover,
+    #back-link:hover, #dressup-btn:hover, #say-btn:hover, #edit-btn:hover, #map-btn:hover, #journal-btn:hover,
     .emote-btn:hover, #dialogue-footer button:hover, #customize-close:hover, .cz-tab:hover {
       background:linear-gradient(180deg, #245373f2, #122a42f5); border-color:#7fd6ffaa;
       box-shadow:inset 0 1px 0 #ffffff20, 0 6px 20px #020914a8, 0 0 0 1px #7fd6ff22;
     }
     #back-link:focus-visible, #dressup-btn:focus-visible, #say-btn:focus-visible, #edit-btn:focus-visible,
-    #map-btn:focus-visible, .emote-btn:focus-visible, #dialogue-footer button:focus-visible,
+    #map-btn:focus-visible, #journal-btn:focus-visible, .emote-btn:focus-visible, #dialogue-footer button:focus-visible,
     #customize-close:focus-visible, .cz-tab:focus-visible, .cz-cell:focus-visible {
       outline:2px solid var(--accent); outline-offset:3px;
     }
     #dressup-btn, #say-btn, #edit-btn { color:var(--ink); background:linear-gradient(180deg, #245373ed, #122a42f2); }
-    #map-btn { color:var(--ink); background:linear-gradient(180deg, #245373f2, #122a42f5); }
+    #map-btn, #journal-btn { color:var(--ink); background:linear-gradient(180deg, #245373f2, #122a42f5); }
     .emote-btn { color:var(--ink); background:#0d2238dc; }
     #coin-counter, #customize-coins { color:#091827; background:linear-gradient(135deg, #c8f4ff, #7fd6ff 58%, #65c6ef); border:1px solid #f7fbffaa; box-shadow:inset 0 1px 0 #fff, 0 5px 18px #02091499; }
     #coin-counter.bump { animation:coin-bump .38s cubic-bezier(.2,.9,.25,1.35); }
 
     #dialogue-overlay, #customize-overlay { background:#020914b8; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
-    #dialogue-box, #customize-panel {
+    #customize-panel {
       color:var(--ink); background:linear-gradient(155deg, #193d59f2, #0d2238f7 52%, #091827fa);
       border:1px solid var(--rim); border-radius:18px;
       box-shadow:inset 0 1px 0 #ffffff20, 0 22px 70px var(--shadow), 0 0 0 1px #091827;
       backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
     }
+    #dialogue-box { color:var(--ink); background:linear-gradient(145deg, #7c583d, #6b4a33 55%, #4c3426);
+      border:5px solid #3b281d; border-radius:12px; box-shadow:inset 0 0 0 3px #9a6b48,
+      0 22px 70px var(--shadow); }
+    #dialogue-content { padding:2px 4px; }
+    #dialogue-body { color:#e8f3fc; padding:13px 14px; border:2px solid #274861; border-radius:8px;
+      background:linear-gradient(160deg, #193d59, #122a42); box-shadow:inset 0 0 18px #091827aa; }
+    #dialogue-name-plaque { border-color:#2f2018; background:linear-gradient(#7c583d, #5b3e2d);
+      box-shadow:inset 0 0 0 2px #9a6b48, 0 3px 0 #2f2018; }
     #customize-panel, #catalog-panel, #map-panel, #chat-panel, #edit-tray-strip { scrollbar-width:thin; scrollbar-color:#3b8fb8 #091827; }
     :is(#customize-panel, #catalog-panel, #map-panel, #chat-panel, #edit-tray-strip)::-webkit-scrollbar { width:9px; height:8px; }
     :is(#customize-panel, #catalog-panel, #map-panel, #chat-panel, #edit-tray-strip)::-webkit-scrollbar-track { background:#091827; }
     :is(#customize-panel, #catalog-panel, #map-panel, #chat-panel, #edit-tray-strip)::-webkit-scrollbar-thumb { background:#3b8fb8; border:2px solid #091827; border-radius:999px; }
     #dialogue-title, #customize-title { color:#f7fbff; letter-spacing:.25px; }
-    #dialogue-body { color:#dcecff; }
+    #dialogue-subtitle { color:#cfe0f2; }
+    #dialogue-page { color:#d6e5ef; }
+    #dialogue-choices button { color:#f7fbff; border-color:#c79a6b; background:linear-gradient(#7c583d, #5b3e2d); }
+    #dialogue-choices button:hover { border-color:#ffcf92; background:linear-gradient(#8b6042, #6b4a33); }
     #dialogue-footer button { border:1px solid var(--rim); }
     #dialogue-close { background:linear-gradient(180deg, #245373, #122a42) !important; color:var(--ink); }
     #customize-close { border:1px solid var(--rim); }
@@ -183,7 +218,7 @@
     @media (prefers-reduced-motion: reduce) {
       body::before { display:none; animation:none; }
       #interact-prompt.show, #coin-toast.show, #coin-counter.bump { animation:none; }
-      #back-link, #dressup-btn, #say-btn, #edit-btn, #map-btn, .emote-btn,
+      #back-link, #dressup-btn, #say-btn, #edit-btn, #map-btn, #journal-btn, .emote-btn,
       #dialogue-footer button, #customize-close, .cz-tab, .cz-cell { transition:none; }
     }
 
@@ -207,6 +242,7 @@
   <button id="say-btn" type="button">💬 Say</button>
   <button id="edit-btn" type="button" hidden>🖌️ Decorate</button>
   <button id="map-btn" type="button" aria-label="Island map (M)" title="Island map (M)">🗺️</button>
+  <button id="journal-btn" type="button" aria-label="Curio Log (J)" title="Curio Log (J)">📖</button>
   <div id="emote-bar" aria-label="Emotes"></div>
   <div id="chat-live" class="sr-only" aria-live="polite"></div>
 
@@ -226,13 +262,24 @@
   <!-- Dialogue overlay -->
   <div id="dialogue-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="dialogue-title">
     <div id="dialogue-box">
-      <header id="dialogue-header">
-        <h2 id="dialogue-title"></h2>
-      </header>
-      <div id="dialogue-body"></div>
-      <footer id="dialogue-footer">
-        <button id="dialogue-close" type="button" aria-label="Close">Close ✕</button>
-      </footer>
+      <figure id="dialogue-portrait-frame" hidden>
+        <img id="dialogue-portrait" alt="" />
+      </figure>
+      <section id="dialogue-content">
+        <header id="dialogue-header">
+          <div id="dialogue-name-plaque">
+            <h2 id="dialogue-title"></h2>
+            <span id="dialogue-subtitle" hidden></span>
+          </div>
+        </header>
+        <div id="dialogue-body"></div>
+        <div id="dialogue-page" aria-live="polite"></div>
+        <div id="dialogue-choices"></div>
+        <footer id="dialogue-footer">
+          <button id="dialogue-next" type="button" hidden>Next →</button>
+          <button id="dialogue-close" type="button" aria-label="Close">Close ✕</button>
+        </footer>
+      </section>
     </div>
   </div>
 

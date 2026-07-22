@@ -75,6 +75,13 @@ export function travelTargets(nodes) {
   return nodes.filter(n => n.unlocked);
 }
 
+/** Apply the saved first-walk discovery gate without mutating authored map content. */
+export function discoveredTravelNode(node, visitedRooms) {
+  if (!node) return null;
+  const visited = Array.isArray(visitedRooms) && visitedRooms.includes(node.roomId);
+  return { ...node, unlocked: Boolean(node.unlocked && visited) };
+}
+
 /**
  * Generate spawn point ID for arriving in a room from a specific source.
  * Capitalizes the first letter of sourceRoomId and prepends 'from'.
@@ -144,9 +151,9 @@ export function findAutoEnterDoor(pos, movement, doors, bounds, maxDist = AUTO_D
  * Returns an array of error strings (empty = valid).
  * Checks:
  * 1. Every unlocked map node has a roomId that exists in the registry.
- * 2. Every unlocked room in registry has at least one unlocked door OR is reachable via the map
- *    (since the map connects all unlocked nodes, just verify each unlocked room exists).
+ * 2. Every registry room has an unlocked door or a shipped map node.
  * 3. Every door with locked:false points to a room that exists in the registry.
+ * 4. Every shipped map room is reachable through unlocked walkable doors from the first node.
  * @param {MapNode[]} nodes       // all map nodes
  * @param {Object} registry       // room registry (rooms by roomId)
  * @returns {string[]}            // array of error strings
@@ -186,6 +193,27 @@ export function validateWorldGraph(nodes, registry) {
         if (!door.locked && !registryRoomIds.has(door.targetRoom)) {
           errors.push(`Door '${door.id}' in room '${roomId}' targets non-existent room '${door.targetRoom}'`);
         }
+      }
+    }
+  }
+
+  // Check 4: map travel unlocks only after first walk-in, so the authored door graph itself must
+  // reach every shipped map room. This becomes meaningful with W3's first multi-hop branch.
+  if (unlockedNodes.length > 0) {
+    const startRoomId = unlockedNodes[0].roomId;
+    const visited = new Set(registryRoomIds.has(startRoomId) ? [startRoomId] : []);
+    const queue = [...visited];
+    while (queue.length) {
+      const roomId = queue.shift();
+      for (const door of registry[roomId]?.doors ?? []) {
+        if (door.locked || !registryRoomIds.has(door.targetRoom) || visited.has(door.targetRoom)) continue;
+        visited.add(door.targetRoom);
+        queue.push(door.targetRoom);
+      }
+    }
+    for (const node of unlockedNodes) {
+      if (registryRoomIds.has(node.roomId) && !visited.has(node.roomId)) {
+        errors.push(`Unlocked room '${node.roomId}' is not walkable from '${startRoomId}'`);
       }
     }
   }
