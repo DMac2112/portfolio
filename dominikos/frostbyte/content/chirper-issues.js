@@ -18,9 +18,9 @@ export const CHIRPER_ISSUES = Object.freeze([
     articles: Object.freeze([
       Object.freeze({ title: 'Postbox Develops a Rattle', body: 'No parcels are missing, but one red box sounds suspiciously pleased with itself.' }),
       Object.freeze({ title: 'Awning Snowfall Highly Local', body: 'A single Court awning released its entire snowcap at noon. The pavement directly beneath has declined comment.' }),
-      Object.freeze({ title: 'Workshop Lamps Still Dark', body: 'A warm flicker was seen behind the Emberlight shutters. Opening day remains, officially, “when it works.”' }),
+      Object.freeze({ title: 'Workshop Door Finally Unstuck', body: 'Emberlight Workshop is open. Visitors are advised that “do not touch” means Pat has not tested it twice yet.' }),
     ]),
-    hint: Object.freeze({ targetId: 'court-loose-cobble', text: 'Editor’s hunch: not every note in the Court comes from the hanging chimes.' }),
+    hint: Object.freeze({ targetId: 'workshop-gizmo-chain', text: 'Editor’s hunch: the busiest shelf in Emberlight does seven things when poked, perhaps eight.' }),
   }),
   Object.freeze({
     id: 'small-noises',
@@ -29,7 +29,7 @@ export const CHIRPER_ISSUES = Object.freeze([
       Object.freeze({ title: 'Patio Mittens Seek Owner', body: 'One violet pair remains beside the late table. They are dry, warm, and almost certainly up to something.' }),
       Object.freeze({ title: 'Harbor Road Surveyed', body: 'Fresh marker posts appeared east of the Court. The route ends at a great deal of snow—for now.' }),
     ]),
-    hint: Object.freeze({ targetId: 'court-postbox-rattle', text: 'Editor’s hunch: the postbox has more to say than the letters inside it.' }),
+    hint: Object.freeze({ targetId: 'workshop-tube-thunk', text: 'Editor’s hunch: the Workshop message tube sounds heavier than an empty pipe.' }),
   }),
   Object.freeze({
     id: 'ice-under-ink',

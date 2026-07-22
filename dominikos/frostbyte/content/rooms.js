@@ -36,7 +36,7 @@ export const ROOM_REGISTRY = {
     doors: [
       { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 456, targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' },
-      { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 360, targetRoom: 'workshop', locked: true, lockedCopy: "The workshop lamps aren't lit yet." },
+      { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 360, targetRoom: 'workshop', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-den', label: 'Your Den', x: 720, y: 936, targetRoom: 'den', locked: false, targetSpawn: 'fromPlaza' },
     ],
     // Rendered + collidable in the S1 spike: fountain/pond only (what room-plaza.png actually paints).
@@ -112,6 +112,17 @@ export const ROOM_REGISTRY = {
       { id: 'trail-glint-2', x: 720, y: 300 },
       { id: 'trail-glint-3', x: 1150, y: 500 },
       { id: 'trail-glint-4', x: 500, y: 250 },
+    ],
+    clickables: [
+      {
+        id: 'weather-bell-vane', reaction: 'chime', x: 1104, y: 747, w: 72, h: 72,
+        line: 'A small brass vane has twisted itself around the old signpost.', reactionColor: '#ffb45e',
+        favorStep: {
+          favorId: 'pat-weather-bell-parts', stepId: 'recover-trail-vane',
+          successText: 'Weather Bell part 2/3 — final part waits at Driftgate Docks',
+        },
+        onlyWhenFavorStep: true,
+      },
     ],
   },
 
@@ -208,6 +219,93 @@ export const ROOM_REGISTRY = {
       {
         id: 'loose-cobble', reaction: 'hum', x: 900, y: 861, w: 90, h: 42,
         line: 'A low note hums beneath the ice, then slips deeper.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'weather-bell-coil', reaction: 'chime', x: 411, y: 744, w: 60, h: 60,
+        line: 'A warm brass spiral is hiding beneath the companion pen rail.', reactionColor: '#ffb45e',
+        favorStep: {
+          favorId: 'pat-weather-bell-parts', stepId: 'recover-court-coil',
+          successText: 'Weather Bell part 1/3 — next: Frostline Trail',
+        },
+        onlyWhenFavorStep: true,
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Emberlight Workshop — Pat Hocket's forge-warm tinkering room and the Weather Bell project.
+  workshop: {
+    id: 'workshop',
+    title: 'Emberlight Workshop',
+    mapAsset: 'room-workshop',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:   { x: 720, y: 690, facing: 'up' },
+      fromPlaza: { x: 720, y: 820, facing: 'up' },
+      fromMap:   { x: 780, y: 690, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'weather-bell', label: 'The Weather Bell', kind: 'landmark', x: 720, y: 390 },
+    ],
+    doors: [
+      { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 888, targetRoom: 'plaza', locked: false, targetSpawn: 'fromWorkshop' },
+    ],
+    solids: [
+      { id: 'weather-bell', x: 720, y: 390, w: 180, h: 170 },
+      { id: 'pat-bench', x: 1080, y: 300, w: 300, h: 120 },
+      { id: 'gizmo-shelf', x: 300, y: 270, w: 220, h: 130 },
+      { id: 'forge-bellows', x: 270, y: 600, w: 190, h: 160 },
+      { id: 'pneumatic-tube', x: 1170, y: 230, w: 84, h: 150 },
+      { id: 'snowputer', x: 1140, y: 690, w: 120, h: 90 },
+      { id: 'pat-station', x: 1080, y: 450, w: 60, h: 72 },
+    ],
+    anchors: [
+      { characterId: 'pat-hocket', x: 1080, y: 480 },
+    ],
+    clickables: [
+      {
+        id: 'bellows-puff', curioId: 'workshop-bellows-puff', reaction: 'steam',
+        x: 270, y: 600, w: 126, h: 120,
+        line: 'The bellows sighs out one coal-scented cloud.', reactionColor: '#f5fbff',
+      },
+      {
+        id: 'gizmo-chain', curioId: 'workshop-gizmo-chain', reaction: 'chain',
+        x: 300, y: 270, w: 210, h: 120,
+        line: 'Click. Zip. Bonk. Seven mechanisms celebrate doing almost nothing.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'tube-thunk', curioId: 'workshop-tube-thunk', reaction: 'rattle',
+        x: 1170, y: 230, w: 84, h: 150,
+        line: 'Thunk. The tube delivers a blank order slip and one warm washer.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'blueprint-cycle', curioId: 'workshop-blueprint-cycle', reaction: 'wave',
+        x: 720, y: 195, w: 270, h: 102, reactionColor: '#7fd6ff',
+        lines: [
+          'A rotating sketch proposes an umbrella for the lighthouse.',
+          'Next design: a kettle that whistles only when nobody is watching.',
+          'Final sheet: a tiny wheeled shelf labelled entirely in arrows.',
+        ],
+      },
+      {
+        id: 'snowputer', curioId: 'workshop-snowputer', reaction: 'snow',
+        x: 1140, y: 690, w: 120, h: 105,
+        line: 'The snowputer calculates: “probably flurries.” A tiny fan applauds.', reactionColor: '#cfe0f2',
+      },
+      {
+        id: 'weather-bell-test', reaction: 'chime', x: 720, y: 390, w: 210, h: 210,
+        line: 'The half-built Bell answers with one brave note and two nervous rattles.', reactionColor: '#ffb45e',
+        favorStep: {
+          favorId: 'edda-tip-workshop-test', stepId: 'witness-workshop-test',
+          successText: 'Story tip witnessed — report the test-firing to Edda!',
+        },
+      },
+      {
+        id: 'dumbwaiter-hatch', reaction: 'hum', x: 390, y: 795, w: 180, h: 90,
+        line: 'The hatch is locked. A draught below smells like cold stone.', reactionColor: '#6fe0b2',
       },
     ],
     npcSpawnAnchors: [],

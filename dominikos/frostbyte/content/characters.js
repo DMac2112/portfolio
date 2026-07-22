@@ -1,5 +1,5 @@
-// content/characters.js — approved anchor-character contracts (World Plan W0/W1).
-import { EDDA_STORY_TIP_FAVORS } from './favors.js';
+// content/characters.js — approved anchor-character contracts (World Plan W0–W2).
+import { EDDA_STORY_TIP_FAVORS, WEATHER_BELL_FAVOR } from './favors.js';
 
 export const ANCHOR_SLOTS = Object.freeze([
   Object.freeze({ id: 'court-editor', roomId: 'court', role: 'editor' }),
@@ -51,6 +51,27 @@ export const EDDA_DIALOGUE_TREE = Object.freeze({
         Object.freeze({ id: 'leave', label: 'I’ll keep looking around.', next: null }),
       ]),
     }),
+    'greeting-next-tip': Object.freeze({
+      pages: Object.freeze([EDDA_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'ask-workshop', label: 'Any Workshop leads?', next: 'offer-workshop' }),
+        Object.freeze({ id: 'leave', label: 'I’ll keep listening.', next: null }),
+      ]),
+    }),
+    'greeting-workshop-offered': Object.freeze({
+      pages: Object.freeze([EDDA_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'accept-workshop', label: 'I’ll witness the test.', next: 'accepted-workshop', effects: Object.freeze([{ type: 'favor-start', favorId: 'edda-tip-workshop-test' }]) }),
+        Object.freeze({ id: 'leave', label: 'I’ll return when my ears are ready.', next: null }),
+      ]),
+    }),
+    'greeting-workshop-progress': Object.freeze({
+      pages: Object.freeze([EDDA_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'remind-workshop', label: 'What should I listen for?', next: 'reminder-workshop' }),
+        Object.freeze({ id: 'leave', label: 'I’m still following the lead.', next: null }),
+      ]),
+    }),
     'offer-trail': Object.freeze({
       pages: Object.freeze([
         'Frostline Trail keeps flashing like it has something to say.',
@@ -70,14 +91,103 @@ export const EDDA_DIALOGUE_TREE = Object.freeze({
     accepted: Object.freeze({
       pages: Object.freeze(['Good. Watch the Trail, not your boots. The smallest flash may be the whole story.']),
     }),
+    'offer-workshop': Object.freeze({
+      pages: Object.freeze([
+        'Pat Hocket has a half-built Weather Bell and the confidence of someone holding a wrench.',
+        'Witness a test-firing in Emberlight Workshop, then bring me the sound in your own words.',
+      ]),
+      choices: Object.freeze([
+        Object.freeze({
+          id: 'take-workshop-tip', label: 'I’ll cover the test.', next: 'accepted-workshop',
+          effects: Object.freeze([
+            { type: 'favor-offer', favorId: 'edda-tip-workshop-test' },
+            { type: 'favor-start', favorId: 'edda-tip-workshop-test' },
+          ]),
+        }),
+        Object.freeze({ id: 'later', label: 'Let Pat tighten a few more bolts first.', next: null }),
+      ]),
+    }),
+    'accepted-workshop': Object.freeze({
+      pages: Object.freeze(['Excellent. Stand clear of the brass end, listen closely, and come straight back.']),
+    }),
     reminder: Object.freeze({
       pages: Object.freeze(['Catch one of the strange glints on Frostline Trail, then report back here.']),
+    }),
+    'reminder-workshop': Object.freeze({
+      pages: Object.freeze(['Visit Emberlight Workshop and click the Weather Bell when Pat is not looking worried.']),
     }),
     reported: Object.freeze({
       pages: Object.freeze(['A light that waits until someone notices it—yes, that earns a column. And your finder’s fee.']),
     }),
+    'reported-workshop': Object.freeze({
+      pages: Object.freeze(['A brass note with a wobble at the end. Perfect. That is much better than “it went bong.”']),
+    }),
     finished: Object.freeze({
       pages: Object.freeze(['Front page of the little-news section. Around here, little news travels furthest.']),
+    }),
+  }),
+});
+
+const PAT_DAILY_GREETING = Object.freeze({
+  daily: Object.freeze([
+    'If it clicks twice, duck once. That is the current rule.',
+    'The Bell predicts weather. At present it mostly predicts loose screws.',
+    'A good invention leaves room for one impossible component.',
+  ]),
+  salt: 'pat-greeting',
+});
+
+export const PAT_DIALOGUE_TREE = Object.freeze({
+  id: 'pat-workshop',
+  start: 'greeting',
+  nodes: Object.freeze({
+    greeting: Object.freeze({
+      pages: Object.freeze([PAT_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'ask-bell', label: 'What is the big brass machine?', next: 'offer-bell' }),
+        Object.freeze({ id: 'leave', label: 'I’ll keep my flippers clear.', next: null }),
+      ]),
+    }),
+    'greeting-offered': Object.freeze({
+      pages: Object.freeze([PAT_DAILY_GREETING]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'accept-bell', label: 'I’ll find the three parts.', next: 'accepted', effects: Object.freeze([{ type: 'favor-start', favorId: 'pat-weather-bell-parts' }]) }),
+        Object.freeze({ id: 'leave', label: 'I need a less metallic errand.', next: null }),
+      ]),
+    }),
+    'offer-bell': Object.freeze({
+      pages: Object.freeze([
+        'The Weather Bell. It should ring before a storm and hum before an aurora.',
+        'Its coil rolled into Glasswind Court, its vane caught on Frostline Trail, and its clapper went with a shipment bound for Driftgate Docks.',
+      ]),
+      choices: Object.freeze([
+        Object.freeze({
+          id: 'take-bell', label: 'I’ll recover the parts.', next: 'accepted',
+          effects: Object.freeze([
+            { type: 'favor-offer', favorId: 'pat-weather-bell-parts' },
+            { type: 'favor-start', favorId: 'pat-weather-bell-parts' },
+          ]),
+        }),
+        Object.freeze({ id: 'later', label: 'That sounds like three separate walks.', next: null }),
+      ]),
+    }),
+    accepted: Object.freeze({
+      pages: Object.freeze(['Start in the Court. The resonator coil bounced toward the companion pen. Try not to let it adopt you.']),
+    }),
+    'reminder-court': Object.freeze({
+      pages: Object.freeze(['First: the resonator coil in Glasswind Court, near the companion pen. Brass spiral, faintly warm.']),
+    }),
+    'reminder-trail': Object.freeze({
+      pages: Object.freeze(['Next: the wind vane snagged on the old signpost along Frostline Trail.']),
+    }),
+    'waiting-docks': Object.freeze({
+      pages: Object.freeze(['Two parts recovered. The final clapper is cargo at Driftgate Docks—but the harbor road is still snowed shut.']),
+    }),
+    'return-ready': Object.freeze({
+      pages: Object.freeze(['All three! Hold the pieces steady while I persuade the Bell to become one machine.']),
+    }),
+    completed: Object.freeze({
+      pages: Object.freeze(['The Weather Bell has all its notes. Now we find out whether the weather agrees.']),
     }),
   }),
 });
@@ -146,10 +256,13 @@ export const ANCHOR_CHARACTERS = defineCharacters([
   },
   {
     id: 'pat-hocket', name: 'Pat Hocket', slotId: 'workshop-tinkerer', roomId: 'workshop',
+    subtitle: 'Tinkerer, Emberlight Workshop',
     species: 'puffin', portraitAsset: './assets/portraits/pat-hocket.png',
     spriteAsset: './assets/characters/pat-hocket.png', spriteKey: 'anchor-pat-hocket',
     palette: { body: '#24384a', accent: '#ffb45e', warm: '#ff784f' },
-    linePools: { greeting: ['If it clicks twice, duck once. That is the current rule.'] }, favorDefs: [],
+    linePools: { greeting: ['If it clicks twice, duck once. That is the current rule.'] },
+    favorDefs: [WEATHER_BELL_FAVOR],
+    dialogueTree: PAT_DIALOGUE_TREE,
   },
   {
     id: 'captain-salka', name: 'Captain Salka', slotId: 'docks-trader', roomId: 'docks',

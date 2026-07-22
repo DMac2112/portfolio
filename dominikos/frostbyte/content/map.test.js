@@ -23,22 +23,22 @@ describe('MAP_NODES', () => {
     }
   });
 
-  it('has exactly four unlocked nodes', () => {
+  it('has exactly five unlocked nodes through W2', () => {
     const unlockedCount = MAP_NODES.filter(n => n.unlocked).length;
-    expect(unlockedCount).toBe(4);
+    expect(unlockedCount).toBe(5);
   });
 
-  it('unlocked nodes are plaza, den, trail, and court', () => {
+  it('unlocked nodes include Emberlight Workshop', () => {
     const unlockedRoomIds = MAP_NODES.filter(n => n.unlocked).map(n => n.roomId);
-    expect(unlockedRoomIds).toEqual(expect.arrayContaining(['plaza', 'den', 'trail', 'court']));
-    expect(unlockedRoomIds).toHaveLength(4);
+    expect(unlockedRoomIds).toEqual(expect.arrayContaining(['plaza', 'den', 'trail', 'court', 'workshop']));
+    expect(unlockedRoomIds).toHaveLength(5);
   });
 
   it('locked node labels exactly match plaza locked door labels', () => {
     const lockedNodes = MAP_NODES.filter(n => !n.unlocked);
     const plazaRoom = ROOM_REGISTRY.plaza;
 
-    // Extract locked door labels from plaza (court and workshop only)
+    // Extract any future locked door labels from plaza.
     const lockedDoorLabels = plazaRoom.doors
       .filter(d => d.locked)
       .map(d => d.label);

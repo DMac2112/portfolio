@@ -14,9 +14,24 @@ describe('anchor runtime content binding', () => {
     });
   });
 
-  it('loads only anchors whose rooms currently ship', () => {
+  it('resolves the Workshop placement to Pat’s distinct puffin record', () => {
+    const records = roomAnchorRecords(ROOM_REGISTRY.workshop, ANCHOR_CHARACTERS);
+    expect(records).toHaveLength(1);
+    expect(records[0].character).toMatchObject({
+      id: 'pat-hocket',
+      name: 'Pat Hocket',
+      species: 'puffin',
+      spriteKey: 'anchor-pat-hocket',
+    });
+  });
+
+  it('loads only anchors whose rooms currently ship through W2', () => {
     const k = { loadSprite: vi.fn() };
-    expect(loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY)).toEqual(['anchor-edda-quill']);
+    expect(loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY)).toEqual([
+      'anchor-edda-quill',
+      'anchor-pat-hocket',
+    ]);
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-edda-quill', './assets/characters/edda-quill.png');
+    expect(k.loadSprite).toHaveBeenCalledWith('anchor-pat-hocket', './assets/characters/pat-hocket.png');
   });
 });

@@ -318,4 +318,32 @@ describe('room configs', () => {
     expect(court.clickables.filter((prop) => prop.curioId)).toHaveLength(6);
     expect(court.clickables.find((prop) => prop.id === 'loose-cobble')).toMatchObject({ reaction: 'hum' });
   });
+
+  it('workshop and plaza: mutual W2 door reachability', () => {
+    const workshop = ROOM_REGISTRY.workshop;
+    const plaza = ROOM_REGISTRY.plaza;
+    expect(plaza.doors.find((door) => door.id === 'door-workshop')).toMatchObject({
+      targetRoom: 'workshop', locked: false, targetSpawn: 'fromPlaza',
+    });
+    expect(workshop.doors.find((door) => door.id === 'door-back')).toMatchObject({
+      targetRoom: 'plaza', locked: false, targetSpawn: 'fromWorkshop',
+    });
+  });
+
+  it('workshop: ships Pat, the Weather Bell, five Curios, two recoverable parts, and the locked hatch', () => {
+    const workshop = ROOM_REGISTRY.workshop;
+    expect(workshop.anchors).toEqual([{ characterId: 'pat-hocket', x: 1080, y: 480 }]);
+    expect(workshop.hotspots.find((hotspot) => hotspot.id === 'weather-bell')).toMatchObject({
+      kind: 'landmark', label: 'The Weather Bell',
+    });
+    expect(workshop.clickables.filter((prop) => prop.curioId)).toHaveLength(5);
+    expect(workshop.clickables.find((prop) => prop.id === 'weather-bell-test').favorStep).toMatchObject({
+      favorId: 'edda-tip-workshop-test', stepId: 'witness-workshop-test',
+    });
+    expect(workshop.clickables.find((prop) => prop.id === 'dumbwaiter-hatch')).toMatchObject({ reaction: 'hum' });
+    expect(ROOM_REGISTRY.court.clickables.find((prop) => prop.id === 'weather-bell-coil').favorStep.stepId)
+      .toBe('recover-court-coil');
+    expect(ROOM_REGISTRY.trail.clickables.find((prop) => prop.id === 'weather-bell-vane').favorStep.stepId)
+      .toBe('recover-trail-vane');
+  });
 });

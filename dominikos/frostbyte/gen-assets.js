@@ -258,6 +258,82 @@ function buildEddaPortrait() {
   return save(path.join('portraits', 'edda-quill.png'), img);
 }
 
+/* ----------------------------- ANCHOR: Pat Hocket (W2) ---------------- */
+// Stocky puffin silhouette: broad striped beak, pushed-up goggles, ember apron, tool belt.
+function buildPatSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  oval(img, 12, 29, 10, 2, [A.inkDeep[0], A.inkDeep[1], A.inkDeep[2], 70]);
+  oval(img, 11, 20, 10, 12, A.inkDeep);
+  oval(img, 11, 11, 9, 9, A.ink);
+  oval(img, 8, 12, 5, 6, A.snowL); oval(img, 14, 12, 5, 6, A.snowL);
+  // Puffin beak projects farther than any penguin anchor silhouette.
+  rect(img, 11, 12, 11, 2, A.amberL); rect(img, 10, 14, 12, 3, A.beak);
+  rect(img, 12, 17, 8, 2, A.ember); rect(img, 15, 14, 2, 5, A.beakD);
+  disc(img, 7, 10, 2, A.inkDeep); disc(img, 15, 10, 2, A.inkDeep);
+  px(img, 7, 9, A.snowL); px(img, 15, 9, A.snowL);
+  // Goggles rest above the eyes, joined by a leather strap.
+  ovalRing(img, 7, 6, 4, 3, A.ice, 80); ovalRing(img, 15, 6, 4, 3, A.ice, 80);
+  rect(img, 10, 6, 3, 1, A.woodL); rect(img, 3, 5, 2, 1, A.woodL); rect(img, 18, 5, 2, 1, A.woodL);
+  // Apron and a lopsided belt of tiny tools.
+  rrect(img, 6, 20, 11, 9, A.amber); rect(img, 8, 19, 7, 2, A.woodL);
+  rect(img, 5, 24, 14, 2, A.wood); rect(img, 7, 23, 2, 4, A.ice); rect(img, 15, 23, 2, 5, A.ember);
+  rect(img, 5, 28, 5, 2, A.beak); rect(img, 13, 28, 5, 2, A.beak);
+  return save(path.join('characters', 'pat-hocket.png'), img);
+}
+
+// Repo-native framed portrait; Graphics/Frostbyte/prompts.md preserves the future painted swap.
+function buildPatPortrait() {
+  const W = 128, H = 128, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x0a7c0c37;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = y / (H - 1);
+    const base = [
+      A.nightL[0] * (1 - t) + A.inkDeep[0] * t,
+      A.nightL[1] * (1 - t) + A.inkDeep[1] * t,
+      A.nightL[2] * (1 - t) + A.inkDeep[2] * t,
+    ];
+    const grain = (nextNoise() - 0.5) * 12;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+
+  // Workshop pipes, pegboard, and forge glow frame the bust without readable markings.
+  rect(img, 7, 13, 7, 80, A.wood); rect(img, 14, 17, 21, 6, A.woodL);
+  rect(img, 17, 28, 17, 44, shade(A.wood, 0.82));
+  for (const [x, y] of [[21, 34], [29, 34], [21, 45], [29, 45], [21, 56], [29, 56]]) disc(img, x, y, 2, A.amber);
+  rect(img, 101, 8, 9, 65, A.stone); rect(img, 106, 12, 15, 8, A.stoneL);
+  for (let r = 38; r >= 3; r -= 4) disc(img, 105, 93, r, [...A.ember, Math.max(3, 33 - r / 2)]);
+
+  // Warm rim, stocky puffin body, white cheek disks, and the oversized striped beak.
+  oval(img, 61, 114, 47, 43, A.amber);
+  oval(img, 60, 115, 44, 43, A.inkDeep);
+  oval(img, 58, 64, 39, 40, A.ink);
+  oval(img, 45, 66, 25, 29, A.snowL); oval(img, 69, 66, 24, 29, A.snowL);
+  oval(img, 59, 112, 32, 28, A.amber); rect(img, 29, 96, 60, 8, A.wood);
+  rect(img, 57, 99, 5, 29, A.woodL);
+
+  // Beak planes read as a puffin at thumbnail size.
+  oval(img, 79, 71, 32, 15, A.beak);
+  rect(img, 61, 70, 48, 5, A.amberL); rect(img, 68, 76, 34, 7, A.ember);
+  rect(img, 83, 58, 5, 27, A.beakD); oval(img, 108, 72, 7, 6, A.beakD);
+  disc(img, 43, 58, 4, A.inkDeep); disc(img, 70, 57, 4, A.inkDeep);
+  px(img, 42, 57, A.snowL); px(img, 69, 56, A.snowL);
+
+  // Goggles pushed up, plus a spanner and two belt tools.
+  ovalRing(img, 42, 43, 15, 10, A.ice, 120); ovalRing(img, 70, 42, 15, 10, A.ice, 120);
+  rect(img, 55, 42, 4, 3, A.woodL); rect(img, 26, 40, 4, 3, A.woodL); rect(img, 84, 39, 5, 3, A.woodL);
+  rect(img, 36, 102, 6, 24, A.ice); rect(img, 76, 101, 6, 27, A.ember);
+  rect(img, 104, 91, 5, 30, A.stoneL); ovalRing(img, 106, 88, 8, 8, A.stoneL, 90);
+  disc(img, 102, 116, 7, A.ink);
+
+  for (let i = 0; i < 90; i++) {
+    const x = 15 + Math.floor(nextNoise() * 100), y = 25 + Math.floor(nextNoise() * 98);
+    px(img, x, y, nextNoise() > 0.5 ? [...A.amberL, 26] : [...A.iceL, 23]);
+  }
+  return save(path.join('portraits', 'pat-hocket.png'), img);
+}
+
 /* ----------------------------- COSMETIC OVERLAYS ---------------------- */
 // Grayscale shapes, tinted per-item at runtime. Head is stationary during a walk cycle, so each
 // row's 4 frames are identical. Drawn only on facings where the item is visible.
@@ -588,8 +664,7 @@ function buildRoomDen() {
 
 /* ----------------------------- MAP: Chillmere Isle ---------------------- */
 // 480x320 painted-look travel map (island only — pins/labels are DOM, content/map.js owns them).
-// The remaining mist patch is centered on the workshop's locked map pin; unlocked destinations
-// get a painted glyph and route beneath their DOM pin.
+// Every unlocked destination gets a painted glyph and route beneath its DOM pin.
 const ISLE = {
   sea: ARCTIC_DUSK.night, seaD: ARCTIC_DUSK.inkDeep, seaL: ARCTIC_DUSK.nightL,
   land: ARCTIC_DUSK.snowD, landD: ARCTIC_DUSK.frost, landL: ARCTIC_DUSK.snowL,
@@ -597,7 +672,6 @@ const ISLE = {
   plaza: ARCTIC_DUSK.stoneL, plazaD: ARCTIC_DUSK.stone, fountain: ARCTIC_DUSK.ice,
   dome: ARCTIC_DUSK.snowL, domeSh: ARCTIC_DUSK.frost, domeDoor: ARCTIC_DUSK.wood,
   roof: ARCTIC_DUSK.amber, roofD: ARCTIC_DUSK.wood,
-  mist: ARCTIC_DUSK.mist, mistShadow: ARCTIC_DUSK.frost,
 };
 
 function buildMapIsle() {
@@ -649,6 +723,7 @@ function buildMapIsle() {
     }
   };
   route(221, 128, 298, 237); route(221, 128, 182, 38); route(221, 128, 384, 122);
+  route(221, 128, 67, 147);
 
   // Pine clusters — flavor only, a scaled-down version of the plaza's disc-stack pine.
   const pineAt = (px0, py0, s) => {
@@ -696,25 +771,21 @@ function buildMapIsle() {
     rect(img, gpx + ox - 4, gpy + oy - 3, 8, 5, c);
   }
 
+  // Emberlight Workshop glyph: warm window, chimney, and a tiny brass bell.
+  const wpx = Math.round(0.14 * W), wpy = Math.round(0.46 * H);
+  rrect(img, wpx - 16, wpy - 11, 32, 24, ISLE.roofD);
+  rect(img, wpx - 12, wpy - 7, 24, 18, ARCTIC_DUSK.wood);
+  rect(img, wpx - 8, wpy - 3, 11, 9, ARCTIC_DUSK.amber);
+  rect(img, wpx + 7, wpy - 23, 6, 15, ARCTIC_DUSK.stone);
+  disc(img, wpx + 10, wpy - 25, 5, [...ARCTIC_DUSK.frost, 130]);
+  oval(img, wpx + 8, wpy + 5, 5, 4, ARCTIC_DUSK.amberL);
+  rect(img, wpx + 4, wpy + 5, 9, 2, ARCTIC_DUSK.beakD);
+
   // Small compass rose in open water, kept away from every pin.
   const crx = 432, cry = 263;
   disc(img, crx, cry, 13, [...ARCTIC_DUSK.inkDeep, 150]); ovalRing(img, crx, cry, 11, 11, ARCTIC_DUSK.iceD, 90);
   rect(img, crx, cry - 9, 1, 19, ARCTIC_DUSK.iceL); rect(img, crx - 9, cry, 19, 1, ARCTIC_DUSK.iceL);
   px(img, crx, cry - 11, ARCTIC_DUSK.amber); px(img, crx - 1, cry - 9, ARCTIC_DUSK.amber);
-
-  // Mist/cloud patch over the remaining locked workshop.
-  const puffs = [[0, -2, 17], [-13, 5, 14], [13, 5, 14], [0, 10, 13]];
-  for (const [nx, ny] of [[0.14, 0.46]]) {
-    const mx = Math.round(nx * W), my = Math.round(ny * H);
-    // faint haze rim so the cloud doesn't have a hard cutoff against the land
-    for (let layer = 30; layer >= 20; layer -= 5) disc(img, mx, my, layer, [...ISLE.mist, Math.round(60 * (1 - layer / 30))]);
-    // cool shadowed underside, offset down-right, for a puffy 3-D read
-    for (const [ox, oy, r] of puffs) disc(img, mx + ox + 3, my + oy + 4, r, [...ISLE.mistShadow, 130]);
-    // opaque cloud body
-    for (const [ox, oy, r] of puffs) disc(img, mx + ox, my + oy, r, [...ISLE.mist, 235]);
-    // small bright highlight, upper-left
-    disc(img, mx - 6, my - 9, 7, [255, 255, 255, 170]);
-  }
 
   return save('map-isle.png', img);
 }
@@ -1445,6 +1516,134 @@ function buildRoomCourt() {
   return save('room-court.png', img);
 }
 
+/* ----------------------------- ROOM: Emberlight Workshop -------------- */
+function buildRoomWorkshop() {
+  const W = 480, H = 320;
+  const img = Img(W, H), A = ARCTIC_DUSK;
+
+  // Timber-and-stone interior at blue hour: cool rafters above, forge-warm plank floor below.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (y < 174) {
+      const t = y / 174;
+      const wall = [
+        A.night[0] * (1 - t) + A.wood[0] * t * 0.72,
+        A.night[1] * (1 - t) + A.wood[1] * t * 0.72,
+        A.night[2] * (1 - t) + A.wood[2] * t * 0.72,
+      ];
+      px(img, x, y, wall);
+    } else {
+      const plank = Math.floor((y - 174) / 14) % 2;
+      const grain = (x + (plank ? 17 : 0)) % 58;
+      const base = plank ? shade(A.wood, 0.88) : shade(A.woodL, 0.72);
+      px(img, x, y, grain < 2 ? shade(base, 0.74) : base);
+    }
+  }
+
+  // Heavy rounded frame and roof ribs make the room feel carved into an old service building.
+  rect(img, 0, 0, W, 12, A.inkDeep); rect(img, 0, 0, 14, H, A.inkDeep); rect(img, W - 14, 0, 14, H, A.inkDeep);
+  for (const x of [42, 160, 320, 438]) {
+    rect(img, x - 5, 0, 10, 178, A.wood); rect(img, x - 2, 0, 4, 178, A.woodL);
+    disc(img, x, 22, 8, A.inkDeep); disc(img, x, 22, 4, A.amber);
+  }
+  rect(img, 0, 166, W, 13, A.inkDeep); rect(img, 0, 169, W, 5, A.woodL);
+
+  const glow = (cx, cy, radius, color = A.amber) => {
+    for (let r = radius; r >= 3; r -= 3) {
+      disc(img, cx, cy, r, [...color, Math.round(10 + (radius - r) * 2.6)]);
+    }
+  };
+  const stroke = (points, radius, color) => {
+    for (let i = 0; i < points.length - 1; i++) {
+      const [x0, y0] = points[i], [x1, y1] = points[i + 1];
+      const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+      for (let s = 0; s <= steps; s++) {
+        const t = steps ? s / steps : 0;
+        disc(img, Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), radius, color);
+      }
+    }
+  };
+
+  // Rotating blueprints: three clipped sheets above the machine, with abstract arrow-only plans.
+  rrect(img, 181, 30, 118, 63, A.wood); rect(img, 187, 36, 106, 51, A.iceD);
+  for (const [x, y, tilt] of [[193, 42, 0], [226, 39, 1], [258, 44, 0]]) {
+    rrect(img, x, y, 29, 37, A.iceL); rect(img, x + 5, y + 7, 18, 2, A.iceD);
+    ovalRing(img, x + 14, y + 21 + tilt, 8, 6, A.iceD, 60);
+    rect(img, x + 9, y + 30, 12, 2, A.iceD);
+  }
+  rect(img, 194, 38, 5, 5, A.violet); rect(img, 260, 40, 5, 5, A.amber);
+
+  // Left gizmo shelf: an intentionally over-connected seven-step mechanism.
+  rrect(img, 39, 39, 121, 84, A.inkDeep); rect(img, 45, 45, 109, 72, A.wood);
+  for (const y of [68, 93]) rect(img, 45, y, 109, 5, A.woodL);
+  for (const [x, y, c] of [[58, 57, A.aurora], [80, 58, A.amber], [105, 56, A.violet], [132, 58, A.ember],
+    [67, 83, A.ice], [96, 84, A.amberL], [127, 84, A.aurora]]) {
+    disc(img, x, y, 8, A.inkDeep); disc(img, x, y, 5, c); disc(img, x - 2, y - 2, 2, A.snowL);
+  }
+  stroke([[58, 57], [80, 58], [105, 56], [132, 58], [127, 84], [96, 84], [67, 83]], 1, A.amberL);
+  rect(img, 51, 103, 94, 8, A.night); rect(img, 54, 105, 22, 4, A.ember);
+
+  // Forge and bellows occupy the lower-left work bay.
+  glow(77, 205, 42, A.ember);
+  rrect(img, 42, 165, 72, 58, A.inkDeep); rrect(img, 49, 171, 58, 45, A.stone);
+  oval(img, 78, 199, 21, 13, A.inkDeep); disc(img, 77, 199, 12, A.ember); disc(img, 74, 195, 6, A.amberL);
+  rect(img, 83, 136, 15, 38, A.stone); rect(img, 87, 139, 8, 35, A.stoneL);
+  oval(img, 121, 211, 31, 16, A.wood); oval(img, 121, 207, 27, 12, A.ember);
+  stroke([[145, 207], [164, 194], [174, 185]], 3, A.woodL);
+
+  // The half-built Weather Bell: broad brass arch, exposed heart, and three empty component sockets.
+  glow(240, 133, 48, A.amber);
+  oval(img, 240, 151, 48, 14, [...A.inkDeep, 60]);
+  rect(img, 198, 119, 10, 61, A.wood); rect(img, 272, 119, 10, 61, A.wood);
+  rect(img, 194, 174, 92, 12, A.inkDeep); rect(img, 202, 169, 76, 10, A.woodL);
+  ovalRing(img, 240, 124, 40, 45, A.amber, 180); ovalRing(img, 240, 124, 35, 40, A.amberL, 180);
+  oval(img, 240, 132, 26, 23, A.beakD); oval(img, 240, 128, 24, 20, A.amber);
+  rect(img, 217, 130, 47, 9, A.amber); oval(img, 240, 145, 31, 8, A.amberL);
+  rect(img, 237, 99, 7, 18, A.wood); disc(img, 240, 97, 8, A.inkDeep);
+  for (const [x, y] of [[214, 150], [240, 107], [266, 150]]) {
+    disc(img, x, y, 7, A.inkDeep); ovalRing(img, x, y, 7, 7, A.iceD, 60);
+  }
+  // A loose test lever gives the centerpiece a readable click target.
+  rect(img, 285, 145, 6, 28, A.stone); disc(img, 288, 141, 8, A.ember);
+
+  // Pat's bench stays visually occupied without drawing Pat into the backdrop.
+  rrect(img, 305, 79, 113, 54, A.inkDeep); rect(img, 311, 85, 101, 42, A.woodL);
+  rect(img, 303, 125, 119, 10, A.wood); rect(img, 315, 135, 7, 28, A.inkDeep); rect(img, 402, 135, 7, 28, A.inkDeep);
+  for (const [x, y, w, h, c] of [[320, 102, 26, 16, A.violet], [353, 95, 18, 23, A.stoneL], [379, 103, 24, 15, A.amber]]) {
+    rrect(img, x, y, w, h, c);
+  }
+  rect(img, 327, 89, 4, 15, A.ice); rect(img, 390, 87, 5, 17, A.ember);
+
+  // Pneumatic post tube on the right wall, ending in a satisfyingly oversized receiver.
+  rect(img, 386, 19, 12, 71, A.stone); rect(img, 390, 22, 5, 66, A.stoneL);
+  rrect(img, 373, 78, 39, 34, A.inkDeep); rrect(img, 379, 83, 27, 23, A.ember);
+  rect(img, 382, 91, 21, 5, A.amberL); disc(img, 392, 113, 8, A.stoneL);
+
+  // Prototype snowputer at floor-right: chunky CRT, fan, and frost-speckled screen.
+  oval(img, 381, 247, 31, 8, [...A.inkDeep, 58]);
+  rrect(img, 357, 205, 51, 39, A.inkDeep); rrect(img, 363, 211, 39, 27, A.stone);
+  rrect(img, 368, 215, 29, 18, A.night); rect(img, 372, 219, 20, 2, A.aurora);
+  for (const [x, y] of [[374, 226], [383, 221], [392, 228]]) disc(img, x, y, 2, A.snowL);
+  rect(img, 376, 244, 13, 8, A.stoneL); rect(img, 364, 252, 38, 7, A.inkDeep);
+  ovalRing(img, 412, 225, 10, 10, A.iceD, 70); disc(img, 412, 225, 3, A.ice);
+
+  // Locked dumbwaiter hatch: deliberately cold amid the warm floor, foreshadowing stone below.
+  rrect(img, 96, 249, 70, 39, A.inkDeep); rrect(img, 102, 255, 58, 27, A.stone);
+  for (let x = 107; x < 158; x += 10) rect(img, x, 258, 3, 21, A.stoneL);
+  disc(img, 151, 269, 5, A.iceD); rect(img, 148, 267, 7, 4, A.iceL);
+  for (let r = 22; r >= 5; r -= 4) oval(img, 131, 270, r, Math.max(2, Math.round(r / 4)), [...A.ice, 12]);
+
+  // South door and open central floor keep travel geometry obvious at game scale.
+  rect(img, 221, 283, 38, 37, A.inkDeep); rect(img, 228, 290, 24, 30, A.night);
+  glow(240, 296, 18, A.ice); rect(img, 216, 304, 48, 8, A.stone); rect(img, 222, 303, 36, 3, A.iceL);
+  stroke([[172, 222], [200, 215], [279, 216], [319, 235]], 2, [...A.amber, 90]);
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (edge > 0.87) px(img, x, y, [...A.inkDeep, Math.round((edge - 0.87) * 170)]);
+  }
+  return save('room-workshop.png', img);
+}
+
 /* ----------------------------- Pickup glint (H4) ------------------------ */
 // 12x12 walk-over coin token: warm gold dot + 4-point sparkle cross, dark outline.
 function buildPickupGlint() {
@@ -1467,6 +1666,8 @@ const made = [
   buildPenguinBelly(),
   buildEddaSprite(),
   buildEddaPortrait(),
+  buildPatSprite(),
+  buildPatPortrait(),
   buildRoomPlaza(),
   ...ITEM_CATALOG.map(buildCosmetic),
   buildSnowpal(),
@@ -1479,6 +1680,7 @@ const made = [
   buildRoomTrail(),
   buildPickupGlint(),
   buildRoomCourt(),
+  buildRoomWorkshop(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

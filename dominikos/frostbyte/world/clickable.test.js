@@ -29,13 +29,14 @@ function fakeKaplay() {
   const k = {
     Color: { fromHex: (value) => value },
     rect: () => ({}),
+    text: () => ({}),
     pos: () => ({}),
     anchor: () => ({}),
     color: () => ({}),
     opacity: () => ({}),
     scale: () => ({}),
     z: () => ({}),
-    add: () => ({ scale: { x: 1, y: 1 }, opacity: 1, onUpdate: vi.fn() }),
+    add: () => ({ pos: { x: 0, y: 0 }, scale: { x: 1, y: 1 }, opacity: 1, onUpdate: vi.fn() }),
     destroy: vi.fn(),
     dt: () => 0.016,
     mousePos: () => ({ x: 100, y: 100 }),
@@ -76,5 +77,35 @@ describe('spawnClickables', () => {
     k.fireLeave();
     expect(k.pressController.cancel).toHaveBeenCalledTimes(1);
     expect(controller.trigger({ x: 100, y: 100 })).toBe(null);
+  });
+
+  it('cycles authored reaction lines without changing the prop contract', () => {
+    const k = fakeKaplay();
+    const onReaction = vi.fn();
+    const controller = spawnClickables(k, {
+      props: [{ id: 'plans', x: 100, y: 100, w: 20, h: 20, lines: ['one', 'two'] }],
+      onReaction,
+      reducedMotion: true,
+    });
+    controller.trigger({ x: 100, y: 100 });
+    controller.trigger({ x: 100, y: 100 });
+    controller.trigger({ x: 100, y: 100 });
+    expect(onReaction.mock.calls.map(([prop]) => prop.line)).toEqual(['one', 'two', 'one']);
+    expect(onReaction.mock.calls[0][0]).toMatchObject({ id: 'plans', lines: ['one', 'two'] });
+  });
+
+  it('excludes state-gated props from both hit testing paths', () => {
+    const k = fakeKaplay();
+    let enabled = false;
+    const controller = spawnClickables(k, {
+      props: [{ id: 'part', x: 100, y: 100, w: 20, h: 20 }],
+      isEnabled: () => enabled,
+      reducedMotion: true,
+    });
+    expect(controller.contains({ x: 100, y: 100 })).toBe(false);
+    expect(controller.trigger({ x: 100, y: 100 })).toBe(null);
+    enabled = true;
+    expect(controller.contains({ x: 100, y: 100 })).toBe(true);
+    expect(controller.trigger({ x: 100, y: 100 })).toMatchObject({ id: 'part' });
   });
 });

@@ -86,6 +86,20 @@ function addVariantReaction(k, prop, color, reducedMotion) {
         piece.opacity = 0.75 * (1 - progress);
       });
     }
+  } else if (prop.reaction === 'chain') {
+    for (let i = 0; i < 7; i++) {
+      addMotionPiece(k, [
+        k.rect(7, 7, { radius: 3 }),
+        k.pos(prop.x - 42 + i * 14, prop.y + (i % 2 ? 8 : -8)), k.anchor('center'),
+        k.color(color), k.opacity(0.9), k.scale(0.6), k.z(100004),
+      ], reducedMotion ? 0.24 : 0.62, (piece, progress, origin) => {
+        const local = Math.max(0, Math.min(1, progress * 2.4 - i * 0.18));
+        piece.pos.y = origin.y - (reducedMotion ? 0 : Math.sin(local * Math.PI) * 16);
+        const scale = 0.6 + local * 0.8;
+        piece.scale.x = scale; piece.scale.y = scale;
+        piece.opacity = local >= 1 ? 0 : 0.9;
+      });
+    }
   } else if (prop.reaction === 'hum') {
     for (let i = 0; i < 2; i++) {
       addMotionPiece(k, [
@@ -147,18 +161,25 @@ function reactionBurst(k, prop, reducedMotion) {
 /**
  * @param {object} k KAPLAY scene context
  * @param {{props?:object[],anyOverlayOpen?:()=>boolean,onReaction?:(prop:object)=>void,
- *   onCurio?:(curioId:string,prop:object)=>void,reducedMotion?:boolean}} opts
+ *   onCurio?:(curioId:string,prop:object)=>void,isEnabled?:(prop:object)=>boolean,
+ *   reducedMotion?:boolean}} opts
  */
 export function spawnClickables(k, opts = {}) {
   const props = opts.props ?? [];
   const anyOverlayOpen = opts.anyOverlayOpen ?? (() => false);
   let active = true;
   let handledPress = false;
+  const lineIndexes = new Map();
 
   function trigger(point) {
     if (!active || anyOverlayOpen()) return null;
-    const prop = clickableAt(props, point);
-    if (!prop) return null;
+    const enabledProps = opts.isEnabled ? props.filter((prop) => opts.isEnabled(prop)) : props;
+    const hit = clickableAt(enabledProps, point);
+    if (!hit) return null;
+    const lines = Array.isArray(hit.lines) ? hit.lines.filter(Boolean) : [];
+    const lineIndex = lineIndexes.get(hit.id) ?? 0;
+    const prop = lines.length ? { ...hit, line: lines[lineIndex % lines.length] } : hit;
+    if (lines.length) lineIndexes.set(hit.id, lineIndex + 1);
     reactionBurst(k, prop, Boolean(opts.reducedMotion));
     opts.onReaction?.(prop);
     if (prop.curioId) opts.onCurio?.(prop.curioId, prop);
@@ -174,7 +195,10 @@ export function spawnClickables(k, opts = {}) {
 
   return {
     trigger,
-    contains: (point) => Boolean(clickableAt(props, point)),
+    contains: (point) => Boolean(clickableAt(
+      opts.isEnabled ? props.filter((prop) => opts.isEnabled(prop)) : props,
+      point,
+    )),
     consumePress() {
       const handled = handledPress;
       handledPress = false;

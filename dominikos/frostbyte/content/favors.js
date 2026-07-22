@@ -1,6 +1,6 @@
-// content/favors.js — cross-room Favor definitions. W1 ships Edda's three story-tip threads;
-// only the Trail thread is currently completable, while Workshop/Docks event hooks arrive with
-// their own room phases.
+// content/favors.js — cross-room Favor definitions. W1 seeds Edda's story-tip threads; W2 makes
+// the Workshop tip completable and adds Pat's three-part Weather Bell chain. Docks hooks remain
+// deliberately unavailable until W3.
 
 function freezeFavor(definition) {
   return Object.freeze({
@@ -44,7 +44,23 @@ export const EDDA_STORY_TIP_FAVORS = Object.freeze([
   }),
 ]);
 
-export const FAVOR_DEFINITIONS = EDDA_STORY_TIP_FAVORS;
+export const WEATHER_BELL_FAVOR = freezeFavor({
+  id: 'pat-weather-bell-parts',
+  ownerId: 'pat-hocket',
+  title: 'Three Notes Missing',
+  steps: [
+    { id: 'recover-court-coil', label: 'Recover the resonator coil in Glasswind Court' },
+    { id: 'recover-trail-vane', label: 'Recover the wind vane on Frostline Trail' },
+    { id: 'recover-docks-clapper', label: 'Recover the brass clapper at Driftgate Docks' },
+    { id: 'return-to-pat', label: 'Bring all three Weather Bell parts to Pat' },
+  ],
+  reward: { coins: 24 },
+});
+
+export const FAVOR_DEFINITIONS = Object.freeze([
+  ...EDDA_STORY_TIP_FAVORS,
+  WEATHER_BELL_FAVOR,
+]);
 
 export function favorById(id) {
   return FAVOR_DEFINITIONS.find((favor) => favor.id === id) ?? null;

@@ -48,7 +48,7 @@ import { ANCHOR_CHARACTERS } from './content/characters.js';
 import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
 import { chooseDialogue, startDialogue } from './engine/dialogue-tree.js';
 import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
-import { favorById } from './content/favors.js';
+import { EDDA_STORY_TIP_FAVORS, WEATHER_BELL_FAVOR, favorById } from './content/favors.js';
 import { chirperIssueForDate } from './content/chirper-issues.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
@@ -96,6 +96,7 @@ k.loadSprite('room-plaza', './assets/room-plaza.png');
 k.loadSprite('room-den', './assets/room-den.png');
 k.loadSprite('room-trail', './assets/room-trail.png');
 k.loadSprite('room-court', './assets/room-court.png');
+k.loadSprite('room-workshop', './assets/room-workshop.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
@@ -232,7 +233,7 @@ k.scene('room', (roomId, opts = {}) => {
   const anchorLayer = spawnRoomAnchors(k, room, ANCHOR_CHARACTERS, reduceMotion);
 
   // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. Minigames, shops,
-  // venues, signs and doors are actionable; NPCs/landmarks stay promptless and
+  // venues, newspapers, anchors, signs and doors are actionable; NPCs/landmarks stay promptless and
   // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
   const hotspotInteractables = (room.hotspots ?? []).map((h) => ({
     id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label,
@@ -281,6 +282,22 @@ k.scene('room', (roomId, opts = {}) => {
     return events;
   }
 
+  function advanceTrackedFavor(definition, stepId) {
+    const events = [];
+    if (!definition || !advanceFavor(save, definition, stepId, events)) return null;
+    persist(save);
+    return events;
+  }
+
+  function showFavorReward(events, copy) {
+    const reward = events?.find((event) => event.type === 'coins-earned');
+    if (!reward) return false;
+    refreshCoins(true);
+    showCoinSparkle(k, player.pos, reduceMotion);
+    showCoinToast(`+${reward.amount} coins — ${copy}`);
+    return true;
+  }
+
   function openCharacterDialogue(character, startNode) {
     const tree = character?.dialogueTree;
     if (!tree) {
@@ -317,30 +334,49 @@ k.scene('room', (roomId, opts = {}) => {
   }
 
   function talkToCharacter(character) {
+    if (character.id === 'pat-hocket') {
+      const step = currentFavorStep(save, WEATHER_BELL_FAVOR);
+      if (step?.id === 'return-to-pat') {
+        const events = advanceTrackedFavor(WEATHER_BELL_FAVOR, 'return-to-pat');
+        showFavorReward(events, 'Weather Bell assembled!');
+        openCharacterDialogue(character, 'completed');
+        return;
+      }
+      const status = favorState(save, WEATHER_BELL_FAVOR.id)?.status;
+      const startNode = status === 'offered' ? 'greeting-offered'
+        : status === 'done' ? 'completed'
+          : step?.id === 'recover-court-coil' ? 'reminder-court'
+            : step?.id === 'recover-trail-vane' ? 'reminder-trail'
+              : step?.id === 'recover-docks-clapper' ? 'waiting-docks'
+                : 'greeting';
+      openCharacterDialogue(character, startNode);
+      return;
+    }
     if (character.id !== 'edda-quill') {
       openCharacterDialogue(character, character.dialogueTree?.start);
       return;
     }
-    const trailTip = favorById('edda-tip-trail-glint');
-    const step = currentFavorStep(save, trailTip);
-    if (step?.id === 'report-to-edda') {
-      const events = [];
-      if (advanceFavor(save, trailTip, 'report-to-edda', events)) {
-        persist(save);
-        const reward = events.find((event) => event.type === 'coins-earned');
-        if (reward) {
-          refreshCoins(true);
-          showCoinSparkle(k, player.pos, reduceMotion);
-          showCoinToast(`+${reward.amount} coins — story tip filed!`);
-        }
-      }
-      openCharacterDialogue(character, 'reported');
+
+    const reportable = EDDA_STORY_TIP_FAVORS.find((definition) =>
+      currentFavorStep(save, definition)?.id === 'report-to-edda');
+    if (reportable) {
+      const events = advanceTrackedFavor(reportable, 'report-to-edda');
+      showFavorReward(events, 'story tip filed!');
+      openCharacterDialogue(character,
+        reportable.id === 'edda-tip-workshop-test' ? 'reported-workshop' : 'reported');
       return;
     }
-    const status = favorState(save, trailTip.id)?.status;
-    const startNode = status === 'offered' ? 'greeting-offered'
-      : status === 'in-progress' ? 'greeting-progress'
-        : status === 'done' ? 'greeting-done' : 'greeting';
+
+    const trailTip = favorById('edda-tip-trail-glint');
+    const workshopTip = favorById('edda-tip-workshop-test');
+    const trailStatus = favorState(save, trailTip.id)?.status;
+    const workshopStatus = favorState(save, workshopTip.id)?.status;
+    const startNode = trailStatus === 'offered' ? 'greeting-offered'
+      : trailStatus === 'in-progress' ? 'greeting-progress'
+        : trailStatus !== 'done' ? 'greeting'
+          : workshopStatus === 'offered' ? 'greeting-workshop-offered'
+            : workshopStatus === 'in-progress' ? 'greeting-workshop-progress'
+              : workshopStatus === 'done' ? 'greeting-done' : 'greeting-next-tip';
     openCharacterDialogue(character, startNode);
   }
 
@@ -583,6 +619,22 @@ k.scene('room', (roomId, opts = {}) => {
     props: room.clickables ?? [],
     anyOverlayOpen,
     reducedMotion: reduceMotion,
+    isEnabled: (prop) => {
+      if (!prop.onlyWhenFavorStep) return true;
+      const link = prop.favorStep;
+      const definition = favorById(link?.favorId);
+      return Boolean(definition && currentFavorStep(save, definition)?.id === link.stepId);
+    },
+    onReaction: (prop) => {
+      const link = prop.favorStep;
+      if (!link) return;
+      const definition = favorById(link.favorId);
+      const events = advanceTrackedFavor(definition, link.stepId);
+      if (!events) return;
+      if (!showFavorReward(events, definition.title)) {
+        showCoinToast(link.successText ?? `${definition.title}: ${link.stepId}`);
+      }
+    },
     onCurio: (curioId) => {
       const events = [];
       if (!discoverCurio(save, CURIO_REGISTRY, curioId, events)) return;

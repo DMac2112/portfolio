@@ -6,7 +6,12 @@ import {
   startFavor,
   validateFavorDefinitions,
 } from '../engine/favors.js';
-import { EDDA_STORY_TIP_FAVORS, FAVOR_DEFINITIONS, favorById } from './favors.js';
+import {
+  EDDA_STORY_TIP_FAVORS,
+  FAVOR_DEFINITIONS,
+  WEATHER_BELL_FAVOR,
+  favorById,
+} from './favors.js';
 
 describe('story-tip Favor content', () => {
   it('ships three valid, uniquely keyed Edda threads', () => {
@@ -34,5 +39,22 @@ describe('story-tip Favor content', () => {
     expect(save.coins).toBe(0);
     expect(advanceFavor(save, trailTip, 'report-to-edda')).toBe(true);
     expect(save.coins).toBe(8);
+  });
+
+  it('ships Pat’s three-part Weather Bell chain with W2 stopping at the Docks step', () => {
+    const save = { coins: 0, favors: {} };
+    expect(WEATHER_BELL_FAVOR.steps.map((step) => step.id)).toEqual([
+      'recover-court-coil',
+      'recover-trail-vane',
+      'recover-docks-clapper',
+      'return-to-pat',
+    ]);
+    expect(favorById(WEATHER_BELL_FAVOR.id)).toBe(WEATHER_BELL_FAVOR);
+    expect(offerFavor(save, WEATHER_BELL_FAVOR)).toBe(true);
+    expect(startFavor(save, WEATHER_BELL_FAVOR)).toBe(true);
+    expect(advanceFavor(save, WEATHER_BELL_FAVOR, 'recover-court-coil')).toBe(true);
+    expect(advanceFavor(save, WEATHER_BELL_FAVOR, 'recover-trail-vane')).toBe(true);
+    expect(currentFavorStep(save, WEATHER_BELL_FAVOR).id).toBe('recover-docks-clapper');
+    expect(save.coins).toBe(0);
   });
 });
