@@ -16,7 +16,8 @@ const APP = path.resolve(here, '..');
 const DIST = path.join(APP, 'dist');
 const GAME1_SRC = path.resolve(APP, '..', 'game1');
 const FROSTBYTE_SRC = path.resolve(APP, '..', 'frostbyte');
-const PUBLIC = path.resolve(APP, '..', '..', 'portfolio-rework', 'public');
+// dominikos/ now lives INSIDE portfolio-rework, so public/ is two levels up: os → dominikos → repo.
+const PUBLIC = path.resolve(APP, '..', '..', 'public');
 
 if (!fs.existsSync(DIST)) {
   console.error('✖ dist/ not found — run `npm run build` first.');

@@ -1,55 +1,46 @@
 # Working in portfolio-rework — read this before you change or publish anything
 
-This folder is the **single publish point** for Dominik's whole site. Everything the world sees —
-the Astro portfolio, DominikOS, Frostbyte, game1 — goes out from here, together, in one command.
-Work was previously scattered across folders and repos and things got lost. Don't reintroduce that.
+**This folder is the whole project.** The Astro portfolio, DominikOS, Frostbyte and game1 all live
+here and all publish from here, together, in one command.
 
-## The rule
+Everything used to be spread across separate folders and repos — `Websites/dominikos/` had its own
+git repo with no remote, and edits made there simply never reached the site. That was consolidated
+on **2026-07-22**: the OS source now lives at `dominikos/` *inside this repo*, with its full commit
+history merged in. `Websites/dominikos/` is a dead archive.
 
-**One command publishes everything: `.\deploy.cmd` from this folder.**
+## The rules
 
-Never hand-copy files to a host, never publish a subset, never "just push the one folder".
-If a change is meant to be live, it goes out with everything else that is currently in this folder.
+1. **Never work in `Websites/dominikos/` again.** It is archived and nothing there is published.
+   All OS / Frostbyte / game1 source is at `portfolio-rework/dominikos/`.
+2. **One command publishes everything: `.\deploy.cmd` from this folder.** Never hand-copy files to
+   a host, never publish a subset. If a change should be live, it ships with everything else that
+   is currently in this folder.
 
-## What `.\deploy.cmd` actually does (verified 2026-07-22)
+## What `.\deploy.cmd` does (verified 2026-07-22)
 
-1. Builds the Astro site with the portable Node 20 (`npm20.cmd run build`) — **from the working
-   tree, not from git**. Uncommitted edits in `src/` are compiled in and published.
-2. `public/` passes through to `dist/` verbatim, so the vendored `public/os`, `public/frostbyte`
-   and `public/game1` ship exactly as they currently sit on disk.
-3. Wipes the deploy clone (`.ghio-deploy/`, everything but `.git`), copies the fresh `dist/` in,
-   writes `.nojekyll`. Deletions propagate — no stale files survive a deploy.
-4. `git add -A`, commit, push to `DMac2112.github.io`. Live in ~1–2 minutes.
+1. **Rebuilds DominikOS from `dominikos/os` and re-vendors it** into `public/os`, `public/game1`,
+   `public/frostbyte`. You can no longer forget this step.
+2. Builds the Astro site with the portable Node 20 — **from the working tree, not from git**, so
+   uncommitted edits are compiled in and published.
+3. `public/` passes through to `dist/` verbatim, so the vendored apps ship as they sit on disk.
+4. Wipes the deploy clone (`.ghio-deploy/`, all but `.git`), copies the fresh `dist/` in, writes
+   `.nojekyll`. Deletions propagate — no stale files survive a deploy.
+5. Commits + pushes the built site to `DMac2112.github.io`. Live in ~1–2 minutes.
+6. **Then commits and pushes this repo's source to `origin`**, so the code that produced the live
+   site always exists in history. If that step fails it says so loudly — don't walk away from it.
 
-So: **everything inside this folder does go at once.** That part is settled — you do not need to
-stage, order, or batch anything.
-
-## The two things it does NOT do — this is where work gets lost
-
-**1. It does not rebuild DominikOS.** It publishes whatever is already vendored in `public/os`.
-If you touched anything in `../dominikos/` (the OS, Frostbyte, game1), re-vendor FIRST:
-
-```bash
-cd ../dominikos/os && npm run build && node scripts/deploy-rework.mjs
-```
-
-Skip that and the deploy still prints success while silently shipping the *old* OS. Nothing warns
-you. `deploy-rework.mjs` syncs all three peers (`/os`, `/game1`, `/frostbyte`) in one go.
-
-**2. It does not commit this repo.** It pushes the *built output* to the deploy repo only. Source
-changes here can be live on the internet while still uncommitted locally — one bad `git checkout`
-and the live site has code that exists nowhere in history. Commit your source, in this repo, as
-part of finishing the job.
+Flags: `--skip-os` publishes without rebuilding the OS (site-only changes);
+`--no-commit` publishes without touching source history. Neither is the default, on purpose.
 
 ## Pre-flight, every time
 
-1. Touched `../dominikos/`? → rebuild + `deploy-rework.mjs` (above).
-2. `git status` here — look at **everything** that is modified, not just your own files. It is all
-   about to go live. If someone else's uncommitted work is in the tree, that ships too: say so in
-   your handback rather than discovering it afterwards.
+1. `git status` — look at **everything** modified, not just your own files. It is all about to go
+   live, including anyone else's in-progress work. Say so in your handback rather than letting them
+   discover it afterwards.
+2. Changed the OS, Frostbyte or game1? Run their tests first (`cd dominikos/frostbyte && npx vitest
+   run`, `cd dominikos/os && npm run ci`). The deploy does not test for you.
 3. `.\deploy.cmd`
-4. Commit the source in this repo (and in `dominikos/` if you changed it) by explicit paths.
-5. Verify the live URL, don't assume: `https://dmac2112.github.io/`.
+4. Verify the live URL, don't assume: `https://dmac2112.github.io/`.
 
 ## Design standard — applies to every agent, not just Claude
 
@@ -69,7 +60,16 @@ an agent ignoring it. Before writing any markup or CSS:
 | Path | What it is |
 |---|---|
 | `src/` | the Astro portfolio site (source) |
-| `public/os`, `public/frostbyte`, `public/game1` | **vendored build output** from `../dominikos/` — never hand-edit; regenerate and re-vendor |
-| `plans/` | planning docs |
+| `dominikos/os/` | **DominikOS source** — React + TS. Build: `npm run ci` / `npm run build` |
+| `dominikos/frostbyte/` | Frostbyte game source (buildless ES modules + KAPLAY). Tests: `npx vitest run` |
+| `dominikos/game1/` | Dev District game source |
+| `dominikos/Graphics/` | art masters (pinball kit, Frostbyte references) |
+| `dominikos/*.md` | the build plans for everything above |
+| `public/os`, `public/frostbyte`, `public/game1` | **generated — never hand-edit.** Overwritten from `dominikos/` on every deploy |
+| `plans/` | site-level planning docs |
 | `.ghio-deploy/` | throwaway clone of the deploy repo (gitignored) — never edit |
 | `deploy.cmd` / `scripts/deploy.mjs` | the one publish path |
+
+Two git repos are in play and it's worth knowing which is which: **this** repo
+(`github.com/DMac2112/portfolio`) holds the source and is what you commit to; the deploy repo
+(`DMac2112.github.io`) holds only built output and is written exclusively by the deploy script.
