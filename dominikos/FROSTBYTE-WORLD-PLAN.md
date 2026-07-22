@@ -29,11 +29,11 @@ cosmetic + a den trophy. This is the stamp-book analog and the reason to poke ev
   glue that pushes players between areas.
 - **Secret**: one per room minimum — a save-gated door, a vista, or a foreshadow of the caverns.
 
-## Main characters (one anchor per area — names are Dominik's call, these are placeholders that pass the legal gate)
+## Main characters (one anchor per area — names approved by Dominik on 2026-07-22 and now test contracts)
 | Character | Species | Area | Role (genre analog, made ours) |
 |---|---|---|---|
 | **Edda Quill** | emperor penguin, half-moon specs | Glasswind Court | Editor of *The Chillmere Chirper*; warm, tea-fuelled, knows everyone; her "story tips" favors send you everywhere (kindly-editor archetype) |
-| **Pem Sprocket** | puffin (distinct silhouette!) | Emberlight Workshop | Tinkerer; builds the Weather Bell; parts-fetch favor chain (gadgeteer archetype) |
+| **Pat Hocket** | puffin (distinct silhouette!) | Emberlight Workshop | Tinkerer; builds the Weather Bell; parts-fetch favor chain (gadgeteer archetype) |
 | **Captain Salka** | chinstrap penguin, oilskin coat | Driftgate Docks | Trader whose barge *The Driftwood Gull* is only in port on some days (date-seeded) — rotating stall stock; the returning-ship ritual |
 | **Old Maren** | weathered gentoo | Palefire Light | Lighthouse keeper; logbook of sightings; telescope favors (keeper-of-the-light archetype) |
 | **Vesper** | arctic fox | Whisperpine Hollow | Trickster who relocates daily between three dens; trades hints for curios; explains the isle's little mysteries (mischief archetype — ambiguous, never a combat villain) |
@@ -94,7 +94,7 @@ start only from Codex's committed tree — see §Coordination):
 - Secret: one loose cobble hums faintly (caverns foreshadow, does nothing yet — pays off W6).
 
 ### W2 — Emberlight Workshop (M) — first interior anchor room
-- Warm forge-lit interior (art: pipeline shot list). **Pem Sprocket** at the bench.
+- Warm forge-lit interior (art: pipeline shot list). **Pat Hocket** at the bench.
 - Centerpiece: the **Weather Bell** — a half-built brass contraption. Favor chain: recover 3
   parts (one each hidden in court / trail / docks-when-built; W2 ships with 2 recoverable, third
   unlocks at W3 — the chain itself advertises the next area).
@@ -134,7 +134,7 @@ start only from Codex's committed tree — see §Coordination):
   quiet place. First fully hidden room in the game.
 
 ### W6 — Hollowfrost Caverns (L) — capstone: the two foreshadows converge
-- Under-isle crystal caverns; TWO earned entrances open at once: the trail-side crack and Pem's
+- Under-isle crystal caverns; TWO earned entrances open at once: the trail-side crack and Pat's
   dumbwaiter (both previously seen, now openable — the "I knew it" moment).
 - **The Echo**: unseen presence; crystal walls chime response-notes when clicked; her song lines
   appear as floating text. Final curio set ("echo shards", 6).

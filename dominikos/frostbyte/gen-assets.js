@@ -15,6 +15,8 @@ fs.mkdirSync(path.join(OUT, 'props'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'cosmetics'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'minigame'), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'furniture'), { recursive: true });
+fs.mkdirSync(path.join(OUT, 'characters'), { recursive: true });
+fs.mkdirSync(path.join(OUT, 'portraits'), { recursive: true });
 
 /* ----------------------------- PNG encoder (verbatim technique from game1) --------------- */
 const CRC = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
@@ -55,6 +57,16 @@ function px(img, x, y, c) {
 function rect(img, x, y, w, h, c) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) px(img, x + i, y + j, c); }
 function disc(img, cx, cy, r, c) { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r + r * 0.6) px(img, cx + x, cy + y, c); }
 function rrect(img, x, y, w, h, c) { rect(img, x + 1, y, w - 2, h, c); rect(img, x, y + 1, w, h - 2, c); }
+function halfMoonFrame(img, cx, cy, rx, ry, c, thickness = 1) {
+  rect(img, cx - rx, cy, rx * 2 + 1, thickness, c);
+  const steps = Math.max(16, rx * 6);
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * Math.PI;
+    const x = Math.round(cx + Math.cos(angle) * rx);
+    const y = Math.round(cy + Math.sin(angle) * ry);
+    for (let t = 0; t < thickness; t++) px(img, x, y + t, c);
+  }
+}
 function save(name, img) { fs.writeFileSync(path.join(OUT, name), encodePNG(img)); return `${name} ${img.w}x${img.h}`; }
 
 // seeded PRNG (project LCG, independent seed from game1's 1337 — see engine/rng.js)
@@ -159,6 +171,91 @@ function buildPenguinBelly() {
     cell(f, 2, (p) => { footD(p, 6, 14 + la); footD(p, 9, 14 + lb); });
   }
   return save('penguin-belly.png', img);
+}
+
+/* ----------------------------- ANCHOR: Edda Quill (W1) ---------------- */
+// One-off front-facing sprite: emperor markings, half-moon spectacles, plum cardigan, notebook.
+// Deliberately not assembled from the roaming-NPC layers; anchors keep distinct silhouettes.
+function buildEddaSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  oval(img, 12, 29, 9, 2, [A.inkDeep[0], A.inkDeep[1], A.inkDeep[2], 70]);
+  oval(img, 12, 18, 10, 13, A.inkDeep);
+  oval(img, 12, 12, 9, 10, A.ink);
+  oval(img, 12, 15, 6, 8, A.snowL);
+  oval(img, 12, 23, 7, 7, A.violet);
+  rect(img, 6, 20, 12, 2, shade(A.violet, 0.72));
+  rect(img, 11, 21, 2, 8, A.inkDeep);
+  // Emperor-penguin amber ear patches and beak.
+  oval(img, 5, 11, 2, 4, A.amber); oval(img, 19, 11, 2, 4, A.amber);
+  rect(img, 10, 14, 5, 2, A.beak); rect(img, 11, 16, 3, 1, A.beakD);
+  // Half-moon spectacles, joined by a short bridge.
+  halfMoonFrame(img, 8, 10, 4, 3, A.amberL); halfMoonFrame(img, 16, 10, 4, 3, A.amberL);
+  rect(img, 11, 10, 3, 1, A.amberL);
+  px(img, 8, 11, A.inkDeep); px(img, 16, 11, A.inkDeep);
+  // Notebook and ink-smudged flipper.
+  rrect(img, 17, 20, 6, 8, A.wood); rect(img, 18, 21, 4, 6, A.amberL);
+  rect(img, 19, 22, 2, 1, A.ink); rect(img, 19, 24, 3, 1, A.ink);
+  disc(img, 17, 20, 2, A.ink); px(img, 18, 18, A.violet);
+  rect(img, 6, 28, 4, 2, A.beak); rect(img, 14, 28, 4, 2, A.beak);
+  return save(path.join('characters', 'edda-quill.png'), img);
+}
+
+// 128px framed-dialogue portrait. This code-drawn fallback ships because the configured painted-
+// master generator exhausted its credits; Graphics/Frostbyte/prompts.md preserves the swap prompt.
+function buildEddaPortrait() {
+  const W = 128, H = 128, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x0edda123;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = y / (H - 1);
+    const base = [
+      A.nightL[0] * (1 - t) + A.night[0] * t,
+      A.nightL[1] * (1 - t) + A.night[1] * t,
+      A.nightL[2] * (1 - t) + A.night[2] * t,
+    ];
+    const grain = (nextNoise() - 0.5) * 12;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  // Abstract newsroom papers and amber desk light behind the bust.
+  rrect(img, 8, 13, 28, 20, shade(A.snowD, 0.88));
+  rect(img, 12, 18, 18, 2, A.frost); rect(img, 12, 24, 13, 2, A.frost);
+  rrect(img, 94, 19, 25, 28, shade(A.snowD, 0.82));
+  rect(img, 99, 25, 14, 2, A.frost); rect(img, 99, 31, 17, 2, A.frost);
+  for (let r = 34; r > 2; r -= 3) disc(img, 102, 73, r, [...A.amber, Math.max(3, 28 - r / 2)]);
+
+  // Warm rim, body, head, white bib and emperor patches.
+  oval(img, 64, 112, 48, 46, A.amber);
+  oval(img, 64, 113, 45, 45, A.inkDeep);
+  oval(img, 64, 61, 42, 43, A.amber);
+  oval(img, 64, 62, 39, 41, A.ink);
+  oval(img, 64, 67, 28, 31, A.snowL);
+  oval(img, 32, 58, 8, 20, A.amber); oval(img, 96, 58, 8, 20, A.amber);
+  oval(img, 64, 111, 33, 29, A.violet);
+  rect(img, 34, 93, 60, 8, shade(A.violet, 0.72));
+  rect(img, 61, 97, 6, 31, A.inkDeep);
+
+  // Face and distinctive half-moon spectacles.
+  halfMoonFrame(img, 49, 54, 15, 12, A.amberL, 2);
+  halfMoonFrame(img, 79, 54, 15, 12, A.amberL, 2);
+  rect(img, 62, 54, 5, 3, A.amberL);
+  disc(img, 50, 59, 3, A.inkDeep); disc(img, 78, 59, 3, A.inkDeep);
+  px(img, 49, 58, A.snowL); px(img, 77, 58, A.snowL);
+  oval(img, 64, 72, 9, 6, A.beak); rect(img, 58, 73, 13, 3, A.beakD);
+
+  // Reporter notebook at frame edge and the small ink mark called out in the prompt.
+  rrect(img, 87, 91, 34, 35, A.wood); rect(img, 92, 96, 24, 25, A.amberL);
+  rect(img, 97, 101, 14, 2, A.wood); rect(img, 97, 108, 18, 2, A.wood);
+  rect(img, 97, 115, 11, 2, A.wood); disc(img, 86, 96, 8, A.ink);
+  disc(img, 89, 91, 2, A.violet); disc(img, 84, 99, 2, A.violet);
+
+  // Sparse painterly flecks unify the large flat forms without muddying facial readability.
+  for (let i = 0; i < 90; i++) {
+    const x = 18 + Math.floor(nextNoise() * 92), y = 36 + Math.floor(nextNoise() * 84);
+    const color = nextNoise() > 0.5 ? [...A.snowL, 28] : [...A.amberL, 24];
+    px(img, x, y, color);
+  }
+  return save(path.join('portraits', 'edda-quill.png'), img);
 }
 
 /* ----------------------------- COSMETIC OVERLAYS ---------------------- */
@@ -1368,6 +1465,8 @@ function buildPickupGlint() {
 const made = [
   buildPenguinBody(),
   buildPenguinBelly(),
+  buildEddaSprite(),
+  buildEddaPortrait(),
   buildRoomPlaza(),
   ...ITEM_CATALOG.map(buildCosmetic),
   buildSnowpal(),

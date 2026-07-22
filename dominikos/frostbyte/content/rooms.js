@@ -151,6 +151,10 @@ export const ROOM_REGISTRY = {
         prompt: 'Visit the restaurant',
         copy: 'Tonight\'s special is ember-roasted root stew with iceleaf rolls. A warm corner table is ready.',
       },
+      {
+        id: 'noticeboard-chirper', label: 'The Chillmere Chirper', kind: 'newspaper', x: 1095, y: 822,
+        prompt: 'Read this week’s Chirper',
+      },
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 72, y: 480, targetRoom: 'plaza', locked: false, targetSpawn: 'fromCourt' },
@@ -165,6 +169,46 @@ export const ROOM_REGISTRY = {
       { id: 'patio-brazier', x: 735, y: 846, w: 54, h: 54 },
       { id: 'court-bench', x: 540, y: 822, w: 108, h: 30 },
       { id: 'menu-board', x: 1095, y: 822, w: 45, h: 66 },
+      { id: 'edda-nook', x: 925, y: 790, w: 54, h: 70 },
+    ],
+    anchors: [
+      { characterId: 'edda-quill', x: 925, y: 790 },
+    ],
+    clickables: [
+      {
+        id: 'window-wave', curioId: 'court-window-wave', reaction: 'wave',
+        x: 219, y: 207, w: 228, h: 90,
+        line: 'Two tiny silhouettes wave back from the warm window.', reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'fountain-glimmer', curioId: 'court-fountain-glimmer', reaction: 'glimmer',
+        x: 579, y: 490, w: 300, h: 220,
+        line: 'A coin glints once beneath the frozen court.', reactionColor: '#ffb45e',
+      },
+      {
+        id: 'wind-chimes', curioId: 'court-wind-chimes', reaction: 'chime',
+        x: 846, y: 120, w: 84, h: 48,
+        line: 'The ice chimes answer in three bright notes.', reactionColor: '#7fd6ff',
+      },
+      {
+        id: 'awning-snow', curioId: 'court-awning-snow', reaction: 'snow',
+        x: 285, y: 132, w: 420, h: 48,
+        line: 'Whump. The awning looks much lighter now.', reactionColor: '#cfe0f2',
+      },
+      {
+        id: 'kettle-steam', curioId: 'court-kettle-steam', reaction: 'steam',
+        x: 705, y: 520, w: 150, h: 96,
+        line: 'The kettle answers with a determined puff.', reactionColor: '#f5fbff',
+      },
+      {
+        id: 'postbox-rattle', curioId: 'court-postbox-rattle', reaction: 'rattle',
+        x: 1095, y: 810, w: 54, h: 96,
+        line: 'Rattle-rattle. No letter takes responsibility.', reactionColor: '#ff784f',
+      },
+      {
+        id: 'loose-cobble', reaction: 'hum', x: 900, y: 861, w: 90, h: 42,
+        line: 'A low note hums beneath the ice, then slips deeper.', reactionColor: '#6fe0b2',
+      },
     ],
     npcSpawnAnchors: [],
   },

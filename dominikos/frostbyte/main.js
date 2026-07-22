@@ -28,6 +28,7 @@ import { createEmotes, emoteSymbol } from './ui/emotes.js';
 import { createMap } from './ui/map.js';
 import { createJournal } from './ui/journal.js';
 import { createDialogue } from './ui/dialogue.js';
+import { createNewspaper } from './ui/newspaper.js';
 import { nodeByRoom } from './content/map.js';
 import { canTravel, arriveSpawnId, findAutoEnterDoor } from './engine/travel.js';
 import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
@@ -43,6 +44,12 @@ import { resolveRoomCollision } from './world/room-collision.js';
 import { CURIO_REGISTRY } from './content/curios.js';
 import { curioById, discoverCurio } from './engine/curios.js';
 import { spawnClickables } from './world/clickable.js';
+import { ANCHOR_CHARACTERS } from './content/characters.js';
+import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
+import { chooseDialogue, startDialogue } from './engine/dialogue-tree.js';
+import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
+import { favorById } from './content/favors.js';
+import { chirperIssueForDate } from './content/chirper-issues.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -91,6 +98,7 @@ k.loadSprite('room-trail', './assets/room-trail.png');
 k.loadSprite('room-court', './assets/room-court.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
+loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
 loadFurnitureSprites(k);
 k.loadSprite('den-sign-open', './assets/den-sign-open.png');
 k.loadSprite('den-sign-closed', './assets/den-sign-closed.png');
@@ -221,6 +229,7 @@ k.scene('room', (roomId, opts = {}) => {
   // it's driven from this same k.onUpdate, which KAPLAY simply never calls while paused.
   const spawnConfig = ROOM_SPAWN[roomId];
   const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, room.scale) : null;
+  const anchorLayer = spawnRoomAnchors(k, room, ANCHOR_CHARACTERS, reduceMotion);
 
   // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. Minigames, shops,
   // venues, signs and doors are actionable; NPCs/landmarks stay promptless and
@@ -239,6 +248,8 @@ k.scene('room', (roomId, opts = {}) => {
     if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
     if (hit.kind === 'shop') return 'shop';
     if (hit.kind === 'venue') return 'venue';
+    if (hit.kind === 'newspaper') return 'newspaper';
+    if (hit.kind === 'character') return 'character';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
     return null;
@@ -257,6 +268,82 @@ k.scene('room', (roomId, opts = {}) => {
     changeScene(() => k.go('room', door.targetRoom, { spawn: door.targetSpawn ?? arriveSpawnId(roomId) }));
     return true;
   }
+
+  function applyDialogueEffects(effects) {
+    const events = [];
+    for (const effect of effects) {
+      const definition = favorById(effect.favorId);
+      if (!definition) continue;
+      if (effect.type === 'favor-offer') offerFavor(save, definition, events);
+      else if (effect.type === 'favor-start') startFavor(save, definition, events);
+    }
+    if (events.length) persist(save);
+    return events;
+  }
+
+  function openCharacterDialogue(character, startNode) {
+    const tree = character?.dialogueTree;
+    if (!tree) {
+      showDialogue(character?.name, character?.linePools?.greeting?.[0] ?? 'The isle is listening.');
+      return;
+    }
+    const context = () => ({ todayKey: todayISO, favors: save.favors });
+    const first = startDialogue(tree, context(), startNode);
+    if (!first) return;
+
+    const render = (session) => {
+      dialogueUI.open({
+        name: character.name,
+        subtitle: character.subtitle,
+        portraitSrc: character.portraitAsset,
+        portraitAlt: `Portrait of ${character.name}`,
+        pages: session.pages,
+        choices: session.choices.map((choice) => ({ id: choice.id, label: choice.label })),
+        onChoice: (choice) => {
+          const atFinalPage = { ...session, pageIndex: Math.max(0, session.pages.length - 1) };
+          const result = chooseDialogue(tree, atFinalPage, choice.id, context());
+          if (!result) return false;
+          applyDialogueEffects(result.effects);
+          if (result.session.complete) {
+            dialogueUI.close();
+            return false;
+          }
+          render(result.session);
+          return false;
+        },
+      });
+    };
+    render(first);
+  }
+
+  function talkToCharacter(character) {
+    if (character.id !== 'edda-quill') {
+      openCharacterDialogue(character, character.dialogueTree?.start);
+      return;
+    }
+    const trailTip = favorById('edda-tip-trail-glint');
+    const step = currentFavorStep(save, trailTip);
+    if (step?.id === 'report-to-edda') {
+      const events = [];
+      if (advanceFavor(save, trailTip, 'report-to-edda', events)) {
+        persist(save);
+        const reward = events.find((event) => event.type === 'coins-earned');
+        if (reward) {
+          refreshCoins(true);
+          showCoinSparkle(k, player.pos, reduceMotion);
+          showCoinToast(`+${reward.amount} coins — story tip filed!`);
+        }
+      }
+      openCharacterDialogue(character, 'reported');
+      return;
+    }
+    const status = favorState(save, trailTip.id)?.status;
+    const startNode = status === 'offered' ? 'greeting-offered'
+      : status === 'in-progress' ? 'greeting-progress'
+        : status === 'done' ? 'greeting-done' : 'greeting';
+    openCharacterDialogue(character, startNode);
+  }
+
   function doInteract() {
     if (anyOverlayOpen()) return; // 'e' typed into the chat box (or any open modal) must not interact
     const action = actionFor(nearest);
@@ -269,6 +356,10 @@ k.scene('room', (roomId, opts = {}) => {
       dressUp.open();
     } else if (action === 'venue') {
       enterVenue(nearest);
+    } else if (action === 'newspaper') {
+      newspaperUI.open();
+    } else if (action === 'character') {
+      talkToCharacter(nearest.character);
     } else if (action === 'door') {
       const d = nearest.door;
       if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
@@ -470,9 +561,12 @@ k.scene('room', (roomId, opts = {}) => {
     getState: () => save.curios,
     getRoomLabel: (id) => ROOM_REGISTRY[id]?.title ?? id,
   });
+  const newspaperUI = createNewspaper({
+    getIssue: () => chirperIssueForDate(todayISO),
+  });
   const anyOverlayOpen = () =>
     transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || journalUI.isOpen() ||
-    dialogueUI.isOpen() || editMode.isOpen() || catalogUI.isOpen();
+    newspaperUI.isOpen() || dialogueUI.isOpen() || editMode.isOpen() || catalogUI.isOpen();
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
@@ -485,7 +579,7 @@ k.scene('room', (roomId, opts = {}) => {
 
   // Direct-click props use one scene-scoped mouse path. touchToMouse synthesizes that path for taps,
   // so no parallel touch listener exists and a Curio can never register twice from one tap.
-  spawnClickables(k, {
+  const clickableLayer = spawnClickables(k, {
     props: room.clickables ?? [],
     anyOverlayOpen,
     reducedMotion: reduceMotion,
@@ -552,6 +646,7 @@ k.scene('room', (roomId, opts = {}) => {
   // canvas presses to the furniture editor (the tray is non-modal by design).
   k.onMousePress(() => {
     if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
+    if (clickableLayer.consumePress()) { moveTarget = null; return; }
     if (!anyOverlayOpen()) {
       moveTarget = collidePlayer(k.toWorld(k.mousePos()));
       showMovePing(k, moveTarget, reduceMotion);
@@ -562,7 +657,7 @@ k.scene('room', (roomId, opts = {}) => {
     // routed ONLY through onMousePress — wiring it here too would double-fire on one tap
     // (double stock burn / duplicate placement — H2 review blocker). The idempotent moveTarget
     // assignment is safe to keep on both paths.
-    if (!anyOverlayOpen()) moveTarget = collidePlayer(k.toWorld(pos));
+    if (!anyOverlayOpen() && !clickableLayer.contains(k.toWorld(pos))) moveTarget = collidePlayer(k.toWorld(pos));
   });
 
   k.onUpdate(() => {
@@ -629,10 +724,13 @@ k.scene('room', (roomId, opts = {}) => {
       const pdy = player.pos.y - p.obj.pos.y;
       if (pdx * pdx + pdy * pdy < 40 * 40) {
         if (collectPickup(save, p.id, todayISO, [])) {
+          const trailTip = favorById('edda-tip-trail-glint');
+          const witnessed = currentFavorStep(save, trailTip)?.id === 'witness-trail-glint'
+            && advanceFavor(save, trailTip, 'witness-trail-glint', []);
           refreshCoins(true);
           persist(save);
           showCoinSparkle(k, p.obj.pos, reduceMotion);
-          showCoinToast('+1 coin!');
+          showCoinToast(witnessed ? 'Story tip witnessed — report to Edda!' : '+1 coin!');
         }
         k.destroy(p.obj);
         pickupObjs.splice(i, 1);
@@ -675,7 +773,7 @@ k.scene('room', (roomId, opts = {}) => {
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];
     nearest = findNearestInteractable(
       player.pos,
-      mergeInteractables(hotspotInteractables.concat(doorInteractables), liveNpcs),
+      mergeInteractables(hotspotInteractables.concat(doorInteractables, anchorLayer.interactables), liveNpcs),
       undefined,
       { isActionable: (c) => actionFor(c) !== null },
     );
@@ -686,6 +784,8 @@ k.scene('room', (roomId, opts = {}) => {
           action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
           action === 'shop' ? '👕 Dress Up' :
           action === 'venue' ? `🏪 ${nearest.prompt ?? `Visit ${nearest.label}`}` :
+          action === 'newspaper' ? `📰 ${nearest.prompt ?? `Read ${nearest.label}`}` :
+          action === 'character' ? `💬 Talk to ${nearest.label}` :
           action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');

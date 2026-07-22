@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { validateDialogueTree } from '../engine/dialogue-tree.js';
 import {
+  ANCHOR_CHARACTERS,
   ANCHOR_SLOTS,
+  EDDA_DIALOGUE_TREE,
   characterById,
+  characterByRoom,
   defineCharacters,
   unfilledAnchorSlots,
   validateCharacters,
@@ -11,6 +15,8 @@ const fixture = (overrides = {}) => ({
   id: 'fixture-anchor',
   name: 'Fixture Name',
   slotId: ANCHOR_SLOTS[0].id,
+  roomId: ANCHOR_SLOTS[0].roomId,
+  species: 'fixture species',
   portraitAsset: './assets/portraits/fixture.png',
   palette: { body: '#16283e', accent: '#ffb45e' },
   linePools: { greeting: ['Hello.'] },
@@ -39,5 +45,26 @@ describe('anchor character schema', () => {
 
   it('identifies the slots still waiting for approved content', () => {
     expect(unfilledAnchorSlots([fixture()])).toHaveLength(ANCHOR_SLOTS.length - 1);
+  });
+});
+
+describe('approved anchor contracts', () => {
+  it('locks the exact approved six names in area order', () => {
+    expect(ANCHOR_CHARACTERS.map((character) => character.name)).toEqual([
+      'Edda Quill',
+      'Pat Hocket',
+      'Captain Salka',
+      'Old Maren',
+      'Vesper',
+      'The Echo',
+    ]);
+  });
+
+  it('fills every anchor slot and resolves the W1 Court editor', () => {
+    expect(validateCharacters(ANCHOR_CHARACTERS)).toEqual([]);
+    expect(validateDialogueTree(EDDA_DIALOGUE_TREE)).toEqual([]);
+    expect(unfilledAnchorSlots()).toEqual([]);
+    expect(characterByRoom('court')).toBe(characterById('edda-quill'));
+    expect(characterById('the-echo')).toMatchObject({ portraitAsset: null, spriteAsset: null });
   });
 });

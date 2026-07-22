@@ -13,6 +13,93 @@ export function clickableAt(props, point) {
   return null;
 }
 
+function addMotionPiece(k, components, duration, update) {
+  const piece = k.add(components);
+  const origin = { x: piece.pos.x, y: piece.pos.y };
+  let elapsed = 0;
+  piece.onUpdate(() => {
+    elapsed += Math.min(k.dt(), 0.05);
+    const progress = Math.min(1, elapsed / duration);
+    update(piece, progress, origin);
+    if (progress >= 1) k.destroy(piece);
+  });
+  return piece;
+}
+
+function addVariantReaction(k, prop, color, reducedMotion) {
+  const quick = reducedMotion ? 0.22 : 0.7;
+  if (prop.reaction === 'snow') {
+    const count = reducedMotion ? 3 : 8;
+    for (let i = 0; i < count; i++) {
+      const x = prop.x - prop.w * 0.42 + (prop.w * 0.84 * i) / Math.max(1, count - 1);
+      addMotionPiece(k, [
+        k.rect(5, 5, { radius: 3 }), k.pos(x, prop.y - 8 - (i % 3) * 5), k.anchor('center'),
+        k.color(color), k.opacity(0.9), k.z(100004),
+      ], quick, (piece, progress, origin) => {
+        piece.pos.x = origin.x + (reducedMotion ? 0 : Math.sin(progress * 8 + i) * 8);
+        piece.pos.y = origin.y + progress * 58;
+        piece.opacity = 0.9 * (1 - progress);
+      });
+    }
+  } else if (prop.reaction === 'steam') {
+    for (let i = 0; i < 3; i++) {
+      addMotionPiece(k, [
+        k.rect(10, 10, { radius: 6 }), k.pos(prop.x + (i - 1) * 13, prop.y - 12), k.anchor('center'),
+        k.color(color), k.opacity(0.65), k.scale(0.7), k.z(100004),
+      ], quick, (piece, progress, origin) => {
+        piece.pos.x = origin.x + (reducedMotion ? 0 : Math.sin(progress * 5 + i) * 6);
+        piece.pos.y = origin.y - progress * 44;
+        const scale = 0.7 + progress * 1.1;
+        piece.scale.x = scale; piece.scale.y = scale;
+        piece.opacity = 0.65 * (1 - progress);
+      });
+    }
+  } else if (prop.reaction === 'chime') {
+    for (let i = 0; i < 3; i++) {
+      addMotionPiece(k, [
+        k.text('♪', { size: 15 }), k.pos(prop.x + (i - 1) * 18, prop.y), k.anchor('center'),
+        k.color(color), k.opacity(0.95), k.z(100004),
+      ], quick, (piece, progress, origin) => {
+        piece.pos.x = origin.x + (reducedMotion ? 0 : Math.sin(progress * 7 + i) * 5);
+        piece.pos.y = origin.y - progress * 30;
+        piece.opacity = 0.95 * (1 - progress);
+      });
+    }
+  } else if (prop.reaction === 'wave') {
+    for (let i = 0; i < 3; i++) {
+      addMotionPiece(k, [
+        k.rect(18, 4, { radius: 3 }), k.pos(prop.x - 28 + i * 28, prop.y), k.anchor('center'),
+        k.color(color), k.opacity(0.8), k.z(100004),
+      ], quick, (piece, progress, origin) => {
+        piece.pos.x = origin.x + (reducedMotion ? 0 : Math.sin(progress * Math.PI * 4 + i) * 9);
+        piece.pos.y = origin.y - progress * 14;
+        piece.opacity = 0.8 * (1 - progress);
+      });
+    }
+  } else if (prop.reaction === 'rattle') {
+    for (const offset of [-10, 10]) {
+      addMotionPiece(k, [
+        k.rect(7, 20, { radius: 3 }), k.pos(prop.x + offset, prop.y), k.anchor('center'),
+        k.color(color), k.opacity(0.75), k.z(100004),
+      ], reducedMotion ? 0.18 : 0.46, (piece, progress, origin) => {
+        piece.pos.x = origin.x + (reducedMotion ? 0 : Math.sin(progress * Math.PI * 10) * 8);
+        piece.opacity = 0.75 * (1 - progress);
+      });
+    }
+  } else if (prop.reaction === 'hum') {
+    for (let i = 0; i < 2; i++) {
+      addMotionPiece(k, [
+        k.rect(18, 8, { radius: 5 }), k.pos(prop.x, prop.y), k.anchor('center'),
+        k.color(color), k.opacity(0.6 - i * 0.15), k.scale(1 + i * 0.5), k.z(100004),
+      ], quick, (piece, progress) => {
+        const scale = (1 + i * 0.5) + (reducedMotion ? 0 : progress * 3);
+        piece.scale.x = scale; piece.scale.y = scale;
+        piece.opacity = (0.6 - i * 0.15) * (1 - progress);
+      });
+    }
+  }
+}
+
 function reactionBurst(k, prop, reducedMotion) {
   const color = k.Color.fromHex(prop.reactionColor ?? '#ffb45e');
   const burst = k.add([
@@ -34,6 +121,7 @@ function reactionBurst(k, prop, reducedMotion) {
     burst.opacity = 0.8 * (1 - progress);
     if (progress >= 1) k.destroy(burst);
   });
+  addVariantReaction(k, prop, color, reducedMotion);
 
   if (prop.line) {
     const line = k.add([
@@ -65,6 +153,7 @@ export function spawnClickables(k, opts = {}) {
   const props = opts.props ?? [];
   const anyOverlayOpen = opts.anyOverlayOpen ?? (() => false);
   let active = true;
+  let handledPress = false;
 
   function trigger(point) {
     if (!active || anyOverlayOpen()) return null;
@@ -77,7 +166,7 @@ export function spawnClickables(k, opts = {}) {
   }
 
   // Scene listener, not window/document. It is cancelled explicitly as well as by KAPLAY teardown.
-  const mousePress = k.onMousePress(() => trigger(k.toWorld(k.mousePos())));
+  const mousePress = k.onMousePress(() => { handledPress = Boolean(trigger(k.toWorld(k.mousePos()))); });
   k.onSceneLeave(() => {
     active = false;
     mousePress?.cancel?.();
@@ -85,6 +174,12 @@ export function spawnClickables(k, opts = {}) {
 
   return {
     trigger,
+    contains: (point) => Boolean(clickableAt(props, point)),
+    consumePress() {
+      const handled = handledPress;
+      handledPress = false;
+      return handled;
+    },
     destroy() {
       active = false;
       mousePress?.cancel?.();

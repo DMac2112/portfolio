@@ -145,7 +145,7 @@ Acceptance: same filenames+dims, doors/walkable center readable, vitest untouche
 in-browser eyeball vs door hotspots.
 **Phase B — per world-plan phase:** W2 workshop interior · W3 docks · W4 lighthouse ×2 +
 telescope vista vignettes (3–4 small paintings) · W5 hollow + Moonwell · W6 caverns ×1–2 ·
-6 character portraits (Edda, Pem, Salka, Maren, Vesper — the Echo deliberately has none).
+5 character portraits (Edda, Pat, Salka, Maren, Vesper — the Echo deliberately has none).
 
 ## Risks & mitigations
 - **Style drift across rooms** → reference-edit protocol + single-session batches + palette-snap.

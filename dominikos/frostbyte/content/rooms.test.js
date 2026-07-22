@@ -24,7 +24,11 @@ describe('room configs', () => {
     });
 
     it(`${room.id}: no two interactables are closer than INTERACT_R (ambiguous nearest-scan)`, () => {
-      const all = [...room.hotspots, ...room.doors];
+      const all = [
+        ...room.hotspots,
+        ...room.doors,
+        ...(room.anchors ?? []).map((anchor) => ({ ...anchor, id: `anchor-${anchor.characterId}` })),
+      ];
       for (let i = 0; i < all.length; i++) {
         for (let j = i + 1; j < all.length; j++) {
           const d = Math.hypot(all[i].x - all[j].x, all[i].y - all[j].y);
@@ -57,6 +61,21 @@ describe('room configs', () => {
         expect(s.x + s.w / 2).toBeLessThanOrEqual(room.bounds.x1);
         expect(s.y - s.h / 2).toBeGreaterThanOrEqual(room.bounds.y0);
         expect(s.y + s.h / 2).toBeLessThanOrEqual(room.bounds.y1);
+      }
+    });
+
+    it(`${room.id}: anchor placements and clickable hitboxes stay inside bounds`, () => {
+      for (const anchor of room.anchors ?? []) {
+        expect(anchor.x).toBeGreaterThanOrEqual(room.bounds.x0);
+        expect(anchor.x).toBeLessThanOrEqual(room.bounds.x1);
+        expect(anchor.y).toBeGreaterThanOrEqual(room.bounds.y0);
+        expect(anchor.y).toBeLessThanOrEqual(room.bounds.y1);
+      }
+      for (const prop of room.clickables ?? []) {
+        expect(prop.x - prop.w / 2).toBeGreaterThanOrEqual(room.bounds.x0);
+        expect(prop.x + prop.w / 2).toBeLessThanOrEqual(room.bounds.x1);
+        expect(prop.y - prop.h / 2).toBeGreaterThanOrEqual(room.bounds.y0);
+        expect(prop.y + prop.h / 2).toBeLessThanOrEqual(room.bounds.y1);
       }
     });
   }
@@ -288,5 +307,15 @@ describe('room configs', () => {
       'court-bench',
       'menu-board',
     ]));
+  });
+
+  it('court: ships Edda, the Chirper board, six Curios, and one non-Curio secret', () => {
+    const court = ROOM_REGISTRY.court;
+    expect(court.anchors).toEqual([{ characterId: 'edda-quill', x: 925, y: 790 }]);
+    expect(court.hotspots.find((hotspot) => hotspot.id === 'noticeboard-chirper')).toMatchObject({
+      kind: 'newspaper', label: 'The Chillmere Chirper',
+    });
+    expect(court.clickables.filter((prop) => prop.curioId)).toHaveLength(6);
+    expect(court.clickables.find((prop) => prop.id === 'loose-cobble')).toMatchObject({ reaction: 'hum' });
   });
 });

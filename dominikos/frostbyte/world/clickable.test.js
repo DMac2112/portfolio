@@ -70,6 +70,9 @@ describe('spawnClickables', () => {
     k.fireMouse();
     expect(onReaction).toHaveBeenCalledTimes(1);
     expect(onCurio).toHaveBeenCalledWith('curio', expect.objectContaining({ id: 'prop' }));
+    expect(controller.contains({ x: 100, y: 100 })).toBe(true);
+    expect(controller.consumePress()).toBe(true);
+    expect(controller.consumePress()).toBe(false);
     k.fireLeave();
     expect(k.pressController.cancel).toHaveBeenCalledTimes(1);
     expect(controller.trigger({ x: 100, y: 100 })).toBe(null);
