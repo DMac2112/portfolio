@@ -118,9 +118,10 @@ const description = site.meta.description;
   });
 
   // Structural style switch
-  type StyleOption = 'classic' | 'editorial' | 'glass' | 'terminal';
+  type StyleOption = 'studio' | 'classic' | 'editorial' | 'glass' | 'terminal';
   const styleStorageKey = 'portfolio-style';
   const styleOptions: { id: StyleOption; label: string }[] = [
+    { id: 'studio', label: 'Studio' },
     { id: 'classic', label: 'Classic' },
     { id: 'editorial', label: 'Editorial' },
     { id: 'glass', label: 'Glass' },
@@ -159,7 +160,7 @@ const description = site.meta.description;
   const savedStyle = document.documentElement.dataset.style;
   const initialStyle = styleOptions.some((option) => option.id === savedStyle)
     ? savedStyle as StyleOption
-    : 'classic';
+    : 'studio';
   setStyle(initialStyle, false);
   styleToggle?.addEventListener('click', () => {
     const activeStyle = document.documentElement.dataset.style;
@@ -170,6 +171,8 @@ const description = site.meta.description;
 
   // Colour palette switch: six light palettes followed by six dark palettes.
   type PaletteOption =
+    | 'cobalt'
+    | 'frost'
     | 'cloud'
     | 'paper'
     | 'mint'
@@ -184,6 +187,8 @@ const description = site.meta.description;
     | 'slate';
   const paletteStorageKey = 'portfolio-palette';
   const paletteOptions: { id: PaletteOption; label: string; mode: 'Light' | 'Dark' }[] = [
+    { id: 'cobalt', label: 'Cobalt', mode: 'Dark' },
+    { id: 'frost', label: 'Frost', mode: 'Light' },
     { id: 'cloud', label: 'Cloud', mode: 'Light' },
     { id: 'paper', label: 'Paper', mode: 'Light' },
     { id: 'mint', label: 'Mint', mode: 'Light' },
@@ -239,7 +244,7 @@ const description = site.meta.description;
   const savedPalette = document.documentElement.dataset.palette;
   const initialPalette = paletteOptions.some((option) => option.id === savedPalette)
     ? savedPalette as PaletteOption
-    : 'cloud';
+    : 'cobalt';
   setPalette(initialPalette, false);
   paletteToggle?.addEventListener('click', () => {
     const activePalette = document.documentElement.dataset.palette;

@@ -276,6 +276,55 @@ html[data-palette='slate'] {
   --selection-color: #93c5fd;
 }
 
+/* ── Signature palettes (Studio theme). Deep-ink Cobalt + crisp Frost, built on
+   an electric-indigo + live-teal accent system. These are the site defaults. ── */
+
+html[data-palette='cobalt'] {
+  color-scheme: dark;
+  --primary-color: #0b0f1a;
+  --secondary-color: #8098ff;
+  --accent-color: #3ce0c7;
+  --black-color: #eaf0ff;
+  --gray-color: #9aa7c2;
+  --white-color: #131a2b;
+  --darkBlue-color: #05080f;
+  --page-bg: #0b0f1a;
+  --surface-color: #131a2b;
+  --surface-muted: #1b2438;
+  --text-color: #eaf0ff;
+  --text-muted-color: #9aa7c2;
+  --border-color: #2b3650;
+  --nav-bg: rgba(9, 13, 22, 0.82);
+  --hero-bg: #05080f;
+  --on-hero: #eaf0ff;
+  --on-accent: #05221d;
+  --shadow-color: rgba(2, 4, 10, 0.55);
+  --selection-color: #3ce0c7;
+}
+
+html[data-palette='frost'] {
+  color-scheme: light;
+  --primary-color: #eef2f8;
+  --secondary-color: #3b4ee0;
+  --accent-color: #0b7285;
+  --black-color: #0e1424;
+  --gray-color: #55617a;
+  --white-color: #ffffff;
+  --darkBlue-color: #0b1020;
+  --page-bg: #eef2f8;
+  --surface-color: #ffffff;
+  --surface-muted: #e6ebf4;
+  --text-color: #0e1424;
+  --text-muted-color: #55617a;
+  --border-color: #d3dbe8;
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --hero-bg: #0b1020;
+  --on-hero: #eef2fb;
+  --on-accent: #ffffff;
+  --shadow-color: rgba(14, 20, 36, 0.1);
+  --selection-color: #3b4ee0;
+}
+
 /* Shared color adaptation; deliberately avoids structural/layout properties. */
 body {
   background-color: var(--page-bg, var(--primary-color));
