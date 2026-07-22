@@ -23,17 +23,18 @@ describe('MAP_NODES', () => {
     }
   });
 
-  it('has exactly seven unlocked nodes through W4', () => {
+  it('has exactly eight unlocked nodes through W5', () => {
     const unlockedCount = MAP_NODES.filter(n => n.unlocked).length;
-    expect(unlockedCount).toBe(7);
+    expect(unlockedCount).toBe(8);
   });
 
-  it('unlocked nodes include Palefire Light', () => {
+  it('unlocked nodes include Palefire Light and discovery-gated Whisperpine', () => {
     const unlockedRoomIds = MAP_NODES.filter(n => n.unlocked).map(n => n.roomId);
     expect(unlockedRoomIds).toEqual(expect.arrayContaining([
-      'plaza', 'den', 'trail', 'court', 'workshop', 'docks', 'lighthouse-rest',
+      'plaza', 'den', 'trail', 'court', 'workshop', 'docks', 'lighthouse-rest', 'whisperpine',
     ]));
-    expect(unlockedRoomIds).toHaveLength(7);
+    expect(unlockedRoomIds).toHaveLength(8);
+    expect(MAP_NODES.some((node) => node.roomId === 'moonwell')).toBe(false);
   });
 
   it('locked node labels exactly match plaza locked door labels', () => {

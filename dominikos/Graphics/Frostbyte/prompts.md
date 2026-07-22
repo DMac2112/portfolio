@@ -115,3 +115,33 @@ between broken floes; a crown-shaped green-violet aurora above a pressure ridge;
 Gull, a low timber work-barge under sail with an unmistakable signal-orange pennant. Blue-hour navy
 sea, snow-blue floes, restrained aurora and amber accents, chunky storybook forms and soft painterly
 texture. No text, logos, watermark, photorealism, or recognizable franchise design.
+
+## Vesper — Whisperpine trickster
+
+A square painted character portrait for Frostbyte, an original cosy Antarctic-island social
+adventure. Vesper is a clever arctic fox with long asymmetric ears, a narrow snow-white muzzle,
+ink-dark paws, a violet neck-knot, and an enormous curled tail whose tip catches a restrained
+aurora-green light. Seated bust composition, knowing expression, deep blue-green pines and three
+misleading den glows behind the silhouette. Chunky rounded forms, thick soft outlines, painterly
+texture, cold navy and snow-blue palette with restrained violet and aurora accents. No text, logos,
+photorealism, or recognizable existing character or franchise design.
+
+## Whisperpine Hollow — room backdrop
+
+A wide 3:2 painted deep-forest room for Frostbyte, viewed from a slightly elevated three-quarter
+angle at blue hour. Dense blue-green pines enclose a forked snow path entering from the west. Show
+three visually distinct fox-den sites: a root-bank opening in the northwest, an ice-owl den among
+the north-east pines, and a hollow fallen log in the southeast. The center is a listening grove;
+specific readable details include a snow hare, an impossible upward icicle, frozen violet berries,
+and three green-blue will-o-glows. A north wall of pine shadow conceals a moonlit gap, while an east
+root-bound stone crack quietly foreshadows a way below. Keep walkable routes open. No characters,
+readable text, logos, watermark, photorealism, or recognizable franchise design.
+
+## Moonwell Clearing — secret room backdrop
+
+A wide 3:2 painted secret forest clearing for Frostbyte, viewed from a slightly elevated
+three-quarter angle. This is the isle’s quiet place: a perfectly still oval pool at center, a pale
+moon halo through the canopy, one empty weathered bench at lower-left, encircling dark pines, and a
+single south gap back to the forest. The pool holds a slightly early silver reflection. No
+character, settlement, quest marker, readable text, logos, watermark, photorealism, or recognizable
+franchise design. Deep navy, pine blue-green, moon-snow and restrained ice-blue only.

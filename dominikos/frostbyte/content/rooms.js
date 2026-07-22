@@ -87,6 +87,7 @@ export const ROOM_REGISTRY = {
     spawnPoints: {
       default:    { x: 720, y: 760, facing: 'up' },
       fromPlaza:  { x: 720, y: 820, facing: 'up' },
+      fromWhisperpine: { x: 1240, y: 620, facing: 'left' },
       fromMap:    { x: 720, y: 560, facing: 'down' },
     },
     camera: { leadY: -50 },
@@ -96,6 +97,7 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 880, targetRoom: 'plaza', locked: false, targetSpawn: 'fromTrail' },
+      { id: 'door-whisperpine', label: 'Whisperpine Hollow', x: 1320, y: 620, targetRoom: 'whisperpine', locked: false, targetSpawn: 'fromTrail' },
     ],
     solids: [
       { id: 'pines-west', x: 300, y: 400, w: 120, h: 140 },
@@ -514,6 +516,131 @@ export const ROOM_REGISTRY = {
         id: 'balcony-wind-carving', curioId: 'lighthouse-gallery-wind-carving', reaction: 'hum',
         x: 1120, y: 810, w: 180, h: 72, requiresProximity: true,
         line: 'The wind-carved groove hums the same three notes as the loose Court cobble.', reactionColor: '#6fe0b2',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Whisperpine Hollow — a deep forest branch off Frostline Trail. Vesper's one daily placement
+  // and the hidden Moonwell door are resolved in content/whisperpine.js without mutating this data.
+  whisperpine: {
+    id: 'whisperpine',
+    title: 'Whisperpine Hollow',
+    mapAsset: 'room-whisperpine',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
+    spawnPoints: {
+      default:      { x: 220, y: 540, facing: 'right' },
+      fromTrail:    { x: 190, y: 540, facing: 'right' },
+      fromMoonwell: { x: 720, y: 200, facing: 'down' },
+      fromMap:      { x: 720, y: 760, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'whisperpine-heart', label: 'The Listening Pines', kind: 'landmark', x: 720, y: 480 },
+    ],
+    doors: [
+      { id: 'door-trail', label: 'Frostline Trail', x: 120, y: 540, targetRoom: 'trail', locked: false, targetSpawn: 'fromWhisperpine' },
+      {
+        id: 'door-moonwell', label: 'A Moonlit Gap', x: 720, y: 120,
+        targetRoom: 'moonwell', targetSpawn: 'fromWhisperpine', locked: true, hidden: true,
+        lockedCopy: 'Only an unbroken wall of pine shadows stands here.',
+      },
+      {
+        id: 'door-cavern-crack', label: 'Root-bound Crack', x: 1320, y: 600,
+        targetRoom: 'caverns', targetSpawn: 'fromWhisperpine', locked: true,
+        lockedCopy: 'A cold note breathes through the stone, but the roots refuse to part.',
+      },
+    ],
+    solids: [
+      { id: 'root-den-bank', x: 330, y: 255, w: 260, h: 150 },
+      { id: 'owl-den-pines', x: 900, y: 220, w: 220, h: 150 },
+      { id: 'heart-pines', x: 720, y: 465, w: 220, h: 180 },
+      { id: 'fallen-den-log', x: 1040, y: 650, w: 270, h: 100 },
+      { id: 'berry-snowbank', x: 430, y: 790, w: 180, h: 80 },
+    ],
+    vesperDens: [
+      { id: 'root-den', x: 330, y: 370 },
+      { id: 'owl-den', x: 900, y: 330 },
+      { id: 'fallen-den', x: 1040, y: 740 },
+    ],
+    anchors: [],
+    wisps: [
+      { id: 'wisp-one', x: 720, y: 560, phase: 0.2 },
+      { id: 'wisp-two', x: 780, y: 585, phase: 2.3 },
+      { id: 'wisp-three', x: 745, y: 625, phase: 4.1 },
+    ],
+    clickables: [
+      {
+        id: 'whisperpine-hare', curioId: 'whisperpine-snow-hare', reaction: 'scatter',
+        x: 250, y: 650, w: 140, h: 100,
+        line: 'A snow hare becomes three white bounds and one questioning ear.', reactionColor: '#f7fbff',
+      },
+      {
+        id: 'whisperpine-owl', curioId: 'whisperpine-ice-owl', reaction: 'glimmer',
+        x: 900, y: 225, w: 120, h: 100,
+        line: 'The ice owl blinks. Snow falls from the eye that moved second.', reactionColor: '#c8f4ff',
+      },
+      {
+        id: 'whisperpine-icicle', curioId: 'whisperpine-icicle-drop', reaction: 'snow',
+        x: 530, y: 250, w: 130, h: 120,
+        line: 'One icicle drops upward into the branch and leaves no gap behind.', reactionColor: '#7fd6ff',
+      },
+      {
+        id: 'whisperpine-echo-log', curioId: 'whisperpine-echo-log', reaction: 'hum',
+        x: 1040, y: 650, w: 250, h: 110,
+        lines: [
+          'The fallen log repeats your tap in three notes.',
+          'On the second tap, a fourth note answers from under the roots.',
+        ],
+        reactionColor: '#6fe0b2',
+      },
+      {
+        id: 'whisperpine-berries', curioId: 'whisperpine-frozen-berries', reaction: 'rattle',
+        x: 430, y: 790, w: 160, h: 90,
+        line: 'The frozen berries rattle from blue to violet without leaving their stems.', reactionColor: '#a78bfa',
+      },
+      {
+        id: 'whisperpine-wisps', curioId: 'whisperpine-will-o-glow', reaction: 'wave',
+        x: 750, y: 590, w: 190, h: 150,
+        line: 'The will-o-glows dodge your hand, then arrange themselves into a tiny fox grin.', reactionColor: '#6fe0b2',
+      },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Moonwell Clearing never appears on the island map. Its only way in is the save-gated gap in
+  // Whisperpine, and its only resident is the moon's reflection.
+  moonwell: {
+    id: 'moonwell',
+    title: 'Moonwell Clearing',
+    mapAsset: 'room-moonwell',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 180, x1: 1260, y0: 150, y1: 850 },
+    spawnPoints: {
+      default:         { x: 720, y: 770, facing: 'up' },
+      fromWhisperpine: { x: 720, y: 790, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'moonwell-pool', label: 'The Still Pool', kind: 'landmark', x: 720, y: 450 },
+      { id: 'moonwell-bench', label: null, kind: 'sit', x: 350, y: 650 },
+    ],
+    doors: [
+      { id: 'door-whisperpine', label: 'Whisperpine Hollow', x: 720, y: 850, targetRoom: 'whisperpine', locked: false, targetSpawn: 'fromMoonwell' },
+    ],
+    solids: [
+      { id: 'moonwell-pool', x: 720, y: 450, w: 420, h: 250 },
+      { id: 'moonwell-bench', x: 350, y: 650, w: 200, h: 70 },
+    ],
+    anchors: [],
+    clickables: [
+      {
+        id: 'moonwell-reflection', curioId: 'moonwell-reflection', reaction: 'glimmer',
+        x: 720, y: 450, w: 400, h: 230,
+        line: 'Your reflection looks up a heartbeat before you look down.', reactionColor: '#c8f4ff',
       },
     ],
     npcSpawnAnchors: [],

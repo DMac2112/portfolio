@@ -83,7 +83,7 @@ describe('room configs', () => {
   it('door graph: locked doors in the vignette point at real (future) ids, not typos', () => {
     const knownFutureIds = [
       'plaza', 'den', 'court', 'workshop', 'trail', 'docks',
-      'lighthouse-rest', 'lighthouse-gallery',
+      'lighthouse-rest', 'lighthouse-gallery', 'whisperpine', 'moonwell', 'caverns',
     ];
     for (const room of Object.values(ROOM_REGISTRY)) {
       for (const d of room.doors) {
@@ -436,5 +436,48 @@ describe('room configs', () => {
     });
     expect(ROOM_REGISTRY.trail.clickables.find((prop) => prop.id === 'palefire-trail-ribbon').favorStep)
       .toMatchObject({ favorId: 'maren-sighting-trail', stepId: 'witness-trail-event' });
+  });
+
+  it('Whisperpine: branches mutually from the Trail and authors three daily Vesper dens', () => {
+    const trailDoor = ROOM_REGISTRY.trail.doors.find((door) => door.id === 'door-whisperpine');
+    const hollow = ROOM_REGISTRY.whisperpine;
+    expect(trailDoor).toMatchObject({
+      targetRoom: 'whisperpine', targetSpawn: 'fromTrail', locked: false,
+    });
+    expect(hollow.doors.find((door) => door.id === 'door-trail')).toMatchObject({
+      targetRoom: 'trail', targetSpawn: 'fromWhisperpine', locked: false,
+    });
+    expect(hollow.vesperDens.map((den) => den.id)).toEqual(['root-den', 'owl-den', 'fallen-den']);
+    expect(hollow.anchors).toEqual([]);
+  });
+
+  it('Whisperpine: ships the six specified Curios, cursor-dodging wisps, and W6 crack foreshadow', () => {
+    const hollow = ROOM_REGISTRY.whisperpine;
+    expect(hollow.clickables.filter((prop) => prop.curioId)).toHaveLength(6);
+    expect(hollow.clickables.map((prop) => prop.id)).toEqual(expect.arrayContaining([
+      'whisperpine-hare', 'whisperpine-owl', 'whisperpine-icicle',
+      'whisperpine-echo-log', 'whisperpine-berries', 'whisperpine-wisps',
+    ]));
+    expect(hollow.wisps).toHaveLength(3);
+    expect(hollow.doors.find((door) => door.id === 'door-cavern-crack')).toMatchObject({
+      targetRoom: 'caverns', locked: true,
+    });
+  });
+
+  it('Moonwell: remains a hidden one-Curio quiet room with no character or map dependency', () => {
+    const hollow = ROOM_REGISTRY.whisperpine;
+    const moonwell = ROOM_REGISTRY.moonwell;
+    expect(hollow.doors.find((door) => door.id === 'door-moonwell')).toMatchObject({
+      targetRoom: 'moonwell', locked: true, hidden: true,
+    });
+    expect(moonwell.doors).toEqual([expect.objectContaining({
+      targetRoom: 'whisperpine', targetSpawn: 'fromMoonwell', locked: false,
+    })]);
+    expect(moonwell.anchors).toEqual([]);
+    expect(moonwell.npcSpawnAnchors).toEqual([]);
+    expect(moonwell.clickables.filter((prop) => prop.curioId)).toHaveLength(1);
+    expect(moonwell.solids.map((solid) => solid.id)).toEqual(expect.arrayContaining([
+      'moonwell-pool', 'moonwell-bench',
+    ]));
   });
 });

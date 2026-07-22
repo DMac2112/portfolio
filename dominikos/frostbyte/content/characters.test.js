@@ -63,7 +63,7 @@ describe('approved anchor contracts', () => {
     ]);
   });
 
-  it('fills every anchor slot and resolves the shipped W1-W4 anchors', () => {
+  it('fills every anchor slot and resolves the shipped W1-W5 anchors', () => {
     expect(validateCharacters(ANCHOR_CHARACTERS)).toEqual([]);
     expect(validateDialogueTree(EDDA_DIALOGUE_TREE)).toEqual([]);
     expect(validateDialogueTree(PAT_DIALOGUE_TREE)).toEqual([]);
@@ -82,6 +82,10 @@ describe('approved anchor contracts', () => {
     expect(characterByRoom('lighthouse-rest')).toMatchObject({
       id: 'old-maren', name: 'Old Maren', dialogueTree: MAREN_DIALOGUE_TREE,
       favorDefs: expect.arrayContaining([expect.objectContaining({ id: 'maren-sighting-gull' })]),
+    });
+    expect(characterByRoom('whisperpine')).toMatchObject({
+      id: 'vesper', name: 'Vesper', species: 'arctic fox',
+      subtitle: 'Trickster of Whisperpine Hollow',
     });
     expect(characterById('the-echo')).toMatchObject({ portraitAsset: null, spriteAsset: null });
   });

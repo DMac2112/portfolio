@@ -27,4 +27,11 @@ export const CURIO_REGISTRY = Object.freeze([
   Object.freeze({ id: 'lighthouse-gallery-pennant', roomId: 'lighthouse-gallery', label: 'The Unfelt Wind' }),
   Object.freeze({ id: 'lighthouse-gallery-rail-crystals', roomId: 'lighthouse-gallery', label: 'Glass-Step Chime' }),
   Object.freeze({ id: 'lighthouse-gallery-wind-carving', roomId: 'lighthouse-gallery', label: 'Three Notes in the Rail' }),
+  Object.freeze({ id: 'whisperpine-snow-hare', roomId: 'whisperpine', label: 'One Questioning Ear' }),
+  Object.freeze({ id: 'whisperpine-ice-owl', roomId: 'whisperpine', label: 'The Second Blink' }),
+  Object.freeze({ id: 'whisperpine-icicle-drop', roomId: 'whisperpine', label: 'The Upward Drop' }),
+  Object.freeze({ id: 'whisperpine-echo-log', roomId: 'whisperpine', label: 'Fourth Note Underroot' }),
+  Object.freeze({ id: 'whisperpine-frozen-berries', roomId: 'whisperpine', label: 'Colour Without Thaw' }),
+  Object.freeze({ id: 'whisperpine-will-o-glow', roomId: 'whisperpine', label: 'The Fox-Grin Lights' }),
+  Object.freeze({ id: 'moonwell-reflection', roomId: 'moonwell', label: 'The Earlier Reflection' }),
 ]);

@@ -460,6 +460,73 @@ function buildMarenPortrait() {
   return save(path.join('portraits', 'old-maren.png'), img);
 }
 
+/* ----------------------------- ANCHOR: Vesper (W5) ------------------- */
+// A sitting arctic-fox silhouette: long ears, ink-dark paws, violet neck-knot, aurora tail-tip.
+function buildVesperSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  oval(img, 12, 29, 10, 2, [A.inkDeep[0], A.inkDeep[1], A.inkDeep[2], 65]);
+  // Tail curls around the seated body and keeps the fox distinct from every upright bird anchor.
+  oval(img, 17, 24, 7, 6, A.inkDeep); oval(img, 17, 23, 6, 5, A.snowD);
+  disc(img, 21, 21, 3, A.aurora); px(img, 22, 19, A.iceL);
+  oval(img, 11, 21, 8, 10, A.snowD); oval(img, 11, 17, 6, 7, A.snowL);
+  // Tall asymmetric ears and a narrow fox muzzle.
+  for (let i = 0; i < 8; i++) {
+    rect(img, 5 + Math.floor(i / 3), 2 + i, 3, 1, i < 3 ? A.violet : A.snowL);
+    rect(img, 15 - Math.floor(i / 3), 1 + i, 3, 1, i < 3 ? A.violet : A.snowL);
+  }
+  oval(img, 11, 11, 8, 7, A.snowL); oval(img, 11, 15, 5, 4, A.snowD);
+  disc(img, 8, 11, 1, A.inkDeep); disc(img, 14, 11, 1, A.inkDeep);
+  px(img, 8, 10, A.iceL); px(img, 14, 10, A.iceL); disc(img, 11, 15, 1, A.inkDeep);
+  rect(img, 6, 18, 10, 2, A.violet); px(img, 16, 19, A.aurora);
+  rect(img, 6, 28, 5, 2, A.inkDeep); rect(img, 12, 28, 4, 2, A.inkDeep);
+  return save(path.join('characters', 'vesper.png'), img);
+}
+
+function buildVesperPortrait() {
+  const W = 128, H = 128, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x0f0ae522;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = y / (H - 1);
+    const base = [
+      A.pineD[0] * (1 - t) + A.inkDeep[0] * t,
+      A.pineD[1] * (1 - t) + A.inkDeep[1] * t,
+      A.pineD[2] * (1 - t) + A.inkDeep[2] * t,
+    ];
+    const grain = (nextNoise() - 0.5) * 12;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  // Pine trunks and three misleading den-glows establish the daily hunt behind the bust.
+  for (const x of [7, 22, 103, 117]) rect(img, x, 8, 7, 116, A.wood);
+  for (const [x, y, c] of [[20, 77, A.aurora], [105, 34, A.violet], [112, 92, A.ice]]) {
+    for (let r = 25; r > 2; r -= 4) disc(img, x, y, r, [...c, Math.max(3, 26 - r / 2)]);
+  }
+  // Broad white ruff and seated shoulders.
+  oval(img, 64, 117, 48, 40, A.inkDeep); oval(img, 64, 114, 44, 38, A.snowD);
+  for (let x = 25; x <= 103; x += 8) disc(img, x, 93 + Math.abs(64 - x) / 6, 9, A.snowL);
+  // Long ears, angular cheeks, and the small black muzzle.
+  for (let y = 13; y <= 62; y++) {
+    const widen = Math.floor((y - 13) * 0.28);
+    rect(img, 29 - Math.floor(widen / 2), y, 10 + widen, 2, y < 25 ? A.violet : A.snowL);
+    rect(img, 89 - Math.floor(widen / 2), y - 2, 10 + widen, 2, y < 23 ? A.violet : A.snowL);
+  }
+  oval(img, 64, 68, 43, 38, A.snowL); oval(img, 64, 80, 27, 22, A.snowD);
+  // Dark eye-line gives Vesper a knowing, readable expression at thumbnail size.
+  rect(img, 35, 62, 25, 5, A.inkDeep); rect(img, 68, 62, 25, 5, A.inkDeep);
+  disc(img, 49, 66, 5, A.inkDeep); disc(img, 79, 66, 5, A.inkDeep);
+  px(img, 48, 64, A.iceL); px(img, 78, 64, A.iceL);
+  oval(img, 64, 83, 7, 5, A.inkDeep); rect(img, 58, 89, 13, 3, A.inkDeep);
+  rect(img, 34, 96, 60, 7, A.violet); rect(img, 85, 101, 17, 8, A.aurora);
+  // Curled tail enters the frame with an aurora-green tip.
+  ovalRing(img, 108, 113, 24, 22, A.snowL, 210); ovalRing(img, 108, 113, 18, 16, A.snowD, 190);
+  disc(img, 119, 96, 8, A.aurora); disc(img, 120, 93, 3, A.iceL);
+  for (let i = 0; i < 90; i++) {
+    const x = 13 + Math.floor(nextNoise() * 103), y = 20 + Math.floor(nextNoise() * 103);
+    px(img, x, y, nextNoise() > 0.55 ? [...A.aurora, 24] : [...A.iceL, 22]);
+  }
+  return save(path.join('portraits', 'vesper.png'), img);
+}
+
 /* ----------------------------- COSMETIC OVERLAYS ---------------------- */
 // Grayscale shapes, tinted per-item at runtime. Head is stationary during a walk cycle, so each
 // row's 4 frames are identical. Drawn only on facings where the item is visible.
@@ -852,6 +919,7 @@ function buildMapIsle() {
   route(221, 128, 67, 147);
   route(384, 122, 302, 58);
   route(302, 58, 355, 26);
+  route(182, 38, 130, 54);
 
   // Pine clusters — flavor only, a scaled-down version of the plaza's disc-stack pine.
   const pineAt = (px0, py0, s) => {
@@ -890,6 +958,12 @@ function buildMapIsle() {
   const tpx = Math.round(0.38 * W), tpy = Math.round(0.12 * H);
   rect(img, tpx - 3, tpy - 7, 7, 15, ARCTIC_DUSK.iceD); rect(img, tpx - 1, tpy - 7, 3, 15, ARCTIC_DUSK.iceL);
   disc(img, tpx, tpy + 8, 6, ARCTIC_DUSK.water); pineAt(tpx - 11, tpy + 7, 0.8); pineAt(tpx + 12, tpy + 7, 0.8);
+
+  // Whisperpine glyph: three dark pines guard one small aurora-lit den mouth.
+  const hpx = Math.round(0.27 * W), hpy = Math.round(0.17 * H);
+  for (const [ox, oy, s] of [[-10, 5, 0.78], [0, -2, 0.92], [11, 5, 0.78]]) pineAt(hpx + ox, hpy + oy, s);
+  oval(img, hpx, hpy + 9, 8, 5, ARCTIC_DUSK.inkDeep);
+  oval(img, hpx, hpy + 9, 4, 3, ARCTIC_DUSK.aurora);
 
   // Glasswind Court glyph: three warm storefronts around a tiny ice court.
   const gpx = Math.round(0.80 * W), gpy = Math.round(0.38 * H);
@@ -1479,6 +1553,16 @@ function buildRoomTrail() {
     px(img, 369, 249, A.amberL);
   }
 
+  // W5 east branch: a narrow, blue-green path slips behind two whispering pine posts.
+  for (let x = 352; x < W; x++) {
+    const y = 207 + Math.round(Math.sin(x * 0.06) * 4);
+    disc(img, x, y, 12, [...A.frost, 145]); disc(img, x, y - 1, 8, [...A.snowL, 165]);
+  }
+  for (const x of [434, 456]) {
+    rect(img, x, 183, 5, 48, A.wood); disc(img, x + 2, 184, 12, A.pineD); disc(img, x + 2, 176, 9, A.pine);
+  }
+  for (let r = 12; r > 2; r -= 3) disc(img, 449, 205, r, [...A.aurora, Math.max(3, 23 - r)]);
+
   // South trailhead posts visually anchor the return door without changing its DOM label.
   for (const x of [220, 260]) {
     rect(img, x, 292, 4, 28, A.wood); rect(img, x - 3, 291, 10, 5, A.snowL);
@@ -2038,6 +2122,152 @@ function buildRoomLighthouseGallery() {
   return save('room-lighthouse-gallery.png', img);
 }
 
+/* ----------------------------- ROOMS: Whisperpine (W5) --------------- */
+function buildRoomWhisperpine() {
+  const W = 480, H = 320, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x7159e251;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+
+  // Dense blue-green forest floor with a lighter path entering from Frostline at west.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.min(1, Math.hypot((x - W / 2) / (W / 2), (y - H / 2) / (H / 2)));
+    const base = y < 84
+      ? A.night.map((channel, i) => channel + (A.pineD[i] - channel) * (y / 84) * 0.55)
+      : shade(A.pineD, 0.92 + (1 - edge) * 0.17);
+    const grain = (nextNoise() - 0.5) * 12;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  for (const [x, y] of [[24, 26], [72, 48], [136, 20], [286, 35], [373, 17], [447, 51]]) px(img, x, y, A.iceL);
+  for (let x = 0; x < W; x++) {
+    const y = 34 + Math.round(Math.sin(x * 0.022) * 5);
+    px(img, x, y, [...A.aurora, 48]);
+  }
+
+  // Forked snow path: west entrance, central listening grove, and three den approaches.
+  const path = (points, radius) => {
+    for (let i = 0; i < points.length - 1; i++) {
+      const [x0, y0] = points[i], [x1, y1] = points[i + 1];
+      const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+      for (let s = 0; s <= steps; s++) {
+        const t = steps ? s / steps : 0;
+        const x = Math.round(x0 + (x1 - x0) * t), y = Math.round(y0 + (y1 - y0) * t);
+        disc(img, x, y, radius, [...A.frost, 130]); disc(img, x, y - 1, Math.max(2, radius - 4), [...A.snowD, 150]);
+      }
+    }
+  };
+  path([[-10, 180], [66, 180], [132, 169], [203, 163], [240, 160]], 15);
+  path([[203, 163], [150, 142], [110, 124]], 10);
+  path([[240, 160], [277, 132], [300, 110]], 10);
+  path([[240, 160], [294, 196], [347, 244]], 10);
+  path([[240, 160], [240, 104], [240, 38]], 9);
+
+  const pineAt = (cx, cy, s = 1) => {
+    oval(img, cx, cy + 4 * s, 10 * s, 4 * s, [...A.inkDeep, 60]);
+    rect(img, cx - Math.max(1, Math.round(s * 1.5)), cy - 5 * s, Math.max(3, Math.round(s * 3)), 12 * s, A.wood);
+    disc(img, cx, cy - 7 * s, 11 * s, A.pineD);
+    disc(img, cx, cy - 17 * s, 9 * s, A.pine);
+    disc(img, cx, cy - 27 * s, 7 * s, shade(A.pine, 1.08));
+    disc(img, cx - 3 * s, cy - 29 * s, 4 * s, A.snowD);
+  };
+  // The perimeter is intentionally crowded; the three openings remain legible between trunks.
+  for (const p of [
+    [49, 117, 1.25], [72, 91, 1.05], [91, 79, 0.9], [132, 70, 1.1], [169, 86, 1.0],
+    [205, 72, 1.15], [273, 73, 1.05], [324, 72, 1.15], [360, 86, 1.05], [403, 97, 1.22], [439, 121, 1.1],
+    [55, 260, 1.18], [104, 282, 0.95], [179, 288, 1.05], [291, 287, 1.0], [394, 278, 1.18], [441, 255, 1.05],
+  ]) pineAt(...p);
+
+  // Root den (west), owl den (north-east), and fallen-log den (south-east).
+  oval(img, 110, 104, 47, 27, A.inkDeep); oval(img, 110, 108, 31, 19, A.night);
+  for (let i = 0; i < 9; i++) rect(img, 74 + i * 9, 82 + (i % 2) * 4, 4, 35, A.wood);
+  disc(img, 110, 111, 6, [...A.aurora, 36]);
+
+  for (const [x, y] of [[275, 82], [296, 69], [319, 84]]) pineAt(x, y, 1.05);
+  oval(img, 300, 98, 34, 24, A.inkDeep); oval(img, 300, 103, 23, 16, A.night);
+  // Ice owl silhouette above the second den; only the blink is warm enough to find.
+  oval(img, 300, 72, 13, 17, A.iceD); disc(img, 294, 69, 2, A.iceL); disc(img, 306, 69, 2, A.iceL);
+  px(img, 306, 69, A.amberL);
+
+  oval(img, 347, 245, 57, 16, [...A.inkDeep, 70]);
+  rrect(img, 302, 211, 90, 28, A.inkDeep); rrect(img, 308, 216, 78, 18, A.wood);
+  for (let x = 313; x < 382; x += 11) rect(img, x, 218, 3, 14, A.woodL);
+  oval(img, 347, 231, 27, 12, A.night); ovalRing(img, 347, 231, 19, 8, A.aurora, 100);
+
+  // Listening-pine heart, upward icicle, frozen berries, hare trace, and the three dodging wisps.
+  for (const p of [[225, 160, 1.32], [244, 146, 1.22], [262, 163, 1.28]]) pineAt(...p);
+  for (let i = 0; i < 31; i++) { rect(img, 171 + Math.floor(i / 7), 66 + i, Math.max(1, 8 - Math.floor(i / 5)), 1, A.iceL); }
+  for (const [x, y, c] of [[136, 254, A.violet], [145, 259, A.ice], [152, 251, A.violet], [140, 265, A.aurora]]) disc(img, x, y, 3, c);
+  oval(img, 79, 218, 13, 8, A.snowL); disc(img, 68, 210, 7, A.snowL); rect(img, 65, 196, 3, 12, A.snowL); rect(img, 71, 197, 3, 12, A.snowL);
+  px(img, 66, 208, A.inkDeep); oval(img, 91, 221, 8, 3, A.snowD);
+  for (const [x, y, c] of [[240, 187, A.aurora], [260, 196, A.ice], [249, 211, A.violet]]) {
+    for (let r = 12; r > 2; r -= 3) disc(img, x, y, r, [...c, Math.max(4, 24 - r)]);
+    disc(img, x, y, 3, A.iceL);
+  }
+
+  // North Moonwell seam reads as ordinary pine-shadow until Vesper turns it into an interaction.
+  for (const x of [221, 232, 248, 259]) { rect(img, x, 37, 5, 54, A.wood); disc(img, x + 2, 45, 17, A.pineD); }
+  rect(img, 233, 38, 16, 53, [...A.night, 210]); px(img, 241, 47, [...A.iceL, 85]);
+  // East root-bound cavern crack foreshadows W6 without opening it.
+  rect(img, 439, 169, 41, 67, A.inkDeep);
+  for (let i = 0; i < 53; i++) px(img, 442 + Math.round(Math.sin(i * 0.33) * 6), 176 + i, i % 7 ? A.iceD : A.aurora);
+  for (let x = 431; x < 480; x += 9) rect(img, x, 179 + (x % 3) * 7, 4, 51, A.wood);
+  // West trail posts.
+  for (const x of [38, 51]) { rect(img, x, 163, 4, 35, A.wood); disc(img, x + 2, 164, 5, A.snowD); }
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (edge > 0.87) px(img, x, y, [...A.inkDeep, Math.round((edge - 0.87) * 150)]);
+  }
+  return save('room-whisperpine.png', img);
+}
+
+function buildRoomMoonwell() {
+  const W = 480, H = 320, img = Img(W, H), A = ARCTIC_DUSK;
+  let noise = 0x600a7e11;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+
+  // A deliberately quieter palette than every social room: deep pine, moon-snow, still water.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = y / H;
+    const base = A.night.map((channel, i) => channel * (1 - t * 0.2) + A.pineD[i] * t * 0.2);
+    const grain = (nextNoise() - 0.5) * 7;
+    px(img, x, y, base.map((channel) => Math.max(0, Math.min(255, channel + grain))));
+  }
+  for (const [x, y] of [[36, 28], [83, 52], [139, 20], [337, 35], [404, 19], [451, 57]]) px(img, x, y, A.iceL);
+  // Moon halo is reflection-first: the source moon is mostly outside the canopy.
+  for (let r = 68; r > 4; r -= 5) disc(img, 240, 45, r, [...A.iceL, Math.max(2, 24 - r / 4)]);
+  disc(img, 240, 43, 28, A.snowL); disc(img, 250, 36, 27, A.nightL);
+
+  // Snow clearing and the perfectly still oval pool.
+  oval(img, 240, 175, 190, 119, A.pineD); oval(img, 240, 178, 174, 105, A.snowD);
+  oval(img, 240, 151, 79, 44, A.inkDeep); oval(img, 240, 148, 73, 39, shade(A.water, 0.66));
+  oval(img, 240, 145, 67, 34, A.nightL);
+  for (let r = 61; r > 4; r -= 6) ovalRing(img, 240, 150, r, Math.max(3, Math.round(r * 0.45)), [...A.iceL, 35], 130);
+  // Moon and player-not-yet-there reflected as a thin vertical silver path.
+  oval(img, 240, 132, 18, 11, [...A.snowL, 155]);
+  for (let y = 140; y <= 170; y += 4) rect(img, 236 - (y % 3), y, 9 + (y % 7), 1, [...A.iceL, 130]);
+
+  const pineAt = (cx, cy, s = 1) => {
+    rect(img, cx - 2 * s, cy - 5 * s, 4 * s, 14 * s, A.wood);
+    disc(img, cx, cy - 8 * s, 12 * s, A.pineD); disc(img, cx, cy - 20 * s, 10 * s, A.pine);
+    disc(img, cx, cy - 31 * s, 7 * s, shade(A.pine, 1.06));
+  };
+  for (const p of [[43, 105, 1.3], [78, 80, 1.15], [118, 75, 1.0], [362, 75, 1.05], [404, 83, 1.2], [444, 108, 1.35], [58, 255, 1.15], [423, 253, 1.2]]) pineAt(...p);
+
+  // One weathered bench, no occupant and no implied quest marker.
+  oval(img, 117, 225, 45, 9, [...A.inkDeep, 70]);
+  rrect(img, 82, 205, 70, 12, A.inkDeep); rect(img, 87, 208, 60, 7, A.woodL);
+  rect(img, 91, 216, 6, 24, A.wood); rect(img, 137, 216, 6, 24, A.wood);
+  // South gap back to Whisperpine.
+  for (const x of [221, 257]) { rect(img, x, 272, 5, 48, A.wood); disc(img, x + 2, 275, 17, A.pineD); }
+  rect(img, 225, 281, 32, 5, A.snowL);
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (edge > 0.88) px(img, x, y, [...A.inkDeep, Math.round((edge - 0.88) * 155)]);
+  }
+  return save('room-moonwell.png', img);
+}
+
 /* ----------------------------- TELESCOPE VISTAS (W4) ----------------- */
 function vistaCanvas(seed) {
   const W = 320, H = 200, img = Img(W, H), A = ARCTIC_DUSK;
@@ -2095,7 +2325,7 @@ function buildGullVista() {
   rect(img, 172, 66, 40, 19, A.ember); rect(img, 176, 69, 32, 12, A.amber);
   for (const [x, c] of [[126, A.violet], [199, A.ice]]) { rrect(img, x, 129, 21, 15, A.inkDeep); rect(img, x + 4, 132, 13, 9, c); }
   for (let r = 40; r > 4; r -= 5) ovalRing(img, 177, 173, r * 2, Math.max(3, Math.round(r / 5)), [...A.iceL, 48], 100);
-  return save(path.join('vistas', 'driftwood-gull.png'), img);
+  return save(path.join('vistas', 'salka-at-sea.png'), img);
 }
 
 /* ----------------------------- Pickup glint (H4) ------------------------ */
@@ -2143,6 +2373,10 @@ const made = [
   buildMarenPortrait(),
   buildRoomLighthouseRest(),
   buildRoomLighthouseGallery(),
+  buildVesperSprite(),
+  buildVesperPortrait(),
+  buildRoomWhisperpine(),
+  buildRoomMoonwell(),
   buildWhaleVista(),
   buildAuroraVista(),
   buildGullVista(),

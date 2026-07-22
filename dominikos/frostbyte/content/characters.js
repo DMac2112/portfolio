@@ -1,4 +1,4 @@
-// content/characters.js — approved anchor-character contracts (World Plan W0–W4).
+// content/characters.js — approved anchor-character contracts (World Plan W0–W5).
 import { EDDA_STORY_TIP_FAVORS, MAREN_SIGHTING_FAVORS, WEATHER_BELL_FAVOR } from './favors.js';
 
 export const ANCHOR_SLOTS = Object.freeze([
@@ -451,10 +451,15 @@ export const ANCHOR_CHARACTERS = defineCharacters([
   },
   {
     id: 'vesper', name: 'Vesper', slotId: 'hollow-trickster', roomId: 'whisperpine',
+    subtitle: 'Trickster of Whisperpine Hollow',
     species: 'arctic fox', portraitAsset: './assets/portraits/vesper.png',
     spriteAsset: './assets/characters/vesper.png', spriteKey: 'anchor-vesper',
     palette: { body: '#edf5fb', accent: '#6fe0b2', warm: '#a78bfa' },
-    linePools: { greeting: ['You found this den. I never said it was mine.'] }, favorDefs: [],
+    linePools: { greeting: [
+      'You found this den. I never said it was mine.',
+      'The forest moved me again. Or you. Hard to tell from here.',
+      'A stamped Curio is a secret that agreed to be remembered.',
+    ] }, favorDefs: [],
   },
   {
     id: 'the-echo', name: 'The Echo', slotId: 'caverns-voice', roomId: 'caverns',

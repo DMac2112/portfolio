@@ -21,9 +21,11 @@ describe('DEFAULT_SAVE', () => {
     expect(s.avatar.equipped).toEqual({ hat: null, eyewear: null, neck: null, held: null });
     expect(s.curios).toEqual({ found: {}, roomRewards: {}, isleRewardClaimed: false });
     expect(s.favors).toEqual({});
+    expect(s.secrets).toEqual({ vesperHints: [], moonwellUnlocked: false });
     expect(s.visitedRooms).toEqual(DEFAULT_VISITED_ROOMS);
     expect(s.visitedRooms).not.toContain('docks');
     expect(s.visitedRooms).not.toContain('lighthouse-rest');
+    expect(s.visitedRooms).not.toContain('whisperpine');
     expect(s.createdAt).toBe('2026-07-12T00:00:00.000Z');
   });
 });
@@ -84,6 +86,15 @@ describe('migrateSave', () => {
       .toEqual(DEFAULT_VISITED_ROOMS);
     expect(migrateSave({ visitedRooms: ['plaza', 'docks', 'docks', 42] }, '2026-07-22T00:00:00.000Z').visitedRooms)
       .toEqual(['plaza', 'docks']);
+  });
+  it('forward-defaults and preserves W5 Vesper hint state', () => {
+    expect(migrateSave({ coins: 77 }, '2026-07-22T00:00:00.000Z').secrets)
+      .toEqual({ vesperHints: [], moonwellUnlocked: false });
+    expect(migrateSave({
+      secrets: { vesperHints: ['court-cobble', 'court-cobble', 42], moonwellUnlocked: true },
+    }, '2026-07-22T00:00:00.000Z').secrets).toEqual({
+      vesperHints: ['court-cobble'], moonwellUnlocked: true,
+    });
   });
 });
 

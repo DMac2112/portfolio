@@ -48,13 +48,16 @@ import { curioById, discoverCurio } from './engine/curios.js';
 import { spawnClickables } from './world/clickable.js';
 import { ANCHOR_CHARACTERS } from './content/characters.js';
 import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
-import { chooseDialogue, startDialogue } from './engine/dialogue-tree.js';
+import { chooseDialogue, dailyLine, startDialogue } from './engine/dialogue-tree.js';
 import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
 import { EDDA_STORY_TIP_FAVORS, MAREN_SIGHTING_FAVORS, WEATHER_BELL_FAVOR, favorById } from './content/favors.js';
 import { chirperIssueForDate } from './content/chirper-issues.js';
 import { resolveDocksRoom, salkaStockForDate } from './content/docks.js';
 import { lighthouseLogbookPages, telescopeVistaForDate } from './content/lighthouse.js';
 import { addLighthouseSweep } from './world/lighthouse-lamp.js';
+import { resolveWhisperpineRoom } from './content/whisperpine.js';
+import { claimVesperHint, nextVesperHint } from './engine/vesper.js';
+import { addDodgeWisps } from './world/will-o-wisps.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -106,6 +109,8 @@ k.loadSprite('room-docks-port', './assets/room-docks-port.png');
 k.loadSprite('room-docks-away', './assets/room-docks-away.png');
 k.loadSprite('room-lighthouse-rest', './assets/room-lighthouse-rest.png');
 k.loadSprite('room-lighthouse-gallery', './assets/room-lighthouse-gallery.png');
+k.loadSprite('room-whisperpine', './assets/room-whisperpine.png');
+k.loadSprite('room-moonwell', './assets/room-moonwell.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
@@ -169,9 +174,12 @@ function setHudVisible(v) {
  * ------------------------------------------------------------------ */
 k.scene('room', (roomId, opts = {}) => {
   const baseRoom = ROOM_REGISTRY[roomId];
-  const room = roomId === 'docks' ? resolveDocksRoom(baseRoom, todayISO) : baseRoom;
+  const room = roomId === 'docks' ? resolveDocksRoom(baseRoom, todayISO)
+    : roomId === 'whisperpine' ? resolveWhisperpineRoom(baseRoom, todayISO, save)
+      : baseRoom;
   buildRoom(k, room);
   addLighthouseSweep(k, room, reduceMotion);
+  addDodgeWisps(k, room, reduceMotion);
   addSnowfall(k, room, reduceMotion);
   fadeIn(k, reduceMotion);
 
@@ -251,7 +259,9 @@ k.scene('room', (roomId, opts = {}) => {
     id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label,
     prompt: h.prompt, copy: h.copy, entryDirection: h.entryDirection,
   }));
-  const doorInteractables = (room.doors ?? []).map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
+  const doorInteractables = (room.doors ?? [])
+    .filter((door) => !door.hidden)
+    .map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
   const interactPrompt = document.getElementById('interact-prompt');
   let nearest = null;
   let autoVenueLatch = null;
@@ -283,6 +293,18 @@ k.scene('room', (roomId, opts = {}) => {
     if (interactPrompt) interactPrompt.classList.remove('show');
     changeScene(() => k.go('room', door.targetRoom, { spawn: door.targetSpawn ?? arriveSpawnId(roomId) }));
     return true;
+  }
+
+  function revealRoomDoor(doorId) {
+    const door = (room.doors ?? []).find((entry) => entry.id === doorId);
+    if (!door || (!door.hidden && !door.locked)) return door ?? null;
+    door.hidden = false;
+    door.locked = false;
+    doorInteractables.push({
+      id: door.id, pos: { x: door.x, y: door.y }, kind: 'door', label: door.label, door,
+    });
+    showMovePing(k, { x: door.x, y: door.y + 34 }, reduceMotion);
+    return door;
   }
 
   function applyDialogueEffects(effects) {
@@ -402,6 +424,36 @@ k.scene('room', (roomId, opts = {}) => {
                     : gullState.status === 'offered' ? 'greeting-gull-offered'
                       : gullState.status === 'in-progress' ? 'reminder-gull' : 'completed';
       openCharacterDialogue(character, startNode);
+      return;
+    }
+    if (character.id === 'vesper') {
+      const trade = nextVesperHint(save, CURIO_REGISTRY);
+      const events = [];
+      const hint = claimVesperHint(save, CURIO_REGISTRY, events);
+      const greeting = dailyLine(character.linePools.greeting, todayISO, 'vesper-greeting');
+      const pages = [greeting];
+      if (hint) {
+        pages.push(`You show Vesper ${trade.found} stamped Curios. The fox studies every mark before offering one secret.`);
+        pages.push(hint.text);
+        if (hint.unlocks === 'moonwell') {
+          revealRoomDoor('door-moonwell');
+          pages.push('Moonlight threads the north pines. The gap is a door now.');
+          showCoinToast('Moonwell revealed — the north-pine gap is now a door');
+        }
+        persist(save);
+      } else if (trade.complete) {
+        pages.push('You have heard every secret Vesper will trade for a stamped page. For now.');
+      } else {
+        pages.push(`Your Curio Log carries ${trade.found} stamps. Bring ${trade.hint.requiredCurios} and Vesper will trade the next hint.`);
+        pages.push(`${trade.remaining} more ${trade.remaining === 1 ? 'Curio' : 'Curios'} should persuade the fox.`);
+      }
+      dialogueUI.open({
+        name: character.name,
+        subtitle: character.subtitle,
+        portraitSrc: character.portraitAsset,
+        portraitAlt: `Portrait of ${character.name}`,
+        pages,
+      });
       return;
     }
     if (character.id !== 'edda-quill') {
