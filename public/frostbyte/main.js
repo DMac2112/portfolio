@@ -5,7 +5,7 @@ import kaplay from './vendor/kaplay.mjs';
 import { ROOM_REGISTRY } from './content/rooms.js';
 import { buildRoom } from './world/build-room.js';
 import { loadAvatarSprites, makeAvatarActor } from './world/build-avatar.js';
-import { resolveMoveVector, clampToBounds, resolveObstacles, resolveFacing } from './engine/movement.js';
+import { resolveMoveVector, resolveFacing } from './engine/movement.js';
 import { computeCamPos, computeCamScale } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
@@ -14,7 +14,12 @@ import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
 import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
-import { findNearestInteractable, mergeInteractables } from './engine/interaction.js';
+import {
+  AUTO_VENUE_RESET_R,
+  findAutoEnterVenue,
+  findNearestInteractable,
+  mergeInteractables,
+} from './engine/interaction.js';
 import { minigameForHotspot } from './content/minigames-registry.js';
 import { recordCoins, remainingToday } from './engine/minigame-daily.js';
 import { newChat, addBubble, tick as tickChat, active as activeChat } from './engine/chat.js';
@@ -22,7 +27,7 @@ import { createChat } from './ui/chat.js';
 import { createEmotes, emoteSymbol } from './ui/emotes.js';
 import { createMap } from './ui/map.js';
 import { nodeByRoom } from './content/map.js';
-import { canTravel, arriveSpawnId } from './engine/travel.js';
+import { canTravel, arriveSpawnId, findAutoEnterDoor } from './engine/travel.js';
 import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
 import { SNAP, addToInventory, place as placeFurn, move as moveFurn, flip as flipFurn, store as storeFurn, hitTest } from './engine/home-editor.js';
 import { loadFurnitureSprites, initFurnitureLayer } from './world/furniture.js';
@@ -31,6 +36,8 @@ import { createCatalog } from './ui/catalog.js';
 import { newVisitorScheduler, tick as tickVisitors } from './engine/visitors.js';
 import { initVisitorLayer } from './world/visitor-runtime.js';
 import { ROSTER } from './content/npc-roster.js';
+import { addSnowfall, createWalkPuffs, fadeIn, fadeTo, showCoinSparkle, showMovePing } from './world/game-feel.js';
+import { resolveRoomCollision } from './world/room-collision.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -44,6 +51,7 @@ if (embedded) {
  * ------------------------------------------------------------------ */
 const save = load();
 const todayISO = new Date().toISOString().slice(0, 10);
+const reduceMotion = Boolean(save.prefs?.reducedMotion || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
 checkDailyLogin(save, todayISO, []);
 persist(save);
 
@@ -75,6 +83,7 @@ const PLAYER_RADIUS = 12;
 k.loadSprite('room-plaza', './assets/room-plaza.png');
 k.loadSprite('room-den', './assets/room-den.png');
 k.loadSprite('room-trail', './assets/room-trail.png');
+k.loadSprite('room-court', './assets/room-court.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadFurnitureSprites(k);
@@ -85,21 +94,28 @@ k.loadSprite('snowball', './assets/minigame/snowball.png');
 k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
 
 // Register the Snowdrift Toss scene (a sibling scene entered/exited via the room ↔ minigame contract).
-registerMinigameSnowdrift(k);
+registerMinigameSnowdrift(k, { reducedMotion: reduceMotion });
 
 /* ------------------------------------------------------------------ *
  * Coin HUD
  * ------------------------------------------------------------------ */
 const coinEl = document.getElementById('coin-counter');
-function refreshCoins() {
+function refreshCoins(pulse = false) {
   coinEl.hidden = false;
   coinEl.textContent = `${save.coins} coins`;
+  if (pulse && !reduceMotion) {
+    coinEl.classList.remove('bump');
+    void coinEl.offsetWidth;
+    coinEl.classList.add('bump');
+  }
 }
 
 const coinToastEl = document.getElementById('coin-toast');
 let coinToastTimer = null;
 function showCoinToast(msg) {
   coinToastEl.textContent = msg;
+  coinToastEl.classList.remove('show');
+  void coinToastEl.offsetWidth;
   coinToastEl.classList.add('show');
   clearTimeout(coinToastTimer);
   coinToastTimer = setTimeout(() => coinToastEl.classList.remove('show'), 2600);
@@ -148,6 +164,8 @@ function setHudVisible(v) {
 k.scene('room', (roomId, opts = {}) => {
   const room = ROOM_REGISTRY[roomId];
   buildRoom(k, room);
+  addSnowfall(k, room, reduceMotion);
+  fadeIn(k, reduceMotion);
 
   // Remember where the player is — the map's "You are here" pin reads this (H1).
   save.prefs.lastRoom = roomId;
@@ -160,7 +178,7 @@ k.scene('room', (roomId, opts = {}) => {
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
   for (const h of room.hotspots ?? []) {
-    if (h.kind !== 'minigame' && h.kind !== 'shop') continue;
+    if (h.kind !== 'minigame' && h.kind !== 'shop' && h.kind !== 'venue') continue;
     const lw = Math.max(64, (h.label?.length ?? 4) * 9 + 18);
     k.add([k.rect(lw, 22, { radius: 6 }), k.pos(h.x, h.y - 46), k.anchor('center'),
       k.color(k.Color.fromHex('#0d1c2b')), k.opacity(0.82), k.z(100000)]);
@@ -179,6 +197,8 @@ k.scene('room', (roomId, opts = {}) => {
       earnCoins(save, credited, 'minigame', []);
       recordCoins(save, todayISO, credited);
       persist(save);
+      refreshCoins(true);
+      showCoinSparkle(k, player.pos, reduceMotion);
       showCoinToast(`+${credited} coins!`);
     } else {
       showCoinToast('Daily coin cap reached');
@@ -188,6 +208,13 @@ k.scene('room', (roomId, opts = {}) => {
   let facing = spawn.facing === 'left' ? 'left' : 'down';
   let moveTarget = null;
   let animT = 0;
+  let transitioning = false;
+  const walkPuffs = createWalkPuffs(k, reduceMotion);
+  const changeScene = (go) => {
+    if (transitioning) return;
+    transitioning = true;
+    fadeTo(k, reduceMotion, go);
+  };
 
   const dirGroup = (f) => (f === 'left' || f === 'right' ? 'side' : f);
   const ROW_BASE = { down: 0, side: 4, up: 8 };
@@ -207,22 +234,41 @@ k.scene('room', (roomId, opts = {}) => {
   const spawnConfig = ROOM_SPAWN[roomId];
   const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, room.scale) : null;
 
-  // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. 'minigame', 'shop'
-  // and 'door' are actionable (locked doors show their copy); NPCs/landmarks stay promptless and
+  // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. Minigames, shops,
+  // venues, signs and doors are actionable; NPCs/landmarks stay promptless and
   // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
-  const hotspotInteractables = (room.hotspots ?? []).map((h) => ({ id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label }));
+  const hotspotInteractables = (room.hotspots ?? []).map((h) => ({
+    id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label,
+    prompt: h.prompt, copy: h.copy, entryDirection: h.entryDirection,
+  }));
   const doorInteractables = (room.doors ?? []).map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
   const interactPrompt = document.getElementById('interact-prompt');
   let nearest = null;
+  let autoVenueLatch = null;
 
   const actionFor = (hit) => {
     if (!hit) return null;
     if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
     if (hit.kind === 'shop') return 'shop';
+    if (hit.kind === 'venue') return 'venue';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
     return null;
   };
+  function enterVenue(venue) {
+    if (!venue) return false;
+    autoVenueLatch = venue.id;
+    moveTarget = null;
+    showDialogue(venue.label, venue.copy ?? 'Warm lights glow behind the frosted windows.');
+    return true;
+  }
+  function enterDoor(door) {
+    if (!door || door.locked) return false;
+    moveTarget = null;
+    if (interactPrompt) interactPrompt.classList.remove('show');
+    changeScene(() => k.go('room', door.targetRoom, { spawn: door.targetSpawn ?? arriveSpawnId(roomId) }));
+    return true;
+  }
   function doInteract() {
     if (anyOverlayOpen()) return; // 'e' typed into the chat box (or any open modal) must not interact
     const action = actionFor(nearest);
@@ -230,14 +276,15 @@ k.scene('room', (roomId, opts = {}) => {
       if (interactPrompt) interactPrompt.classList.remove('show'); // hide before leaving the scene
       setHudVisible(false); // persistent DOM buttons must not float over (or act on) the minigame
       inMinigame = true;
-      k.go(minigameForHotspot(nearest.id).sceneId, { from: roomId });
+      changeScene(() => k.go(minigameForHotspot(nearest.id).sceneId, { from: roomId }));
     } else if (action === 'shop') {
       dressUp.open();
+    } else if (action === 'venue') {
+      enterVenue(nearest);
     } else if (action === 'door') {
       const d = nearest.door;
       if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
-      if (interactPrompt) interactPrompt.classList.remove('show');
-      k.go('room', d.targetRoom, { spawn: d.targetSpawn ?? arriveSpawnId(roomId) });
+      enterDoor(d);
     } else if (action === 'sign') {
       save.home.open = !save.home.open;
       persist(save);
@@ -256,7 +303,6 @@ k.scene('room', (roomId, opts = {}) => {
    * ------------------------------------------------------------------ */
   const playerChat = newChat();
   const chatLive = document.getElementById('chat-live');
-  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   function announce(msg) { if (chatLive) chatLive.textContent = msg; }
 
   const chatUI = createChat({
@@ -273,13 +319,18 @@ k.scene('room', (roomId, opts = {}) => {
   function playEmote(id) {
     const sym = k.add([
       k.text(emoteSymbol(id), { size: 14 }), k.pos(player.pos.x, player.pos.y - 84),
-      k.anchor('center'), k.z(100002), k.opacity(1),
+      k.anchor('center'), k.z(100002), k.opacity(1), k.scale(reduceMotion ? 1 : 0.45),
     ]);
     let life = 0;
     sym.onUpdate(() => {
       life += k.dt();
-      if (!reduceMotion) sym.pos = k.vec2(player.pos.x, player.pos.y - 84 - life * 30);
-      else sym.pos = k.vec2(player.pos.x, player.pos.y - 84);
+      sym.pos.x = player.pos.x;
+      sym.pos.y = player.pos.y - 84 - (reduceMotion ? 0 : life * 30);
+      if (!reduceMotion) {
+        const u = Math.min(1, life / 0.24), v = u - 1;
+        const s = 0.45 + 0.55 * (1 + 2.70158 * v ** 3 + 1.70158 * v ** 2);
+        sym.scale.x = s; sym.scale.y = s;
+      }
       sym.opacity = Math.max(0, 1 - life);
       if (life >= 1) k.destroy(sym);
     });
@@ -299,6 +350,7 @@ k.scene('room', (roomId, opts = {}) => {
   const isHome = roomId === 'den';
   const furnLayer = isHome ? initFurnitureLayer(k, save.home, room.scale) : null;
   const catalogById = Object.fromEntries(FURNITURE_CATALOG.map((it) => [it.id, it]));
+  const collidePlayer = (pos) => resolveRoomCollision(room, pos, PLAYER_RADIUS, save.home.placed, catalogById);
   let pickId = null;   // tray item armed for placement
   let selIdx = -1;     // selected placed-furniture index
   let dragging = false;
@@ -422,11 +474,11 @@ k.scene('room', (roomId, opts = {}) => {
       const res = canTravel({ frozen: false, inMinigame, currentRoomId: roomId }, nodeByRoom(target));
       if (!res.ok) return;
       if (interactPrompt) interactPrompt.classList.remove('show');
-      k.go('room', target, { spawn: 'fromMap' });
+      changeScene(() => k.go('room', target, { spawn: 'fromMap' }));
     },
   });
   const anyOverlayOpen = () =>
-    dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || dialogueIsOpen() ||
+    transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || dialogueIsOpen() ||
     editMode.isOpen() || catalogUI.isOpen();
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
@@ -442,8 +494,9 @@ k.scene('room', (roomId, opts = {}) => {
   // Player speech bubble — recreated only when the visible bubble changes, opacity tracks its fade.
   let curBubbleId = null;
   let bubbleObjs = null;
+  let bubblePopT = 0;
   function clearPlayerBubble() {
-    if (bubbleObjs) { k.destroy(bubbleObjs.bg); k.destroy(bubbleObjs.txt); bubbleObjs = null; }
+    if (bubbleObjs) { for (const obj of Object.values(bubbleObjs)) k.destroy(obj); bubbleObjs = null; }
     curBubbleId = null;
   }
   function renderPlayerBubble() {
@@ -453,13 +506,25 @@ k.scene('room', (roomId, opts = {}) => {
     if (top.id !== curBubbleId) {
       clearPlayerBubble();
       const w = Math.min(180, Math.max(48, top.text.length * 6 + 16));
+      const rim = player.add([k.rect(w + 4, 26, { radius: 9 }), k.pos(0, -78), k.anchor('center'),
+        k.color(k.Color.fromHex('#3b8fb8')), k.opacity(0.82), k.scale(reduceMotion ? 1 : 0.82), k.z(99997)]);
       const bg = player.add([k.rect(w, 22, { radius: 7 }), k.pos(0, -78), k.anchor('center'),
-        k.color(k.Color.fromHex('#7fd6ff')), k.opacity(0.95), k.z(99998)]);
+        k.color(k.Color.fromHex('#eaf7ff')), k.opacity(0.96), k.scale(reduceMotion ? 1 : 0.82), k.z(99998)]);
+      const tail = player.add([k.text('▼', { size: 11 }), k.pos(0, -64), k.anchor('center'),
+        k.color(k.Color.fromHex('#eaf7ff')), k.scale(reduceMotion ? 1 : 0.82), k.z(99998)]);
       const txt = player.add([k.text(top.text, { size: 9, width: w - 10 }), k.pos(0, -78), k.anchor('center'),
-        k.color(k.Color.fromHex('#0d1c2b')), k.z(99999)]);
-      bubbleObjs = { bg, txt }; curBubbleId = top.id;
+        k.color(k.Color.fromHex('#122a42')), k.scale(reduceMotion ? 1 : 0.82), k.z(99999)]);
+      bubbleObjs = { rim, bg, tail, txt }; curBubbleId = top.id; bubblePopT = 0;
     }
+    bubblePopT += Math.min(k.dt(), 0.05);
+    const s = reduceMotion ? 1 : Math.min(1, 0.82 + bubblePopT * 1.35);
+    bubbleObjs.rim.scale.x = bubbleObjs.rim.scale.y = s;
+    bubbleObjs.bg.scale.x = bubbleObjs.bg.scale.y = s;
+    bubbleObjs.tail.scale.x = bubbleObjs.tail.scale.y = s;
+    bubbleObjs.txt.scale.x = bubbleObjs.txt.scale.y = s;
+    bubbleObjs.rim.opacity = 0.82 * top.alpha;
     bubbleObjs.bg.opacity = 0.95 * top.alpha;
+    bubbleObjs.tail.opacity = top.alpha;
     bubbleObjs.txt.opacity = top.alpha;
   }
 
@@ -468,14 +533,17 @@ k.scene('room', (roomId, opts = {}) => {
   // canvas presses to the furniture editor (the tray is non-modal by design).
   k.onMousePress(() => {
     if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
-    if (!anyOverlayOpen()) moveTarget = k.toWorld(k.mousePos());
+    if (!anyOverlayOpen()) {
+      moveTarget = collidePlayer(k.toWorld(k.mousePos()));
+      showMovePing(k, moveTarget, reduceMotion);
+    }
   });
   k.onTouchStart((pos) => {
     // touchToMouse:true already synthesizes a mousePress for every tap, so editPress must be
     // routed ONLY through onMousePress — wiring it here too would double-fire on one tap
     // (double stock burn / duplicate placement — H2 review blocker). The idempotent moveTarget
     // assignment is safe to keep on both paths.
-    if (!anyOverlayOpen()) moveTarget = k.toWorld(pos);
+    if (!anyOverlayOpen()) moveTarget = collidePlayer(k.toWorld(pos));
   });
 
   k.onUpdate(() => {
@@ -502,10 +570,30 @@ k.scene('room', (roomId, opts = {}) => {
     if (arrived) moveTarget = null;
 
     let next = { x: player.pos.x + dxPx, y: player.pos.y + dyPx };
-    next = resolveObstacles(next, PLAYER_RADIUS, room.solids ?? []);
-    next = clampToBounds(next, room.bounds);
+    next = collidePlayer(next);
     player.pos.x = next.x;
     player.pos.y = next.y;
+
+    const autoDoor = findAutoEnterDoor(
+      next,
+      { x: dxPx, y: dyPx },
+      room.doors ?? [],
+      room.bounds,
+    );
+    if (autoDoor) { enterDoor(autoDoor); return; }
+
+    const latchedVenue = autoVenueLatch
+      ? hotspotInteractables.find(h => h.id === autoVenueLatch)
+      : null;
+    if (latchedVenue && Math.hypot(latchedVenue.pos.x - next.x, latchedVenue.pos.y - next.y) > AUTO_VENUE_RESET_R) {
+      autoVenueLatch = null;
+    }
+    const autoVenue = findAutoEnterVenue(
+      next,
+      { x: dxPx, y: dyPx },
+      hotspotInteractables,
+    );
+    if (autoVenue && autoVenue.id !== autoVenueLatch) { enterVenue(autoVenue); return; }
 
     facing = resolveFacing(dxPx, dyPx, facing);
     animT += dt;
@@ -513,6 +601,7 @@ k.scene('room', (roomId, opts = {}) => {
     syncFrame(avatar.parts, ROW_BASE[dirGroup(facing)] + walkFrame, facing === 'left');
 
     player.z = player.pos.y; // y-sort, same as game1
+    walkPuffs.tick(dt, moving && !frozen, player.pos);
 
     // Walk-over pickup collection (H4) — squared-distance check, ~one glint radius.
     for (let i = pickupObjs.length - 1; i >= 0; i--) {
@@ -521,8 +610,9 @@ k.scene('room', (roomId, opts = {}) => {
       const pdy = player.pos.y - p.obj.pos.y;
       if (pdx * pdx + pdy * pdy < 40 * 40) {
         if (collectPickup(save, p.id, todayISO, [])) {
-          refreshCoins();
+          refreshCoins(true);
           persist(save);
+          showCoinSparkle(k, p.obj.pos, reduceMotion);
           showCoinToast('+1 coin!');
         }
         k.destroy(p.obj);
@@ -548,8 +638,9 @@ k.scene('room', (roomId, opts = {}) => {
       for (const e of vev) {
         if (e.type === 'visit-tip') { // economy-only event — never forwarded to the render layer
           if (greetNpc(save, e.personaId, todayISO, [])) {
-            refreshCoins();
+            refreshCoins(true);
             persist(save);
+            showCoinSparkle(k, player.pos, reduceMotion);
             showCoinToast('+2 coins — visitor tip!');
           }
           continue;
@@ -575,6 +666,7 @@ k.scene('room', (roomId, opts = {}) => {
         interactPrompt.textContent =
           action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
           action === 'shop' ? '👕 Dress Up' :
+          action === 'venue' ? `🏪 ${nearest.prompt ?? `Visit ${nearest.label}`}` :
           action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');

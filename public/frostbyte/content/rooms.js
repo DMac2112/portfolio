@@ -1,5 +1,5 @@
 // Room registry — DATA, not code (Engine & World Architecture §3, World & Room Design).
-// Only 'plaza' ships in the vignette; expansion rooms are added here later as data only.
+// Playable rooms remain data-driven so new destinations share the same scene wiring.
 //
 // Bounds note: the plan's first-draft bounds {y0:120,y1:864} excluded the north/south door
 // hotspots (720,96) and (720,936), which sit deliberately at the map's compass edges. Per the
@@ -35,7 +35,7 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: false, targetSpawn: 'fromPlaza' },
-      { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 456, targetRoom: 'court', locked: true, lockedCopy: "They're still smoothing the ice out there." },
+      { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 456, targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 360, targetRoom: 'workshop', locked: true, lockedCopy: "The workshop lamps aren't lit yet." },
       { id: 'door-den', label: 'Your Den', x: 720, y: 936, targetRoom: 'den', locked: false, targetSpawn: 'fromPlaza' },
     ],
@@ -113,5 +113,59 @@ export const ROOM_REGISTRY = {
       { id: 'trail-glint-3', x: 1150, y: 500 },
       { id: 'trail-glint-4', x: 500, y: 250 },
     ],
+  },
+
+  // Glasswind Court — a compact market square with three distinct, interactive storefronts.
+  court: {
+    id: 'court',
+    title: 'Glasswind Court',
+    mapAsset: 'room-court',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 72, x1: 1368, y0: 96, y1: 888 },
+    spawnPoints: {
+      default:    { x: 720, y: 420, facing: 'down' },
+      fromPlaza:  { x: 168, y: 480, facing: 'right' },
+      fromMap:    { x: 720, y: 720, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      {
+        id: 'venue-snowtail-petshop', label: 'Snowtail Pet Shop', kind: 'venue', x: 426, y: 296,
+        solidId: 'snowtail-petshop',
+        entryDirection: 'up',
+        prompt: 'Visit the pet shop',
+        copy: 'Warm nests, tiny scarves, and three sleepy snowtails fill the window. The keeper says every companion chooses their own name.',
+      },
+      {
+        id: 'venue-bluehour-coffee', label: 'Bluehour Coffee', kind: 'venue', x: 702, y: 324,
+        solidId: 'bluehour-coffee',
+        entryDirection: 'up',
+        prompt: 'Visit the coffee shop',
+        copy: 'Today\'s Northlight Blend comes with cloudberry foam and a cinnamon snowflake on top.',
+      },
+      {
+        id: 'venue-lantern-ladle', label: 'Lantern Ladle Restaurant', kind: 'venue', x: 1116, y: 648,
+        solidId: 'lantern-ladle',
+        entryDirection: 'right',
+        prompt: 'Visit the restaurant',
+        copy: 'Tonight\'s special is ember-roasted root stew with iceleaf rolls. A warm corner table is ready.',
+      },
+    ],
+    doors: [
+      { id: 'door-back', label: 'Chillmere Plaza', x: 72, y: 480, targetRoom: 'plaza', locked: false, targetSpawn: 'fromCourt' },
+    ],
+    solids: [
+      { id: 'snowtail-petshop', x: 291, y: 190, w: 438, h: 188 },
+      { id: 'bluehour-coffee', x: 840, y: 204, w: 420, h: 216 },
+      { id: 'lantern-ladle', x: 1248, y: 600, w: 240, h: 456 },
+      { id: 'court-cart', x: 705, y: 522, w: 114, h: 78 },
+      { id: 'patio-table-a', x: 840, y: 744, w: 84, h: 54 },
+      { id: 'patio-table-b', x: 1035, y: 810, w: 78, h: 54 },
+      { id: 'patio-brazier', x: 735, y: 846, w: 54, h: 54 },
+      { id: 'court-bench', x: 540, y: 822, w: 108, h: 30 },
+      { id: 'menu-board', x: 1095, y: 822, w: 45, h: 66 },
+    ],
+    npcSpawnAnchors: [],
   },
 };
