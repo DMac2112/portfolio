@@ -1,5 +1,6 @@
-// Dialtone — DominikOS fake call app (kind:'react' via componentById). An affectionate homage
-// to early-2000s desktop call/IM clients: browse contacts, place a call, and… nobody ever
+// Skajp — DominikOS fake call app (kind:'react' via componentById; internal id stays `dialtone`).
+// An affectionate homage to the 2010-era desktop call/IM clients: browse contacts, place a call,
+// and… nobody ever
 // answers. Pure theatre — no network, no AI. It's a DOM app (no canvas/useGameLoop): the pure
 // machine in ./callMachine drives the call, fed real elapsed time from a §8.4-gated interval,
 // so a backgrounded call stops ringing and resumes cleanly.
@@ -23,54 +24,101 @@ function awayLine(c: Contact): string {
   return `${c.name} ${verb} reply right now.`;
 }
 
-/* ------------------------------ pixel glyphs ------------------------------ */
+/* --------------------------------- glyphs --------------------------------- */
+/* All smooth vector — the 2010-era client this evokes had anti-aliased, rounded art, so
+   nothing here snaps to the pixel grid (no shapeRendering="crispEdges" anywhere). */
 
-function Avatar({ c, size }: { c: Contact; size: number }): JSX.Element {
+/** Lighten a hex by mixing toward white, for the avatar's top-to-bottom sheen. */
+function lighten(hex: string, amount: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const mix = (c: number) => Math.round(c + (255 - c) * amount);
+  return `rgb(${mix((n >> 16) & 255)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;
+}
+
+/** Presence badge: a filled disc with a white glyph, the way the era signalled status. */
+function PresenceBadge({ p, size }: { p: Presence; size: number }): JSX.Element {
+  const stroke = { strokeWidth: 2.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none', stroke: '#fff' };
   return (
-    <svg viewBox="0 0 24 24" width={size} height={size} className="dialtone__avatar" shapeRendering="crispEdges" aria-hidden="true">
-      <rect x="0" y="0" width="24" height="24" fill={avatarColor(c.avatarSeed)} />
-      <rect x="0" y="0" width="24" height="3" fill="rgba(255,255,255,.28)" />
-      <rect x="0" y="19" width="24" height="5" fill="rgba(0,0,0,.22)" />
-      <text x="12" y="16.5" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#fff">{initials(c.name)}</text>
-      <rect x="0.5" y="0.5" width="23" height="23" fill="none" stroke="rgba(0,0,0,.45)" />
+    <svg viewBox="0 0 16 16" width={size} height={size} className="dialtone__badge" aria-hidden="true">
+      <circle cx="8" cy="8" r="8" fill="#fff" />
+      <circle cx="8" cy="8" r="6.6" fill={DOT[p]} />
+      {p === 'online' && <path d="M4.9 8.3l2.1 2.1 4.1-4.5" {...stroke} />}
+      {p === 'away' && <path d="M8 4.6V8.2l2.4 1.6" {...stroke} />}
+      {p === 'busy' && <path d="M4.8 8h6.4" {...stroke} />}
+      {p === 'offline' && <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" {...stroke} />}
     </svg>
   );
 }
 
-function Dot({ p }: { p: Presence }): JSX.Element {
-  return <span className="dialtone__dot" style={{ background: DOT[p] }} aria-hidden="true" />;
+function Avatar({ c, size, badge }: { c: Contact; size: number; badge?: boolean }): JSX.Element {
+  const base = avatarColor(c.avatarSeed);
+  const gid = `sk-ava-${c.id}-${size}`;
+  const art = (
+    <svg viewBox="0 0 40 40" width={size} height={size} className="dialtone__avatar" aria-hidden="true">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={lighten(base, 0.30)} />
+          <stop offset="0.52" stopColor={base} />
+          <stop offset="1" stopColor={lighten(base, -0.001)} />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="40" height="40" rx="5" fill={`url(#${gid})`} />
+      <path d="M0 5a5 5 0 0 1 5-5h30a5 5 0 0 1 5 5v9C31 19 9 19 0 14z" fill="rgba(255,255,255,.22)" />
+      <text x="20" y="26" textAnchor="middle" fontSize="16" fontWeight="600" fill="#fff"
+            fontFamily="'Segoe UI', system-ui, sans-serif" letterSpacing="0.5">{initials(c.name)}</text>
+      <rect x="0.5" y="0.5" width="39" height="39" rx="4.5" fill="none" stroke="rgba(0,0,0,.22)" />
+    </svg>
+  );
+  if (!badge) return art;
+  return (
+    <span className="dialtone__ava">
+      {art}
+      <PresenceBadge p={c.presence} size={Math.max(11, Math.round(size * 0.38))} />
+    </span>
+  );
 }
 
-/** Original Dialtone mark: pixel speech bubble holding a handset (nothing traced). */
+function Dot({ p }: { p: Presence }): JSX.Element {
+  return <PresenceBadge p={p} size={13} />;
+}
+
+/** Original Skajp mark: a rounded cloud-bubble holding a handset. Ours, not traced. */
 function Logo(): JSX.Element {
   return (
-    <svg viewBox="0 0 24 24" className="dialtone__logo" shapeRendering="crispEdges" aria-hidden="true">
-      <rect x="1" y="2" width="22" height="15" fill="#31b4a6" stroke="#0f6a5e" strokeWidth="1.5" />
-      <rect x="2.5" y="3.5" width="19" height="2.5" fill="#63d3c6" />
-      <path d="M6 17 L6 23 L12 17 Z" fill="#31b4a6" stroke="#0f6a5e" strokeWidth="1.5" />
-      <rect x="7" y="7" width="10" height="2.6" fill="#fff" />
-      <rect x="5.6" y="9" width="3.4" height="4.4" fill="#fff" />
-      <rect x="15" y="9" width="3.4" height="4.4" fill="#fff" />
+    <svg viewBox="0 0 48 48" className="dialtone__logo" aria-hidden="true">
+      <defs>
+        <linearGradient id="sk-logo-body" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#4fd0ff" /><stop offset="0.5" stopColor="#00aff0" /><stop offset="1" stopColor="#0089c8" />
+        </linearGradient>
+        <linearGradient id="sk-logo-gloss" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.55" /><stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="M16 9h16a11 11 0 0 1 0 22h-6l-8.5 7.5a1 1 0 0 1-1.6-.9L16.6 31H16a11 11 0 0 1 0-22z"
+            fill="url(#sk-logo-body)" stroke="#0072a8" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M16 10.4h16a9.6 9.6 0 0 1 8.9 6C38.6 14 31.8 12.6 24 12.6S9.4 14 7.1 16.4a9.6 9.6 0 0 1 8.9-6z" fill="url(#sk-logo-gloss)" />
+      <g transform="rotate(-28 24 20)">
+        <path d="M15.4 15.8a2.6 2.6 0 0 1 2.6-2.6h1.3a1.7 1.7 0 0 1 1.7 1.5l.4 3a1.7 1.7 0 0 1-1 1.8l-1.5.7a13 13 0 0 0 6.2 6.2l.7-1.5a1.7 1.7 0 0 1 1.8-1l3 .4a1.7 1.7 0 0 1 1.5 1.7v1.3a2.6 2.6 0 0 1-2.6 2.6A17.5 17.5 0 0 1 15.4 15.8z" fill="#fff" />
+      </g>
     </svg>
   );
 }
 
 function CallGlyph(): JSX.Element {
   return (
-    <svg viewBox="0 0 14 14" width="13" height="13" shapeRendering="crispEdges" aria-hidden="true">
-      <rect x="2" y="2" width="10" height="2.4" fill="currentColor" />
-      <rect x="1" y="4" width="3.2" height="5" fill="currentColor" />
-      <rect x="9.8" y="4" width="3.2" height="5" fill="currentColor" />
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+      <path d="M5.4 4.2a2.4 2.4 0 0 1 2.4-2.4h1.1a1.6 1.6 0 0 1 1.6 1.4l.4 2.8a1.6 1.6 0 0 1-.9 1.7l-1.4.7a12.2 12.2 0 0 0 5.8 5.8l.7-1.4a1.6 1.6 0 0 1 1.7-.9l2.8.4a1.6 1.6 0 0 1 1.4 1.6v1.1a2.4 2.4 0 0 1-2.4 2.4A16.4 16.4 0 0 1 5.4 4.2z"
+            fill="currentColor" transform="translate(1.2 1.6)" />
     </svg>
   );
 }
 
 function CamOff(): JSX.Element {
   return (
-    <svg viewBox="0 0 24 24" width="30" height="30" shapeRendering="crispEdges" aria-hidden="true">
-      <rect x="2" y="7" width="13" height="10" fill="#39465a" stroke="#5b6c84" />
-      <path d="M15 10 L21 7 L21 17 L15 14 Z" fill="#39465a" stroke="#5b6c84" />
-      <line x1="3" y1="20" x2="21" y2="4" stroke="#c25555" strokeWidth="2.4" />
+    <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
+      <rect x="2" y="7" width="13" height="10" rx="2.4" fill="#26333f" stroke="#4a5d6e" strokeWidth="1.2" />
+      <path d="M15.6 10.4l5-2.6a.8.8 0 0 1 1.2.7v6.9a.8.8 0 0 1-1.2.7l-5-2.6z" fill="#26333f" stroke="#4a5d6e" strokeWidth="1.2" strokeLinejoin="round" />
+      <line x1="3.4" y1="19.6" x2="20.6" y2="4.4" stroke="#e0574b" strokeWidth="2.2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -204,9 +252,9 @@ export default function DialtoneApp({ windowId, focused, setTitle }: AppProps) {
   }, [call.phase, active, closeCall]);
 
   useEffect(() => {
-    if (call.phase === 'dialing') setTitle('Dialtone — calling…');
-    else if (call.phase === 'ringing') setTitle('Dialtone — ringing…');
-    else setTitle('Dialtone');
+    if (call.phase === 'dialing') setTitle('Skajp — calling…');
+    else if (call.phase === 'ringing') setTitle('Skajp — ringing…');
+    else setTitle('Skajp');
   }, [call.phase, setTitle]);
 
   /* Focus follows the call dialog (a11y): Hang up on open, primary action on no-answer,
@@ -330,7 +378,7 @@ export default function DialtoneApp({ windowId, focused, setTitle }: AppProps) {
       <div className="dialtone__head">
         <Logo />
         <div className="dialtone__headtext">
-          <strong>Dialtone</strong>
+          <strong>Skajp</strong>
           <span>Everyone’s here. Nobody answers.</span>
         </div>
       </div>
@@ -358,18 +406,17 @@ export default function DialtoneApp({ windowId, focused, setTitle }: AppProps) {
                 onFocus={() => setCursor(i)}
                 onClick={() => setView({ kind: 'card', id: c.id })}
               >
-                <Avatar c={c} size={28} />
+                <Avatar c={c} size={34} badge />
                 <span className="dialtone__rowtext">
                   <strong>{c.name}</strong>
                   <em>{c.tagline}</em>
                 </span>
-                <Dot p={c.presence} />
               </button>
             ))}
             {filtered.length === 0 && <p className="dialtone__empty">No contacts match “{q}”.</p>}
           </div>
           <div className="dialtone__me">
-            <Avatar c={me} size={22} />
+            <Avatar c={me} size={28} badge />
             <span>You — Dominik</span>
             <select value={myStatus} aria-label="Your status (cosmetic — calls stay unanswered either way)" onChange={(e) => setMyStatus(e.target.value as Presence)}>
               <option value="online">Online</option>
@@ -385,7 +432,7 @@ export default function DialtoneApp({ windowId, focused, setTitle }: AppProps) {
         <div className="dialtone__cardwrap">
           <button type="button" className="dialtone__back" onClick={() => setView({ kind: 'roster' })}>◀ Contacts</button>
           <div className="dialtone__card">
-            <Avatar c={cardContact} size={64} />
+            <Avatar c={cardContact} size={76} badge />
             <h2>{cardContact.name}</h2>
             <p className="dialtone__presline"><Dot p={cardContact.presence} /> {PRESENCE_LABEL[cardContact.presence]}</p>
             <p className="dialtone__tagline">{cardContact.tagline}</p>
@@ -408,9 +455,8 @@ export default function DialtoneApp({ windowId, focused, setTitle }: AppProps) {
         <div className="dialtone__chat">
           <div className="dialtone__chathead">
             <button type="button" className="dialtone__back" onClick={() => setView({ kind: 'card', id: chatContact.id })} aria-label="Back to contact card">◀</button>
-            <Avatar c={chatContact} size={22} />
+            <Avatar c={chatContact} size={26} badge />
             <strong>{chatContact.name}</strong>
-            <Dot p={chatContact.presence} />
             <span className="sr-only">{PRESENCE_LABEL[chatContact.presence]}</span>
           </div>
           <div className="dialtone__msgs" ref={msgsRef}>
@@ -451,7 +497,7 @@ export default function DialtoneApp({ windowId, focused, setTitle }: AppProps) {
                 <span className="dialtone__ripple dialtone__ripple--late" />
               </>
             )}
-            <Avatar c={callContact} size={72} />
+            <Avatar c={callContact} size={88} />
           </div>
           <h2>{callContact.name}</h2>
           <p className="dialtone__status">{statusLine}</p>

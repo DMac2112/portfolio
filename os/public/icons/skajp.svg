@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Skajp — original mark authored for DominikOS. A rounded cloud-bubble holding a handset,
+       in the late-2000s glossy-web idiom: vertical gradient body, top gloss, soft outline.
+       Smooth vector (no crispEdges) — the whole point is that it does not look pixelated. -->
+  <defs>
+    <linearGradient id="skajpBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4fd0ff"/>
+      <stop offset="0.5" stop-color="#00aff0"/>
+      <stop offset="1" stop-color="#0089c8"/>
+    </linearGradient>
+    <linearGradient id="skajpGloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="skajpHalo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#00aff0" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#00aff0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="24" cy="24" r="23" fill="url(#skajpHalo)"/>
+
+  <!-- cloud-bubble: overlapping lobes + a tail, drawn as one path so the outline stays clean -->
+  <path d="M16 9h16a11 11 0 0 1 0 22h-6l-8.5 7.5a1 1 0 0 1-1.6-.9L16.6 31H16a11 11 0 0 1 0-22z"
+        fill="url(#skajpBody)" stroke="#0072a8" stroke-width="1.4" stroke-linejoin="round"/>
+  <path d="M16 10.4h16a9.6 9.6 0 0 1 8.9 6C38.6 14 31.8 12.6 24 12.6S9.4 14 7.1 16.4a9.6 9.6 0 0 1 8.9-6z"
+        fill="url(#skajpGloss)"/>
+
+  <!-- handset, tilted like a call glyph -->
+  <g transform="rotate(-28 24 20)">
+    <path d="M15.4 15.8a2.6 2.6 0 0 1 2.6-2.6h1.3a1.7 1.7 0 0 1 1.7 1.5l.4 3a1.7 1.7 0 0 1-1 1.8l-1.5.7a13 13 0 0 0 6.2 6.2l.7-1.5a1.7 1.7 0 0 1 1.8-1l3 .4a1.7 1.7 0 0 1 1.5 1.7v1.3a2.6 2.6 0 0 1-2.6 2.6A17.5 17.5 0 0 1 15.4 15.8z"
+          fill="#ffffff"/>
+  </g>
+
+  <!-- presence pip: online -->
+  <circle cx="38" cy="36" r="7" fill="#ffffff"/>
+  <circle cx="38" cy="36" r="5.8" fill="#5cb800"/>
+  <path d="M35.3 36.2l1.9 1.9 3.6-3.9" fill="none" stroke="#ffffff" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

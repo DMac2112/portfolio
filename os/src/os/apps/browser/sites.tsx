@@ -162,7 +162,7 @@ const SITES: Site[] = [
           </aside>
         </div>
         <footer className="portal__foot">
-          Best viewed at 1024×768 · © 2003 DominikNet · no popups, no cookies, no answers (see Dialtone)
+          Best viewed at 1024×768 · © 2003 DominikNet · no popups, no cookies, no answers (see Skajp)
         </footer>
       </div>
     ),
