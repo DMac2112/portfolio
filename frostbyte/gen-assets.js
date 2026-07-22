@@ -491,8 +491,8 @@ function buildRoomDen() {
 
 /* ----------------------------- MAP: Chillmere Isle ---------------------- */
 // 480x320 painted-look travel map (island only — pins/labels are DOM, content/map.js owns them).
-// The two mist patches are centered exactly on MAP_NODES' locked x/y so the future-area pins land
-// on the cloud cover; the plaza/den glyphs sit under the 'plaza'/'den' pins for the same reason.
+// The remaining mist patch is centered on the workshop's locked map pin; unlocked destinations
+// get a painted glyph and route beneath their DOM pin.
 const ISLE = {
   sea: ARCTIC_DUSK.night, seaD: ARCTIC_DUSK.inkDeep, seaL: ARCTIC_DUSK.nightL,
   land: ARCTIC_DUSK.snowD, landD: ARCTIC_DUSK.frost, landL: ARCTIC_DUSK.snowL,
@@ -543,7 +543,7 @@ function buildMapIsle() {
     px(img, x, y, land ? ISLE.coast : [...ISLE.seaL, 190]);
   }
 
-  // Dotted snow routes connect the three available destinations without duplicating DOM labels.
+  // Dotted snow routes connect the available destinations without duplicating DOM labels.
   const route = (x0, y0, x1, y1) => {
     const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
     for (let s = 0; s <= steps; s += 8) {
@@ -551,7 +551,7 @@ function buildMapIsle() {
       disc(img, Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), 2, [...ARCTIC_DUSK.iceD, 150]);
     }
   };
-  route(221, 128, 298, 237); route(221, 128, 182, 38);
+  route(221, 128, 298, 237); route(221, 128, 182, 38); route(221, 128, 384, 122);
 
   // Pine clusters — flavor only, a scaled-down version of the plaza's disc-stack pine.
   const pineAt = (px0, py0, s) => {
@@ -591,17 +591,23 @@ function buildMapIsle() {
   rect(img, tpx - 3, tpy - 7, 7, 15, ARCTIC_DUSK.iceD); rect(img, tpx - 1, tpy - 7, 3, 15, ARCTIC_DUSK.iceL);
   disc(img, tpx, tpy + 8, 6, ARCTIC_DUSK.water); pineAt(tpx - 11, tpy + 7, 0.8); pineAt(tpx + 12, tpy + 7, 0.8);
 
+  // Glasswind Court glyph: three warm storefronts around a tiny ice court.
+  const gpx = Math.round(0.80 * W), gpy = Math.round(0.38 * H);
+  disc(img, gpx, gpy, 9, ARCTIC_DUSK.iceD); disc(img, gpx, gpy, 6, ARCTIC_DUSK.iceL);
+  for (const [ox, oy, c] of [[-12, -10, ARCTIC_DUSK.violet], [12, -10, ARCTIC_DUSK.amber], [12, 10, ARCTIC_DUSK.ember]]) {
+    rect(img, gpx + ox - 5, gpy + oy - 4, 10, 8, ISLE.roofD);
+    rect(img, gpx + ox - 4, gpy + oy - 3, 8, 5, c);
+  }
+
   // Small compass rose in open water, kept away from every pin.
   const crx = 432, cry = 263;
   disc(img, crx, cry, 13, [...ARCTIC_DUSK.inkDeep, 150]); ovalRing(img, crx, cry, 11, 11, ARCTIC_DUSK.iceD, 90);
   rect(img, crx, cry - 9, 1, 19, ARCTIC_DUSK.iceL); rect(img, crx - 9, cry, 19, 1, ARCTIC_DUSK.iceL);
   px(img, crx, cry - 11, ARCTIC_DUSK.amber); px(img, crx - 1, cry - 9, ARCTIC_DUSK.amber);
 
-  // Mist/cloud patches over the three locked areas — centers match MAP_NODES exactly. Painted as
-  // tight scalloped puffs (not a broad soft glow) so each patch reads as a discrete cloud sitting
-  // on the island, rather than washing the whole map out to white-on-white.
+  // Mist/cloud patch over the remaining locked workshop.
   const puffs = [[0, -2, 17], [-13, 5, 14], [13, 5, 14], [0, 10, 13]];
-  for (const [nx, ny] of [[0.80, 0.38], [0.14, 0.46]]) {
+  for (const [nx, ny] of [[0.14, 0.46]]) {
     const mx = Math.round(nx * W), my = Math.round(ny * H);
     // faint haze rim so the cloud doesn't have a hard cutoff against the land
     for (let layer = 30; layer >= 20; layer -= 5) disc(img, mx, my, layer, [...ISLE.mist, Math.round(60 * (1 - layer / 30))]);
@@ -1173,6 +1179,175 @@ function buildRoomTrail() {
   return save('room-trail.png', img);
 }
 
+/* ----------------------------- ROOM: Glasswind Court ------------------- */
+function buildRoomCourt() {
+  const W = 480, H = 320;
+  const img = Img(W, H), A = ARCTIC_DUSK;
+
+  // Wind-polished snow with a cooler glassy center and darker perimeter.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.min(1, Math.hypot((x - W / 2) / (W / 2), (y - H / 2) / (H / 2)));
+    let col = shade(A.snow, 1.02 - edge * 0.09); const n = rnd();
+    if (n > 0.965) col = A.snowL; else if (n > 0.91) col = A.snowD;
+    px(img, x, y, col);
+  }
+
+  const stroke = (points, radius, color) => {
+    for (let i = 0; i < points.length - 1; i++) {
+      const [x0, y0] = points[i], [x1, y1] = points[i + 1];
+      const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+      for (let s = 0; s <= steps; s++) {
+        const t = steps ? s / steps : 0;
+        disc(img, Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), radius, color);
+      }
+    }
+  };
+  const paths = [
+    [[-8, 160], [68, 160], [125, 170], [195, 163]],
+    [[195, 163], [165, 128], [142, 104]],
+    [[195, 163], [214, 134], [234, 108]],
+    [[220, 170], [292, 188], [368, 216]],
+    [[205, 188], [250, 220], [315, 240]],
+    [[150, 184], [126, 208], [150, 236]],
+  ];
+  for (const p of paths) { stroke(p, 14, [...A.frost, 150]); stroke(p, 10, [...A.snowL, 180]); }
+  oval(img, 195, 165, 67, 48, [...A.iceD, 130]); oval(img, 193, 162, 61, 43, [...A.iceL, 120]);
+  for (let y = 132; y <= 198; y += 12) rect(img, 143, y, 104, 1, [...A.iceD, 120]);
+  for (let x = 151; x <= 239; x += 16) rect(img, x, 124, 1, 76, [...A.iceD, 100]);
+
+  const warmGlow = (cx, cy, r = 12) => {
+    for (let rr = r; rr >= 3; rr -= 3) disc(img, cx, cy, rr, [...A.amber, Math.round(14 + (r - rr) * 3)]);
+  };
+  const lampAt = (cx, cy) => {
+    warmGlow(cx, cy - 9, 14); rect(img, cx - 1, cy - 8, 3, 15, A.ink);
+    rect(img, cx - 4, cy - 12, 9, 7, A.inkDeep); rect(img, cx - 3, cy - 11, 7, 5, A.amberL);
+    rect(img, cx - 4, cy + 6, 9, 2, A.inkDeep);
+  };
+  const snowtailAt = (cx, cy, body = A.snowL, ear = A.violet, s = 1) => {
+    oval(img, cx, cy + 6 * s, 9 * s, 6 * s, body); disc(img, cx, cy - 1 * s, 6 * s, body);
+    px(img, Math.round(cx - 4 * s), Math.round(cy - 7 * s), ear);
+    px(img, Math.round(cx + 4 * s), Math.round(cy - 7 * s), ear);
+    px(img, Math.round(cx - 2 * s), Math.round(cy - 1 * s), A.ink);
+    px(img, Math.round(cx + 2 * s), Math.round(cy - 1 * s), A.ink);
+    disc(img, cx + 9 * s, cy + 4 * s, 3 * s, ear);
+  };
+
+  // Snowtail Pet Shop — broad north-west frontage with a busy companion window.
+  rrect(img, 20, 18, 150, 82, A.nightL); rect(img, 24, 24, 142, 72, A.ink);
+  for (let x = 18; x < 172; x += 7) disc(img, x, 18, 7, A.snowL);
+  for (let x = 24; x < 166; x += 12) rect(img, x, 40, 12, 8, (x / 12) % 2 ? A.violet : A.aurora);
+  rect(img, 34, 51, 78, 35, A.iceD); rect(img, 38, 55, 70, 27, A.night);
+  rrect(img, 128, 49, 28, 47, A.wood); rrect(img, 133, 55, 18, 41, A.nightL);
+  warmGlow(142, 69, 14); px(img, 149, 76, A.amberL);
+  disc(img, 96, 32, 10, A.inkDeep); disc(img, 96, 35, 4, A.violet);
+  for (const [ox, oy] of [[-5, -4], [0, -6], [5, -4]]) disc(img, 96 + ox, 35 + oy, 2, A.aurora);
+  snowtailAt(58, 65, A.snowL, A.violet, 1);
+  snowtailAt(88, 67, A.frost, A.aurora, 0.9);
+
+  // Bluehour Coffee — set back and offset from the pet shop, with deliveries on the path.
+  rrect(img, 205, 25, 150, 79, A.nightL); rect(img, 210, 31, 140, 69, A.ink);
+  for (let x = 203; x < 357; x += 7) disc(img, x, 25, 7, A.snowL);
+  for (let x = 210; x < 350; x += 12) rect(img, x, 47, 12, 8, (x / 12) % 2 ? A.ice : A.amber);
+  rrect(img, 220, 57, 28, 47, A.wood); rrect(img, 225, 63, 18, 41, A.nightL);
+  rect(img, 258, 57, 82, 34, A.iceD); rect(img, 262, 61, 74, 26, shade(A.amber, 0.72));
+  rect(img, 264, 79, 70, 5, A.woodL); rect(img, 282, 67, 22, 9, A.amberL);
+  disc(img, 318, 72, 5, A.snowL); disc(img, 323, 72, 5, A.snowL);
+  disc(img, 282, 39, 10, A.inkDeep); rect(img, 277, 38, 10, 6, A.amberL);
+  ovalRing(img, 287, 41, 4, 4, A.amber, 255); px(img, 279, 35, A.snowL); px(img, 282, 33, A.snowL);
+  warmGlow(234, 75, 14);
+  rect(img, 296, 110, 35, 7, A.wood); rect(img, 301, 105, 13, 7, A.woodL);
+  rect(img, 318, 105, 10, 12, A.violet); px(img, 323, 103, A.snowL);
+
+  // Lantern Ladle Restaurant — a west-facing side building, approached horizontally from court.
+  rrect(img, 370, 110, 118, 172, A.nightL); rect(img, 378, 118, 102, 158, A.wood);
+  for (let x = 370; x < 486; x += 8) disc(img, x, 111, 8, A.snowL);
+  for (let y = 136; y < 268; y += 14) rect(img, 368, y, 11, 14, (y / 14) % 2 ? A.ember : A.amberL);
+  rrect(img, 376, 194, 30, 46, A.inkDeep); rrect(img, 381, 200, 20, 40, A.nightL);
+  warmGlow(389, 216, 17); px(img, 399, 224, A.amberL);
+  rect(img, 412, 174, 58, 50, A.inkDeep); rect(img, 417, 179, 48, 40, shade(A.amber, 0.65));
+  rect(img, 421, 203, 40, 5, A.woodL); oval(img, 441, 193, 13, 5, A.snowL);
+  disc(img, 408, 146, 12, A.inkDeep); oval(img, 408, 148, 8, 5, A.amberL);
+  rect(img, 399, 151, 19, 2, A.amber); px(img, 408, 141, A.snowL);
+  rect(img, 360, 204, 17, 27, [...A.violet, 150]); rect(img, 362, 206, 13, 23, [...A.snowL, 130]);
+  rect(img, 454, 94, 14, 27, A.inkDeep); rect(img, 457, 97, 8, 23, A.wood);
+  disc(img, 461, 91, 6, [...A.frost, 150]); disc(img, 468, 84, 8, [...A.frost, 100]);
+
+  // An off-centre provisions cart keeps the ice court from reading as a sterile roundabout.
+  oval(img, 235, 185, 23, 8, [...A.inkDeep, 45]);
+  rect(img, 216, 163, 38, 20, A.wood); rect(img, 220, 167, 30, 12, A.woodL);
+  rect(img, 213, 155, 44, 7, A.inkDeep);
+  for (let x = 214; x < 258; x += 8) rect(img, x, 156, 8, 6, (x / 8) % 2 ? A.amberL : A.violet);
+  rect(img, 219, 180, 3, 10, A.ink); rect(img, 249, 180, 3, 10, A.ink);
+  disc(img, 222, 186, 5, A.inkDeep); disc(img, 250, 186, 5, A.inkDeep);
+  disc(img, 228, 173, 4, A.snowL); oval(img, 240, 173, 7, 3, A.ember); disc(img, 247, 171, 3, A.aurora);
+
+  // Lantern Ladle's outdoor patio fills the lower court with mismatched seating and warm light.
+  oval(img, 318, 258, 80, 50, [...A.violet, 28]); oval(img, 318, 258, 74, 45, [...A.amber, 18]);
+  stroke([[244, 214], [315, 207], [394, 222]], 1, A.inkDeep);
+  for (const [bx, by, bc] of [[257, 213, A.amberL], [279, 211, A.aurora], [302, 209, A.amberL], [326, 210, A.violet], [350, 215, A.amberL], [376, 220, A.aurora]]) {
+    disc(img, bx, by, 2, bc); warmGlow(bx, by, 5);
+  }
+  lampAt(244, 222); lampAt(394, 230);
+
+  const patioTableAt = (cx, cy, cloth) => {
+    oval(img, cx, cy + 7, 18, 6, [...A.inkDeep, 45]);
+    oval(img, cx, cy, 14, 8, cloth); ovalRing(img, cx, cy, 14, 8, A.wood, 190);
+    rect(img, cx - 2, cy + 5, 5, 14, A.wood); rect(img, cx - 8, cy + 17, 17, 3, A.inkDeep);
+    oval(img, cx - 20, cy + 2, 6, 5, A.woodL); oval(img, cx + 20, cy + 2, 6, 5, A.woodL);
+    disc(img, cx - 4, cy - 1, 2, A.snowL); disc(img, cx + 4, cy - 1, 2, A.amberL);
+  };
+  patioTableAt(280, 248, A.violet); patioTableAt(345, 270, A.ember);
+
+  // Shared brazier, chalkboard menu, dropped mittens, and dishes make the patio feel occupied.
+  oval(img, 245, 289, 14, 6, [...A.inkDeep, 55]); disc(img, 245, 282, 10, A.inkDeep);
+  disc(img, 245, 280, 7, A.ember); disc(img, 242, 276, 4, A.amberL); disc(img, 248, 275, 3, A.snowL);
+  rect(img, 242, 288, 3, 8, A.wood); rect(img, 248, 288, 3, 8, A.wood);
+  rrect(img, 357, 260, 16, 24, A.wood); rect(img, 360, 263, 10, 15, A.inkDeep);
+  rect(img, 361, 266, 8, 1, A.snowL); rect(img, 362, 270, 6, 1, A.amberL);
+  rect(img, 359, 284, 3, 8, A.wood); rect(img, 369, 284, 3, 8, A.wood);
+  oval(img, 320, 294, 5, 3, A.violet); oval(img, 329, 297, 5, 3, A.aurora);
+  disc(img, 300, 281, 4, A.snowL); disc(img, 309, 285, 4, A.snowL); rect(img, 299, 280, 12, 1, A.iceD);
+
+  // Snowtail playpen in the lower-left: an open gate, toys, bowls, and pawprints.
+  oval(img, 94, 252, 58, 38, [...A.violet, 22]); oval(img, 92, 250, 51, 32, [...A.snowL, 80]);
+  stroke([[40, 220], [110, 220]], 2, A.wood);
+  stroke([[40, 220], [40, 286], [150, 286], [150, 252]], 2, A.wood);
+  for (const [fx, fy] of [[40, 220], [75, 220], [110, 220], [40, 253], [40, 286], [75, 286], [110, 286], [150, 286], [150, 252]]) {
+    rect(img, fx - 2, fy - 5, 5, 11, A.woodL); disc(img, fx, fy - 5, 3, A.snowL);
+  }
+  snowtailAt(72, 248, A.snowL, A.violet, 1.1);
+  snowtailAt(112, 265, A.frost, A.aurora, 0.95);
+  disc(img, 93, 271, 5, A.ember); px(img, 91, 269, A.amberL);
+  oval(img, 127, 240, 9, 4, A.iceD); oval(img, 127, 239, 7, 3, A.amberL);
+  for (const [px0, py0] of [[139, 232], [149, 224], [157, 213]]) {
+    disc(img, px0, py0, 2, A.violet); px(img, px0 - 2, py0 - 2, A.violet); px(img, px0 + 2, py0 - 2, A.violet);
+  }
+
+  // A used bench faces the patio; a parcel and thermos imply somebody just stepped away.
+  oval(img, 180, 281, 21, 5, [...A.inkDeep, 45]); rect(img, 162, 270, 36, 7, A.wood);
+  rect(img, 165, 277, 4, 8, A.ink); rect(img, 192, 277, 4, 8, A.ink);
+  rect(img, 166, 263, 10, 8, A.violet); rect(img, 177, 265, 5, 9, A.amberL);
+
+  // West return gate and irregular edge planting keep the room tied to Chillmere Plaza.
+  rect(img, 0, 132, 24, 18, A.iceD); rect(img, 0, 170, 24, 18, A.iceD);
+  rect(img, 0, 144, 10, 32, A.night); rect(img, 5, 148, 5, 24, A.amber);
+
+  const pineAt = (cx, cy, s = 1) => {
+    rect(img, cx - 1, cy - 3, 3, 8, A.wood);
+    disc(img, cx, cy - 8 * s, 9 * s, A.pineD); disc(img, cx, cy - 16 * s, 7 * s, A.pine);
+    disc(img, cx, cy - 22 * s, 5 * s, A.pine); disc(img, cx - 2 * s, cy - 24 * s, 3 * s, A.snowL);
+  };
+  pineAt(25, 205, 1); pineAt(18, 78, 0.8); pineAt(462, 300, 0.75);
+  rect(img, 16, 304, 35, 6, A.iceD); disc(img, 20, 302, 8, A.snowL); disc(img, 37, 303, 10, A.snowL);
+  rect(img, 334, 116, 24, 6, A.wood); rect(img, 338, 110, 9, 7, A.woodL); rect(img, 349, 111, 7, 6, A.violet);
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const edge = Math.max(Math.abs(x - W / 2) / (W / 2), Math.abs(y - H / 2) / (H / 2));
+    if (edge > 0.86) px(img, x, y, [...A.inkDeep, Math.round((edge - 0.86) * 145)]);
+  }
+  return save('room-court.png', img);
+}
+
 /* ----------------------------- Pickup glint (H4) ------------------------ */
 // 12x12 walk-over coin token: warm gold dot + 4-point sparkle cross, dark outline.
 function buildPickupGlint() {
@@ -1204,6 +1379,7 @@ const made = [
   ...buildDenSigns(),
   buildRoomTrail(),
   buildPickupGlint(),
+  buildRoomCourt(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

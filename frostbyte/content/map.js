@@ -21,7 +21,7 @@ export const MAP_NODES = [
   { roomId: 'plaza', label: 'Chillmere Plaza', x: 0.46, y: 0.40, unlocked: true },
   { roomId: 'den',   label: 'Your Den',        x: 0.62, y: 0.74, unlocked: true },
   { roomId: 'trail',     label: 'Frostline Trail',     x: 0.38, y: 0.12, unlocked: true },
-  { roomId: 'court',     label: 'Glasswind Court',     x: 0.80, y: 0.38, unlocked: false },
+  { roomId: 'court',     label: 'Glasswind Court',     x: 0.80, y: 0.38, unlocked: true },
   { roomId: 'workshop',  label: 'Emberlight Workshop', x: 0.14, y: 0.46, unlocked: false },
 ];
 

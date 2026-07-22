@@ -239,4 +239,54 @@ describe('room configs', () => {
       }
     }
   });
+
+  it('court and plaza: mutual door reachability', () => {
+    const court = ROOM_REGISTRY.court;
+    const plaza = ROOM_REGISTRY.plaza;
+    const courtDoorBack = court.doors.find(d => d.id === 'door-back');
+    const plazaDoorCourt = plaza.doors.find(d => d.id === 'door-court');
+
+    expect(courtDoorBack).toMatchObject({ targetRoom: 'plaza', locked: false, targetSpawn: 'fromCourt' });
+    expect(plazaDoorCourt).toMatchObject({ targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' });
+  });
+
+  it('court: exposes one pet shop, one coffee shop, and one restaurant as venues', () => {
+    const venues = ROOM_REGISTRY.court.hotspots.filter(h => h.kind === 'venue');
+    expect(venues.map(v => v.label)).toEqual([
+      'Snowtail Pet Shop',
+      'Bluehour Coffee',
+      'Lantern Ladle Restaurant',
+    ]);
+    for (const venue of venues) {
+      expect(venue.prompt.length).toBeGreaterThan(0);
+      expect(venue.copy.length).toBeGreaterThan(0);
+      const solid = ROOM_REGISTRY.court.solids.find(s => s.id === venue.solidId);
+      expect(solid).toBeDefined();
+      if (venue.entryDirection === 'up') {
+        expect(venue.x).toBeGreaterThanOrEqual(solid.x - solid.w / 2);
+        expect(venue.x).toBeLessThanOrEqual(solid.x + solid.w / 2);
+        expect(venue.y).toBeGreaterThan(solid.y + solid.h / 2);
+      } else if (venue.entryDirection === 'right') {
+        expect(venue.y).toBeGreaterThanOrEqual(solid.y - solid.h / 2);
+        expect(venue.y).toBeLessThanOrEqual(solid.y + solid.h / 2);
+        expect(venue.x).toBeLessThan(solid.x - solid.w / 2);
+      } else {
+        throw new Error(`Unsupported venue entry direction: ${venue.entryDirection}`);
+      }
+    }
+  });
+
+  it('court: breaks the top row with a side-facing restaurant and occupied lower plaza', () => {
+    const court = ROOM_REGISTRY.court;
+    const restaurant = court.hotspots.find(h => h.id === 'venue-lantern-ladle');
+    expect(restaurant.entryDirection).toBe('right');
+    expect(restaurant.y).toBeGreaterThan(500);
+    expect(court.solids.filter(s => s.y > 700).map(s => s.id)).toEqual(expect.arrayContaining([
+      'patio-table-a',
+      'patio-table-b',
+      'patio-brazier',
+      'court-bench',
+      'menu-board',
+    ]));
+  });
 });

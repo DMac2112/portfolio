@@ -54,6 +54,27 @@ const PROFILES = {
       { type: 'capsule', ax: 786, ay: 873, bx: 786, by: 948, r: 7 },
     ],
   },
+  court: {
+    boundary: { type: 'rect', x0: 0, x1: 1440, y0: 0, y1: 960 },
+    obstacles: [
+      { type: 'roundRect', x: 291, y: 190, w: 438, h: 188, r: 24 },
+      { type: 'roundRect', x: 840, y: 204, w: 420, h: 216, r: 24 },
+      { type: 'roundRect', x: 1248, y: 600, w: 240, h: 456, r: 24 },
+      { type: 'roundRect', x: 705, y: 522, w: 114, h: 78, r: 12 },
+      { type: 'ellipse', x: 840, y: 744, rx: 42, ry: 27 },
+      { type: 'ellipse', x: 1035, y: 810, rx: 39, ry: 27 },
+      { type: 'circle', x: 735, y: 846, r: 27 },
+      { type: 'capsule', ax: 486, ay: 822, bx: 594, by: 822, r: 10 },
+      { type: 'roundRect', x: 1095, y: 822, w: 45, h: 66, r: 5 },
+      { type: 'capsule', ax: 120, ay: 660, bx: 330, by: 660, r: 6 },
+      { type: 'capsule', ax: 120, ay: 660, bx: 120, by: 858, r: 6 },
+      { type: 'capsule', ax: 120, ay: 858, bx: 450, by: 858, r: 6 },
+      { type: 'capsule', ax: 450, ay: 756, bx: 450, by: 858, r: 6 },
+      { type: 'capsule', ax: 732, ay: 642, bx: 732, by: 690, r: 5 },
+      { type: 'capsule', ax: 1182, ay: 666, bx: 1182, by: 714, r: 5 },
+      { type: 'ellipse', x: 75, y: 615, rx: 50, ry: 65 },
+    ],
+  },
 };
 
 const sign = (n) => (n < 0 ? -1 : 1);

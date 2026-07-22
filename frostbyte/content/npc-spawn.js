@@ -38,4 +38,21 @@ export const ROOM_SPAWN = {
     maxConcurrentChat: 1,
     bounds: { x0: 120, x1: 1320, y0: 180, y1: 880 },
   },
+
+  court: {
+    capacity: { min: 4, max: 6 },
+    roamPoints: [
+      { x: 210, y: 480 }, { x: 480, y: 450 }, { x: 660, y: 390 },
+      { x: 900, y: 510 }, { x: 570, y: 720 }, { x: 930, y: 690 },
+      { x: 480, y: 720 }, { x: 990, y: 870 },
+    ],
+    gatherPoints: [
+      { x: 900, y: 690, label: 'lantern-ladle-patio' },
+      { x: 480, y: 720, label: 'snowtail-playpen' },
+      { x: 690, y: 390, label: 'bluehour-path' },
+    ],
+    rosterPoolIds: ['bramble', 'pip', 'marzi', 'dot', 'chowder', 'sable'],
+    maxConcurrentChat: 2,
+    bounds: { x0: 72, x1: 1368, y0: 96, y1: 888 },
+  },
 };

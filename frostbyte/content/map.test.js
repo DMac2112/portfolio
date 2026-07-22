@@ -23,15 +23,15 @@ describe('MAP_NODES', () => {
     }
   });
 
-  it('has exactly three unlocked nodes', () => {
+  it('has exactly four unlocked nodes', () => {
     const unlockedCount = MAP_NODES.filter(n => n.unlocked).length;
-    expect(unlockedCount).toBe(3);
+    expect(unlockedCount).toBe(4);
   });
 
-  it('unlocked nodes are plaza, den, and trail', () => {
+  it('unlocked nodes are plaza, den, trail, and court', () => {
     const unlockedRoomIds = MAP_NODES.filter(n => n.unlocked).map(n => n.roomId);
-    expect(unlockedRoomIds).toEqual(expect.arrayContaining(['plaza', 'den', 'trail']));
-    expect(unlockedRoomIds).toHaveLength(3);
+    expect(unlockedRoomIds).toEqual(expect.arrayContaining(['plaza', 'den', 'trail', 'court']));
+    expect(unlockedRoomIds).toHaveLength(4);
   });
 
   it('locked node labels exactly match plaza locked door labels', () => {

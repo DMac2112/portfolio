@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { findNearestInteractable, mergeInteractables, INTERACT_R } from './interaction.js';
+import {
+  AUTO_VENUE_R,
+  findAutoEnterVenue,
+  findNearestInteractable,
+  mergeInteractables,
+  INTERACT_R,
+} from './interaction.js';
 
 describe('findNearestInteractable', () => {
   it('picks the closest of several candidates within range', () => {
@@ -155,6 +161,53 @@ describe('findNearestInteractable', () => {
       const result = findNearestInteractable(pos, candidates);
       expect(result.id).toBe('npc-nearest'); // no filter supplied -> nearest overall, old behavior
     });
+  });
+});
+
+describe('findAutoEnterVenue', () => {
+  const venue = {
+    id: 'venue-petshop', kind: 'venue', entryDirection: 'up', pos: { x: 398, y: 296 },
+  };
+
+  it('opens a venue when the player touches its doorway while walking inward', () => {
+    expect(findAutoEnterVenue(
+      { x: 398, y: 296 + AUTO_VENUE_R },
+      { x: 0, y: -4 },
+      [venue],
+    )).toBe(venue);
+  });
+
+  it('does not open the venue while moving away from its doorway', () => {
+    expect(findAutoEnterVenue(
+      { x: 398, y: 306 },
+      { x: 0, y: 4 },
+      [venue],
+    )).toBeNull();
+  });
+
+  it('does not auto-open non-venue interactables', () => {
+    expect(findAutoEnterVenue(
+      { x: 398, y: 306 },
+      { x: 0, y: -4 },
+      [{ ...venue, kind: 'shop' }],
+    )).toBeNull();
+  });
+
+  it('does not auto-open a venue without a declared entry direction', () => {
+    const { entryDirection, ...withoutDirection } = venue;
+    expect(findAutoEnterVenue(
+      { x: 398, y: 306 },
+      { x: 0, y: -4 },
+      [withoutDirection],
+    )).toBeNull();
+  });
+
+  it('does not open a venue outside its physical contact radius', () => {
+    expect(findAutoEnterVenue(
+      { x: 398, y: 296 + AUTO_VENUE_R + 1 },
+      { x: 0, y: -4 },
+      [venue],
+    )).toBeNull();
   });
 });
 

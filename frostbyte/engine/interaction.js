@@ -1,6 +1,8 @@
 // Pure interaction module — nearest interactable picker. No game/KAPLAY dependency.
 
 export const INTERACT_R = 168; // default interaction radius, world px
+export const AUTO_VENUE_R = 20;
+export const AUTO_VENUE_RESET_R = 72;
 
 /**
  * @typedef {Object} Interactable
@@ -45,6 +47,39 @@ export function findNearestInteractable(pos, candidates, maxDist = INTERACT_R, o
     }
   }
 
+  return nearest;
+}
+
+const ENTRY_VECTORS = {
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+};
+
+/**
+ * Return the nearest venue doorway touched while moving in its declared entry direction.
+ * @param {{x:number,y:number}} pos
+ * @param {{x:number,y:number}} movement
+ * @param {Interactable[]} candidates
+ * @param {number} [maxDist]
+ * @returns {Interactable|null}
+ */
+export function findAutoEnterVenue(pos, movement, candidates, maxDist = AUTO_VENUE_R) {
+  if (!pos || !movement || !Array.isArray(candidates)) return null;
+  if (Math.hypot(movement.x, movement.y) === 0) return null;
+
+  let nearest = null;
+  let nearestDist = Infinity;
+  for (const candidate of candidates) {
+    const entry = candidate.kind === 'venue' && ENTRY_VECTORS[candidate.entryDirection];
+    if (!entry || movement.x * entry.x + movement.y * entry.y <= 0) continue;
+    const dist = Math.hypot(candidate.pos.x - pos.x, candidate.pos.y - pos.y);
+    if (dist <= maxDist && dist < nearestDist) {
+      nearest = candidate;
+      nearestDist = dist;
+    }
+  }
   return nearest;
 }
 

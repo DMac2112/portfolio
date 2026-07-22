@@ -93,6 +93,52 @@ export function arriveSpawnId(sourceRoomId) {
   return `from${capitalized}`;
 }
 
+// Door coordinates sit on room edges. This radius matches the visible avatar/collider contact
+// point, so walking into an unlocked doorway travels immediately instead of stopping for a click.
+export const AUTO_DOOR_R = 56;
+
+function outwardVectorForDoor(door, bounds, maxEdgeDist) {
+  if (!door || !bounds) return null;
+  const edges = [
+    { distance: Math.abs(door.x - bounds.x0), x: -1, y: 0 },
+    { distance: Math.abs(door.x - bounds.x1), x: 1, y: 0 },
+    { distance: Math.abs(door.y - bounds.y0), x: 0, y: -1 },
+    { distance: Math.abs(door.y - bounds.y1), x: 0, y: 1 },
+  ];
+  edges.sort((a, b) => a.distance - b.distance);
+  return edges[0].distance <= maxEdgeDist ? edges[0] : null;
+}
+
+/**
+ * Return the nearest unlocked edge door the player is physically walking into.
+ * Moving past or away from a nearby door never triggers travel.
+ * @param {{x:number,y:number}} pos
+ * @param {{x:number,y:number}} movement
+ * @param {Array<{x:number,y:number,locked:boolean}>} doors
+ * @param {{x0:number,x1:number,y0:number,y1:number}} bounds
+ * @param {number} [maxDist]
+ * @returns {Object|null}
+ */
+export function findAutoEnterDoor(pos, movement, doors, bounds, maxDist = AUTO_DOOR_R) {
+  if (!pos || !movement || !Array.isArray(doors) || !bounds) return null;
+  if (Math.hypot(movement.x, movement.y) === 0) return null;
+
+  let nearest = null;
+  let nearestDist = Infinity;
+  for (const door of doors) {
+    if (door.locked) continue;
+    const outward = outwardVectorForDoor(door, bounds, maxDist);
+    if (!outward || movement.x * outward.x + movement.y * outward.y <= 0) continue;
+
+    const dist = Math.hypot(door.x - pos.x, door.y - pos.y);
+    if (dist <= maxDist && dist < nearestDist) {
+      nearest = door;
+      nearestDist = dist;
+    }
+  }
+  return nearest;
+}
+
 /**
  * Validate that the world graph is well-formed and fully connected.
  * Returns an array of error strings (empty = valid).

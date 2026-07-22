@@ -14,7 +14,12 @@ import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
 import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
-import { findNearestInteractable, mergeInteractables } from './engine/interaction.js';
+import {
+  AUTO_VENUE_RESET_R,
+  findAutoEnterVenue,
+  findNearestInteractable,
+  mergeInteractables,
+} from './engine/interaction.js';
 import { minigameForHotspot } from './content/minigames-registry.js';
 import { recordCoins, remainingToday } from './engine/minigame-daily.js';
 import { newChat, addBubble, tick as tickChat, active as activeChat } from './engine/chat.js';
@@ -22,7 +27,7 @@ import { createChat } from './ui/chat.js';
 import { createEmotes, emoteSymbol } from './ui/emotes.js';
 import { createMap } from './ui/map.js';
 import { nodeByRoom } from './content/map.js';
-import { canTravel, arriveSpawnId } from './engine/travel.js';
+import { canTravel, arriveSpawnId, findAutoEnterDoor } from './engine/travel.js';
 import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
 import { SNAP, addToInventory, place as placeFurn, move as moveFurn, flip as flipFurn, store as storeFurn, hitTest } from './engine/home-editor.js';
 import { loadFurnitureSprites, initFurnitureLayer } from './world/furniture.js';
@@ -78,6 +83,7 @@ const PLAYER_RADIUS = 12;
 k.loadSprite('room-plaza', './assets/room-plaza.png');
 k.loadSprite('room-den', './assets/room-den.png');
 k.loadSprite('room-trail', './assets/room-trail.png');
+k.loadSprite('room-court', './assets/room-court.png');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadFurnitureSprites(k);
@@ -172,7 +178,7 @@ k.scene('room', (roomId, opts = {}) => {
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
   for (const h of room.hotspots ?? []) {
-    if (h.kind !== 'minigame' && h.kind !== 'shop') continue;
+    if (h.kind !== 'minigame' && h.kind !== 'shop' && h.kind !== 'venue') continue;
     const lw = Math.max(64, (h.label?.length ?? 4) * 9 + 18);
     k.add([k.rect(lw, 22, { radius: 6 }), k.pos(h.x, h.y - 46), k.anchor('center'),
       k.color(k.Color.fromHex('#0d1c2b')), k.opacity(0.82), k.z(100000)]);
@@ -228,22 +234,41 @@ k.scene('room', (roomId, opts = {}) => {
   const spawnConfig = ROOM_SPAWN[roomId];
   const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, room.scale) : null;
 
-  // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. 'minigame', 'shop'
-  // and 'door' are actionable (locked doors show their copy); NPCs/landmarks stay promptless and
+  // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. Minigames, shops,
+  // venues, signs and doors are actionable; NPCs/landmarks stay promptless and
   // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
-  const hotspotInteractables = (room.hotspots ?? []).map((h) => ({ id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label }));
+  const hotspotInteractables = (room.hotspots ?? []).map((h) => ({
+    id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label,
+    prompt: h.prompt, copy: h.copy, entryDirection: h.entryDirection,
+  }));
   const doorInteractables = (room.doors ?? []).map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
   const interactPrompt = document.getElementById('interact-prompt');
   let nearest = null;
+  let autoVenueLatch = null;
 
   const actionFor = (hit) => {
     if (!hit) return null;
     if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
     if (hit.kind === 'shop') return 'shop';
+    if (hit.kind === 'venue') return 'venue';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
     return null;
   };
+  function enterVenue(venue) {
+    if (!venue) return false;
+    autoVenueLatch = venue.id;
+    moveTarget = null;
+    showDialogue(venue.label, venue.copy ?? 'Warm lights glow behind the frosted windows.');
+    return true;
+  }
+  function enterDoor(door) {
+    if (!door || door.locked) return false;
+    moveTarget = null;
+    if (interactPrompt) interactPrompt.classList.remove('show');
+    changeScene(() => k.go('room', door.targetRoom, { spawn: door.targetSpawn ?? arriveSpawnId(roomId) }));
+    return true;
+  }
   function doInteract() {
     if (anyOverlayOpen()) return; // 'e' typed into the chat box (or any open modal) must not interact
     const action = actionFor(nearest);
@@ -254,11 +279,12 @@ k.scene('room', (roomId, opts = {}) => {
       changeScene(() => k.go(minigameForHotspot(nearest.id).sceneId, { from: roomId }));
     } else if (action === 'shop') {
       dressUp.open();
+    } else if (action === 'venue') {
+      enterVenue(nearest);
     } else if (action === 'door') {
       const d = nearest.door;
       if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
-      if (interactPrompt) interactPrompt.classList.remove('show');
-      changeScene(() => k.go('room', d.targetRoom, { spawn: d.targetSpawn ?? arriveSpawnId(roomId) }));
+      enterDoor(d);
     } else if (action === 'sign') {
       save.home.open = !save.home.open;
       persist(save);
@@ -548,6 +574,27 @@ k.scene('room', (roomId, opts = {}) => {
     player.pos.x = next.x;
     player.pos.y = next.y;
 
+    const autoDoor = findAutoEnterDoor(
+      next,
+      { x: dxPx, y: dyPx },
+      room.doors ?? [],
+      room.bounds,
+    );
+    if (autoDoor) { enterDoor(autoDoor); return; }
+
+    const latchedVenue = autoVenueLatch
+      ? hotspotInteractables.find(h => h.id === autoVenueLatch)
+      : null;
+    if (latchedVenue && Math.hypot(latchedVenue.pos.x - next.x, latchedVenue.pos.y - next.y) > AUTO_VENUE_RESET_R) {
+      autoVenueLatch = null;
+    }
+    const autoVenue = findAutoEnterVenue(
+      next,
+      { x: dxPx, y: dyPx },
+      hotspotInteractables,
+    );
+    if (autoVenue && autoVenue.id !== autoVenueLatch) { enterVenue(autoVenue); return; }
+
     facing = resolveFacing(dxPx, dyPx, facing);
     animT += dt;
     const walkFrame = moving ? Math.floor(animT * 8) % 4 : 0;
@@ -619,6 +666,7 @@ k.scene('room', (roomId, opts = {}) => {
         interactPrompt.textContent =
           action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
           action === 'shop' ? '👕 Dress Up' :
+          action === 'venue' ? `🏪 ${nearest.prompt ?? `Visit ${nearest.label}`}` :
           action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');

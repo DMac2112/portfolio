@@ -45,6 +45,17 @@ describe('npc-spawn', () => {
   });
 });
 
+describe('Glasswind Court activity', () => {
+  it('uses a busier crowd and gathers at the lower-room destinations', () => {
+    const court = ROOM_SPAWN.court;
+    expect(court.capacity).toEqual({ min: 4, max: 6 });
+    expect(court.gatherPoints.map(point => point.label)).toEqual(expect.arrayContaining([
+      'lantern-ladle-patio',
+      'snowtail-playpen',
+    ]));
+  });
+});
+
 describe('ROOM_SPAWN generic invariants', () => {
   for (const [roomId, config] of Object.entries(ROOM_SPAWN)) {
     const { bounds, capacity, roamPoints, gatherPoints, rosterPoolIds, maxConcurrentChat } = config;

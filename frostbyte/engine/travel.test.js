@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { canTravel, travelTargets, arriveSpawnId, validateWorldGraph } from './travel.js';
+import {
+  AUTO_DOOR_R,
+  canTravel,
+  travelTargets,
+  arriveSpawnId,
+  findAutoEnterDoor,
+  validateWorldGraph,
+} from './travel.js';
 import { MAP_NODES } from '../content/map.js';
 import { ROOM_REGISTRY } from '../content/rooms.js';
 
@@ -137,6 +144,75 @@ describe('arriveSpawnId', () => {
   it('handles multi-word room names (just first character of first word)', () => {
     // arriveSpawnId only capitalizes the first character, so 'workshop' becomes 'fromWorkshop'
     expect(arriveSpawnId('workshop')).toBe('fromWorkshop');
+  });
+});
+
+describe('findAutoEnterDoor', () => {
+  const bounds = { x0: 72, x1: 1368, y0: 96, y1: 936 };
+  const eastDoor = {
+    id: 'door-court', x: 1368, y: 456, locked: false, targetRoom: 'court',
+  };
+
+  it('enters an unlocked door when the player walks outward into its contact edge', () => {
+    const result = findAutoEnterDoor(
+      { x: 1316, y: 456 },
+      { x: 4, y: 0 },
+      [eastDoor],
+      bounds,
+    );
+    expect(result).toBe(eastDoor);
+  });
+
+  it('includes the visible contact-radius boundary', () => {
+    const result = findAutoEnterDoor(
+      { x: 1368 - AUTO_DOOR_R, y: 456 },
+      { x: 1, y: 0 },
+      [eastDoor],
+      bounds,
+    );
+    expect(result).toBe(eastDoor);
+  });
+
+  it('does not enter when the player moves away from the door', () => {
+    const result = findAutoEnterDoor(
+      { x: 1316, y: 456 },
+      { x: -4, y: 0 },
+      [eastDoor],
+      bounds,
+    );
+    expect(result).toBeNull();
+  });
+
+  it('does not enter a locked door', () => {
+    const result = findAutoEnterDoor(
+      { x: 1316, y: 456 },
+      { x: 4, y: 0 },
+      [{ ...eastDoor, locked: true }],
+      bounds,
+    );
+    expect(result).toBeNull();
+  });
+
+  it('does not enter when passing outside the doorway contact zone', () => {
+    const result = findAutoEnterDoor(
+      { x: 1316, y: 560 },
+      { x: 4, y: 0 },
+      [eastDoor],
+      bounds,
+    );
+    expect(result).toBeNull();
+  });
+
+  it('supports north and south doors using the same room-edge rule', () => {
+    const northDoor = { id: 'door-trail', x: 720, y: 96, locked: false };
+    const southDoor = { id: 'door-den', x: 720, y: 936, locked: false };
+    expect(findAutoEnterDoor({ x: 720, y: 148 }, { x: 0, y: -4 }, [northDoor], bounds)).toBe(northDoor);
+    expect(findAutoEnterDoor({ x: 720, y: 884 }, { x: 0, y: 4 }, [southDoor], bounds)).toBe(southDoor);
+  });
+
+  it('does not auto-enter an interior interaction point', () => {
+    const interior = { id: 'interior-door', x: 720, y: 480, locked: false };
+    expect(findAutoEnterDoor({ x: 720, y: 440 }, { x: 0, y: 4 }, [interior], bounds)).toBeNull();
   });
 });
 
