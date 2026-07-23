@@ -11,9 +11,11 @@
 export const ROOM_SPAWN = {
   plaza: {
     capacity: { min: 4, max: 6 },
+    // Roam points moved onto the open snow: the painted buildings sit further into the frame than
+    // the old code-drawn ones, so the original left/right points now fall on rooftops.
     roamPoints: [
-      { x: 200, y: 300 }, { x: 200, y: 600 }, { x: 350, y: 800 }, { x: 600, y: 850 },
-      { x: 950, y: 800 }, { x: 1200, y: 700 }, { x: 1250, y: 400 }, { x: 1000, y: 250 },
+      { x: 430, y: 420 }, { x: 400, y: 620 }, { x: 420, y: 820 }, { x: 600, y: 850 },
+      { x: 950, y: 800 }, { x: 1000, y: 720 }, { x: 1030, y: 440 }, { x: 1000, y: 250 },
     ],
     gatherPoints: [
       { x: 440, y: 300, label: 'bench-north' },
