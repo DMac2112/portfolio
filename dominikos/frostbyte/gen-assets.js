@@ -68,7 +68,19 @@ function halfMoonFrame(img, cx, cy, rx, ry, c, thickness = 1) {
     for (let t = 0; t < thickness; t++) px(img, x, y + t, c);
   }
 }
-function save(name, img) { fs.writeFileSync(path.join(OUT, name), encodePNG(img)); return `${name} ${img.w}x${img.h}`; }
+// The 12 room backdrops (room-*.png) are owned by the painted-art pipeline: assets/room-*.png are
+// produced from Graphics/Frostbyte/masters/ by process-masters.ps1 (see FROSTBYTE-ART-PIPELINE.md).
+// Their build functions still RUN — they hold the canonical door/prop layout, serve as a code-drawn
+// fallback, and keep the shared rnd() sequence identical so every other asset regenerates unchanged
+// — but their PNG is not written, so `node gen-assets.js` can never clobber the painted art. To
+// fall back to code-drawn rooms, flip PAINTED_ROOMS_OWN_FILES to false and re-run.
+const PAINTED_ROOMS_OWN_FILES = true;
+const isPaintedRoom = (name) => /^room-.*\.png$/.test(name);
+function save(name, img) {
+  if (PAINTED_ROOMS_OWN_FILES && isPaintedRoom(name)) return `${name} ${img.w}x${img.h} (painted master — write skipped)`;
+  fs.writeFileSync(path.join(OUT, name), encodePNG(img));
+  return `${name} ${img.w}x${img.h}`;
+}
 
 // seeded PRNG (project LCG, independent seed from game1's 1337 — see engine/rng.js)
 let SEED = 2600;

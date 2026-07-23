@@ -168,3 +168,32 @@ made from one upright Echo Shard on a warm timber-and-brass plinth, surrounded b
 response-note rings. Compact silhouettes that remain readable at 16×16 and 24×28 pixel scale,
 limited navy, aurora green, ice blue, violet, and restrained brass. No text, letters, numbers,
 logos, watermark, photorealism, or recognizable existing object design.
+
+## Room backdrops (12) -- painted masters, 2026-07-23
+
+Model: fal-ai/nano-banana-2 (masters) + nano-banana-2/edit (per-room, style-locked).
+Draft/ideation pass first on fal-ai/flux/schnell (cheap-drafts-first rule). Total spend ~1.32 USD.
+
+Pipeline: plaza generated first as the STYLE MASTER (masters/plaza-master.png), one edit pass to
+open the right-edge street. Every other room was generated with the plaza master attached as a
+style reference ("use the attached image strictly as a STYLE reference ... paint a completely new
+scene"), so all 12 read as one hand. Downscaled to 480x320 by process-masters.ps1.
+
+THE CAMERA CONTRACT (the key prompt fix -- prepended to every room, art direction was never the
+problem): "CAMERA: fixed high three-quarter overhead view looking down at about 60 degrees, like a
+lit tabletop diorama. The flat walkable ground plane fills the entire frame edge to edge. Never
+show a ceiling. Never show a flat back wall facing the camera. All structures are seen from above
+and behind, pressed to the outer edges of the frame." Interiors add "like a doll's-house with the
+roof removed". Caverns needed a bespoke framing -- "looking straight DOWN into an open sinkhole,
+NO tunnel, NO vanishing point" plus a fully-lit-floor instruction and a hard cold-palette lock
+(no orange/red/fire); it was the one room that took a reroll.
+
+Every prompt also carried: the six palette tokens (dusk-navy #16283e, snow-blue #cfe0f2, ice-cyan
+#7fd6ff, lamp-amber #ffb45e, aurora-green #6fe0b2, timber-brown #6b4a33); "no characters, no
+animals, no people" (the game draws its own sprites); "no text, letters or numbers, all signs
+blank"; and a per-room scene paragraph placing the landmark and the four edge openings to match the
+door geometry in content/rooms.js. Rooms: plaza, den, trail, court, workshop, docks (in-port +
+away), lighthouse-rest, lighthouse-gallery, whisperpine, moonwell, caverns.
+
+No Club Penguin / third-party map, room, character or artwork referenced in any prompt (legal gate
+scans stay green). Masters kept in masters/; gen-assets.js keeps a code-drawn fallback per room.
