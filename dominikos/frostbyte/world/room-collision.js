@@ -6,7 +6,10 @@ const PROFILES = {
   plaza: {
     boundary: { type: 'rect', x0: 0, x1: 1440, y0: 0, y1: 960 },
     obstacles: [
-      { type: 'ellipse', x: 792, y: 264, rx: 120, ry: 87 },
+      // Fountain — moved to sit under the painted basin (upper-right), was authored for the
+      // old code-drawn fountain at (792,264). Sized to the basin only; the decorative spout above
+      // is left open so it clears the (1000,250) roam route. See Graphics/Frostbyte masters.
+      { type: 'ellipse', x: 993, y: 330, rx: 95, ry: 55 },
       { type: 'capsule', ax: 357, ay: 279, bx: 459, by: 279, r: 9 },
       { type: 'capsule', ax: 501, ay: 711, bx: 603, by: 711, r: 9 },
       { type: 'capsule', ax: 552, ay: 306, bx: 552, by: 366, r: 5 },
@@ -17,6 +20,14 @@ const PROFILES = {
       { type: 'ellipse', x: 1450, y: -10, rx: 160, ry: 130 },
       { type: 'ellipse', x: -10, y: 970, rx: 160, ry: 130 },
       { type: 'ellipse', x: 1450, y: 970, rx: 160, ry: 130 },
+      // Painted cabin roofs line the top edge; block them so the penguin can't waddle up onto the
+      // rooftops, leaving the trail-door gap (x 560-1040) open at top-centre.
+      { type: 'rect', x: 230, y: 85, w: 660, h: 330 },
+      { type: 'rect', x: 1250, y: 95, w: 380, h: 350 },
+      // The left buildings (workshop + shop) reach into the frame in the paint; block their roofs
+      // while leaving the workshop door (x<170) open. The right edge is already covered by the
+      // top-right and east blocks plus the toss kiosk, and must stay clear for the court-door spawn.
+      { type: 'rect', x: 270, y: 400, w: 200, h: 440 },
       { type: 'rect', x: -35.5, y: 364.5, w: 329, h: 183 },
       { type: 'rect', x: 1484, y: 453, w: 311, h: 210 },
       { type: 'rect', x: 637.5, y: -21.5, w: 87, h: 277 },

@@ -26,7 +26,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 792, y: 264 },
+      { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 993, y: 300 },
       { id: 'shop-glimmerwool', label: 'Glimmer & Wool', kind: 'shop', x: 96, y: 552 },
       { id: 'minigame-snowdrift', label: 'Snowdrift Toss', kind: 'minigame', x: 1128, y: 552 },
       { id: 'noticeboard-chronicle', label: 'The Chillmere Chronicle', kind: 'noticeboard', x: 168, y: 792 },
@@ -42,7 +42,7 @@ export const ROOM_REGISTRY = {
     // Rendered + collidable in the S1 spike: fountain/pond only (what room-plaza.png actually paints).
     // Bench/shop/minigame/noticeboard solids land once their art does (P2-P4), to avoid invisible walls.
     solids: [
-      { id: 'fountain-driftback', x: 792, y: 264, w: 220, h: 160 },
+      { id: 'fountain-driftback', x: 993, y: 330, w: 190, h: 110 },
     ],
     // Populated in P3 (NPC crowd) — empty for the S1 waddle spike.
     npcSpawnAnchors: [],
