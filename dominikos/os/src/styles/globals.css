@@ -2031,6 +2031,12 @@ body {
 .arcade h1 { font-size: 19px; margin: 12px 0 2px; }
 .arcade__blurb { margin: 0 0 10px; color: var(--ink-subtle); font-size: 12px; }
 .arcade__stage { margin: 0 auto; border: 2px solid #444; background: #000; }
+/* Fluid embeds (Frostbyte) must fill the stage's inline height on desktop too. The flex rule
+   previously lived only inside @media (max-width:520px), so on desktop .iframe-stage's flex:1
+   was inert, the height:100% iframe collapsed to its 150px default, and the stage's black
+   background showed through below it. Making the stage a flex column lets .iframe-stage (flex:1,
+   already set) fill the 640px height, so the game fills the frame. */
+.arcade__stage--fluid { display: flex; flex-direction: column; overflow: hidden; }
 .arcade__loading { color: #fff; padding-top: 40px; }
 .arcade__foot { margin-top: 10px; font-size: 12px; }
 
