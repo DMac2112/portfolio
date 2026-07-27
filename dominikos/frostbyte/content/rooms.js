@@ -16,10 +16,10 @@ export const ROOM_REGISTRY = {
     scale: 3,
     bounds: { x0: 72, x1: 1368, y0: 96, y1: 936 },
     spawnPoints: {
-      default:      { x: 720, y: 800, facing: 'up' },
-      fromDen:      { x: 620, y: 800, facing: 'up' },
-      fromCourt:    { x: 1300, y: 500, facing: 'left' },
-      fromWorkshop: { x: 130, y: 500, facing: 'right' },
+      default:      { x: 720, y: 600, facing: 'up' },
+      fromDen:      { x: 690, y: 920, facing: 'up' },
+      fromCourt:    { x: 1290, y: 600, facing: 'left' },
+      fromWorkshop: { x: 150, y: 570, facing: 'right' },
       fromTrail:    { x: 720, y: 170, facing: 'down' },
       fromMinigame: { x: 1050, y: 620, facing: 'down' },
       fromMap:      { x: 720, y: 560, facing: 'down' },
@@ -35,8 +35,8 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: false, targetSpawn: 'fromPlaza' },
-      { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 456, targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' },
-      { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 360, targetRoom: 'workshop', locked: false, targetSpawn: 'fromPlaza' },
+      { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 600, targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' },
+      { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 570, targetRoom: 'workshop', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-den', label: 'Your Den', x: 720, y: 936, targetRoom: 'den', locked: false, targetSpawn: 'fromPlaza' },
     ],
     // Rendered + collidable in the S1 spike: fountain/pond only (what room-plaza.png actually paints).
@@ -87,7 +87,7 @@ export const ROOM_REGISTRY = {
     spawnPoints: {
       default:    { x: 720, y: 760, facing: 'up' },
       fromPlaza:  { x: 720, y: 820, facing: 'up' },
-      fromWhisperpine: { x: 1240, y: 620, facing: 'left' },
+      fromWhisperpine: { x: 1240, y: 480, facing: 'left' },
       fromMap:    { x: 720, y: 560, facing: 'down' },
     },
     camera: { leadY: -50 },
@@ -97,7 +97,7 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 880, targetRoom: 'plaza', locked: false, targetSpawn: 'fromTrail' },
-      { id: 'door-whisperpine', label: 'Whisperpine Hollow', x: 1320, y: 620, targetRoom: 'whisperpine', locked: false, targetSpawn: 'fromTrail' },
+      { id: 'door-whisperpine', label: 'Whisperpine Hollow', x: 1320, y: 480, targetRoom: 'whisperpine', locked: false, targetSpawn: 'fromTrail' },
     ],
     solids: [
       { id: 'pines-west', x: 300, y: 400, w: 120, h: 140 },
@@ -154,21 +154,21 @@ export const ROOM_REGISTRY = {
     camera: { leadY: -50 },
     hotspots: [
       {
-        id: 'venue-snowtail-petshop', label: 'Snowtail Pet Shop', kind: 'venue', x: 426, y: 296,
+        id: 'venue-snowtail-petshop', label: 'Snowtail Pet Shop', kind: 'venue', x: 360, y: 420,
         solidId: 'snowtail-petshop',
         entryDirection: 'up',
         prompt: 'Visit the pet shop',
         copy: 'Warm nests, tiny scarves, and three sleepy snowtails fill the window. The keeper says every companion chooses their own name.',
       },
       {
-        id: 'venue-bluehour-coffee', label: 'Bluehour Coffee', kind: 'venue', x: 702, y: 324,
+        id: 'venue-bluehour-coffee', label: 'Bluehour Coffee', kind: 'venue', x: 840, y: 420,
         solidId: 'bluehour-coffee',
         entryDirection: 'up',
         prompt: 'Visit the coffee shop',
         copy: 'Today\'s Northlight Blend comes with cloudberry foam and a cinnamon snowflake on top.',
       },
       {
-        id: 'venue-lantern-ladle', label: 'Lantern Ladle Restaurant', kind: 'venue', x: 1116, y: 648,
+        id: 'venue-lantern-ladle', label: 'Lantern Ladle Restaurant', kind: 'venue', x: 1125, y: 620,
         solidId: 'lantern-ladle',
         entryDirection: 'right',
         prompt: 'Visit the restaurant',
@@ -196,7 +196,7 @@ export const ROOM_REGISTRY = {
       { id: 'edda-nook', x: 925, y: 790, w: 54, h: 70 },
     ],
     anchors: [
-      { characterId: 'edda-quill', x: 925, y: 790 },
+      { characterId: 'edda-quill', x: 930, y: 690 },
     ],
     clickables: [
       {
@@ -282,7 +282,7 @@ export const ROOM_REGISTRY = {
       { id: 'pat-station', x: 1080, y: 450, w: 60, h: 72 },
     ],
     anchors: [
-      { characterId: 'pat-hocket', x: 1080, y: 480 },
+      { characterId: 'pat-hocket', x: 1080, y: 520 },
     ],
     clickables: [
       {
@@ -340,22 +340,22 @@ export const ROOM_REGISTRY = {
     scale: 3,
     bounds: { x0: 72, x1: 1368, y0: 96, y1: 888 },
     spawnPoints: {
-      default:        { x: 420, y: 540, facing: 'right' },
+      default:        { x: 330, y: 540, facing: 'right' },
       fromCourt:      { x: 150, y: 480, facing: 'right' },
-      fromLighthouse: { x: 1150, y: 170, facing: 'down' },
-      fromMap:        { x: 420, y: 600, facing: 'right' },
+      fromLighthouse: { x: 990, y: 160, facing: 'down' },
+      fromMap:        { x: 330, y: 540, facing: 'right' },
     },
     camera: { leadY: -50 },
     hotspots: [
       {
         id: 'salka-trader-stall', label: 'Salka’s Cargo Stall', kind: 'trader',
-        x: 1050, y: 680, prompt: 'Browse today’s two cargo finds', bargeState: 'in-port',
+        x: 1050, y: 670, prompt: 'Browse today’s two cargo finds', bargeState: 'in-port',
       },
     ],
     doors: [
       { id: 'door-court', label: 'Glasswind Court', x: 72, y: 480, targetRoom: 'court', locked: false, targetSpawn: 'fromDocks' },
       {
-        id: 'door-lighthouse', label: 'Palefire Light', x: 1150, y: 96,
+        id: 'door-lighthouse', label: 'Palefire Light', x: 990, y: 96,
         targetRoom: 'lighthouse-rest', locked: false, targetSpawn: 'fromDocks',
       },
     ],
@@ -368,7 +368,7 @@ export const ROOM_REGISTRY = {
       { id: 'harbor-bell-post', x: 780, y: 300, w: 66, h: 120 },
     ],
     anchors: [
-      { characterId: 'captain-salka', x: 870, y: 500, bargeState: 'in-port' },
+      { characterId: 'captain-salka', x: 900, y: 600, bargeState: 'in-port' },
     ],
     clickables: [
       {
@@ -430,7 +430,7 @@ export const ROOM_REGISTRY = {
     spawnPoints: {
       default:     { x: 720, y: 720, facing: 'up' },
       fromDocks:   { x: 720, y: 820, facing: 'up' },
-      fromGallery: { x: 1190, y: 480, facing: 'left' },
+      fromGallery: { x: 960, y: 520, facing: 'left' },
       fromMap:     { x: 720, y: 720, facing: 'up' },
     },
     camera: { leadY: -50 },
@@ -540,7 +540,7 @@ export const ROOM_REGISTRY = {
       default:      { x: 220, y: 540, facing: 'right' },
       fromTrail:    { x: 190, y: 540, facing: 'right' },
       fromMoonwell: { x: 720, y: 200, facing: 'down' },
-      fromCaverns:  { x: 1240, y: 600, facing: 'left' },
+      fromCaverns:  { x: 1290, y: 480, facing: 'left' },
       fromMap:      { x: 720, y: 760, facing: 'up' },
     },
     camera: { leadY: -50 },
@@ -555,7 +555,7 @@ export const ROOM_REGISTRY = {
         lockedCopy: 'Only an unbroken wall of pine shadows stands here.',
       },
       {
-        id: 'door-cavern-crack', label: 'Root-bound Crack', x: 1320, y: 600,
+        id: 'door-cavern-crack', label: 'Root-bound Crack', x: 1320, y: 480,
         targetRoom: 'caverns', targetSpawn: 'fromWhisperpine', locked: true,
         lockedCopy: 'A cold note breathes through the stone, but the roots refuse to part.',
       },
@@ -628,7 +628,7 @@ export const ROOM_REGISTRY = {
     bounds: { x0: 180, x1: 1260, y0: 150, y1: 850 },
     spawnPoints: {
       default:         { x: 720, y: 770, facing: 'up' },
-      fromWhisperpine: { x: 720, y: 790, facing: 'up' },
+      fromWhisperpine: { x: 720, y: 800, facing: 'up' },
     },
     camera: { leadY: -50 },
     hotspots: [
@@ -662,9 +662,9 @@ export const ROOM_REGISTRY = {
     scale: 3,
     bounds: { x0: 120, x1: 1320, y0: 120, y1: 888 },
     spawnPoints: {
-      default:         { x: 390, y: 210, facing: 'down' },
-      fromWorkshop:    { x: 390, y: 210, facing: 'down' },
-      fromWhisperpine: { x: 1230, y: 600, facing: 'left' },
+      default:         { x: 330, y: 525, facing: 'right' },
+      fromWorkshop:    { x: 330, y: 525, facing: 'right' },
+      fromWhisperpine: { x: 1290, y: 480, facing: 'left' },
     },
     camera: { leadY: -50 },
     hotspots: [
@@ -675,11 +675,11 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       {
-        id: 'door-workshop-lift', label: "Pat's Dumbwaiter", x: 390, y: 120,
+        id: 'door-workshop-lift', label: "Pat's Dumbwaiter", x: 270, y: 500,
         targetRoom: 'workshop', targetSpawn: 'fromCaverns', locked: false,
       },
       {
-        id: 'door-whisperpine-crack', label: 'Whisperpine Root-Crack', x: 1320, y: 600,
+        id: 'door-whisperpine-crack', label: 'Whisperpine Root-Crack', x: 1320, y: 480,
         targetRoom: 'whisperpine', targetSpawn: 'fromCaverns', locked: false,
       },
     ],

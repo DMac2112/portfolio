@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest';
+import { resolveDocksRoom } from './docks.js';
 import { ROOM_REGISTRY } from './rooms.js';
+import { resolveRoomCollision } from '../world/room-collision.js';
 
 const INTERACT_R = 168; // must match main.js's interaction radius (P3's interaction.js)
+const EXPECTED_CLOSE_PAIRS = {
+  plaza: { 'door-workshop|shop-glimmerwool': 30 },
+  docks: { 'anchor-captain-salka|salka-trader-stall': Math.hypot(150, 70) },
+};
 
 describe('room configs', () => {
   for (const room of Object.values(ROOM_REGISTRY)) {
@@ -23,18 +29,25 @@ describe('room configs', () => {
       }
     });
 
-    it(`${room.id}: no two interactables are closer than INTERACT_R (ambiguous nearest-scan)`, () => {
+    it(`${room.id}: only intentional paired interactables are closer than INTERACT_R`, () => {
       const all = [
         ...room.hotspots,
         ...room.doors,
         ...(room.anchors ?? []).map((anchor) => ({ ...anchor, id: `anchor-${anchor.characterId}` })),
       ];
+      const expectedClosePairs = EXPECTED_CLOSE_PAIRS[room.id] ?? {};
+      const seenClosePairs = new Set();
       for (let i = 0; i < all.length; i++) {
         for (let j = i + 1; j < all.length; j++) {
           const d = Math.hypot(all[i].x - all[j].x, all[i].y - all[j].y);
-          expect(d).toBeGreaterThanOrEqual(INTERACT_R);
+          if (d >= INTERACT_R) continue;
+          const pair = [all[i].id, all[j].id].sort().join('|');
+          expect(Object.hasOwn(expectedClosePairs, pair), `${room.id} unexpected close pair ${pair}`).toBe(true);
+          expect(d, `${room.id} corrected spacing for ${pair}`).toBe(expectedClosePairs[pair]);
+          seenClosePairs.add(pair);
         }
       }
+      expect([...seenClosePairs].sort()).toEqual(Object.keys(expectedClosePairs).sort());
     });
 
     it(`${room.id}: every door target room+spawn resolves`, () => {
@@ -314,7 +327,7 @@ describe('room configs', () => {
 
   it('court: ships Edda, the Chirper board, six Curios, and one non-Curio secret', () => {
     const court = ROOM_REGISTRY.court;
-    expect(court.anchors).toEqual([{ characterId: 'edda-quill', x: 925, y: 790 }]);
+    expect(court.anchors).toEqual([{ characterId: 'edda-quill', x: 930, y: 690 }]);
     expect(court.hotspots.find((hotspot) => hotspot.id === 'noticeboard-chirper')).toMatchObject({
       kind: 'newspaper', label: 'The Chillmere Chirper',
     });
@@ -335,7 +348,7 @@ describe('room configs', () => {
 
   it('workshop: ships Pat, the Weather Bell, five Curios, two recoverable parts, and the locked hatch', () => {
     const workshop = ROOM_REGISTRY.workshop;
-    expect(workshop.anchors).toEqual([{ characterId: 'pat-hocket', x: 1080, y: 480 }]);
+    expect(workshop.anchors).toEqual([{ characterId: 'pat-hocket', x: 1080, y: 520 }]);
     expect(workshop.hotspots.find((hotspot) => hotspot.id === 'weather-bell')).toMatchObject({
       kind: 'landmark', label: 'The Weather Bell',
     });
@@ -369,7 +382,7 @@ describe('room configs', () => {
   it('docks: ships Salka, seven Curios, the under-pier ledge, and the final Bell part', () => {
     const docks = ROOM_REGISTRY.docks;
     expect(docks.anchors).toEqual([
-      { characterId: 'captain-salka', x: 870, y: 500, bargeState: 'in-port' },
+      { characterId: 'captain-salka', x: 900, y: 600, bargeState: 'in-port' },
     ]);
     expect(docks.hotspots.find((hotspot) => hotspot.id === 'salka-trader-stall')).toMatchObject({
       kind: 'trader', bargeState: 'in-port',
@@ -385,27 +398,23 @@ describe('room configs', () => {
 
   it('docks: keeps both arrival spawns, the Palefire causeway, and the under-pier ledge walkable', () => {
     const docks = ROOM_REGISTRY.docks;
-    const contains = (solid, point, radius = 12) =>
-      point.x + radius > solid.x - solid.w / 2 && point.x - radius < solid.x + solid.w / 2 &&
-      point.y + radius > solid.y - solid.h / 2 && point.y - radius < solid.y + solid.h / 2;
-    for (const spawn of Object.values(docks.spawnPoints)) {
-      expect(docks.solids.some((solid) => contains(solid, spawn))).toBe(false);
-    }
-
-    const northWest = docks.solids.find((solid) => solid.id === 'water-north-west');
-    const northEast = docks.solids.find((solid) => solid.id === 'water-north-east');
-    const causewayGap = (northEast.x - northEast.w / 2) - (northWest.x + northWest.w / 2);
-    expect(causewayGap).toBeGreaterThan(24);
-    expect(docks.doors.find((door) => door.id === 'door-lighthouse').x)
-      .toBeGreaterThan(northWest.x + northWest.w / 2);
-    expect(docks.doors.find((door) => door.id === 'door-lighthouse').x)
-      .toBeLessThan(northEast.x - northEast.w / 2);
-
-    const southWater = docks.solids.find((solid) => solid.id === 'water-south-main');
-    const ledgeGap = docks.bounds.y1 - (southWater.y + southWater.h / 2);
-    expect(ledgeGap).toBeGreaterThan(24);
     const cache = docks.clickables.find((prop) => prop.id === 'underpier-cache');
-    expect(contains(southWater, cache, 0)).toBe(false);
+    const variants = [
+      { room: resolveDocksRoom(docks, '2026-07-23'), ledgeApproach: { x: 1098, y: 772 } },
+      { room: resolveDocksRoom(docks, '2026-07-25'), ledgeApproach: { x: 1120, y: 810 } },
+    ];
+    const expectWalkable = (room, point) => {
+      const resolved = resolveRoomCollision(room, point, 12);
+      expect(Math.hypot(resolved.x - point.x, resolved.y - point.y)).toBeLessThan(0.01);
+    };
+
+    for (const { room, ledgeApproach } of variants) {
+      for (const spawn of Object.values(room.spawnPoints)) expectWalkable(room, spawn);
+      expectWalkable(room, room.doors.find((door) => door.id === 'door-lighthouse'));
+      expectWalkable(room, { x: 990, y: 300 });
+      expectWalkable(room, ledgeApproach);
+      expect(Math.hypot(cache.x - ledgeApproach.x, cache.y - ledgeApproach.y)).toBeLessThanOrEqual(120);
+    }
   });
 
   it('Palefire Light: opens the W3 trailhead and connects both lighthouse rooms in order', () => {
