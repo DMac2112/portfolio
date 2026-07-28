@@ -1822,17 +1822,14 @@ body {
 .dialtone button, .dialtone input, .dialtone select { box-sizing: border-box; font-family: var(--sk-font); }
 .dialtone :focus-visible { outline: 2px solid var(--sk-blue); outline-offset: -2px; border-radius: 3px; }
 
-/* identity strip — your own card, the way the era did it: picture, name, mood, status picker */
+/* compact mood strip below the OS titlebar */
 .dialtone__head {
-  display: flex; align-items: center; gap: 9px; padding: 9px 11px;
+  display: flex; align-items: center; padding: 5px 10px;
   background: linear-gradient(180deg, #fbfeff 0%, #e9f5fc 100%);
   border-bottom: 1px solid var(--sk-line);
   box-shadow: inset 0 1px 0 #fff;
 }
-.dialtone__logo { width: 30px; height: 30px; flex: 0 0 auto; }
-.dialtone__headtext { min-width: 0; }
-.dialtone__headtext strong { display: block; font-size: 14px; font-weight: 600; letter-spacing: .1px; color: #10495f; }
-.dialtone__headtext span { display: block; font-size: 11px; color: var(--sk-ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dialtone__head span { min-width: 0; font-size: 11px; color: var(--sk-ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .dialtone__search { padding: 7px 9px; background: #fff; border-bottom: 1px solid #e3ebef; }
 .dialtone__search input {

@@ -182,7 +182,7 @@ const SITES: Site[] = [
     title: 'Sky Hopper — DominikNet Arcade',
     favicon: '/os/icons/flappy.svg',
     render: (ctx) => (
-      <GamePage ctx={ctx} name="Sky Hopper" blurb="Tap, click or press Space to flap through the gaps. How far can you hop?" w={400} h={640}>
+      <GamePage ctx={ctx} name="Sky Hopper" blurb="Tap, click or press Space to flap through the gaps. How far can you hop?" w={400} h={700}>
         <FlappyApp manifest={FLAPPY_STUB} windowId={ctx.windowId} focused={ctx.active} close={noop} setTitle={noop} />
       </GamePage>
     ),

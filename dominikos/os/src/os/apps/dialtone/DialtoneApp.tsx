@@ -82,28 +82,6 @@ function Dot({ p }: { p: Presence }): JSX.Element {
   return <PresenceBadge p={p} size={13} />;
 }
 
-/** Original Skajp mark: a rounded cloud-bubble holding a handset. Ours, not traced. */
-function Logo(): JSX.Element {
-  return (
-    <svg viewBox="0 0 48 48" className="dialtone__logo" aria-hidden="true">
-      <defs>
-        <linearGradient id="sk-logo-body" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#4fd0ff" /><stop offset="0.5" stopColor="#00aff0" /><stop offset="1" stopColor="#0089c8" />
-        </linearGradient>
-        <linearGradient id="sk-logo-gloss" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.55" /><stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d="M16 9h16a11 11 0 0 1 0 22h-6l-8.5 7.5a1 1 0 0 1-1.6-.9L16.6 31H16a11 11 0 0 1 0-22z"
-            fill="url(#sk-logo-body)" stroke="#0072a8" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M16 10.4h16a9.6 9.6 0 0 1 8.9 6C38.6 14 31.8 12.6 24 12.6S9.4 14 7.1 16.4a9.6 9.6 0 0 1 8.9-6z" fill="url(#sk-logo-gloss)" />
-      <g transform="rotate(-28 24 20)">
-        <path d="M15.4 15.8a2.6 2.6 0 0 1 2.6-2.6h1.3a1.7 1.7 0 0 1 1.7 1.5l.4 3a1.7 1.7 0 0 1-1 1.8l-1.5.7a13 13 0 0 0 6.2 6.2l.7-1.5a1.7 1.7 0 0 1 1.8-1l3 .4a1.7 1.7 0 0 1 1.5 1.7v1.3a2.6 2.6 0 0 1-2.6 2.6A17.5 17.5 0 0 1 15.4 15.8z" fill="#fff" />
-      </g>
-    </svg>
-  );
-}
-
 function CallGlyph(): JSX.Element {
   return (
     <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
@@ -376,11 +354,7 @@ export default function DialtoneApp({ windowId, focused, setTitle }: AppProps) {
   return (
     <div className="dialtone">
       <div className="dialtone__head">
-        <Logo />
-        <div className="dialtone__headtext">
-          <strong>Skajp</strong>
-          <span>Everyone’s here. Nobody answers.</span>
-        </div>
+        <span>Everyone’s here. Nobody answers.</span>
       </div>
 
       {view.kind === 'roster' && (
