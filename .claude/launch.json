@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frostbyte",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:/Users/domin/OneDrive/Desktop/Websites/portfolio-rework/dominikos/frostbyte/dev-server.cjs"],
+      "port": 5183
+    }
+  ]
+}

@@ -103,18 +103,18 @@ const PLAYER_RADIUS = 12;
 /* ------------------------------------------------------------------ *
  * Asset loading
  * ------------------------------------------------------------------ */
-k.loadSprite('room-plaza', './assets/room-plaza.png');
-k.loadSprite('room-den', './assets/room-den.png');
-k.loadSprite('room-trail', './assets/room-trail.png');
-k.loadSprite('room-court', './assets/room-court.png');
-k.loadSprite('room-workshop', './assets/room-workshop.png');
-k.loadSprite('room-docks-port', './assets/room-docks-port.png');
-k.loadSprite('room-docks-away', './assets/room-docks-away.png');
-k.loadSprite('room-lighthouse-rest', './assets/room-lighthouse-rest.png');
-k.loadSprite('room-lighthouse-gallery', './assets/room-lighthouse-gallery.png');
-k.loadSprite('room-whisperpine', './assets/room-whisperpine.png');
-k.loadSprite('room-moonwell', './assets/room-moonwell.png');
-k.loadSprite('room-caverns', './assets/room-caverns.png');
+k.loadSprite('room-plaza', './assets/room-plaza.jpg');
+k.loadSprite('room-den', './assets/room-den.jpg');
+k.loadSprite('room-trail', './assets/room-trail.jpg');
+k.loadSprite('room-court', './assets/room-court.jpg');
+k.loadSprite('room-workshop', './assets/room-workshop.jpg');
+k.loadSprite('room-docks-port', './assets/room-docks-port.jpg');
+k.loadSprite('room-docks-away', './assets/room-docks-away.jpg');
+k.loadSprite('room-lighthouse-rest', './assets/room-lighthouse-rest.jpg');
+k.loadSprite('room-lighthouse-gallery', './assets/room-lighthouse-gallery.jpg');
+k.loadSprite('room-whisperpine', './assets/room-whisperpine.jpg');
+k.loadSprite('room-moonwell', './assets/room-moonwell.jpg');
+k.loadSprite('room-caverns', './assets/room-caverns.jpg');
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
