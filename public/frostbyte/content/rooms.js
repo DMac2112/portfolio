@@ -17,7 +17,7 @@ export const ROOM_REGISTRY = {
     bounds: { x0: 72, x1: 1368, y0: 96, y1: 936 },
     spawnPoints: {
       default:      { x: 720, y: 600, facing: 'up' },
-      fromDen:      { x: 690, y: 920, facing: 'up' },
+      fromDen:      { x: 720, y: 740, facing: 'up' },
       fromCourt:    { x: 1290, y: 600, facing: 'left' },
       fromWorkshop: { x: 150, y: 570, facing: 'right' },
       fromTrail:    { x: 720, y: 170, facing: 'down' },
@@ -37,7 +37,7 @@ export const ROOM_REGISTRY = {
       { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 600, targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' },
       { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 570, targetRoom: 'workshop', locked: false, targetSpawn: 'fromPlaza' },
-      { id: 'door-den', label: 'Your Den', x: 720, y: 936, targetRoom: 'den', locked: false, targetSpawn: 'fromPlaza' },
+      { id: 'door-den', label: 'Your Den', x: 720, y: 812, targetRoom: 'den', locked: false, targetSpawn: 'fromPlaza' },
     ],
     // Rendered + collidable in the S1 spike: fountain/pond only (what room-plaza.png actually paints).
     // Bench/shop/minigame/noticeboard solids land once their art does (P2-P4), to avoid invisible walls.

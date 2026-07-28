@@ -1,7 +1,7 @@
 // The desktop composition (§4.4): wallpaper + icon grid + window layer + taskbar, plus the
 // global keyboard map (§11.2 subset for P2: arrows/Enter in the grid, Alt+Tab, Win/Ctrl+Esc,
 // Esc / Alt+F4 close). The aria-live announcer the store writes to also lives here.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useOSStore } from '../store/osStore';
 import { Wallpaper } from './Wallpaper';
 import { IconGrid } from '../desktop/IconGrid';
@@ -55,29 +55,6 @@ export function Desktop({ onLogOff, onShutDown }: Props) {
       ],
     });
   }, []);
-
-  // rubber-band selection: drag a blue box on empty desktop; icons under it highlight (§XP feel).
-  const [marquee, setMarquee] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null);
-  const marqueeStart = useRef<{ x: number; y: number } | null>(null);
-  const onWorkDown = useCallback((e: React.PointerEvent) => {
-    if (e.button !== 0) return;
-    document.querySelectorAll('.desk-icon.is-marquee').forEach((el) => el.classList.remove('is-marquee'));
-    if ((e.target as HTMLElement).closest('.desk-icon, .win, .ctx-menu, .start-menu, .taskbar')) return;
-    marqueeStart.current = { x: e.clientX, y: e.clientY };
-    setMarquee({ x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY });
-    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-  }, []);
-  const onWorkMove = useCallback((e: React.PointerEvent) => {
-    const s = marqueeStart.current;
-    if (!s) return;
-    setMarquee({ x0: s.x, y0: s.y, x1: e.clientX, y1: e.clientY });
-    const l = Math.min(s.x, e.clientX), r = Math.max(s.x, e.clientX), tp = Math.min(s.y, e.clientY), b = Math.max(s.y, e.clientY);
-    document.querySelectorAll('.desk-icon').forEach((el) => {
-      const rr = el.getBoundingClientRect();
-      (el as HTMLElement).classList.toggle('is-marquee', rr.left < r && rr.right > l && rr.top < b && rr.bottom > tp);
-    });
-  }, []);
-  const onWorkUp = useCallback(() => { if (marqueeStart.current) { marqueeStart.current = null; setMarquee(null); } }, []);
 
   // global keyboard map
   useEffect(() => {
@@ -152,7 +129,7 @@ export function Desktop({ onLogOff, onShutDown }: Props) {
       <a className="skip-link" href="/">
         Exit to the accessible classic site
       </a>
-      <main id="os-main" aria-label="DominikOS desktop" className="desktop__work" onContextMenu={openDesktopMenu} onPointerDown={onWorkDown} onPointerMove={onWorkMove} onPointerUp={onWorkUp} onPointerCancel={onWorkUp}>
+      <main id="os-main" aria-label="DominikOS desktop" className="desktop__work" onContextMenu={openDesktopMenu}>
         <Wallpaper />
         <IconGrid onIconContextMenu={openIconMenu} />
         <WindowLayer />
@@ -162,18 +139,6 @@ export function Desktop({ onLogOff, onShutDown }: Props) {
       <ContextMenu menu={menu} onClose={() => setMenu(null)} />
       <AltTabSwitcher state={altTab} />
       <div id="os-announce" className="sr-only" aria-live="polite" />
-      {marquee && (
-        <div
-          className="desktop__marquee"
-          aria-hidden="true"
-          style={{
-            left: Math.min(marquee.x0, marquee.x1),
-            top: Math.min(marquee.y0, marquee.y1),
-            width: Math.abs(marquee.x1 - marquee.x0),
-            height: Math.abs(marquee.y1 - marquee.y0),
-          }}
-        />
-      )}
     </div>
   );
 }

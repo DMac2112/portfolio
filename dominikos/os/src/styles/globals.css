@@ -1235,7 +1235,6 @@ body {
 
 /* ==== Desktop rubber-band selection ==== */
 .desktop__marquee { position: fixed; z-index: 6; border: 1px solid #cfe0ff; background: rgba(74, 140, 230, .28); pointer-events: none; }
-.desk-icon.is-marquee { background: rgba(74, 140, 230, .38); outline: 1px dotted rgba(255, 255, 255, .7); outline-offset: -1px; }
 
 /* large-text pref (§11.3): content surfaces scale up; chrome stays authentic */
 :root[data-text="large"] .doc,

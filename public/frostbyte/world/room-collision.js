@@ -28,8 +28,8 @@ const PROFILES = {
       },
       { id: 'fountain', type: 'ellipse', x: 993, y: 330, rx: 102, ry: 58 },
       {
-        id: 'den-igloo', type: 'ellipse', x: 720, y: 792, rx: 145, ry: 142,
-        opening: { x0: 660, x1: 762, y0: 824, y1: 960 },
+        id: 'den-igloo', type: 'ellipse', x: 720, y: 795, rx: 125, ry: 110,
+        opening: { x0: 648, x1: 792, y0: 670, y1: 900, passThrough: true },
       },
       { id: 'north-bench', type: 'capsule', ax: 450, ay: 350, bx: 565, by: 322, r: 13 },
       { id: 'chronicle-board', type: 'roundRect', x: 108, y: 390, w: 126, h: 90, r: 10 },
@@ -108,7 +108,7 @@ const PROFILES = {
       },
       { id: 'court-cart', type: 'roundRect', x: 495, y: 535, w: 155, h: 145, r: 18 },
       { id: 'patio-table', type: 'ellipse', x: 655, y: 825, rx: 58, ry: 35 },
-      { id: 'patio-brazier', type: 'circle', x: 760, y: 825, r: 36 },
+      { id: 'patio-brazier', type: 'ellipse', x: 760, y: 815, rx: 46, ry: 44 },
       { id: 'patio-chair-west', type: 'roundRect', x: 620, y: 885, w: 50, h: 78, r: 8 },
       { id: 'patio-chair-north', type: 'roundRect', x: 820, y: 755, w: 45, h: 75, r: 8 },
       { id: 'patio-chair-east', type: 'roundRect', x: 850, y: 880, w: 50, h: 78, r: 8 },
@@ -175,6 +175,16 @@ const PROFILES = {
         points: [[870, 960], [1440, 960], [1440, 650], [1110, 650], [900, 780]],
         opening: { x0: 1080, x1: 1320, y0: 720, y1: 930 },
       },
+      {
+        id: 'central-water', type: 'polygon',
+        points: [[620, 365], [850, 365], [1010, 425], [1050, 480], [980, 585],
+          [830, 675], [720, 710], [590, 670], [470, 595], [400, 525], [485, 455]],
+      },
+      {
+        id: 'east-water', type: 'polygon',
+        points: [[1110, 535], [1310, 555], [1380, 500], [1440, 540], [1440, 720],
+          [1300, 700], [1190, 760], [990, 760], [1070, 680], [1095, 600]],
+      },
       { id: 'harbor-bell', type: 'capsule', ax: 635, ay: 75, bx: 635, by: 250, r: 16 },
     ],
   },
@@ -214,6 +224,12 @@ const PROFILES = {
         id: 'southeast-buildings', type: 'polygon',
         points: [[870, 960], [1440, 960], [1440, 650], [1110, 650], [900, 780]],
         opening: { x0: 1080, x1: 1320, y0: 720, y1: 930 },
+      },
+      {
+        id: 'starboard-water', type: 'polygon',
+        points: [[1120, 435], [1280, 465], [1240, 510], [1200, 570], [1160, 630],
+          [1120, 690], [1080, 730], [1050, 720], [1080, 660], [1100, 600],
+          [1120, 540], [1130, 480]],
       },
       { id: 'cargo-stack', type: 'roundRect', x: 760, y: 455, w: 245, h: 125, r: 18 },
       { id: 'ship-mast', type: 'capsule', ax: 975, ay: 350, bx: 975, by: 590, r: 20 },
@@ -596,7 +612,8 @@ function resolveBoundary(pos, radius, boundary) {
 }
 
 function resolveShape(pos, radius, shape) {
-  const opening = resolveOpening(pos, radius, shape.openings ?? shape.opening);
+  const openingRadius = shape.opening?.passThrough ? 0 : radius;
+  const opening = resolveOpening(pos, openingRadius, shape.openings ?? shape.opening);
   if (opening) return opening;
   if (shape.type === 'circle') return resolveCircle(pos, radius, shape);
   if (shape.type === 'ellipse') return resolveEllipse(pos, radius, shape);

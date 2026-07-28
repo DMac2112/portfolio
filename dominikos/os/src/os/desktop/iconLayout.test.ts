@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   resolveLayout, cellFromPoint, nearestFree, pointFromCell,
+  idsIntersectingRect, moveCellsTogether,
   CELL_W, CELL_H, PAD_X, PAD_Y, type CellPos, type IconLayout,
 } from './iconLayout';
 
@@ -110,5 +111,60 @@ describe('nearestFree — ring search', () => {
   it('clamps an out-of-bounds target before searching', () => {
     const got = nearestFree({ col: 99, row: 99 }, new Set(), 4, 6);
     expect(got).toEqual({ col: 5, row: 3 });
+  });
+});
+
+describe('idsIntersectingRect — marquee selection', () => {
+  it('selects exactly the icon boxes intersecting the marquee rectangle', () => {
+    const selected = idsIntersectingRect(
+      { left: 20, top: 20, right: 100, bottom: 100 },
+      {
+        a: { left: 0, top: 0, right: 30, bottom: 30 },
+        b: { left: 70, top: 70, right: 120, bottom: 120 },
+        c: { left: 101, top: 20, right: 140, bottom: 60 },
+        d: { left: 20, top: 100, right: 60, bottom: 140 },
+      },
+    );
+    expect(selected).toEqual(['a', 'b']);
+  });
+});
+
+describe('moveCellsTogether — multi-drag math', () => {
+  it('preserves every relative offset from the dragged anchor', () => {
+    const before = {
+      a: { col: 1, row: 1 },
+      b: { col: 3, row: 2 },
+      c: { col: 2, row: 4 },
+    };
+    const after = moveCellsTogether(before, 'a', { col: 4, row: 2 }, new Set(), 8, 8);
+    expect(after).toEqual({
+      a: { col: 4, row: 2 },
+      b: { col: 6, row: 3 },
+      c: { col: 5, row: 5 },
+    });
+  });
+
+  it('clamps the whole selection without changing its shape', () => {
+    const before = {
+      a: { col: 1, row: 1 },
+      b: { col: 2, row: 2 },
+    };
+    const after = moveCellsTogether(before, 'a', { col: 9, row: 9 }, new Set(), 4, 5);
+    expect(after).toEqual({
+      a: { col: 3, row: 2 },
+      b: { col: 4, row: 3 },
+    });
+  });
+
+  it('moves the intact group to the nearest gap around unselected icons', () => {
+    const before = {
+      a: { col: 0, row: 0 },
+      b: { col: 1, row: 0 },
+    };
+    const after = moveCellsTogether(before, 'a', { col: 2, row: 1 }, new Set(['2,1']), 4, 6);
+    expect(after.a).not.toEqual({ col: 2, row: 1 });
+    expect(after.b.col - after.a.col).toBe(1);
+    expect(after.b.row - after.a.row).toBe(0);
+    expect(Object.values(after).some((c) => k(c) === '2,1')).toBe(false);
   });
 });

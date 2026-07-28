@@ -25,7 +25,7 @@ const BLOCKED_SAMPLES = {
   plaza: [
     { label: 'northwest roof', x: 180, y: 180 },
     { label: 'fountain basin', x: 993, y: 330 },
-    { label: 'den igloo', x: 720, y: 760 },
+    { label: 'den igloo body', x: 620, y: 795 },
     { label: 'southeast roof', x: 1200, y: 870 },
   ],
   den: [
@@ -170,6 +170,20 @@ describe('painted-room collision coverage', () => {
     }
     expect(collisionProfileForRoom(roomVariants.find(({ key }) => key === 'docks-away').room))
       .not.toBe(collisionProfileForRoom(roomVariants.find(({ key }) => key === 'docks-port').room));
+  });
+
+  it('opens the repainted plaza igloo toward the plaza', () => {
+    const plaza = ROOM_REGISTRY.plaza;
+    const igloo = collisionProfileForRoom(plaza).obstacles.find(({ id }) => id === 'den-igloo');
+    expect(igloo).toMatchObject({
+      type: 'ellipse', x: 720, y: 795, rx: 125, ry: 110,
+      opening: { x0: 648, x1: 792, y0: 670, y1: 900, passThrough: true },
+    });
+    expect(plaza.doors.find(({ id }) => id === 'door-den')).toMatchObject({ x: 720, y: 812 });
+    expect(plaza.spawnPoints.fromDen).toEqual({ x: 720, y: 740, facing: 'up' });
+    expect(stable(plaza, { x: 720, y: 812 })).toBe(true);
+    expect(stable(plaza, { x: 720, y: 740 })).toBe(true);
+    expect(stable(plaza, { x: 620, y: 795 })).toBe(false);
   });
 
   it.each(roomVariants)('$key keeps all authored travel, character, venue, and crowd points clear', ({ key, room }) => {
