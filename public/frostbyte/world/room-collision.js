@@ -27,9 +27,21 @@ const PROFILES = {
           [1110, 700], [1010, 760], [900, 720], [820, 790]],
       },
       { id: 'fountain', type: 'ellipse', x: 993, y: 330, rx: 102, ry: 58 },
+      // Traced off the painted dome in room-plaza.jpg: apex ~(720,723), widest ~x600..838 around
+      // y850, then the snow entrance tunnel steps down to y~918. The lit mouth (the golden arch,
+      // x~691..752) is left open as a notch cut up into the tunnel, so the player walks into the
+      // doorway itself instead of being clamped inside a rectangular corridor.
       {
-        id: 'den-igloo', type: 'ellipse', x: 720, y: 795, rx: 125, ry: 110,
-        opening: { x0: 648, x1: 792, y0: 670, y1: 900, passThrough: true },
+        id: 'den-igloo', type: 'polygon',
+        points: [
+          [720, 723], [740, 725], [760, 733], [778, 743], [795, 757], [810, 773],
+          [822, 792], [832, 812], [838, 835], [836, 855], [828, 868], [818, 878],
+          [802, 888], [784, 896], [766, 902], [760, 910], [755, 918],
+          [755, 860], [688, 860], [688, 918],
+          [680, 918], [676, 908], [668, 898], [652, 890], [638, 881], [626, 871],
+          [614, 860], [604, 845], [600, 826], [604, 806], [612, 788], [622, 772],
+          [636, 757], [652, 745], [670, 735], [692, 727],
+        ],
       },
       { id: 'north-bench', type: 'capsule', ax: 450, ay: 350, bx: 565, by: 322, r: 13 },
       { id: 'chronicle-board', type: 'roundRect', x: 108, y: 390, w: 126, h: 90, r: 10 },

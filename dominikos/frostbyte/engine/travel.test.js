@@ -215,6 +215,36 @@ describe('findAutoEnterDoor', () => {
     const interior = { id: 'interior-door', x: 720, y: 480, locked: false };
     expect(findAutoEnterDoor({ x: 720, y: 440 }, { x: 0, y: 4 }, [interior], bounds)).toBeNull();
   });
+
+  describe('interior doors with an authored enterDir', () => {
+    // The plaza igloo: painted mid-room, mouth facing south, so it is 100+px from every edge.
+    const iglooDoor = {
+      id: 'door-den', x: 722, y: 892, locked: false, enterDir: { x: 0, y: -1 },
+    };
+
+    it('auto-enters by proximity even though the door is far from any room edge', () => {
+      expect(findAutoEnterDoor({ x: 722, y: 930 }, { x: 0, y: -4 }, [iglooDoor], bounds))
+        .toBe(iglooDoor);
+    });
+
+    it('still requires walking toward the doorway', () => {
+      expect(findAutoEnterDoor({ x: 722, y: 930 }, { x: 0, y: 4 }, [iglooDoor], bounds)).toBeNull();
+      expect(findAutoEnterDoor({ x: 722, y: 930 }, { x: 4, y: 0 }, [iglooDoor], bounds)).toBeNull();
+    });
+
+    it('still respects the contact radius and the lock', () => {
+      expect(findAutoEnterDoor({ x: 722, y: 892 + AUTO_DOOR_R + 6 }, { x: 0, y: -4 }, [iglooDoor], bounds))
+        .toBeNull();
+      expect(findAutoEnterDoor(
+        { x: 722, y: 930 }, { x: 0, y: -4 }, [{ ...iglooDoor, locked: true }], bounds,
+      )).toBeNull();
+    });
+
+    it('leaves edge doors on the room-edge rule', () => {
+      expect(findAutoEnterDoor({ x: 1316, y: 456 }, { x: 4, y: 0 }, [eastDoor], bounds))
+        .toBe(eastDoor);
+    });
+  });
 });
 
 describe('validateWorldGraph', () => {

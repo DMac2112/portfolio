@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { resolveDocksRoom } from '../content/docks.js';
 import { ROOM_SPAWN } from '../content/npc-spawn.js';
 import { ROOM_REGISTRY } from '../content/rooms.js';
+import { AUTO_DOOR_R } from '../engine/travel.js';
 import { collisionProfileForRoom, resolveRoomCollision } from './room-collision.js';
 
 const PLAYER_RADIUS = 12;
@@ -25,7 +26,7 @@ const BLOCKED_SAMPLES = {
   plaza: [
     { label: 'northwest roof', x: 180, y: 180 },
     { label: 'fountain basin', x: 993, y: 330 },
-    { label: 'den igloo body', x: 620, y: 795 },
+    { label: 'den igloo body', x: 700, y: 800 },
     { label: 'southeast roof', x: 1200, y: 870 },
   ],
   den: [
@@ -172,18 +173,34 @@ describe('painted-room collision coverage', () => {
       .not.toBe(collisionProfileForRoom(roomVariants.find(({ key }) => key === 'docks-port').room));
   });
 
-  it('opens the repainted plaza igloo toward the plaza', () => {
+  it('lets the player walk into the painted plaza igloo mouth', () => {
     const plaza = ROOM_REGISTRY.plaza;
     const igloo = collisionProfileForRoom(plaza).obstacles.find(({ id }) => id === 'den-igloo');
-    expect(igloo).toMatchObject({
-      type: 'ellipse', x: 720, y: 795, rx: 125, ry: 110,
-      opening: { x0: 648, x1: 792, y0: 670, y1: 900, passThrough: true },
-    });
-    expect(plaza.doors.find(({ id }) => id === 'door-den')).toMatchObject({ x: 720, y: 812 });
-    expect(plaza.spawnPoints.fromDen).toEqual({ x: 720, y: 740, facing: 'up' });
-    expect(stable(plaza, { x: 720, y: 812 })).toBe(true);
-    expect(stable(plaza, { x: 720, y: 740 })).toBe(true);
-    expect(stable(plaza, { x: 620, y: 795 })).toBe(false);
+    const door = plaza.doors.find(({ id }) => id === 'door-den');
+
+    // The dome is one solid silhouette — no pass-through corridor punched through its body.
+    expect(igloo.type).toBe('polygon');
+    expect(igloo.opening).toBeUndefined();
+    expect(igloo.openings).toBeUndefined();
+
+    // The door sits in the lit arch and opts into proximity auto-enter (it is nowhere near a
+    // room edge, so the default edge rule would silently never fire).
+    expect(door).toMatchObject({ x: 722, y: 892, enterDir: { x: 0, y: -1 } });
+
+    // Standing in the doorway, on the floor below it, and beside it must all be legal...
+    expect(stable(plaza, door)).toBe(true);
+    expect(stable(plaza, { x: 722, y: 930 })).toBe(true);
+    expect(stable(plaza, plaza.spawnPoints.fromDen)).toBe(true);
+
+    // ...while the dome body itself stays solid on every side of that mouth.
+    expect(stable(plaza, { x: 720, y: 800 })).toBe(false);
+    expect(stable(plaza, { x: 640, y: 820 })).toBe(false);
+    expect(stable(plaza, { x: 800, y: 820 })).toBe(false);
+
+    // Stepping out of the den must not land inside the door's own auto-enter radius, or the
+    // player would be thrown straight back into the igloo.
+    const spawn = plaza.spawnPoints.fromDen;
+    expect(Math.hypot(spawn.x - door.x, spawn.y - door.y)).toBeGreaterThan(AUTO_DOOR_R);
   });
 
   it.each(roomVariants)('$key keeps all authored travel, character, venue, and crowd points clear', ({ key, room }) => {

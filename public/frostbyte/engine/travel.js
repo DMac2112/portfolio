@@ -105,7 +105,18 @@ export function arriveSpawnId(sourceRoomId) {
 export const AUTO_DOOR_R = 56;
 
 function outwardVectorForDoor(door, bounds, maxEdgeDist) {
-  if (!door || !bounds) return null;
+  if (!door) return null;
+
+  // Interior doorways opt in by authoring the direction the player walks to step through them.
+  // The plaza igloo is painted mid-room with its tunnel facing south, so its door sits well
+  // inland of every room edge and the edge rule below can never describe it.
+  if (door.enterDir) {
+    const { x = 0, y = 0 } = door.enterDir;
+    const length = Math.hypot(x, y);
+    return length ? { x: x / length, y: y / length } : null;
+  }
+
+  if (!bounds) return null;
   const edges = [
     { distance: Math.abs(door.x - bounds.x0), x: -1, y: 0 },
     { distance: Math.abs(door.x - bounds.x1), x: 1, y: 0 },
