@@ -533,12 +533,12 @@ function resolvePolygon(pos, radius, shape) {
 }
 
 function resolvePolygonBoundary(pos, radius, boundary) {
-  const opening = resolveOpening(pos, radius, boundary.doors);
-  if (opening) return opening;
-
   const nearest = nearestPolygonEdge(pos, boundary.points);
   const inside = pointInPolygon(pos, boundary.points);
   if (inside && nearest.distance >= radius) return pos;
+
+  const opening = resolveOpening(pos, radius, boundary.doors);
+  if (opening) return opening;
 
   let dx;
   let dy;
@@ -564,10 +564,10 @@ function insideAnyRegion(pos, polygons) {
 }
 
 function resolveRegionBoundary(pos, radius, boundary) {
-  const opening = resolveOpening(pos, radius, boundary.doors);
-  if (opening) return opening;
-
   if (!insideAnyRegion(pos, boundary.polygons)) {
+    const opening = resolveOpening(pos, radius, boundary.doors);
+    if (opening) return opening;
+
     let nearest = null;
     let nearestPoints = null;
     for (const points of boundary.polygons) {
@@ -596,6 +596,10 @@ function resolveRegionBoundary(pos, radius, boundary) {
   }
   const pushLength = Math.hypot(pushX, pushY);
   if (!pushLength) return pos;
+
+  const opening = resolveOpening(pos, radius, boundary.doors);
+  if (opening) return opening;
+
   return {
     x: pos.x + (pushX / pushLength) * Math.max(2, radius * 0.55),
     y: pos.y + (pushY / pushLength) * Math.max(2, radius * 0.55),
@@ -612,13 +616,18 @@ function resolveBoundary(pos, radius, boundary) {
   if (boundary.type === 'polygon') return resolvePolygonBoundary(pos, radius, boundary);
   if (boundary.type === 'regions') return resolveRegionBoundary(pos, radius, boundary);
 
-  const opening = resolveOpening(pos, radius, boundary.doors ?? boundary.door);
-  if (opening) return opening;
   const rx = (boundary.rx ?? boundary.r) - radius;
   const ry = (boundary.ry ?? boundary.r) - radius;
   const dx = pos.x - boundary.x, dy = pos.y - boundary.y;
   const q = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry);
+  // A doorway and the room interior form one walkable union. Prefer a position already safely
+  // inside the room; clamping it to the doorway inset first creates an invisible lip that a
+  // frame-sized movement step can never cross.
   if (q <= 1) return pos;
+
+  const opening = resolveOpening(pos, radius, boundary.doors ?? boundary.door);
+  if (opening) return opening;
+
   const scale = 1 / Math.sqrt(q);
   return { x: boundary.x + dx * scale, y: boundary.y + dy * scale };
 }

@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { resolveDocksRoom } from '../content/docks.js';
 import { ROOM_SPAWN } from '../content/npc-spawn.js';
 import { ROOM_REGISTRY } from '../content/rooms.js';
+import { SPEED } from '../engine/movement.js';
 import { AUTO_DOOR_R } from '../engine/travel.js';
 import { collisionProfileForRoom, resolveRoomCollision } from './room-collision.js';
 
 const PLAYER_RADIUS = 12;
 const GRID_STEP = 24;
+const FRAME_STEP = SPEED / 60;
 
 const roomVariants = [
   ...Object.values(ROOM_REGISTRY)
@@ -106,6 +108,17 @@ function stable(room, point) {
   return distanceMoved(room, point) < 0.01;
 }
 
+function walkFrames(room, start, step, frames) {
+  let point = { ...start };
+  for (let i = 0; i < frames; i++) {
+    point = resolveRoomCollision(room, {
+      x: point.x + step.x,
+      y: point.y + step.y,
+    }, PLAYER_RADIUS);
+  }
+  return point;
+}
+
 function authoredClearPoints(room) {
   return [
     ...Object.entries(room.spawnPoints ?? {}).map(([id, point]) => ({ ...point, label: `spawn:${id}` })),
@@ -201,6 +214,18 @@ describe('painted-room collision coverage', () => {
     // player would be thrown straight back into the igloo.
     const spawn = plaza.spawnPoints.fromDen;
     expect(Math.hypot(spawn.x - door.x, spawn.y - door.y)).toBeGreaterThan(AUTO_DOOR_R);
+  });
+
+  it('lets the player leave the den entrance tunnel frame by frame', () => {
+    const den = ROOM_REGISTRY.den;
+    const opening = collisionProfileForRoom(den).boundary.doors[0];
+    const spawn = den.spawnPoints.fromPlaza;
+
+    const ontoFloor = walkFrames(den, spawn, { x: 0, y: -FRAME_STEP }, 30);
+    expect(ontoFloor.y).toBeLessThan(opening.y0);
+
+    const aroundEntrance = walkFrames(den, spawn, { x: -FRAME_STEP, y: 0 }, 50);
+    expect(aroundEntrance.x).toBeLessThan(opening.x0);
   });
 
   it.each(roomVariants)('$key keeps all authored travel, character, venue, and crowd points clear', ({ key, room }) => {

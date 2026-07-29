@@ -11,6 +11,7 @@ dist/
 # misc
 .DS_Store
 npm-debug.log*
+.claude/settings.local.json
 
 # local deploy clone for dmac2112.github.io (see deploy.cmd)
 .ghio-deploy/
