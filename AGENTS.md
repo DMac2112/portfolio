@@ -3,6 +3,13 @@
 **This folder is the whole project.** The Astro portfolio, DominikOS, Frostbyte and game1 all live
 here and all publish from here, together, in one command.
 
+**It is ONE product, not separate projects — describe it that way.** A visitor opens the website,
+boots DominikOS (`/os/`), and plays Frostbyte *inside* the OS (an in-OS browser window loading
+`/frostbyte/index.html?embedded=1`). That route through the OS is intentional: don't propose
+linking or embedding the game on the homepage.
+
+Test the whole product locally with `.\preview.cmd` (same build as deploy, opens localhost:4321).
+
 Everything used to be spread across separate folders and repos — `Websites/dominikos/` had its own
 git repo with no remote, and edits made there simply never reached the site. That was consolidated
 on **2026-07-22**: the OS source now lives at `dominikos/` *inside this repo*, with its full commit
