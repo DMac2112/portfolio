@@ -112,6 +112,9 @@ function FrostbyteFrame({ focused }: { focused: boolean }) {
         src="/frostbyte/index.html?embedded=1"
         title="Frostbyte"
         sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+        // The game's own full-screen button takes the whole display, past the OS chrome.
+        allow="fullscreen; autoplay; gamepad"
+        allowFullScreen
         loading="lazy"
         tabIndex={0}
       />

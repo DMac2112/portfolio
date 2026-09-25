@@ -6,7 +6,7 @@ import { ROOM_REGISTRY } from './content/rooms.js';
 import { buildRoom } from './world/build-room.js';
 import { loadAvatarSprites, makeAvatarActor } from './world/build-avatar.js';
 import { resolveMoveVector, resolveFacing } from './engine/movement.js';
-import { computeCamPos, computeCamScale } from './engine/camera.js';
+import { computeCamPos, fitCamScale, clampCamPos, roomMapSize } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
 import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup, unlockItem, equipItem } from './engine/economy.js';
@@ -61,6 +61,7 @@ import { claimVesperHint, nextVesperHint } from './engine/vesper.js';
 import { addDodgeWisps } from './world/will-o-wisps.js';
 import { addEchoPresence } from './world/echo-runtime.js';
 import { addAuroraAmbient } from './world/aurora-ambient.js';
+import { createFullscreenToggle } from './world/fullscreen-toggle.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -77,6 +78,16 @@ const todayISO = new Date().toISOString().slice(0, 10);
 const reduceMotion = Boolean(save.prefs?.reducedMotion || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
 checkDailyLogin(save, todayISO, []);
 persist(save);
+
+// Full screen takes the whole display (past the OS window when embedded); the room camera
+// re-fits on the resize it causes, so the view stays inside the painted map.
+createFullscreenToggle({
+  doc: document,
+  root: document.documentElement,
+  button: document.getElementById('fullscreen-btn'),
+  frost: document.getElementById('frost-pane'),
+  reducedMotion: reduceMotion,
+});
 
 /* ------------------------------------------------------------------ *
  * Engine
@@ -183,6 +194,8 @@ k.scene('room', (roomId, opts = {}) => {
       : baseRoom;
   const room = resolveCavernEntrances(datedRoom, save);
   buildRoom(k, room);
+  const map = roomMapSize(room);
+  let camScale = 1;
   const auroraLayer = addAuroraAmbient(k, room, () => save.secrets?.auroraIntensified === true, reduceMotion);
   const echoCharacter = characterById('the-echo');
   const echoLayer = addEchoPresence(k, room, echoCharacter?.linePools?.song, reduceMotion);
@@ -975,7 +988,8 @@ k.scene('room', (roomId, opts = {}) => {
       }
     }
 
-    const cam = computeCamPos(player.pos);
+    // Clamped to the painted map, so no window or fullscreen size ever shows past its edge.
+    const cam = clampCamPos(computeCamPos(player.pos), k.width(), k.height(), camScale, map.w, map.h);
     k.setCamPos(cam.x, cam.y);
 
     // Age + render the player's local speech bubbles.
@@ -1036,7 +1050,10 @@ k.scene('room', (roomId, opts = {}) => {
     }
   });
 
-  function fitCam() { k.setCamScale(k.vec2(computeCamScale(k.width() / k.height()))); }
+  function fitCam() {
+    camScale = fitCamScale(k.width(), k.height(), map.w, map.h);
+    k.setCamScale(k.vec2(camScale));
+  }
   fitCam();
   k.onResize(fitCam);
 });

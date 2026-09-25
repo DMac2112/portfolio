@@ -217,46 +217,37 @@ describe('painted-room collision coverage', () => {
     expect(Math.hypot(spawn.x - door.x, spawn.y - door.y)).toBeGreaterThan(AUTO_DOOR_R);
   });
 
-  it('traces the plaza props and lamppost bases without stealing their walkable edges', () => {
+  it('traces the plaza props and lamp posts off the painted ground, with no halo around them', () => {
     const plaza = ROOM_REGISTRY.plaza;
-    const obstacles = new Map(
-      collisionProfileForRoom(plaza).obstacles.map((obstacle) => [obstacle.id, obstacle]),
-    );
-    const lampApproaches = [
-      ['lamp-northwest', { x: 449, y: 344 }],
-      ['lamp-trail-west', { x: 629, y: 263 }],
-      ['lamp-trail-east', { x: 821, y: 263 }],
-      ['lamp-fountain-east', { x: 1176, y: 350 }],
-      ['lamp-rink-east', { x: 1308, y: 490 }],
-      ['lamp-west-entry', { x: 130, y: 622 }],
-      ['lamp-den-west', { x: 571, y: 847 }],
-      ['lamp-den-east', { x: 879, y: 847 }],
+    // [label, a point on the painted object, the open-snow direction]: the object is solid, and
+    // the avatar can stand within 32px of that point, so no invisible collar surrounds it.
+    const props = [
+      ['lamp northwest', { x: 430, y: 346 }, { x: 0, y: 1 }],
+      ['lamp trail west', { x: 603, y: 268 }, { x: 0, y: 1 }],
+      ['lamp trail east', { x: 852, y: 266 }, { x: 0, y: 1 }],
+      ['lamp fountain east', { x: 1206, y: 350 }, { x: 0, y: 1 }],
+      ['lamp rink east', { x: 1334, y: 495 }, { x: 0, y: 1 }],
+      ['lamp west entry', { x: 110, y: 632 }, { x: Math.SQRT1_2, y: -Math.SQRT1_2 }],
+      ['lamp den west', { x: 545, y: 850 }, { x: 0, y: 1 }],
+      ['lamp den east', { x: 908, y: 850 }, { x: 0, y: 1 }],
+      ['north bench', { x: 530, y: 325 }, { x: 0, y: 1 }],
+      ['chronicle board', { x: 190, y: 480 }, { x: 0, y: 1 }],
+      ['south bench', { x: 1015, y: 720 }, { x: 0, y: -1 }],
+      ['fountain basin', { x: 1000, y: 380 }, { x: 0, y: 1 }],
+      ['rink north fence', { x: 1200, y: 450 }, { x: 0, y: 1 }],
+      ['rink south fence', { x: 1250, y: 615 }, { x: 0, y: -1 }],
     ];
-
-    // Only the painted ground-contact base is solid; each pole can still be approached from
-    // the open-snow side without the surrounding building silhouette swallowing that space.
-    for (const [id, approach] of lampApproaches) {
-      const lamp = obstacles.get(id);
-      expect(lamp, id).toBeDefined();
-      expect(distanceMoved(plaza, lamp), `${id} base`).toBeGreaterThan(1);
-      expect(stable(plaza, approach), `${id} edge`).toBe(true);
+    for (const [label, point, dir] of props) {
+      expect(distanceMoved(plaza, point), `${label} body`).toBeGreaterThan(1);
+      let reach = null;
+      for (let t = 1; t <= 32 && reach === null; t++) {
+        if (stable(plaza, { x: point.x + dir.x * t, y: point.y + dir.y * t })) reach = t;
+      }
+      expect(reach, `${label} has an invisible collar`).not.toBeNull();
     }
 
-    for (const [label, blockedPoint, edgePoint] of [
-      ['north bench', { x: 530, y: 290 }, { x: 530, y: 354 }],
-      ['chronicle board', { x: 190, y: 430 }, { x: 190, y: 535 }],
-      ['south bench', { x: 1015, y: 748 }, { x: 930, y: 720 }],
-      ['fountain basin', { x: 1000, y: 337 }, { x: 1000, y: 405 }],
-      ['rink north rail', { x: 1200, y: 455 }, { x: 1200, y: 477 }],
-      ['rink south rail', { x: 1250, y: 628 }, { x: 1250, y: 608 }],
-    ]) {
-      expect(distanceMoved(plaza, blockedPoint), `${label} body`).toBeGreaterThan(1);
-      expect(stable(plaza, edgePoint), `${label} edge`).toBe(true);
-    }
-
-    // The fence opening remains the route into Snowdrift Toss, while the east court route
-    // stays clear between the lower rail and the room edge.
-    expect(stable(plaza, plaza.hotspots.find(({ id }) => id === 'minigame-snowdrift'))).toBe(true);
+    // The fenced lane stays open from its west gap to the court gate.
+    expect(stable(plaza, { x: 1130, y: 540 })).toBe(true);
     expect(stable(plaza, plaza.spawnPoints.fromCourt)).toBe(true);
     expect(stable(plaza, plaza.doors.find(({ id }) => id === 'door-court'))).toBe(true);
   });

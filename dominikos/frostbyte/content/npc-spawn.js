@@ -14,8 +14,8 @@ export const ROOM_SPAWN = {
     // Roam points moved onto the open snow: the painted buildings sit further into the frame than
     // the old code-drawn ones, so the original left/right points now fall on rooftops.
     roamPoints: [
-      { x: 430, y: 480 }, { x: 400, y: 620 }, { x: 540, y: 690 }, { x: 600, y: 650 },
-      { x: 930, y: 700 }, { x: 1000, y: 620 }, { x: 1030, y: 480 }, { x: 760, y: 240 },
+      { x: 430, y: 480 }, { x: 400, y: 620 }, { x: 540, y: 670 }, { x: 600, y: 650 },
+      { x: 960, y: 700 }, { x: 1000, y: 620 }, { x: 1030, y: 480 }, { x: 760, y: 240 },
     ],
     gatherPoints: [
       { x: 550, y: 420, label: 'bench-north' },

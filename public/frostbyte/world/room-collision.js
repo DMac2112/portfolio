@@ -1,39 +1,15 @@
 // Pixel-aligned room collision profiles for the painted 480x320 backdrops at the room's x3 scale.
 // The artwork owns the physical silhouettes; content/rooms.js owns interactions and travel.
 import { clampToBounds, resolveObstacles } from '../engine/movement.js';
+import { PLAZA_GROUND, PLAZA_FREESTANDING } from './plaza-ground.js';
 
 const PROFILES = {
   plaza: {
-    boundary: { type: 'rect', x0: 0, x1: 1440, y0: 0, y1: 960 },
+    // The painted ground itself (see world/plaza-ground.js): buildings, snowbanks, the fountain,
+    // lamp posts, fences and the Chronicle board all sit outside it.
+    boundary: { type: 'polygon', points: PLAZA_GROUND },
     obstacles: [
-      {
-        id: 'northwest-buildings', type: 'polygon',
-        points: [[-40, -40], [620, -40], [620, 150], [607, 205], [580, 225],
-          [545, 220], [505, 225], [470, 240], [445, 275], [438, 315],
-          [420, 330], [390, 350], [365, 385], [330, 420], [285, 455],
-          [250, 490], [215, 520], [-40, 525]],
-      },
-      {
-        id: 'northeast-buildings', type: 'polygon',
-        points: [[850, -40], [1480, -40], [1480, 520], [1410, 520], [1380, 500],
-          [1350, 470], [1320, 458], [1290, 430], [1265, 390], [1240, 350],
-          [1210, 330], [1175, 330], [1140, 340], [1120, 330], [1060, 315],
-          [950, 300], [900, 285], [850, 285]],
-      },
-      {
-        id: 'southwest-buildings', type: 'polygon',
-        points: [[-40, 650], [100, 650], [160, 640], [205, 625], [255, 655],
-          [310, 700], [380, 715], [450, 748], [505, 805], [530, 880],
-          [530, 1000], [-40, 1000]],
-      },
-      {
-        id: 'southeast-buildings', type: 'polygon',
-        points: [[860, 1000], [1480, 1000], [1480, 675], [1410, 675], [1360, 690],
-          [1320, 720], [1270, 770], [1210, 760], [1150, 730], [1100, 700],
-          [1080, 720], [1065, 750], [1050, 780], [1020, 810], [980, 835],
-          [940, 870], [900, 920], [875, 960]],
-      },
-      { id: 'fountain', type: 'ellipse', x: 1000, y: 337, rx: 110, ry: 55 },
+      ...PLAZA_FREESTANDING,
       // Traced off the painted dome in room-plaza.jpg: apex ~(720,723), widest ~x600..838 around
       // y850, then the snow entrance tunnel steps down to y~918. The lit mouth (the golden arch,
       // x~691..752) is left open as a notch cut up into the tunnel, so the player walks into the
@@ -50,36 +26,6 @@ const PROFILES = {
           [636, 757], [652, 745], [670, 735], [692, 727],
         ],
       },
-      {
-        id: 'north-bench', type: 'polygon',
-        points: [[470, 260], [540, 228], [565, 245], [585, 305], [530, 340], [485, 320]],
-      },
-      {
-        id: 'chronicle-board', type: 'polygon',
-        points: [[135, 380], [246, 370], [254, 465], [222, 476], [222, 497],
-          [208, 500], [205, 477], [166, 480], [166, 502], [153, 505],
-          [150, 480], [136, 470]],
-      },
-      {
-        id: 'south-bench', type: 'polygon',
-        points: [[944, 745], [1068, 696], [1090, 714], [1075, 752], [983, 798], [944, 780]],
-      },
-      // The rink is still walkable. These four narrow shapes follow the painted rails while
-      // preserving the west-side gap used to approach Snowdrift Toss.
-      { id: 'rink-north-rail', type: 'capsule', ax: 1090, ay: 455, bx: 1440, by: 455, r: 9 },
-      { id: 'rink-northwest-post', type: 'capsule', ax: 1090, ay: 450, bx: 1100, by: 500, r: 9 },
-      { id: 'rink-south-rail', type: 'capsule', ax: 1150, ay: 628, bx: 1440, by: 628, r: 7 },
-      { id: 'rink-southwest-post', type: 'capsule', ax: 1144, ay: 580, bx: 1150, by: 625, r: 7 },
-      // Only the ground-contact bases are solid. The tall painted poles remain visually in front
-      // of or behind the avatar according to the artwork, without creating oversized invisible bars.
-      { id: 'lamp-northwest', type: 'ellipse', x: 420, y: 344, rx: 16, ry: 9 },
-      { id: 'lamp-trail-west', type: 'ellipse', x: 600, y: 263, rx: 16, ry: 9 },
-      { id: 'lamp-trail-east', type: 'ellipse', x: 850, y: 263, rx: 16, ry: 9 },
-      { id: 'lamp-fountain-east', type: 'ellipse', x: 1205, y: 350, rx: 16, ry: 9 },
-      { id: 'lamp-rink-east', type: 'ellipse', x: 1337, y: 490, rx: 16, ry: 9 },
-      { id: 'lamp-west-entry', type: 'ellipse', x: 101, y: 622, rx: 16, ry: 9 },
-      { id: 'lamp-den-west', type: 'ellipse', x: 540, y: 847, rx: 18, ry: 10 },
-      { id: 'lamp-den-east', type: 'ellipse', x: 910, y: 847, rx: 18, ry: 10 },
     ],
   },
 
@@ -187,7 +133,8 @@ const PROFILES = {
       points: [[45, 420], [180, 300], [480, 280], [600, 360], [720, 420],
         [840, 360], [1260, 300], [1395, 420], [1395, 750], [1260, 870],
         [930, 870], [840, 720], [600, 720], [600, 870], [240, 870], [45, 720]],
-      doors: [{ x0: 650, x1: 790, y0: 708, y1: 960 }],
+      // The painted opening between the jambs is x~640..830 (dark outline scan at y800..900).
+      doors: [{ x0: 640, x1: 830, y0: 708, y1: 960 }],
     },
     obstacles: [
       {
@@ -585,10 +532,29 @@ function resolvePolygon(pos, radius, shape) {
   };
 }
 
+function insideOpening(pos, openings) {
+  return (openings ?? []).some((o) => pos.x >= (o.x0 ?? -Infinity) && pos.x <= (o.x1 ?? Infinity)
+    && pos.y >= (o.y0 ?? -Infinity) && pos.y <= (o.y1 ?? Infinity));
+}
+
+// The room polygon and its doorways are ONE walkable union. A body straddling the seam (half in
+// the doorway, half on the floor) is fine; clamping it back into the doorway inset is what used
+// to pin the player on the threshold, unable to step into the room.
+function discInsideUnion(pos, radius, points, openings) {
+  const inUnion = (p) => pointInPolygon(p, points) || insideOpening(p, openings);
+  if (!inUnion(pos)) return false;
+  for (let i = 0; i < 16; i++) {
+    const angle = (i / 16) * Math.PI * 2;
+    if (!inUnion({ x: pos.x + Math.cos(angle) * radius, y: pos.y + Math.sin(angle) * radius })) return false;
+  }
+  return true;
+}
+
 function resolvePolygonBoundary(pos, radius, boundary) {
   const nearest = nearestPolygonEdge(pos, boundary.points);
   const inside = pointInPolygon(pos, boundary.points);
   if (inside && nearest.distance >= radius) return pos;
+  if (boundary.doors && discInsideUnion(pos, radius, boundary.points, boundary.doors)) return pos;
 
   const opening = resolveOpening(pos, radius, boundary.doors);
   if (opening) return opening;

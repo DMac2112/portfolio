@@ -20,25 +20,39 @@ export const ROOM_REGISTRY = {
       // Beside the igloo mouth, not in it — every room keeps its arrival spawn clear of the
       // door's auto-enter radius so stepping out never re-triggers the door you just used.
       fromDen:      { x: 646, y: 928, facing: 'left' },
-      fromCourt:    { x: 1290, y: 600, facing: 'left' },
-      fromWorkshop: { x: 150, y: 570, facing: 'right' },
-      fromTrail:    { x: 720, y: 170, facing: 'down' },
+      // Inside the fenced lane that runs east to the court gate, between the painted rails.
+      fromCourt:    { x: 1310, y: 540, facing: 'left' },
+      // On the snow in front of the workshop's painted door, clear of its auto-enter radius.
+      fromWorkshop: { x: 300, y: 492, facing: 'down' },
+      fromTrail:    { x: 720, y: 200, facing: 'down' },
       fromMinigame: { x: 1050, y: 620, facing: 'down' },
       fromMap:      { x: 720, y: 560, facing: 'down' },
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 993, y: 300 },
-      { id: 'shop-glimmerwool', label: 'Glimmer & Wool', kind: 'shop', x: 96, y: 552 },
+      { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 1000, y: 400 },
+      // On the painted door of the timber house just north-east of the fountain.
+      { id: 'shop-glimmerwool', label: 'Glimmer & Wool', kind: 'shop', x: 1148, y: 290 },
       { id: 'minigame-snowdrift', label: 'Snowdrift Toss', kind: 'minigame', x: 1128, y: 552 },
       { id: 'noticeboard-chronicle', label: 'The Chillmere Chronicle', kind: 'noticeboard', x: 168, y: 792 },
       { id: 'bench-north', label: null, kind: 'sit', x: 408, y: 264 },
       { id: 'bench-south', label: null, kind: 'sit', x: 552, y: 696 },
     ],
     doors: [
-      { id: 'door-trail', label: 'Frostline Trail', x: 720, y: 96, targetRoom: 'trail', locked: false, targetSpawn: 'fromPlaza' },
-      { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 600, targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' },
-      { id: 'door-workshop', label: 'Emberlight Workshop', x: 72, y: 570, targetRoom: 'workshop', locked: false, targetSpawn: 'fromPlaza' },
+      // The top of the painted trail, where the path meets the tree line. A threshold across the
+      // path's width, so every lane up the trail leaves (not just the centre line).
+      {
+        id: 'door-trail', label: 'Frostline Trail', x: 720, y: 132, targetRoom: 'trail', locked: false,
+        targetSpawn: 'fromPlaza', autoEnterRadius: 34, autoEnterHalfWidth: 60,
+      },
+      // The snow wedge where the rink lane runs out east between the fence and the house roof.
+      { id: 'door-court', label: 'Glasswind Court', x: 1368, y: 495, targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' },
+      // The painted door under the hanging sign (NW house). Walk up into it to enter; the small
+      // contact radius keeps players strolling along the snowbank from being pulled inside.
+      {
+        id: 'door-workshop', label: 'Emberlight Workshop', x: 300, y: 443, targetRoom: 'workshop', locked: false,
+        targetSpawn: 'fromPlaza', enterDir: { x: 0, y: -1 }, autoEnterRadius: 34,
+      },
       // Sits in the painted golden arch. enterDir opts this door into proximity auto-enter: it is
       // mid-room, so the room-edge rule the other doors use cannot reach it (see engine/travel.js).
       {
