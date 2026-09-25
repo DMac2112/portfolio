@@ -115,6 +115,15 @@ describe('room configs', () => {
     expect(denDoorOut).toBeDefined();
     expect(denDoorOut.targetRoom).toBe('plaza');
     expect(denDoorOut.locked).toBe(false);
+    expect(denDoorOut).toMatchObject({
+      x: 720, y: 642, enterDir: { x: 0, y: 1 },
+      promptRadius: 72, autoEnterRadius: 18, autoEnterHalfWidth: 52,
+    });
+    expect(den.spawnPoints).toMatchObject({
+      default: { x: 720, y: 510, facing: 'down' },
+      fromPlaza: { x: 720, y: 510, facing: 'down' },
+      fromMap: { x: 720, y: 510, facing: 'down' },
+    });
 
     // Plaza's door-den should reach den
     const plazaDoorDen = plaza.doors.find(d => d.id === 'door-den');

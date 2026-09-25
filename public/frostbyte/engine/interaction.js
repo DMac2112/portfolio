@@ -9,6 +9,7 @@ export const AUTO_VENUE_RESET_R = 72;
  * @property {string} id
  * @property {{x:number,y:number}} pos
  * @property {string} kind   // e.g. 'landmark' | 'shop' | 'minigame' | 'noticeboard' | 'sit' | 'door' | 'npc'
+ * @property {number} [interactionRadius]
  */
 
 /**
@@ -39,9 +40,10 @@ export function findNearestInteractable(pos, candidates, maxDist = INTERACT_R, o
     const dx = candidate.pos.x - pos.x;
     const dy = candidate.pos.y - pos.y;
     const dist = Math.hypot(dx, dy);
+    const candidateMaxDist = Math.min(maxDist, candidate.interactionRadius ?? maxDist);
 
     // Only replace if STRICTLY closer (ties go to first candidate)
-    if (dist < nearestDist) {
+    if (dist < candidateMaxDist && dist < nearestDist) {
       nearest = candidate;
       nearestDist = dist;
     }

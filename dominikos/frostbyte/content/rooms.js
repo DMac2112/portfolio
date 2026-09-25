@@ -64,9 +64,9 @@ export const ROOM_REGISTRY = {
     scale: 3,
     bounds: { x0: 400, x1: 1040, y0: 240, y1: 800 },
     spawnPoints: {
-      default:    { x: 720, y: 560, facing: 'down' },
-      fromPlaza:  { x: 720, y: 720, facing: 'up' },
-      fromMap:    { x: 720, y: 560, facing: 'down' },
+      default:    { x: 720, y: 510, facing: 'down' },
+      fromPlaza:  { x: 720, y: 510, facing: 'down' },
+      fromMap:    { x: 720, y: 510, facing: 'down' },
     },
     camera: { leadY: -50 },
     hotspots: [
@@ -74,7 +74,11 @@ export const ROOM_REGISTRY = {
       { id: 'door-sign-den', label: 'Door Sign', kind: 'sign', x: 900, y: 720 },
     ],
     doors: [
-      { id: 'door-out', label: 'Chillmere Plaza', x: 720, y: 800, targetRoom: 'plaza', locked: false, targetSpawn: 'fromDen' },
+      {
+        id: 'door-out', label: 'Chillmere Plaza', x: 720, y: 642,
+        targetRoom: 'plaza', locked: false, targetSpawn: 'fromDen',
+        enterDir: { x: 0, y: 1 }, promptRadius: 72, autoEnterRadius: 18, autoEnterHalfWidth: 52,
+      },
     ],
     solids: [
       { id: 'hearth-den', x: 720, y: 285, w: 120, h: 90 },

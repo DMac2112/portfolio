@@ -77,6 +77,14 @@ describe('findNearestInteractable', () => {
     expect(result).toBeNull();
   });
 
+  it('honours a smaller interaction radius authored for one candidate', () => {
+    const door = {
+      id: 'narrow-door', pos: { x: 80, y: 0 }, kind: 'door', interactionRadius: 72,
+    };
+    expect(findNearestInteractable({ x: 0, y: 0 }, [door])).toBeNull();
+    expect(findNearestInteractable({ x: 9, y: 0 }, [door])).toBe(door);
+  });
+
   it('uses hypot distance (2D Euclidean)', () => {
     const pos = { x: 0, y: 0 };
     // Candidate at (3, 4) has distance sqrt(3^2 + 4^2) = sqrt(25) = 5

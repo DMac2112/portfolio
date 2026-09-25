@@ -269,7 +269,10 @@ k.scene('room', (roomId, opts = {}) => {
   }));
   const doorInteractables = (room.doors ?? [])
     .filter((door) => !door.hidden)
-    .map((d) => ({ id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d }));
+    .map((d) => ({
+      id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d,
+      interactionRadius: d.promptRadius,
+    }));
   const interactPrompt = document.getElementById('interact-prompt');
   let nearest = null;
   let autoVenueLatch = null;
@@ -313,6 +316,7 @@ k.scene('room', (roomId, opts = {}) => {
     if (existing) existing.door = door;
     else doorInteractables.push({
       id: door.id, pos: { x: door.x, y: door.y }, kind: 'door', label: door.label, door,
+      interactionRadius: door.promptRadius,
     });
     showMovePing(k, { x: door.x, y: door.y + 34 }, reduceMotion);
     return door;

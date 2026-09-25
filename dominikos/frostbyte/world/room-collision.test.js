@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { resolveDocksRoom } from '../content/docks.js';
 import { ROOM_SPAWN } from '../content/npc-spawn.js';
 import { ROOM_REGISTRY } from '../content/rooms.js';
+import { findNearestInteractable } from '../engine/interaction.js';
 import { SPEED } from '../engine/movement.js';
-import { AUTO_DOOR_R } from '../engine/travel.js';
+import { AUTO_DOOR_R, findAutoEnterDoor } from '../engine/travel.js';
 import { collisionProfileForRoom, resolveRoomCollision } from './room-collision.js';
 
 const PLAYER_RADIUS = 12;
@@ -216,16 +217,132 @@ describe('painted-room collision coverage', () => {
     expect(Math.hypot(spawn.x - door.x, spawn.y - door.y)).toBeGreaterThan(AUTO_DOOR_R);
   });
 
-  it('lets the player leave the den entrance tunnel frame by frame', () => {
+  it('traces the plaza props and lamppost bases without stealing their walkable edges', () => {
+    const plaza = ROOM_REGISTRY.plaza;
+    const obstacles = new Map(
+      collisionProfileForRoom(plaza).obstacles.map((obstacle) => [obstacle.id, obstacle]),
+    );
+    const lampApproaches = [
+      ['lamp-northwest', { x: 449, y: 344 }],
+      ['lamp-trail-west', { x: 629, y: 263 }],
+      ['lamp-trail-east', { x: 821, y: 263 }],
+      ['lamp-fountain-east', { x: 1176, y: 350 }],
+      ['lamp-rink-east', { x: 1308, y: 490 }],
+      ['lamp-west-entry', { x: 130, y: 622 }],
+      ['lamp-den-west', { x: 571, y: 847 }],
+      ['lamp-den-east', { x: 879, y: 847 }],
+    ];
+
+    // Only the painted ground-contact base is solid; each pole can still be approached from
+    // the open-snow side without the surrounding building silhouette swallowing that space.
+    for (const [id, approach] of lampApproaches) {
+      const lamp = obstacles.get(id);
+      expect(lamp, id).toBeDefined();
+      expect(distanceMoved(plaza, lamp), `${id} base`).toBeGreaterThan(1);
+      expect(stable(plaza, approach), `${id} edge`).toBe(true);
+    }
+
+    for (const [label, blockedPoint, edgePoint] of [
+      ['north bench', { x: 530, y: 290 }, { x: 530, y: 354 }],
+      ['chronicle board', { x: 190, y: 430 }, { x: 190, y: 535 }],
+      ['south bench', { x: 1015, y: 748 }, { x: 930, y: 720 }],
+      ['fountain basin', { x: 1000, y: 337 }, { x: 1000, y: 405 }],
+      ['rink north rail', { x: 1200, y: 455 }, { x: 1200, y: 477 }],
+      ['rink south rail', { x: 1250, y: 628 }, { x: 1250, y: 608 }],
+    ]) {
+      expect(distanceMoved(plaza, blockedPoint), `${label} body`).toBeGreaterThan(1);
+      expect(stable(plaza, edgePoint), `${label} edge`).toBe(true);
+    }
+
+    // The fence opening remains the route into Snowdrift Toss, while the east court route
+    // stays clear between the lower rail and the room edge.
+    expect(stable(plaza, plaza.hotspots.find(({ id }) => id === 'minigame-snowdrift'))).toBe(true);
+    expect(stable(plaza, plaza.spawnPoints.fromCourt)).toBe(true);
+    expect(stable(plaza, plaza.doors.find(({ id }) => id === 'door-court'))).toBe(true);
+  });
+
+  it('matches the marked den landing point, red floor edge, and blue two-stage exit', () => {
+    const den = ROOM_REGISTRY.den;
+    const boundary = collisionProfileForRoom(den).boundary;
+    const opening = boundary.doors[0];
+    const spawn = den.spawnPoints.fromPlaza;
+    const door = den.doors.find(({ id }) => id === 'door-out');
+
+    expect(spawn).toMatchObject({ x: 720, y: 510, facing: 'down' });
+    expect(boundary.type).toBe('polygon');
+    expect(opening).toEqual({ x0: 668, x1: 772, y0: 560, y1: 960 });
+    expect(stable(den, spawn)).toBe(true);
+
+    // The painted floor remains reachable right up to the red edge, but not through the wall.
+    for (const point of [
+      { x: 100, y: 600 }, { x: 150, y: 650 }, { x: 430, y: 800 },
+      { x: 1350, y: 620 }, { x: 1240, y: 710 },
+    ]) {
+      expect(stable(den, point), `inside red edge at ${point.x},${point.y}`).toBe(true);
+    }
+    for (const point of [
+      { x: 25, y: 550 }, { x: 430, y: 850 }, { x: 1000, y: 850 },
+      { x: 1410, y: 620 },
+    ]) {
+      expect(stable(den, point), `outside red edge at ${point.x},${point.y}`).toBe(false);
+    }
+
+    // Only the blue cap is a corridor through the entrance arch.
+    expect(stable(den, { x: 720, y: 630 })).toBe(true);
+    expect(stable(den, { x: 670, y: 630 })).toBe(false);
+    expect(stable(den, { x: 770, y: 630 })).toBe(false);
+    expect(stable(den, { x: 720, y: 700 })).toBe(true);
+
+    // Arrival is clear of the prompt. Entering the blue cap reveals it.
+    const doorInteractable = {
+      id: door.id,
+      pos: { x: door.x, y: door.y },
+      kind: 'door',
+      interactionRadius: door.promptRadius,
+    };
+    expect(findNearestInteractable(spawn, [doorInteractable])).toBeNull();
+    expect(findNearestInteractable({ x: 720, y: 571 }, [doorInteractable]))
+      .toBe(doorInteractable);
+
+    // Continuing through the blue cap reaches the smaller automatic threshold frame by frame.
+    let point = { ...spawn };
+    let autoDoor = null;
+    for (let frame = 0; frame < 60 && !autoDoor; frame++) {
+      const movement = { x: 0, y: FRAME_STEP };
+      point = resolveRoomCollision(den, {
+        x: point.x + movement.x,
+        y: point.y + movement.y,
+      }, PLAYER_RADIUS);
+      autoDoor = findAutoEnterDoor(point, movement, den.doors, den.bounds);
+    }
+    expect(autoDoor).toBe(door);
+    expect(point.y).toBeGreaterThanOrEqual(door.y - door.autoEnterRadius);
+    expect(point.y).toBeLessThanOrEqual(door.y);
+
+    // Players rarely walk the exact centre line: every lane through the tunnel must exit.
+    for (const laneX of [682, 700, 740, 758]) {
+      let lane = { x: laneX, y: 600 };
+      let laneDoor = null;
+      for (let frame = 0; frame < 90 && !laneDoor; frame++) {
+        const movement = { x: 0, y: FRAME_STEP };
+        lane = resolveRoomCollision(den, { x: lane.x + movement.x, y: lane.y + movement.y }, PLAYER_RADIUS);
+        laneDoor = findAutoEnterDoor(lane, movement, den.doors, den.bounds);
+      }
+      expect(laneDoor, `tunnel lane x=${laneX}`).toBe(door);
+    }
+  });
+
+  it('lets the player walk back out of the den tunnel onto the floor frame by frame', () => {
     const den = ROOM_REGISTRY.den;
     const opening = collisionProfileForRoom(den).boundary.doors[0];
-    const spawn = den.spawnPoints.fromPlaza;
+    const inTunnel = { x: 720, y: 615 };
+    expect(stable(den, inTunnel)).toBe(true);
 
-    const ontoFloor = walkFrames(den, spawn, { x: 0, y: -FRAME_STEP }, 30);
+    const ontoFloor = walkFrames(den, inTunnel, { x: 0, y: -FRAME_STEP }, 60);
     expect(ontoFloor.y).toBeLessThan(opening.y0);
 
-    const aroundEntrance = walkFrames(den, spawn, { x: -FRAME_STEP, y: 0 }, 50);
-    expect(aroundEntrance.x).toBeLessThan(opening.x0);
+    const acrossFloor = walkFrames(den, ontoFloor, { x: -FRAME_STEP, y: 0 }, 60);
+    expect(acrossFloor.x).toBeLessThan(opening.x0);
   });
 
   it.each(roomVariants)('$key keeps all authored travel, character, venue, and crowd points clear', ({ key, room }) => {

@@ -8,25 +8,32 @@ const PROFILES = {
     obstacles: [
       {
         id: 'northwest-buildings', type: 'polygon',
-        points: [[-40, -40], [620, -40], [620, 150], [570, 270], [585, 345],
-          [510, 420], [350, 450], [260, 510], [-40, 525]],
+        points: [[-40, -40], [620, -40], [620, 150], [607, 205], [580, 225],
+          [545, 220], [505, 225], [470, 240], [445, 275], [438, 315],
+          [420, 330], [390, 350], [365, 385], [330, 420], [285, 455],
+          [250, 490], [215, 520], [-40, 525]],
       },
       {
         id: 'northeast-buildings', type: 'polygon',
-        points: [[850, -40], [1480, -40], [1480, 570], [1320, 570], [1270, 505],
-          [1180, 465], [1110, 380], [1050, 285], [850, 285]],
+        points: [[850, -40], [1480, -40], [1480, 520], [1410, 520], [1380, 500],
+          [1350, 470], [1320, 458], [1290, 430], [1265, 390], [1240, 350],
+          [1210, 330], [1175, 330], [1140, 340], [1120, 330], [1060, 315],
+          [950, 300], [900, 285], [850, 285]],
       },
       {
         id: 'southwest-buildings', type: 'polygon',
-        points: [[-40, 620], [300, 620], [380, 675], [505, 690], [530, 810],
+        points: [[-40, 650], [100, 650], [160, 640], [205, 625], [255, 655],
+          [310, 700], [380, 715], [450, 748], [505, 805], [530, 880],
           [530, 1000], [-40, 1000]],
       },
       {
         id: 'southeast-buildings', type: 'polygon',
-        points: [[820, 1000], [1480, 1000], [1480, 650], [1320, 650], [1260, 715],
-          [1110, 700], [1010, 760], [900, 720], [820, 790]],
+        points: [[860, 1000], [1480, 1000], [1480, 675], [1410, 675], [1360, 690],
+          [1320, 720], [1270, 770], [1210, 760], [1150, 730], [1100, 700],
+          [1080, 720], [1065, 750], [1050, 780], [1020, 810], [980, 835],
+          [940, 870], [900, 920], [875, 960]],
       },
-      { id: 'fountain', type: 'ellipse', x: 993, y: 330, rx: 102, ry: 58 },
+      { id: 'fountain', type: 'ellipse', x: 1000, y: 337, rx: 110, ry: 55 },
       // Traced off the painted dome in room-plaza.jpg: apex ~(720,723), widest ~x600..838 around
       // y850, then the snow entrance tunnel steps down to y~918. The lit mouth (the golden arch,
       // x~691..752) is left open as a notch cut up into the tunnel, so the player walks into the
@@ -43,26 +50,72 @@ const PROFILES = {
           [636, 757], [652, 745], [670, 735], [692, 727],
         ],
       },
-      { id: 'north-bench', type: 'capsule', ax: 450, ay: 350, bx: 565, by: 322, r: 13 },
-      { id: 'chronicle-board', type: 'roundRect', x: 108, y: 390, w: 126, h: 90, r: 10 },
-      { id: 'rink-north-rail', type: 'capsule', ax: 1110, ay: 444, bx: 1390, by: 444, r: 7 },
-      { id: 'rink-west-rail', type: 'capsule', ax: 1110, ay: 444, bx: 1110, by: 525, r: 7 },
-      { id: 'rink-south-rail', type: 'capsule', ax: 1140, ay: 650, bx: 1390, by: 650, r: 7 },
-      { id: 'rink-southwest-rail', type: 'capsule', ax: 1140, ay: 580, bx: 1140, by: 650, r: 7 },
-      { id: 'igloo-sign', type: 'capsule', ax: 1010, ay: 735, bx: 1010, by: 800, r: 18 },
+      {
+        id: 'north-bench', type: 'polygon',
+        points: [[470, 260], [540, 228], [565, 245], [585, 305], [530, 340], [485, 320]],
+      },
+      {
+        id: 'chronicle-board', type: 'polygon',
+        points: [[135, 380], [246, 370], [254, 465], [222, 476], [222, 497],
+          [208, 500], [205, 477], [166, 480], [166, 502], [153, 505],
+          [150, 480], [136, 470]],
+      },
+      {
+        id: 'south-bench', type: 'polygon',
+        points: [[944, 745], [1068, 696], [1090, 714], [1075, 752], [983, 798], [944, 780]],
+      },
+      // The rink is still walkable. These four narrow shapes follow the painted rails while
+      // preserving the west-side gap used to approach Snowdrift Toss.
+      { id: 'rink-north-rail', type: 'capsule', ax: 1090, ay: 455, bx: 1440, by: 455, r: 9 },
+      { id: 'rink-northwest-post', type: 'capsule', ax: 1090, ay: 450, bx: 1100, by: 500, r: 9 },
+      { id: 'rink-south-rail', type: 'capsule', ax: 1150, ay: 628, bx: 1440, by: 628, r: 7 },
+      { id: 'rink-southwest-post', type: 'capsule', ax: 1144, ay: 580, bx: 1150, by: 625, r: 7 },
+      // Only the ground-contact bases are solid. The tall painted poles remain visually in front
+      // of or behind the avatar according to the artwork, without creating oversized invisible bars.
+      { id: 'lamp-northwest', type: 'ellipse', x: 420, y: 344, rx: 16, ry: 9 },
+      { id: 'lamp-trail-west', type: 'ellipse', x: 600, y: 263, rx: 16, ry: 9 },
+      { id: 'lamp-trail-east', type: 'ellipse', x: 850, y: 263, rx: 16, ry: 9 },
+      { id: 'lamp-fountain-east', type: 'ellipse', x: 1205, y: 350, rx: 16, ry: 9 },
+      { id: 'lamp-rink-east', type: 'ellipse', x: 1337, y: 490, rx: 16, ry: 9 },
+      { id: 'lamp-west-entry', type: 'ellipse', x: 101, y: 622, rx: 16, ry: 9 },
+      { id: 'lamp-den-west', type: 'ellipse', x: 540, y: 847, rx: 18, ry: 10 },
+      { id: 'lamp-den-east', type: 'ellipse', x: 910, y: 847, rx: 18, ry: 10 },
     ],
   },
 
   den: {
     boundary: {
-      type: 'ellipse', x: 720, y: 465, rx: 660, ry: 315,
-      doors: [{ x0: 564, x1: 876, y0: 660, y1: 960 }],
+      // Traced from the red floor edge on room-den.jpg. The entrance arch cuts a deep notch into
+      // the south edge; only the narrow blue cap is walkable, authored as the doorway union below.
+      type: 'polygon',
+      points: [
+        [390, 270], [490, 275], [575, 300], [640, 320], [720, 330],
+        [805, 320], [875, 300], [960, 270], [1055, 300], [1140, 330],
+        [1240, 350], [1320, 400], [1370, 470], [1395, 550], [1375, 620],
+        [1330, 680], [1240, 735], [1120, 785], [990, 820], [920, 825],
+        [875, 745], [835, 660], [785, 585], [655, 585], [605, 660],
+        [565, 745], [520, 825], [430, 820], [330, 795], [230, 755],
+        [145, 700], [85, 635], [50, 560], [50, 485], [75, 410],
+        [115, 350], [190, 310], [280, 280],
+      ],
+      // The narrow corridor continues down the painted tunnel so click-to-walk targets beyond the
+      // cap are not projected back onto its top edge. Runtime travel fires at y=624 before the
+      // player can continue out of the room.
+      doors: [{ x0: 668, x1: 772, y0: 560, y1: 960 }],
     },
     obstacles: [
-      { id: 'fireplace', type: 'roundRect', x: 720, y: 210, w: 255, h: 255, r: 34 },
-      { id: 'bed', type: 'roundRect', x: 300, y: 405, w: 365, h: 255, r: 28 },
-      { id: 'side-table', type: 'roundRect', x: 1150, y: 405, w: 280, h: 165, r: 24 },
-      { id: 'basket', type: 'ellipse', x: 1285, y: 535, rx: 52, ry: 66 },
+      { id: 'fireplace', type: 'roundRect', x: 720, y: 195, w: 285, h: 215, r: 34 },
+      {
+        id: 'bed', type: 'polygon',
+        points: [[292, 220], [500, 260], [515, 395], [455, 500], [335, 590],
+          [90, 548], [82, 390]],
+      },
+      {
+        id: 'side-table', type: 'polygon',
+        points: [[1065, 305], [1140, 285], [1190, 320], [1200, 270], [1295, 285],
+          [1315, 360], [1320, 455], [1275, 490], [1190, 520], [1090, 435]],
+      },
+      { id: 'basket', type: 'ellipse', x: 1295, y: 520, rx: 60, ry: 72 },
       { id: 'door-sign', type: 'roundRect', x: 1000, y: 790, w: 110, h: 82, r: 8 },
     ],
   },

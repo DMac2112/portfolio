@@ -240,6 +240,36 @@ describe('findAutoEnterDoor', () => {
       )).toBeNull();
     });
 
+    it('honours a smaller authored auto-enter radius for a deep threshold', () => {
+      const denExit = {
+        id: 'door-out', x: 720, y: 642, locked: false,
+        enterDir: { x: 0, y: 1 }, autoEnterRadius: 18,
+      };
+      expect(findAutoEnterDoor({ x: 720, y: 623 }, { x: 0, y: 4 }, [denExit], bounds))
+        .toBeNull();
+      expect(findAutoEnterDoor({ x: 720, y: 624 }, { x: 0, y: 4 }, [denExit], bounds))
+        .toBe(denExit);
+      expect(findAutoEnterDoor({ x: 720, y: 624 }, { x: 0, y: -4 }, [denExit], bounds))
+        .toBeNull();
+    });
+
+    it('treats an authored threshold width as a line across the corridor, not a point', () => {
+      const denExit = {
+        id: 'door-out', x: 720, y: 642, locked: false,
+        enterDir: { x: 0, y: 1 }, autoEnterRadius: 18, autoEnterHalfWidth: 52,
+      };
+      expect(findAutoEnterDoor({ x: 684, y: 630 }, { x: 0, y: 4 }, [denExit], bounds))
+        .toBe(denExit);
+      expect(findAutoEnterDoor({ x: 756, y: 700 }, { x: 0, y: 4 }, [denExit], bounds))
+        .toBe(denExit);
+      expect(findAutoEnterDoor({ x: 684, y: 620 }, { x: 0, y: 4 }, [denExit], bounds))
+        .toBeNull();
+      expect(findAutoEnterDoor({ x: 660, y: 640 }, { x: 0, y: 4 }, [denExit], bounds))
+        .toBeNull();
+      expect(findAutoEnterDoor({ x: 684, y: 640 }, { x: 0, y: -4 }, [denExit], bounds))
+        .toBeNull();
+    });
+
     it('leaves edge doors on the room-edge rule', () => {
       expect(findAutoEnterDoor({ x: 1316, y: 456 }, { x: 4, y: 0 }, [eastDoor], bounds))
         .toBe(eastDoor);

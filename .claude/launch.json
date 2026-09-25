@@ -4,8 +4,14 @@
     {
       "name": "frostbyte",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["C:/Users/domin/OneDrive/Desktop/Websites/portfolio-rework/dominikos/frostbyte/dev-server.cjs"],
+      "runtimeArgs": ["dominikos/frostbyte/dev-server.cjs"],
       "port": 5183
+    },
+    {
+      "name": "site-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["astro", "preview", "--port", "4321"],
+      "port": 4321
     }
   ]
 }

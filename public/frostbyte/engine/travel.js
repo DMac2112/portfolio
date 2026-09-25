@@ -148,8 +148,17 @@ export function findAutoEnterDoor(pos, movement, doors, bounds, maxDist = AUTO_D
     const outward = outwardVectorForDoor(door, bounds, maxDist);
     if (!outward || movement.x * outward.x + movement.y * outward.y <= 0) continue;
 
-    const dist = Math.hypot(door.x - pos.x, door.y - pos.y);
-    if (dist <= maxDist && dist < nearestDist) {
+    const dx = pos.x - door.x;
+    const dy = pos.y - door.y;
+    const dist = Math.hypot(dx, dy);
+    const contactRadius = door.autoEnterRadius ?? maxDist;
+    // A corridor door is a threshold line across its full width: off-centre lanes and anyone
+    // already past the line still leave, instead of only a small circle at the centre.
+    const inContact = door.autoEnterHalfWidth
+      ? dx * outward.x + dy * outward.y >= -contactRadius
+        && Math.abs(dx * outward.y - dy * outward.x) <= door.autoEnterHalfWidth
+      : dist <= contactRadius;
+    if (inContact && dist < nearestDist) {
       nearest = door;
       nearestDist = dist;
     }
