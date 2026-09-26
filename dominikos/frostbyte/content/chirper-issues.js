@@ -18,7 +18,7 @@ export const CHIRPER_ISSUES = Object.freeze([
     articles: Object.freeze([
       Object.freeze({ title: 'Postbox Develops a Rattle', body: 'No parcels are missing, but one red box sounds suspiciously pleased with itself.' }),
       Object.freeze({ title: 'Awning Snowfall Highly Local', body: 'A single Court awning released its entire snowcap at noon. The pavement directly beneath has declined comment.' }),
-      Object.freeze({ title: 'Workshop Door Finally Unstuck', body: 'Emberlight Workshop is open. Visitors are advised that “do not touch” means Pat has not tested it twice yet.' }),
+      Object.freeze({ title: 'Tinkerer Seeks Missing Bell Parts', body: 'Pat Hocket asks readers to report stray brass spirals, weather vanes, or clappers. “Do not touch” means Pat hasn’t tested it twice yet.' }),
     ]),
     hint: Object.freeze({ targetId: 'workshop-gizmo-chain', text: 'Editor’s hunch: the busiest shelf in Emberlight does seven things when poked, perhaps eight.' }),
   }),
@@ -26,8 +26,8 @@ export const CHIRPER_ISSUES = Object.freeze([
     id: 'small-noises',
     articles: Object.freeze([
       Object.freeze({ title: 'Chimes Ring Without Wind', body: 'The Bluehour awning chimed twice during a perfect calm. Patrons ordered a third round and waited.' }),
-      Object.freeze({ title: 'Patio Mittens Seek Owner', body: 'One violet pair remains beside the late table. They are dry, warm, and almost certainly up to something.' }),
-      Object.freeze({ title: 'Harbor Road Surveyed', body: 'Fresh marker posts appeared east of the Court. The route ends at a great deal of snow—for now.' }),
+      Object.freeze({ title: 'Patio Mittens Seek Owner', body: 'The violet pair turned out to be Pat’s. It is now a wrench cosy.' }),
+      Object.freeze({ title: 'Harbor Road Lamps Relit', body: 'Marker lamps now light the way from the Court to Driftgate Docks. The Gull keeps her own calendar, so watch the berth.' }),
     ]),
     hint: Object.freeze({ targetId: 'workshop-tube-thunk', text: 'Editor’s hunch: the Workshop message tube sounds heavier than an empty pipe.' }),
   }),
@@ -36,7 +36,7 @@ export const CHIRPER_ISSUES = Object.freeze([
     articles: Object.freeze([
       Object.freeze({ title: 'Fountain Coin Refuses to Sink', body: 'A brass glimmer has remained beneath the ice all week. No one remembers tossing it.' }),
       Object.freeze({ title: 'Coffee Foam Predicts Flurries', body: 'Today’s Northlight Blend formed a tiny spiral. Snow followed seven minutes later.' }),
-      Object.freeze({ title: 'Cobble Choir Gains One Note', body: 'A low hum was heard after closing. The Court watch found no musician and one unusually cold stone.' }),
+      Object.freeze({ title: 'Cobble Choir Hits Three Notes', body: 'Three low hums were heard after closing. The Court watch found no musician and one unusually cold stone.' }),
     ]),
     hint: Object.freeze({ targetId: 'court-wind-chimes', text: 'Editor’s hunch: look above the coffee awning, where the smallest ice pieces catch the breeze.' }),
   }),

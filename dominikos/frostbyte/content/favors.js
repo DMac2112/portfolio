@@ -36,9 +36,9 @@ export const EDDA_STORY_TIP_FAVORS = Object.freeze([
   freezeFavor({
     id: 'edda-tip-barge-arrival',
     ownerId: 'edda-quill',
-    title: 'Barge at the Breakwater',
+    title: 'Gull at the Breakwater',
     steps: [
-      { id: 'witness-barge-in-port', label: 'See the trader barge in port' },
+      { id: 'witness-barge-in-port', label: 'See the Driftwood Gull in port' },
       { id: 'report-to-edda', label: 'Report the arrival to Edda' },
     ],
     reward: { coins: 12 },

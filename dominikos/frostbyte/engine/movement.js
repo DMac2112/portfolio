@@ -7,7 +7,7 @@ export const ARRIVE_EPS = 4;       // px — below this, moveTarget clears (arri
 // Steers toward moveTarget each frame, same discrete-per-frame approach as game1
 // (NOT a k.tween() on position — a click mid-flight must be able to retarget
 // instantly without waiting out or cancelling a running tween).
-export function resolveMoveVector({ keys, moveTarget, pos, dt }) {
+export function resolveMoveVector({ keys, moveTarget, pos, dt, speed = SPEED }) {
   let dx = 0, dy = 0;
   if (keys.left) dx -= 1;
   if (keys.right) dx += 1;
@@ -25,7 +25,7 @@ export function resolveMoveVector({ keys, moveTarget, pos, dt }) {
   }
 
   const len = Math.hypot(dx, dy) || 1;
-  const vx = (dx / len) * SPEED, vy = (dy / len) * SPEED;
+  const vx = (dx / len) * speed, vy = (dy / len) * speed;
   return {
     vx, vy, dxPx: vx * dt, dyPx: vy * dt,
     moving: !arrived && (dx !== 0 || dy !== 0),

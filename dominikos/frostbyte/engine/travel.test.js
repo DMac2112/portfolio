@@ -240,6 +240,17 @@ describe('findAutoEnterDoor', () => {
       )).toBeNull();
     });
 
+    it('adds body padding to an authored door contact radius', () => {
+      const denExit = {
+        id: 'door-out', x: 720, y: 642, locked: false,
+        enterDir: { x: 0, y: 1 }, autoEnterRadius: 18,
+      };
+      const pos = { x: 720, y: 614 }; // 18 + 10 px from the threshold
+      const movement = { x: 0, y: 4 };
+      expect(findAutoEnterDoor(pos, movement, [denExit], bounds, AUTO_DOOR_R, 0)).toBeNull();
+      expect(findAutoEnterDoor(pos, movement, [denExit], bounds, AUTO_DOOR_R, 12)).toBe(denExit);
+    });
+
     it('honours a smaller authored auto-enter radius for a deep threshold', () => {
       const denExit = {
         id: 'door-out', x: 720, y: 642, locked: false,

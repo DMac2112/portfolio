@@ -2,6 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { resolveMoveVector, clampToBounds, resolveObstacles, resolveFacing, SPEED, ARRIVE_EPS } from './movement.js';
 
 describe('resolveMoveVector', () => {
+  it('uses an optional speed for the world step', () => {
+    const input = { keys: { right: true }, moveTarget: null, pos: { x: 0, y: 0 }, dt: 0.1 };
+    const normal = resolveMoveVector(input);
+    const fast = resolveMoveVector({ ...input, speed: SPEED * 2 });
+    expect(fast.dxPx).toBe(normal.dxPx * 2);
+  });
+
   it('zero input -> zero vector', () => {
     const r = resolveMoveVector({ keys: {}, moveTarget: null, pos: { x: 0, y: 0 }, dt: 1 / 60 });
     expect(r.vx).toBe(0); expect(r.vy).toBe(0); expect(r.moving).toBe(false);

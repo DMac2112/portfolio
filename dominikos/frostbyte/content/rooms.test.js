@@ -1,12 +1,31 @@
 import { describe, it, expect } from 'vitest';
 import { resolveDocksRoom } from './docks.js';
-import { ROOM_REGISTRY } from './rooms.js';
+import { ROOM_REGISTRY, bodyFactor } from './rooms.js';
 import { resolveRoomCollision } from '../world/room-collision.js';
 
 const INTERACT_R = 168; // must match main.js's interaction radius (P3's interaction.js)
 const EXPECTED_CLOSE_PAIRS = {
   docks: { 'anchor-captain-salka|salka-trader-stall': Math.hypot(150, 70) },
 };
+
+describe('avatar scale', () => {
+  it('uses the plaza baseline for outdoor and missing rooms', () => {
+    expect(bodyFactor(ROOM_REGISTRY.plaza)).toBe(1);
+    expect(bodyFactor()).toBe(1);
+  });
+
+  it('enlarges the den avatar against its painted furniture', () => {
+    expect(bodyFactor(ROOM_REGISTRY.den)).toBe(8 / 3);
+  });
+
+  it('keeps every authored avatar scale within the supported range', () => {
+    for (const room of Object.values(ROOM_REGISTRY)) {
+      if (room.avatarScale == null) continue;
+      expect(room.avatarScale).toBeGreaterThanOrEqual(3);
+      expect(room.avatarScale).toBeLessThanOrEqual(8);
+    }
+  });
+});
 
 describe('room configs', () => {
   for (const room of Object.values(ROOM_REGISTRY)) {

@@ -1,6 +1,7 @@
 // Pixel-aligned room collision profiles for the painted 480x320 backdrops at the room's x3 scale.
 // The artwork owns the physical silhouettes; content/rooms.js owns interactions and travel.
 import { clampToBounds, resolveObstacles } from '../engine/movement.js';
+import { BASE_AVATAR_SCALE, bodyFactor } from '../content/rooms.js';
 import { TRACED_ART } from './ground/index.js';
 
 // A room whose collision is traced off its backdrop (scripts/frostbyte-art): the painted ground is
@@ -389,16 +390,16 @@ function resolveShape(pos, radius, shape) {
   return resolveRect(pos, radius, shape);
 }
 
-function resolveFurniture(pos, radius, placed, catalogById) {
+function resolveFurniture(pos, radius, placed, catalogById, furnitureScale) {
   let next = pos;
   for (const p of placed ?? []) {
     const item = catalogById?.[p.id];
     if (!item || item.cls === 'rugs' || item.id === 'string-lights') continue;
-    const h = item.h * 3;
+    const h = item.h * furnitureScale;
     const depth = Math.max(9, Math.min(24, h * 0.28));
     next = resolveRoundRect(next, radius, {
       x: p.x, y: p.y + h / 2 - depth / 2 - 3,
-      w: item.w * 2.4, h: depth, r: Math.min(8, depth / 2),
+      w: item.w * furnitureScale * 0.8, h: depth, r: Math.min(8, depth / 2),
     });
   }
   return next;
@@ -415,7 +416,7 @@ export function collisionProfileForRoom(room) {
   return profileForRoom(room);
 }
 
-export function resolveRoomCollision(room, pos, radius, placed = [], catalogById = null) {
+export function resolveRoomCollision(room, pos, radius, placed = [], catalogById = null, furnitureScale = BASE_AVATAR_SCALE * bodyFactor(room)) {
   const profile = profileForRoom(room);
   if (!profile) return clampToBounds(resolveObstacles(pos, radius, room.solids ?? []), room.bounds);
 
@@ -423,7 +424,7 @@ export function resolveRoomCollision(room, pos, radius, placed = [], catalogById
   for (let pass = 0; pass < 8; pass++) {
     const before = next;
     for (const shape of profile.obstacles) next = resolveShape(next, radius, shape);
-    if (room.id === 'den') next = resolveFurniture(next, radius, placed, catalogById);
+    if (room.id === 'den') next = resolveFurniture(next, radius, placed, catalogById, furnitureScale);
     next = resolveBoundary(next, radius, profile.boundary);
     if (Math.hypot(next.x - before.x, next.y - before.y) < 0.01) break;
   }

@@ -271,6 +271,25 @@ describe('bad-index guards never throw', () => {
   });
 });
 
+describe('scaled furniture editing', () => {
+  it('snaps and clamps placements at the furniture scale', () => {
+    const home = mkHome();
+    const stock = { [STOOL.id]: 1 };
+    place(home, stock, STOOL, 99, 20, { x0: 0, x1: 100, y0: 0, y1: 100 }, 30, [], 8);
+    expect(home.placed[0]).toMatchObject({ x: 92, y: 32 });
+    move(home, 0, 49, 49, STOOL, WIDE_BOUNDS, [], 8);
+    expect(home.placed[0]).toMatchObject({ x: 64, y: 64 });
+  });
+
+  it('hit-tests the enlarged world rect', () => {
+    const home = mkHome({ placed: [{ id: STOOL.id, x: 24, y: 24, flip: false }] });
+    const catalog = { [STOOL.id]: STOOL };
+    expect(hitTest(home, catalog, 31, 24)).toBe(-1);
+    expect(hitTest(home, catalog, 31, 24, 8)).toBe(0);
+    expect(hitTest(home, catalog, 33, 24, 8)).toBe(-1);
+  });
+});
+
 describe('hitTest', () => {
   const catalogById = { [STOOL.id]: STOOL, [SOFA.id]: SOFA };
 

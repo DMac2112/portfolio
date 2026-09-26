@@ -3,9 +3,9 @@ export const LINE_POOLS = {
   AMBIENT: [
     { id: 'amb-01', text: "The snow's extra squeaky today.", durMs: 2200 },
     { id: 'amb-02', text: 'I keep losing my scarf in the wind.', durMs: 2600 },
-    { id: 'amb-03', text: 'Did you see the icicles on the workshop cart?', durMs: 2800 },
-    { id: 'amb-04', text: 'I could waddle around this plaza all day.', durMs: 2400 },
-    { id: 'amb-05', text: 'Someone left a snowball fort half-built again.', durMs: 2800 },
+    { id: 'amb-03', text: 'Have you seen how long the icicles are getting?', durMs: 2800 },
+    { id: 'amb-04', text: 'I could waddle around this isle all day.', durMs: 2400 },
+    { id: 'amb-05', text: 'Someone beat the Snowdrift Toss high score again.', durMs: 2800 },
     { id: 'amb-06', text: 'My flippers are cold. My flippers are always cold.', durMs: 2800 },
   ],
   WEATHER: [
