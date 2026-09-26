@@ -7,6 +7,10 @@
 // Camera bounds), the y-inset is relaxed to {y0:96,y1:936} so every door is reachable. Re-check
 // visually once the camera is live (no blank canvas past the map edge at any corner) and tighten
 // if needed.
+// Avatar sizes measured against painted doors and furniture using the plaza as the baseline.
+export const BASE_AVATAR_SCALE = 3;
+export const bodyFactor = (room) => (room?.avatarScale ?? BASE_AVATAR_SCALE) / BASE_AVATAR_SCALE;
+
 export const ROOM_REGISTRY = {
   plaza: {
     id: 'plaza',
@@ -35,7 +39,7 @@ export const ROOM_REGISTRY = {
       // the door opens the shop, the same as its prompt.
       { id: 'shop-glimmerwool', label: 'Glimmer & Wool', kind: 'shop', x: 1148, y: 290, entryDirection: 'up' },
       { id: 'minigame-snowdrift', label: 'Snowdrift Toss', kind: 'minigame', x: 1128, y: 552 },
-      { id: 'noticeboard-chronicle', label: 'The Chillmere Chronicle', kind: 'noticeboard', x: 168, y: 792 },
+      { id: 'noticeboard-chronicle', label: 'The Chillmere Chirper', kind: 'noticeboard', x: 168, y: 792 },
       { id: 'bench-north', label: null, kind: 'sit', x: 408, y: 264 },
       { id: 'bench-south', label: null, kind: 'sit', x: 552, y: 696 },
     ],
@@ -73,6 +77,7 @@ export const ROOM_REGISTRY = {
   // H1: Your Den — the player's private igloo-dome home. Furniture & edit-mode layers land in H2.
   den: {
     id: 'den',
+    avatarScale: 8,
     title: 'Your Den',
     mapAsset: 'room-den',                            // ./assets/room-den.png
     tile: 16, gridCols: 30, gridRows: 20,             // native 480x320, world 1440x960 — same as plaza
@@ -184,7 +189,7 @@ export const ROOM_REGISTRY = {
         solidId: 'snowtail-petshop',
         entryDirection: 'up',
         prompt: 'Visit the pet shop',
-        copy: 'Warm nests, tiny scarves, and three sleepy snowtails fill the window. The keeper says every companion chooses their own name.',
+        copy: 'Warm nests and tiny scarves fill the window, but the nests are empty. A card reads: ‘Snowtails arrive with the spring sailing.’',
       },
       {
         id: 'venue-bluehour-coffee', label: 'Bluehour Coffee', kind: 'venue', x: 840, y: 420,
@@ -257,7 +262,7 @@ export const ROOM_REGISTRY = {
       },
       {
         id: 'loose-cobble', reaction: 'hum', x: 900, y: 861, w: 90, h: 42,
-        line: 'A low note hums beneath the ice, then slips deeper.', reactionColor: '#6fe0b2',
+        line: 'Three low notes hum beneath the ice, then slip deeper.', reactionColor: '#6fe0b2',
       },
       {
         id: 'weather-bell-coil', reaction: 'chime', x: 411, y: 744, w: 60, h: 60,
@@ -275,6 +280,7 @@ export const ROOM_REGISTRY = {
   // Emberlight Workshop — Pat Hocket's forge-warm tinkering room and the Weather Bell project.
   workshop: {
     id: 'workshop',
+    avatarScale: 7.5,
     title: 'Emberlight Workshop',
     mapAsset: 'room-workshop',
     tile: 16, gridCols: 30, gridRows: 20,
@@ -464,6 +470,7 @@ export const ROOM_REGISTRY = {
   // Palefire Light — lower round keeper's room; the stairs lead to a separate gallery scene.
   'lighthouse-rest': {
     id: 'lighthouse-rest',
+    avatarScale: 7.5,
     title: 'Palefire Light — Keeper’s Rest',
     mapAsset: 'room-lighthouse-rest',
     tile: 16, gridCols: 30, gridRows: 20,
@@ -521,6 +528,7 @@ export const ROOM_REGISTRY = {
   // Palefire Light — upper gallery, telescope balcony, and the slowly sweeping great lamp.
   'lighthouse-gallery': {
     id: 'lighthouse-gallery',
+    avatarScale: 7.5,
     title: 'Palefire Light — Lantern Gallery',
     mapAsset: 'room-lighthouse-gallery',
     tile: 16, gridCols: 30, gridRows: 20,
@@ -699,6 +707,7 @@ export const ROOM_REGISTRY = {
   // Hollowfrost Caverns — W6 capstone reached through both previously foreshadowed entrances.
   caverns: {
     id: 'caverns',
+    avatarScale: 8,
     title: 'Hollowfrost Caverns',
     mapAsset: 'room-caverns',
     tile: 16, gridCols: 30, gridRows: 20,

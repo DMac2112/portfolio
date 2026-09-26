@@ -61,12 +61,12 @@ export function addSnowfall(k, room, reducedMotion) {
   });
 }
 
-export function createWalkPuffs(k, reducedMotion) {
+export function createWalkPuffs(k, reducedMotion, bf = 1) {
   if (reducedMotion) return { tick() {} };
   const pool = [];
   for (let i = 0; i < 6; i++) {
     const obj = k.add([
-      k.rect(13, 7, { radius: 6 }), k.pos(0, 0), k.anchor('center'),
+      k.rect(13 * bf, 7 * bf, { radius: 6 * bf }), k.pos(0, 0), k.anchor('center'),
       k.color(k.Color.fromHex(FROST)), k.opacity(0), k.scale(0.6), k.z(0),
     ]);
     pool.push({ obj, life: 0 });
@@ -76,7 +76,7 @@ export function createWalkPuffs(k, reducedMotion) {
     tick(dt, moving, pos) {
       for (const p of pool) if (p.life > 0) {
         p.life = Math.max(0, p.life - dt);
-        p.obj.pos.y -= 13 * dt;
+        p.obj.pos.y -= 13 * bf * dt;
         p.obj.opacity = p.life * 0.62;
         const s = 0.6 + (0.42 - p.life) * 0.9;
         p.obj.scale.x = s; p.obj.scale.y = s;
@@ -86,7 +86,7 @@ export function createWalkPuffs(k, reducedMotion) {
       if (clock < 0.14) return;
       clock = 0;
       const p = pool[cursor++ % pool.length];
-      p.life = 0.42; p.obj.pos.x = pos.x + (cursor % 2 ? -10 : 10); p.obj.pos.y = pos.y - 3;
+      p.life = 0.42; p.obj.pos.x = pos.x + (cursor % 2 ? -10 : 10) * bf; p.obj.pos.y = pos.y - 3 * bf;
       p.obj.z = pos.y - 1; p.obj.opacity = 0.26; p.obj.scale.x = 0.6; p.obj.scale.y = 0.6;
     },
   };
@@ -107,17 +107,17 @@ export function showMovePing(k, pos, reducedMotion) {
   });
 }
 
-export function showCoinSparkle(k, pos, reducedMotion) {
+export function showCoinSparkle(k, pos, reducedMotion, bf = 1) {
   if (reducedMotion) return;
   const spark = k.add([
-    k.text('✦', { size: 22 }), k.pos(pos.x, pos.y - 12), k.anchor('center'),
+    k.text('✦', { size: 22 }), k.pos(pos.x, pos.y - 12 * bf), k.anchor('center'),
     k.color(k.Color.fromHex(AMBER)), k.opacity(1), k.scale(0.45), k.z(120000),
   ]);
   let t = 0;
   spark.onUpdate(() => {
     t += Math.min(k.dt(), 0.05);
-    spark.pos.y -= 32 * Math.min(k.dt(), 0.05);
-    const s = Math.min(1.25, 0.45 + t * 3.4);
+    spark.pos.y -= 32 * bf * Math.min(k.dt(), 0.05);
+    const s = Math.min(1.25, 0.45 + t * 3.4) * bf;
     spark.scale.x = s; spark.scale.y = s; spark.opacity = Math.max(0, 1 - t * 1.8);
     if (t >= 0.56) k.destroy(spark);
   });

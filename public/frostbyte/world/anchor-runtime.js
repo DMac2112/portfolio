@@ -1,5 +1,6 @@
 // world/anchor-runtime.js — hand-placed named-character actors (World Plan W1).
 // Anchors are room data + custom one-off sprites, never roaming-persona reskins.
+import { BASE_AVATAR_SCALE, bodyFactor } from '../content/rooms.js';
 
 export function roomAnchorRecords(room, characters) {
   const byId = new Map(characters.map((character) => [character.id, character]));
@@ -21,21 +22,22 @@ export function loadAnchorSprites(k, characters, roomRegistry) {
 export function spawnRoomAnchors(k, room, characters, reducedMotion = false) {
   const actors = [];
   const interactables = [];
+  const scale = BASE_AVATAR_SCALE * bodyFactor(room);
   for (const { placement, character } of roomAnchorRecords(room, characters)) {
     const shadow = k.add([
-      k.rect(18 * room.scale, 5 * room.scale, { radius: 6 * room.scale }),
+      k.rect(18 * scale, 5 * scale, { radius: 6 * scale }),
       k.pos(placement.x, placement.y - 2), k.anchor('center'),
       k.color(k.Color.fromHex('#091827')), k.opacity(0.3), k.z(placement.y - 1),
     ]);
     const actor = k.add([
       k.sprite(character.spriteKey), k.pos(placement.x, placement.y), k.anchor('bot'),
-      k.scale(room.scale), k.z(placement.y), 'anchor-character',
+      k.scale(scale), k.z(placement.y), 'anchor-character',
     ]);
     let elapsed = 0;
     actor.onUpdate(() => {
       if (reducedMotion) return;
       elapsed += Math.min(k.dt(), 0.05);
-      actor.scale.y = room.scale * (1 + Math.sin(elapsed * 2.2) * 0.012);
+      actor.scale.y = scale * (1 + Math.sin(elapsed * 2.2) * 0.012);
     });
     actors.push({ actor, shadow, character });
     interactables.push({

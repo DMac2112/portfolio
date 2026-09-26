@@ -17,7 +17,7 @@ export const ROSTER = [
   { id: 'blot', name: 'Blot', homeRoomId: 'plaza', speedMul: 0.8, poolWeights: { AMBIENT: 2, MINIGAME_HYPE: 0, WEATHER: 1, COSMETIC_COMPLIMENT: 0 }, emoteIds: ['shiver-giggle', 'snow-flump'], paletteId: 'moss' },
   { id: 'ferro', name: 'Ferro', homeRoomId: 'plaza', speedMul: 1.0, poolWeights: { AMBIENT: 1, MINIGAME_HYPE: 0, WEATHER: 0, COSMETIC_COMPLIMENT: 0 }, emoteIds: ['wave-flipper', 'snow-flump'], paletteId: 'iron' },
   { id: 'sable', name: 'Sable', homeRoomId: 'plaza', speedMul: 0.95, poolWeights: { AMBIENT: 2, MINIGAME_HYPE: 0, WEATHER: 0, COSMETIC_COMPLIMENT: 0 }, emoteIds: ['shiver-giggle', 'spin-hop'], paletteId: 'plum' },
-  { id: 'chowder', name: 'Chowder', homeRoomId: 'cafe', speedMul: 1.0, poolWeights: { AMBIENT: 2, MINIGAME_HYPE: 0, WEATHER: 0, COSMETIC_COMPLIMENT: 0 }, emoteIds: ['sparkle-clap', 'wave-flipper'], paletteId: 'cocoa' },
+  { id: 'chowder', name: 'Chowder', homeRoomId: 'court', speedMul: 1.0, poolWeights: { AMBIENT: 2, MINIGAME_HYPE: 0, WEATHER: 0, COSMETIC_COMPLIMENT: 0 }, emoteIds: ['sparkle-clap', 'wave-flipper'], paletteId: 'cocoa' },
   { id: 'dot', name: 'Dot', homeRoomId: 'plaza', speedMul: 0.85, poolWeights: { AMBIENT: 2, MINIGAME_HYPE: 0, WEATHER: 0, COSMETIC_COMPLIMENT: 0 }, emoteIds: ['wave-flipper', 'shiver-giggle'], paletteId: 'petal' },
 ];
 

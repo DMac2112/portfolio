@@ -2,10 +2,10 @@
 // Pure logic lives in engine/*.js and is imported, never re-derived here (Engine & World
 // Architecture §1). Boot config + camera conventions are forked from game1/main.js.
 import kaplay from './vendor/kaplay.mjs';
-import { ROOM_REGISTRY } from './content/rooms.js';
+import { ROOM_REGISTRY, BASE_AVATAR_SCALE, bodyFactor } from './content/rooms.js';
 import { buildRoom, loadOccluders } from './world/build-room.js';
 import { loadAvatarSprites, makeAvatarActor } from './world/build-avatar.js';
-import { resolveMoveVector, resolveFacing } from './engine/movement.js';
+import { resolveMoveVector, resolveFacing, SPEED } from './engine/movement.js';
 import { computeCamPos, fitCamScale, clampCamPos, roomMapSize } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
@@ -16,6 +16,7 @@ import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
 import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
 import {
+  AUTO_VENUE_R,
   AUTO_VENUE_RESET_R,
   findAutoEnterVenue,
   findNearestInteractable,
@@ -33,9 +34,9 @@ import { createNewspaper } from './ui/newspaper.js';
 import { createTraderStall } from './ui/trader-stall.js';
 import { createTelescope } from './ui/telescope.js';
 import { nodeByRoom } from './content/map.js';
-import { canTravel, arriveSpawnId, discoveredTravelNode, findAutoEnterDoor } from './engine/travel.js';
+import { AUTO_DOOR_R, canTravel, arriveSpawnId, discoveredTravelNode, findAutoEnterDoor } from './engine/travel.js';
 import { FURNITURE_CATALOG, furnitureById, MAX_PLACED } from './content/furniture-catalog.js';
-import { SNAP, addToInventory, place as placeFurn, move as moveFurn, flip as flipFurn, store as storeFurn, hitTest } from './engine/home-editor.js';
+import { addToInventory, place as placeFurn, move as moveFurn, flip as flipFurn, store as storeFurn, hitTest } from './engine/home-editor.js';
 import { loadFurnitureSprites, initFurnitureLayer } from './world/furniture.js';
 import { createEditMode } from './ui/edit-mode.js';
 import { createCatalog } from './ui/catalog.js';
@@ -208,6 +209,10 @@ k.scene('room', (roomId, opts = {}) => {
     : roomId === 'whisperpine' ? resolveWhisperpineRoom(baseRoom, todayISO, save)
       : baseRoom;
   const room = resolveCavernEntrances(datedRoom, save);
+  const bf = bodyFactor(room);
+  const avatarScale = BASE_AVATAR_SCALE * bf;
+  const playerR = PLAYER_RADIUS * bf;
+  const pad = playerR - PLAYER_RADIUS;
   buildRoom(k, room);
   const map = roomMapSize(room);
   let camScale = 1;
@@ -239,14 +244,15 @@ k.scene('room', (roomId, opts = {}) => {
   }
 
   const catalogById = Object.fromEntries(FURNITURE_CATALOG.map((it) => [it.id, it]));
-  const collidePlayer = (pos) => resolveRoomCollision(room, pos, PLAYER_RADIUS, save.home.placed, catalogById);
+  const collidePlayer = (pos) => resolveRoomCollision(room, pos, playerR, save.home.placed, catalogById);
   let spawn = room.spawnPoints[opts.spawn] ?? room.spawnPoints.default;
   if (opts.resumePos) {
     const resolved = collidePlayer(opts.resumePos);
     spawn = Math.hypot(resolved.x - opts.resumePos.x, resolved.y - opts.resumePos.y) < 0.5
       ? opts.resumePos : room.spawnPoints.default;
   }
-  const avatar = makeAvatarActor(k, save.avatar, spawn, room.scale);
+  if (spawn !== opts.resumePos) spawn = { ...spawn, ...collidePlayer(spawn) };
+  const avatar = makeAvatarActor(k, save.avatar, spawn, avatarScale);
   const player = avatar.root;
 
   // Returning from the minigame: credit the earned coins (re-clamped to today's remaining cap).
@@ -257,7 +263,7 @@ k.scene('room', (roomId, opts = {}) => {
       recordCoins(save, todayISO, credited);
       persist(save);
       refreshCoins(true);
-      showCoinSparkle(k, player.pos, reduceMotion);
+      showCoinSparkle(k, player.pos, reduceMotion, bf);
       showCoinToast(`+${credited} coins!`);
     } else {
       showCoinToast('Daily coin cap reached');
@@ -276,7 +282,7 @@ k.scene('room', (roomId, opts = {}) => {
   let moveTarget = null;
   let animT = 0;
   let transitioning = false;
-  const walkPuffs = createWalkPuffs(k, reduceMotion);
+  const walkPuffs = createWalkPuffs(k, reduceMotion, bf);
   const changeScene = (go) => {
     if (transitioning) return;
     transitioning = true;
@@ -299,7 +305,7 @@ k.scene('room', (roomId, opts = {}) => {
   // NPC crowd — the "it only pretends" fake-multiplayer layer. Ticks and pauses for free, since
   // it's driven from this same k.onUpdate, which KAPLAY simply never calls while paused.
   const spawnConfig = ROOM_SPAWN[roomId];
-  const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, room.scale) : null;
+  const crowd = spawnConfig ? initRoomCrowd(k, roomId, spawnConfig, avatarScale) : null;
   const anchorLayer = spawnRoomAnchors(k, room, ANCHOR_CHARACTERS, reduceMotion);
 
   // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. Minigames, shops,
@@ -313,7 +319,7 @@ k.scene('room', (roomId, opts = {}) => {
     .filter((door) => !door.hidden)
     .map((d) => ({
       id: d.id, pos: { x: d.x, y: d.y }, kind: 'door', label: d.label, door: d,
-      interactionRadius: d.promptRadius,
+      interactionRadius: d.promptRadius == null ? undefined : d.promptRadius + pad,
     }));
   const interactPrompt = document.getElementById('interact-prompt');
   let nearest = null;
@@ -360,7 +366,7 @@ k.scene('room', (roomId, opts = {}) => {
     if (existing) existing.door = door;
     else doorInteractables.push({
       id: door.id, pos: { x: door.x, y: door.y }, kind: 'door', label: door.label, door,
-      interactionRadius: door.promptRadius,
+      interactionRadius: door.promptRadius == null ? undefined : door.promptRadius + pad,
     });
     showMovePing(k, { x: door.x, y: door.y + 34 }, reduceMotion);
     return door;
@@ -389,7 +395,7 @@ k.scene('room', (roomId, opts = {}) => {
     const reward = events?.find((event) => event.type === 'coins-earned');
     if (!reward) return false;
     refreshCoins(true);
-    showCoinSparkle(k, player.pos, reduceMotion);
+    showCoinSparkle(k, player.pos, reduceMotion, bf);
     showCoinToast(`+${reward.amount} coins — ${copy}`);
     return true;
   }
@@ -400,7 +406,7 @@ k.scene('room', (roomId, opts = {}) => {
     const bargeTip = favorById('edda-tip-barge-arrival');
     if (currentFavorStep(save, bargeTip)?.id === 'witness-barge-in-port') {
       const events = advanceTrackedFavor(bargeTip, 'witness-barge-in-port');
-      if (events) showCoinToast('Barge sighted — report the arrival to Edda');
+      if (events) showCoinToast('Gull sighted — report the arrival to Edda');
     }
   }
 
@@ -492,7 +498,7 @@ k.scene('room', (roomId, opts = {}) => {
       const greeting = dailyLine(character.linePools.greeting, todayISO, 'vesper-greeting');
       const pages = [greeting];
       if (hint) {
-        pages.push(`You show Vesper ${trade.found} stamped Curios. The fox studies every mark before offering one secret.`);
+        pages.push(`You show Vesper ${trade.found} stitched Curios. The fox studies every mark before offering one secret.`);
         pages.push(hint.text);
         if (hint.unlocks === 'moonwell') {
           revealRoomDoor('door-moonwell');
@@ -506,9 +512,9 @@ k.scene('room', (roomId, opts = {}) => {
         }
         persist(save);
       } else if (trade.complete) {
-        pages.push('You have heard every secret Vesper will trade for a stamped page. For now.');
+        pages.push('You have heard every secret Vesper will trade for a stitched page. For now.');
       } else {
-        pages.push(`Your Curio Log carries ${trade.found} stamps. Bring ${trade.hint.requiredCurios} and Vesper will trade the next hint.`);
+        pages.push(`Your Curio Log carries ${trade.found} stitches. Bring ${trade.hint.requiredCurios} and Vesper will trade the next hint.`);
         pages.push(`${trade.remaining} more ${trade.remaining === 1 ? 'Curio' : 'Curios'} should persuade the fox.`);
       }
       dialogueUI.open({
@@ -618,14 +624,14 @@ k.scene('room', (roomId, opts = {}) => {
   // Floating emote symbol above the player + a11y announce (no body-frame animation — Avatar §3).
   function playEmote(id) {
     const sym = k.add([
-      k.text(emoteSymbol(id), { size: 14 }), k.pos(player.pos.x, player.pos.y - 84),
+      k.text(emoteSymbol(id), { size: 14 }), k.pos(player.pos.x, player.pos.y - 84 * bf),
       k.anchor('center'), k.z(100002), k.opacity(1), k.scale(reduceMotion ? 1 : 0.45),
     ]);
     let life = 0;
     sym.onUpdate(() => {
       life += k.dt();
       sym.pos.x = player.pos.x;
-      sym.pos.y = player.pos.y - 84 - (reduceMotion ? 0 : life * 30);
+      sym.pos.y = player.pos.y - 84 * bf - (reduceMotion ? 0 : life * 30 * bf);
       if (!reduceMotion) {
         const u = Math.min(1, life / 0.24), v = u - 1;
         const s = 0.45 + 0.55 * (1 + 2.70158 * v ** 3 + 1.70158 * v ** 2);
@@ -648,7 +654,7 @@ k.scene('room', (roomId, opts = {}) => {
    * Canvas owns pick-to-place, click-select and drag-move below.
    * ---------------------------------------------------------------- */
   const isHome = roomId === 'den';
-  const furnLayer = isHome ? initFurnitureLayer(k, save.home, room.scale) : null;
+  const furnLayer = isHome ? initFurnitureLayer(k, save.home, avatarScale) : null;
   let pickId = null;   // tray item armed for placement
   let selIdx = -1;     // selected placed-furniture index
   let dragging = false;
@@ -699,7 +705,7 @@ k.scene('room', (roomId, opts = {}) => {
   function editPress(w) {
     if (pickId) {
       const item = furnitureById(pickId);
-      const r = placeFurn(save.home, save.furniture, item, w.x, w.y, room.bounds, MAX_PLACED, []);
+      const r = placeFurn(save.home, save.furniture, item, w.x, w.y, room.bounds, MAX_PLACED, [], avatarScale);
       if (r.ok) {
         if ((save.furniture[pickId] ?? 0) <= 0) { pickId = null; editMode.clearPick(); }
         selectPlaced(r.index);
@@ -707,7 +713,7 @@ k.scene('room', (roomId, opts = {}) => {
       }
       return;
     }
-    const hit = hitTest(save.home, catalogById, w.x, w.y);
+    const hit = hitTest(save.home, catalogById, w.x, w.y, avatarScale);
     selectPlaced(hit);
     dragging = hit >= 0;
   }
@@ -718,12 +724,12 @@ k.scene('room', (roomId, opts = {}) => {
     if (!editMode.isOpen() || chatUI.isOpen() || selIdx < 0) return;
     const p = save.home.placed[selIdx];
     const item = p && furnitureById(p.id);
-    if (item && moveFurn(save.home, selIdx, p.x + dx, p.y + dy, item, room.bounds, []).ok) syncEditUI();
+    if (item && moveFurn(save.home, selIdx, p.x + dx, p.y + dy, item, room.bounds, [], avatarScale).ok) syncEditUI();
   };
-  k.onKeyPress('left', () => nudge(-SNAP, 0));
-  k.onKeyPress('right', () => nudge(SNAP, 0));
-  k.onKeyPress('up', () => nudge(0, -SNAP));
-  k.onKeyPress('down', () => nudge(0, SNAP));
+  k.onKeyPress('left', () => nudge(-4 * avatarScale, 0));
+  k.onKeyPress('right', () => nudge(4 * avatarScale, 0));
+  k.onKeyPress('up', () => nudge(0, -4 * avatarScale));
+  k.onKeyPress('down', () => nudge(0, 4 * avatarScale));
   k.onKeyPress('r', () => {
     if (editMode.isOpen() && !chatUI.isOpen() && selIdx >= 0 && flipFurn(save.home, selIdx, []).ok) syncEditUI();
   });
@@ -747,7 +753,7 @@ k.scene('room', (roomId, opts = {}) => {
   ]) : null;
   const visitorSched = isHome ? newVisitorScheduler((Date.now() % 2147483647) | 0) : null;
   const visitorLayer = isHome
-    ? initVisitorLayer(k, { scale: room.scale, doorPos: { x: 720, y: 800 }, getPlaced: () => save.home.placed })
+    ? initVisitorLayer(k, { scale: avatarScale, doorPos: { x: 720, y: 800 }, getPlaced: () => save.home.placed })
     : null;
   const visitorPersonaIds = ROSTER.map((p) => p.id);
   k.onSceneLeave(() => {
@@ -844,7 +850,7 @@ k.scene('room', (roomId, opts = {}) => {
     anyOverlayOpen,
     reducedMotion: reduceMotion,
     isEnabled: (prop) => {
-      if (prop.requiresProximity && Math.hypot(player.pos.x - prop.x, player.pos.y - prop.y) > 120) return false;
+      if (prop.requiresProximity && Math.hypot(player.pos.x - prop.x, player.pos.y - prop.y) > 120 + pad) return false;
       if (!prop.onlyWhenFavorStep) return true;
       const link = prop.favorStep;
       const definition = favorById(link?.favorId);
@@ -905,13 +911,13 @@ k.scene('room', (roomId, opts = {}) => {
     if (top.id !== curBubbleId) {
       clearPlayerBubble();
       const w = Math.min(180, Math.max(48, top.text.length * 6 + 16));
-      const rim = player.add([k.rect(w + 4, 26, { radius: 9 }), k.pos(0, -78), k.anchor('center'),
+      const rim = player.add([k.rect(w + 4, 26, { radius: 9 }), k.pos(0, -78 * bf), k.anchor('center'),
         k.color(k.Color.fromHex('#3b8fb8')), k.opacity(0.82), k.scale(reduceMotion ? 1 : 0.82), k.z(99997)]);
-      const bg = player.add([k.rect(w, 22, { radius: 7 }), k.pos(0, -78), k.anchor('center'),
+      const bg = player.add([k.rect(w, 22, { radius: 7 }), k.pos(0, -78 * bf), k.anchor('center'),
         k.color(k.Color.fromHex('#eaf7ff')), k.opacity(0.96), k.scale(reduceMotion ? 1 : 0.82), k.z(99998)]);
-      const tail = player.add([k.text('▼', { size: 11 }), k.pos(0, -64), k.anchor('center'),
+      const tail = player.add([k.text('▼', { size: 11 }), k.pos(0, -64 * bf), k.anchor('center'),
         k.color(k.Color.fromHex('#eaf7ff')), k.scale(reduceMotion ? 1 : 0.82), k.z(99998)]);
-      const txt = player.add([k.text(top.text, { size: 9, width: w - 10 }), k.pos(0, -78), k.anchor('center'),
+      const txt = player.add([k.text(top.text, { size: 9, width: w - 10 }), k.pos(0, -78 * bf), k.anchor('center'),
         k.color(k.Color.fromHex('#122a42')), k.scale(reduceMotion ? 1 : 0.82), k.z(99999)]);
       bubbleObjs = { rim, bg, tail, txt }; curBubbleId = top.id; bubblePopT = 0;
     }
@@ -955,7 +961,7 @@ k.scene('room', (roomId, opts = {}) => {
       const w = k.toWorld(k.mousePos());
       const p = save.home.placed[selIdx];
       const item = p && furnitureById(p.id);
-      if (item && moveFurn(save.home, selIdx, w.x, w.y, item, room.bounds, []).ok) furnLayer?.sync();
+      if (item && moveFurn(save.home, selIdx, w.x, w.y, item, room.bounds, [], avatarScale).ok) furnLayer?.sync();
     }
     const keys = frozen ? {} : {
       left: k.isKeyDown('left') || k.isKeyDown('a'),
@@ -964,7 +970,7 @@ k.scene('room', (roomId, opts = {}) => {
       down: k.isKeyDown('down') || k.isKeyDown('s'),
     };
     const { dxPx, dyPx, moving, arrived, keysCancelTarget } =
-      resolveMoveVector({ keys, moveTarget: frozen ? null : moveTarget, pos: player.pos, dt });
+      resolveMoveVector({ keys, moveTarget: frozen ? null : moveTarget, pos: player.pos, dt, speed: SPEED * Math.sqrt(bf) });
 
     if (keysCancelTarget) moveTarget = null;
     if (arrived) moveTarget = null;
@@ -979,19 +985,22 @@ k.scene('room', (roomId, opts = {}) => {
       { x: dxPx, y: dyPx },
       room.doors ?? [],
       room.bounds,
+      AUTO_DOOR_R,
+      pad,
     );
     if (autoDoor) { enterDoor(autoDoor); return; }
 
     const latchedVenue = autoVenueLatch
       ? hotspotInteractables.find(h => h.id === autoVenueLatch)
       : null;
-    if (latchedVenue && Math.hypot(latchedVenue.pos.x - next.x, latchedVenue.pos.y - next.y) > AUTO_VENUE_RESET_R) {
+    if (latchedVenue && Math.hypot(latchedVenue.pos.x - next.x, latchedVenue.pos.y - next.y) > AUTO_VENUE_RESET_R + pad) {
       autoVenueLatch = null;
     }
     const autoVenue = findAutoEnterVenue(
       next,
       { x: dxPx, y: dyPx },
       hotspotInteractables,
+      AUTO_VENUE_R + pad,
     );
     if (autoVenue && autoVenue.id !== autoVenueLatch) { enterVenue(autoVenue); return; }
 
@@ -1016,7 +1025,7 @@ k.scene('room', (roomId, opts = {}) => {
       const p = pickupObjs[i];
       const pdx = player.pos.x - p.obj.pos.x;
       const pdy = player.pos.y - p.obj.pos.y;
-      if (pdx * pdx + pdy * pdy < 40 * 40) {
+      if (pdx * pdx + pdy * pdy < (40 + pad) ** 2) {
         if (collectPickup(save, p.id, todayISO, [])) {
           const trailTip = favorById('edda-tip-trail-glint');
           const witnessed = currentFavorStep(save, trailTip)?.id === 'witness-trail-glint'
@@ -1052,7 +1061,7 @@ k.scene('room', (roomId, opts = {}) => {
           if (greetNpc(save, e.personaId, todayISO, [])) {
             refreshCoins(true);
             persist(save);
-            showCoinSparkle(k, player.pos, reduceMotion);
+            showCoinSparkle(k, player.pos, reduceMotion, bf);
             showCoinToast('+2 coins — visitor tip!');
           }
           continue;

@@ -137,7 +137,7 @@ function outwardVectorForDoor(door, bounds, maxEdgeDist) {
  * @param {number} [maxDist]
  * @returns {Object|null}
  */
-export function findAutoEnterDoor(pos, movement, doors, bounds, maxDist = AUTO_DOOR_R) {
+export function findAutoEnterDoor(pos, movement, doors, bounds, maxDist = AUTO_DOOR_R, pad = 0) {
   if (!pos || !movement || !Array.isArray(doors) || !bounds) return null;
   if (Math.hypot(movement.x, movement.y) === 0) return null;
 
@@ -145,13 +145,13 @@ export function findAutoEnterDoor(pos, movement, doors, bounds, maxDist = AUTO_D
   let nearestDist = Infinity;
   for (const door of doors) {
     if (door.locked) continue;
-    const outward = outwardVectorForDoor(door, bounds, maxDist);
+    const outward = outwardVectorForDoor(door, bounds, AUTO_DOOR_R + pad);
     if (!outward || movement.x * outward.x + movement.y * outward.y <= 0) continue;
 
     const dx = pos.x - door.x;
     const dy = pos.y - door.y;
     const dist = Math.hypot(dx, dy);
-    const contactRadius = door.autoEnterRadius ?? maxDist;
+    const contactRadius = (door.autoEnterRadius ?? maxDist) + pad;
     // A corridor door is a threshold line across its full width: off-centre lanes and anyone
     // already past the line still leave, instead of only a small circle at the centre.
     const inContact = door.autoEnterHalfWidth

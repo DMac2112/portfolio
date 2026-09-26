@@ -133,7 +133,7 @@ export const EDDA_DIALOGUE_TREE = Object.freeze({
     }),
     'offer-barge': Object.freeze({
       pages: Object.freeze([
-        'Captain Salka’s barge comes and goes on its own stubborn calendar.',
+        'Captain Salka’s ship, the Driftwood Gull, comes and goes on its own stubborn calendar.',
         'If The Driftwood Gull is tied up at Driftgate Docks, bring me the arrival before the tide takes it away again.',
       ]),
       choices: Object.freeze([
@@ -148,13 +148,13 @@ export const EDDA_DIALOGUE_TREE = Object.freeze({
       ]),
     }),
     'accepted-barge': Object.freeze({
-      pages: Object.freeze(['Look for the oilskin pennant and the cargo crane. If Salka is ashore, that is the story.']),
+      pages: Object.freeze(['Look for the orange oilskin pennant and the cargo crane. If Salka is ashore, that is the story.']),
     }),
     reminder: Object.freeze({
       pages: Object.freeze(['Catch one of the strange glints on Frostline Trail, then report back here.']),
     }),
     'reminder-workshop': Object.freeze({
-      pages: Object.freeze(['Visit Emberlight Workshop and click the Weather Bell when Pat is not looking worried.']),
+      pages: Object.freeze(['Visit Emberlight Workshop and give the Weather Bell one careful tap. Pat says it’s safe. Mostly.']),
     }),
     'reminder-barge': Object.freeze({
       pages: Object.freeze(['Walk east through Glasswind Court to Driftgate Docks. The berth itself will tell you whether Salka is in port.']),
@@ -204,7 +204,7 @@ export const PAT_DIALOGUE_TREE = Object.freeze({
     'offer-bell': Object.freeze({
       pages: Object.freeze([
         'The Weather Bell. It should ring before a storm and hum before an aurora.',
-        'Its coil rolled into Glasswind Court, its vane caught on Frostline Trail, and its clapper went with a shipment bound for Driftgate Docks.',
+        'Its first test-ring blew it apart: the coil rolled into Glasswind Court, the vane sailed up Frostline Trail, and the clapper landed in a crate Salka loaded onto the Driftwood Gull.',
       ]),
       choices: Object.freeze([
         Object.freeze({
@@ -227,7 +227,7 @@ export const PAT_DIALOGUE_TREE = Object.freeze({
       pages: Object.freeze(['Next: the wind vane snagged on the old signpost along Frostline Trail.']),
     }),
     'waiting-docks': Object.freeze({
-      pages: Object.freeze(['Two parts recovered. The final clapper is cargo at Driftgate Docks. Check Salka’s stall when the barge is in port.']),
+      pages: Object.freeze(['Two parts recovered. The clapper is still in Salka’s cargo. Look for it at Driftgate Docks when the Gull is in port.']),
     }),
     'return-ready': Object.freeze({
       pages: Object.freeze(['All three! Hold the pieces steady while I persuade the Bell to become one machine.']),
@@ -286,7 +286,7 @@ export const MAREN_DIALOGUE_TREE = Object.freeze({
       choices: Object.freeze([Object.freeze({ id: 'leave', label: 'I’ll mind the horizon.', next: null })]),
     }),
     'offer-vista': Object.freeze({
-      pages: Object.freeze([MAREN_DAILY_GREETING, 'Take the spiral stair and give the telescope one unhurried look. Then tell me what stayed with you.']),
+      pages: Object.freeze([MAREN_DAILY_GREETING, 'Go up through the east arch and give the telescope one unhurried look. Then tell me what stayed with you.']),
       choices: Object.freeze([
         Object.freeze({
           id: 'take-vista', label: 'I’ll study the horizon.', next: 'accepted-vista',
@@ -351,7 +351,7 @@ export const MAREN_DIALOGUE_TREE = Object.freeze({
         Object.freeze({ id: 'later', label: 'Not yet.', next: null }),
       ]),
     }),
-    'accepted-gull': Object.freeze({ pages: Object.freeze(['On an away-day the telescope will find Salka beyond the floes. Her pennant is signal orange.']) }),
+    'accepted-gull': Object.freeze({ pages: Object.freeze(['On an away-day the telescope will find Salka beyond the floes. Her pennant is orange oilskin.']) }),
     'reminder-gull': Object.freeze({ pages: Object.freeze(['If the berth is empty, climb to the telescope. The Gull should be somewhere in the outer current.']) }),
     'reported-gull': Object.freeze({ pages: Object.freeze(['Eastbound and steady. I’ll mark the course; the harbor can breathe easier.']) }),
     completed: Object.freeze({ pages: Object.freeze(['Three careful sightings, three honest reports. The blank pages look less lonely now.']) }),
@@ -458,7 +458,7 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     linePools: { greeting: [
       'You found this den. I never said it was mine.',
       'The forest moved me again. Or you. Hard to tell from here.',
-      'A stamped Curio is a secret that agreed to be remembered.',
+      'A stitched Curio is a secret that agreed to be remembered.',
     ] }, favorDefs: [],
   },
   {

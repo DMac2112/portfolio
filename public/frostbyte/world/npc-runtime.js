@@ -58,19 +58,20 @@ export function realEmoteFor(persona, syntheticEmoteId) {
 const ROW_BASE = { down: 0, side: 4, up: 8 };
 const dirGroup = (f) => (f === 'left' || f === 'right' ? 'side' : f);
 
-function showSpeechBubble(k, actor, text) {
+function showSpeechBubble(k, actor, text, scale) {
   if (!text) return;
   const w = Math.min(160, Math.max(50, text.length * 6 + 16));
+  const bf = scale / 3;
   const bg = actor.root.add([
-    k.rect(w, 24, { radius: 9 }), k.pos(0, -76), k.anchor('center'),
+    k.rect(w, 24, { radius: 9 }), k.pos(0, -76 * bf), k.anchor('center'),
     k.color(k.Color.fromHex('#eaf7ff')), k.opacity(0.96), k.z(99999),
   ]);
   const tail = actor.root.add([
-    k.text('▼', { size: 11 }), k.pos(0, -61), k.anchor('center'),
+    k.text('▼', { size: 11 }), k.pos(0, -61 * bf), k.anchor('center'),
     k.color(k.Color.fromHex('#eaf7ff')), k.z(99999),
   ]);
   const label = actor.root.add([
-    k.text(text, { size: 9, width: w - 10 }), k.pos(0, -76), k.anchor('center'),
+    k.text(text, { size: 9, width: w - 10 }), k.pos(0, -76 * bf), k.anchor('center'),
     k.color(k.Color.fromHex('#122a42')), k.z(100000),
   ]);
   return { bg, label, tail };
@@ -132,7 +133,7 @@ export function initRoomCrowd(k, roomId, config, scale) {
       if (e.type === 'speak') {
         clearBubble(npc.id);
         const line = realLineFor(persona, e.lineId);
-        const bubble = showSpeechBubble(k, actor, line?.text);
+        const bubble = showSpeechBubble(k, actor, line?.text, scale);
         if (bubble) {
           bubbles.set(npc.id, bubble);
           k.wait(Math.max(0.4, (line?.durMs ?? e.durMs) / 1000), () => clearBubble(npc.id));

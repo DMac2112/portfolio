@@ -17,7 +17,7 @@ export const TELESCOPE_VISTAS = Object.freeze([
   Object.freeze({
     id: 'salka-at-sea',
     title: 'The Gull Under Sail',
-    copy: 'The Driftwood Gull leans into the blue current. Salka’s orange pennant is a pinprick beyond the floes.',
+    copy: 'The Driftwood Gull leans into the blue current. Salka’s orange oilskin pennant is a pinprick beyond the floes.',
     asset: './assets/vistas/salka-at-sea.png',
   }),
 ]);
