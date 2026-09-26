@@ -3,6 +3,7 @@
 // localStorage directly — it calls the economy engine, then the injected persist(), then notifies
 // main.js to re-composite the in-game avatar and update the coin HUD.
 import { BODY_COLORS, ITEM_CATALOG, EQUIP_SLOTS } from '../content/cosmetics.js';
+import { closeOnBackdrop } from './backdrop.js';
 import { unlockItem, equipItem, setBodyColor } from '../engine/economy.js';
 
 const TABS = [
@@ -16,7 +17,7 @@ const TABS = [
 // Singleton state (Home Plan §8.1): `k.scene('room', …)` re-runs on every room change and every
 // return from a minigame, and each run used to call createDressUp(...) again — the DOM lookups
 // were already idempotent (getElementById finds the same #customize-overlay every time), but
-// `overlay.addEventListener('keydown', …)` was NOT: it stacked one more listener per scene entry.
+// event listeners were NOT: they stacked one more listener per scene entry.
 // `instance` caches the listeners/render-closures built on the FIRST call ever; `boundOpts` is a
 // mutable ref every handler reads through, rebound on EVERY call. This matters beyond hygiene:
 // `onChange` in particular closes over that scene's own `avatar` actor, which KAPLAY destroys on
@@ -92,7 +93,7 @@ export function createDressUp(opts) {
   const isOpen = () => !overlay.classList.contains('hidden');
 
   closeBtn.onclick = close;
-  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
 
   instance = { open, close, isOpen, render };
   return instance;

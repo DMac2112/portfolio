@@ -1,33 +1,23 @@
 // Pixel-aligned room collision profiles for the painted 480x320 backdrops at the room's x3 scale.
 // The artwork owns the physical silhouettes; content/rooms.js owns interactions and travel.
 import { clampToBounds, resolveObstacles } from '../engine/movement.js';
-import { PLAZA_GROUND, PLAZA_FREESTANDING } from './plaza-ground.js';
+import { TRACED_ART } from './ground/index.js';
+
+// A room whose collision is traced off its backdrop (scripts/frostbyte-art): the painted ground is
+// the boundary, and everything painted standing in it (props' footprints, the igloo...) a hole.
+function traced(asset, extra = {}) {
+  const art = TRACED_ART[asset];
+  return {
+    boundary: { type: 'polygon', points: art.GROUND, ...extra.boundary },
+    obstacles: [
+      ...art.HOLES.map(({ id, points }) => ({ id, type: 'polygon', points })),
+      ...(extra.obstacles ?? []),
+    ],
+  };
+}
 
 const PROFILES = {
-  plaza: {
-    // The painted ground itself (see world/plaza-ground.js): buildings, snowbanks, the fountain,
-    // lamp posts, fences and the Chronicle board all sit outside it.
-    boundary: { type: 'polygon', points: PLAZA_GROUND },
-    obstacles: [
-      ...PLAZA_FREESTANDING,
-      // Traced off the painted dome in room-plaza.jpg: apex ~(720,723), widest ~x600..838 around
-      // y850, then the snow entrance tunnel steps down to y~918. The lit mouth (the golden arch,
-      // x~691..752) is left open as a notch cut up into the tunnel, so the player walks into the
-      // doorway itself instead of being clamped inside a rectangular corridor.
-      {
-        id: 'den-igloo', type: 'polygon',
-        points: [
-          [720, 723], [740, 725], [760, 733], [778, 743], [795, 757], [810, 773],
-          [822, 792], [832, 812], [838, 835], [836, 855], [828, 868], [818, 878],
-          [802, 888], [784, 896], [766, 902], [760, 910], [755, 918],
-          [755, 860], [688, 860], [688, 918],
-          [680, 918], [676, 908], [668, 898], [652, 890], [638, 881], [626, 871],
-          [614, 860], [604, 845], [600, 826], [604, 806], [612, 788], [622, 772],
-          [636, 757], [652, 745], [670, 735], [692, 727],
-        ],
-      },
-    ],
-  },
+  plaza: traced('room-plaza'),
 
   den: {
     boundary: {
@@ -66,66 +56,8 @@ const PROFILES = {
     ],
   },
 
-  trail: {
-    boundary: {
-      type: 'polygon',
-      points: [[90, 450], [210, 330], [390, 300], [510, 270], [585, 330],
-        [855, 330], [930, 300], [1130, 300], [1260, 375], [1350, 450],
-        [1350, 660], [1260, 720], [1290, 900], [840, 900], [720, 960],
-        [600, 900], [180, 900], [180, 780], [90, 720]],
-      doors: [
-        { x0: 660, x1: 780, y0: 840, y1: 960 },
-        { x0: 1260, x1: 1440, y0: 420, y1: 570 },
-      ],
-    },
-    obstacles: [
-      { id: 'west-boulder', type: 'ellipse', x: 270, y: 365, rx: 130, ry: 76 },
-      { id: 'north-lantern', type: 'capsule', ax: 960, ay: 250, bx: 960, by: 380, r: 10 },
-      { id: 'trail-sign', type: 'roundRect', x: 1090, y: 350, w: 128, h: 88, r: 8 },
-      { id: 'east-lantern', type: 'capsule', ax: 1205, ay: 540, bx: 1205, by: 710, r: 10 },
-    ],
-  },
-
-  court: {
-    boundary: { type: 'rect', x0: 0, x1: 1440, y0: 0, y1: 960 },
-    obstacles: [
-      {
-        id: 'snowtail-building', type: 'polygon',
-        points: [[-40, -40], [610, -40], [625, 205], [565, 330], [505, 390],
-          [380, 425], [-40, 450]],
-        opening: { x0: 320, x1: 405, y0: 330, y1: 470 },
-      },
-      {
-        id: 'bluehour-building', type: 'polygon',
-        points: [[720, -40], [1090, -40], [1120, 220], [1050, 350], [900, 400],
-          [760, 365], [700, 250]],
-        opening: { x0: 800, x1: 880, y0: 330, y1: 450 },
-      },
-      {
-        id: 'lantern-ladle-building', type: 'polygon',
-        points: [[1050, 110], [1480, 70], [1480, 700], [1280, 700], [1170, 635],
-          [1020, 570], [995, 300]],
-        opening: { x0: 1068, x1: 1170, y0: 535, y1: 690 },
-      },
-      {
-        id: 'southwest-buildings', type: 'polygon',
-        points: [[-40, 620], [430, 640], [550, 760], [565, 1000], [-40, 1000]],
-      },
-      {
-        id: 'southeast-buildings', type: 'polygon',
-        points: [[870, 1000], [1480, 1000], [1480, 680], [1200, 720], [1020, 700],
-          [900, 800]],
-        opening: { x0: 1188, x1: 1360, y0: 708, y1: 960 },
-      },
-      { id: 'court-cart', type: 'roundRect', x: 495, y: 535, w: 155, h: 145, r: 18 },
-      { id: 'patio-table', type: 'ellipse', x: 655, y: 825, rx: 58, ry: 35 },
-      { id: 'patio-brazier', type: 'ellipse', x: 760, y: 815, rx: 46, ry: 44 },
-      { id: 'patio-chair-west', type: 'roundRect', x: 620, y: 885, w: 50, h: 78, r: 8 },
-      { id: 'patio-chair-north', type: 'roundRect', x: 820, y: 755, w: 45, h: 75, r: 8 },
-      { id: 'patio-chair-east', type: 'roundRect', x: 850, y: 880, w: 50, h: 78, r: 8 },
-      { id: 'edda-nook', type: 'roundRect', x: 930, y: 785, w: 58, h: 74, r: 8 },
-    ],
-  },
+  trail: traced('room-trail'),
+  court: traced('room-court'),
 
   workshop: {
     boundary: {
@@ -151,220 +83,14 @@ const PROFILES = {
     ],
   },
 
-  'docks-away': {
-    boundary: {
-      type: 'regions',
-      polygons: [
-        [[270, 240], [750, 180], [1200, 300], [1080, 474], [975, 369],
-          [705, 312], [450, 336], [309, 450]],
-        [[1200, 300], [1410, 360], [1320, 600], [1140, 660], [1020, 618],
-          [1080, 474]],
-        [[1320, 600], [900, 960], [720, 900], [804, 726], [1020, 618]],
-        [[720, 900], [180, 600], [270, 480], [366, 576], [570, 690], [804, 726]],
-        [[180, 600], [0, 540], [0, 250], [270, 240], [309, 450], [366, 576]],
-        [[855, -20], [1065, -20], [1110, 300], [960, 360], [840, 240]],
-      ],
-      doors: [
-        { x0: 0, x1: 180, y0: 420, y1: 540 },
-        { x0: 915, x1: 1065, y0: 0, y1: 180 },
-      ],
-    },
-    obstacles: [
-      {
-        id: 'warehouse', type: 'polygon',
-        points: [[0, 0], [500, 0], [510, 270], [390, 345], [60, 330], [0, 270]],
-      },
-      {
-        id: 'crane', type: 'polygon',
-        points: [[1080, 0], [1440, 0], [1440, 450], [1260, 475], [1080, 330]],
-      },
-      {
-        id: 'southwest-buildings', type: 'polygon',
-        points: [[0, 650], [390, 650], [570, 780], [570, 960], [0, 960]],
-      },
-      {
-        id: 'southeast-buildings', type: 'polygon',
-        points: [[870, 960], [1440, 960], [1440, 650], [1110, 650], [900, 780]],
-        opening: { x0: 1080, x1: 1320, y0: 720, y1: 930 },
-      },
-      {
-        id: 'central-water', type: 'polygon',
-        points: [[620, 365], [850, 365], [1010, 425], [1050, 480], [980, 585],
-          [830, 675], [720, 710], [590, 670], [470, 595], [400, 525], [485, 455]],
-      },
-      {
-        id: 'east-water', type: 'polygon',
-        points: [[1110, 535], [1310, 555], [1380, 500], [1440, 540], [1440, 720],
-          [1300, 700], [1190, 760], [990, 760], [1070, 680], [1095, 600]],
-      },
-      { id: 'harbor-bell', type: 'capsule', ax: 635, ay: 75, bx: 635, by: 250, r: 16 },
-    ],
-  },
-
-  'docks-port': {
-    boundary: {
-      type: 'regions',
-      polygons: [
-        [[0, 300], [600, 270], [900, 360], [1005, 450], [930, 525], [765, 570],
-          [645, 735], [390, 645], [165, 525], [0, 495]],
-        [[-20, 705], [360, 555], [570, 615], [120, 960], [-20, 960]],
-        [[1350, 390], [1460, 450], [1460, 630], [900, 960], [750, 900], [1260, 510]],
-        [[705, 510], [870, 435], [1080, 475], [1215, 585], [1110, 810],
-          [900, 850], [720, 750]],
-        [[510, 440], [900, 455], [925, 570], [540, 570]],
-        [[870, -20], [1080, -20], [1080, 330], [840, 390]],
-      ],
-      doors: [
-        { x0: 0, x1: 180, y0: 420, y1: 540 },
-        { x0: 900, x1: 1060, y0: 0, y1: 180 },
-      ],
-    },
-    obstacles: [
-      {
-        id: 'warehouse', type: 'polygon',
-        points: [[0, 0], [550, 0], [570, 270], [450, 345], [60, 330], [0, 270]],
-      },
-      {
-        id: 'crane', type: 'polygon',
-        points: [[1080, 0], [1440, 0], [1440, 435], [1260, 455], [1090, 330]],
-      },
-      {
-        id: 'southwest-buildings', type: 'polygon',
-        points: [[0, 650], [390, 650], [570, 780], [570, 960], [0, 960]],
-      },
-      {
-        id: 'southeast-buildings', type: 'polygon',
-        points: [[870, 960], [1440, 960], [1440, 650], [1110, 650], [900, 780]],
-        opening: { x0: 1080, x1: 1320, y0: 720, y1: 930 },
-      },
-      {
-        id: 'starboard-water', type: 'polygon',
-        points: [[1120, 435], [1280, 465], [1240, 510], [1200, 570], [1160, 630],
-          [1120, 690], [1080, 730], [1050, 720], [1080, 660], [1100, 600],
-          [1120, 540], [1130, 480]],
-      },
-      { id: 'cargo-stack', type: 'roundRect', x: 760, y: 455, w: 245, h: 125, r: 18 },
-      { id: 'ship-mast', type: 'capsule', ax: 975, ay: 350, bx: 975, by: 590, r: 20 },
-    ],
-  },
-
-  'lighthouse-rest': {
-    boundary: {
-      type: 'ellipse', x: 720, y: 480, rx: 655, ry: 350,
-      doors: [
-        { x0: 630, x1: 810, y0: 735, y1: 960 },
-        { x0: 1210, x1: 1440, y0: 390, y1: 565 },
-      ],
-    },
-    obstacles: [
-      { id: 'keeper-stove', type: 'roundRect', x: 465, y: 295, w: 185, h: 165, r: 18 },
-      { id: 'logbook-table', type: 'roundRect', x: 300, y: 495, w: 250, h: 170, r: 18 },
-      { id: 'spiral-stairs', type: 'roundRect', x: 1115, y: 420, w: 270, h: 260, r: 28 },
-      { id: 'keeper-cot', type: 'roundRect', x: 1060, y: 705, w: 310, h: 190, r: 24 },
-      { id: 'lamp-table', type: 'roundRect', x: 420, y: 745, w: 210, h: 145, r: 18 },
-      { id: 'sealed-north-door', type: 'capsule', ax: 620, ay: 270, bx: 820, by: 270, r: 12 },
-    ],
-  },
-
-  'lighthouse-gallery': {
-    boundary: {
-      type: 'ellipse', x: 720, y: 500, rx: 655, ry: 345,
-      doors: [{ x0: 0, x1: 265, y0: 365, y1: 565 }],
-    },
-    obstacles: [
-      { id: 'great-lamp', type: 'roundRect', x: 720, y: 300, w: 215, h: 260, r: 34 },
-      { id: 'telescope', type: 'roundRect', x: 1140, y: 375, w: 245, h: 170, r: 22 },
-      { id: 'supply-chest', type: 'roundRect', x: 370, y: 700, w: 260, h: 130, r: 24 },
-    ],
-  },
-
-  whisperpine: {
-    boundary: {
-      type: 'polygon',
-      points: [[120, 360], [300, 220], [570, 195], [720, 175], [900, 200],
-        [1140, 225], [1260, 345], [1320, 450], [1320, 660], [1170, 720],
-        [1230, 900], [780, 900], [600, 900], [300, 870], [120, 720]],
-      doors: [
-        { x0: 0, x1: 210, y0: 405, y1: 555 },
-        { x0: 650, x1: 790, y0: 0, y1: 240 },
-        { x0: 1260, x1: 1440, y0: 405, y1: 588 },
-      ],
-    },
-    obstacles: [
-      {
-        id: 'listening-grove', type: 'polygon',
-        points: [[585, 300], [675, 240], [785, 255], [865, 360], [840, 570],
-          [720, 610], [600, 570]],
-      },
-      { id: 'root-den', type: 'ellipse', x: 245, y: 285, rx: 150, ry: 115 },
-      {
-        id: 'fallen-root', type: 'polygon',
-        points: [[1080, 420], [1440, 390], [1440, 600], [1240, 610], [1110, 555]],
-        opening: { x0: 1260, x1: 1440, y0: 430, y1: 636 },
-      },
-      { id: 'berry-bush', type: 'ellipse', x: 365, y: 770, rx: 80, ry: 68 },
-    ],
-  },
-
-  moonwell: {
-    boundary: {
-      type: 'polygon',
-      points: [[90, 300], [330, 250], [540, 240], [600, 120], [840, 120],
-        [900, 240], [1110, 260], [1350, 330], [1350, 600], [1110, 690],
-        [900, 700], [840, 850], [600, 850], [540, 700], [300, 690], [90, 600]],
-      doors: [{ x0: 630, x1: 810, y0: 780, y1: 960 }],
-    },
-    obstacles: [
-      { id: 'moonwell-pool', type: 'ellipse', x: 720, y: 450, rx: 265, ry: 140 },
-      { id: 'moonwell-bench', type: 'roundRect', x: 450, y: 680, w: 190, h: 75, r: 12 },
-      { id: 'west-sign', type: 'roundRect', x: 300, y: 325, w: 60, h: 85, r: 8 },
-      { id: 'east-sign', type: 'roundRect', x: 1275, y: 390, w: 60, h: 85, r: 8 },
-    ],
-  },
-
-  caverns: {
-    boundary: {
-      type: 'polygon',
-      points: [[120, 150], [360, 120], [570, 120], [720, 150], [870, 120],
-        [1080, 150], [1260, 240], [1350, 390], [1320, 600], [1260, 720],
-        [1140, 840], [900, 870], [720, 900], [540, 870], [300, 840],
-        [150, 690], [90, 480]],
-      doors: [{ x0: 1260, x1: 1440, y0: 405, y1: 555 }],
-    },
-    obstacles: [
-      {
-        id: 'west-crystals', type: 'polygon',
-        points: [[0, 120], [330, 120], [450, 285], [405, 390], [270, 405],
-          [165, 480], [0, 480]],
-      },
-      {
-        id: 'listening-arch', type: 'polygon',
-        points: [[570, 105], [660, 45], [720, 20], [795, 75], [870, 180],
-          [825, 300], [600, 300]],
-        opening: { x0: 665, x1: 775, y0: 145, y1: 330 },
-      },
-      {
-        id: 'east-crystals', type: 'polygon',
-        points: [[900, 120], [1160, 120], [1320, 210], [1440, 240], [1440, 420],
-          [1230, 420], [1120, 360], [960, 330]],
-      },
-      {
-        id: 'east-roots', type: 'polygon',
-        points: [[1110, 300], [1440, 300], [1440, 555], [1270, 555], [1190, 480],
-          [1080, 450]],
-        opening: { x0: 1260, x1: 1440, y0: 405, y1: 588 },
-      },
-      { id: 'underisle-pool', type: 'ellipse', x: 720, y: 780, rx: 285, ry: 130 },
-      {
-        id: 'southwest-crystals', type: 'polygon',
-        points: [[0, 600], [170, 585], [330, 690], [390, 900], [300, 960], [0, 960]],
-      },
-      {
-        id: 'southeast-crystals', type: 'polygon',
-        points: [[1140, 690], [1300, 600], [1440, 600], [1440, 960], [1100, 960]],
-      },
-    ],
-  },
+  // Traced off each backdrop (scripts/frostbyte-art/rooms/<asset>.mjs); docks has one per art state.
+  'docks-away': traced('room-docks-away'),
+  'docks-port': traced('room-docks-port'),
+  'lighthouse-rest': traced('room-lighthouse-rest'),
+  'lighthouse-gallery': traced('room-lighthouse-gallery'),
+  whisperpine: traced('room-whisperpine'),
+  moonwell: traced('room-moonwell'),
+  caverns: traced('room-caverns'),
 };
 
 const sign = (n) => (n < 0 ? -1 : 1);

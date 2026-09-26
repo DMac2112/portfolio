@@ -15,6 +15,7 @@
 // frozen/minigame travel guards belong to the integrator (main.js), which should only ever call
 // map.open() when it's actually safe to do so.
 import { MAP_BG, MAP_NODES } from '../content/map.js';
+import { closeOnBackdrop } from './backdrop.js';
 
 let stylesInjected = false;
 
@@ -205,7 +206,7 @@ export function createMap({ getCurrent, isDiscovered = () => true, onTravel }) {
     });
   }
   closeBtn.onclick = close;
-  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
 
   instance = { open, close, isOpen };
   return instance;

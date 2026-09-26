@@ -31,8 +31,9 @@ export const ROOM_REGISTRY = {
     camera: { leadY: -50 },
     hotspots: [
       { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 1000, y: 400 },
-      // On the painted door of the timber house just north-east of the fountain.
-      { id: 'shop-glimmerwool', label: 'Glimmer & Wool', kind: 'shop', x: 1148, y: 290 },
+      // On the painted door of the timber house just north-east of the fountain: walking up into
+      // the door opens the shop, the same as its prompt.
+      { id: 'shop-glimmerwool', label: 'Glimmer & Wool', kind: 'shop', x: 1148, y: 290, entryDirection: 'up' },
       { id: 'minigame-snowdrift', label: 'Snowdrift Toss', kind: 'minigame', x: 1128, y: 552 },
       { id: 'noticeboard-chronicle', label: 'The Chillmere Chronicle', kind: 'noticeboard', x: 168, y: 792 },
       { id: 'bench-north', label: null, kind: 'sit', x: 408, y: 264 },
@@ -136,9 +137,9 @@ export const ROOM_REGISTRY = {
     ],
     pickups: [
       { id: 'trail-glint-1', x: 300, y: 650 },
-      { id: 'trail-glint-2', x: 720, y: 300 },
+      { id: 'trail-glint-2', x: 720, y: 370 },
       { id: 'trail-glint-3', x: 1150, y: 500 },
-      { id: 'trail-glint-4', x: 500, y: 250 },
+      { id: 'trail-glint-4', x: 560, y: 390 },
     ],
     clickables: [
       {
@@ -172,7 +173,7 @@ export const ROOM_REGISTRY = {
     bounds: { x0: 72, x1: 1368, y0: 96, y1: 888 },
     spawnPoints: {
       default:    { x: 720, y: 420, facing: 'down' },
-      fromPlaza:  { x: 168, y: 480, facing: 'right' },
+      fromPlaza:  { x: 168, y: 525, facing: 'right' },
       fromDocks:  { x: 1290, y: 858, facing: 'up' },
       fromMap:    { x: 720, y: 720, facing: 'up' },
     },
@@ -361,6 +362,22 @@ export const ROOM_REGISTRY = {
     title: 'Driftgate Docks',
     mapAsset: 'room-docks-away',
     stateAssets: { inPort: 'room-docks-port', away: 'room-docks-away' },
+    // The two backdrops are painted differently. Away: the lighthouse stairs sit further west, and
+    // there is no ledge under the east pier, so its cache sits under the pier's edge, reached from the
+    // planks. In port: the Glasswind boardwalk joins higher up the west edge, and Salka's stall is on
+    // her deck (the old spot is the hull).
+    statePositions: {
+      away: {
+        spawnPoints: { fromLighthouse: { x: 903 } },
+        doors: { 'door-lighthouse': { x: 940 } },
+        clickables: { 'underpier-cache': { x: 1110, y: 700 } },
+      },
+      inPort: {
+        spawnPoints: { fromCourt: { y: 369 } },
+        doors: { 'door-court': { y: 326 } },
+        hotspots: { 'salka-trader-stall': { x: 990, y: 620 } },
+      },
+    },
     tile: 16, gridCols: 30, gridRows: 20,
     scale: 3,
     bounds: { x0: 72, x1: 1368, y0: 96, y1: 888 },
@@ -464,7 +481,8 @@ export const ROOM_REGISTRY = {
     ],
     doors: [
       { id: 'door-docks', label: 'Driftgate Docks', x: 720, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromLighthouse' },
-      { id: 'stairs-gallery', label: 'Lantern Gallery', x: 1320, y: 480, targetRoom: 'lighthouse-gallery', locked: false, targetSpawn: 'fromRest' },
+      // On the threshold of the east arch, whose stairs climb to the gallery (y480 is the cabinet top).
+      { id: 'stairs-gallery', label: 'Lantern Gallery', x: 1300, y: 440, targetRoom: 'lighthouse-gallery', locked: false, targetSpawn: 'fromRest' },
     ],
     solids: [
       { id: 'keeper-stove', x: 360, y: 285, w: 220, h: 170 },

@@ -46,13 +46,21 @@ export function resolveDocksRoom(room, todayKey) {
   if (!room || !state) return room ?? null;
   const bottle = bottleMessageForDate(todayKey);
   const inPort = state.inPort;
+  // The two backdrops paint some things in different places (stairs, boardwalk, Salka's stall).
+  const moved = room.statePositions?.[inPort ? 'inPort' : 'away'] ?? {};
   return {
     ...room,
     mapAsset: inPort ? room.stateAssets.inPort : room.stateAssets.away,
-    hotspots: (room.hotspots ?? []).filter((entry) => matchesBargeState(entry, inPort)),
+    spawnPoints: Object.fromEntries(Object.entries(room.spawnPoints ?? {})
+      .map(([id, point]) => [id, { ...point, ...moved.spawnPoints?.[id] }])),
+    doors: (room.doors ?? []).map((door) => ({ ...door, ...moved.doors?.[door.id] })),
+    hotspots: (room.hotspots ?? [])
+      .filter((entry) => matchesBargeState(entry, inPort))
+      .map((entry) => ({ ...entry, ...moved.hotspots?.[entry.id] })),
     anchors: (room.anchors ?? []).filter((entry) => matchesBargeState(entry, inPort)),
     clickables: (room.clickables ?? [])
       .filter((entry) => matchesBargeState(entry, inPort))
+      .map((entry) => ({ ...entry, ...moved.clickables?.[entry.id] }))
       .map((entry) => entry.id === 'bottle-post' ? { ...entry, line: bottle?.text ?? entry.line } : entry),
     docksState: {
       ...state,

@@ -1,13 +1,13 @@
 // fullscreen-toggle.js — the HUD's "Play full screen" button (IMPURE DOM glue, injected deps so
 // it tests without a browser). Full screen takes the whole display, past DominikOS's window and
 // browser chrome; the camera's cover-fit (engine/camera.js) keeps the view inside the painted map
-// at the new size. Esc leaves natively, and the button follows that via fullscreenchange.
+// at the new size. Esc closes open menus first, then exits full screen; the button follows fullscreenchange.
 export const FULLSCREEN_LABELS = {
   enter: 'Play full screen',
   exit: 'Exit full screen',
 };
 
-export function createFullscreenToggle({ doc, root, button, frost = null, reducedMotion = false }) {
+export function createFullscreenToggle({ doc, root, button, frost = null, reducedMotion = false, nav = null }) {
   if (!button) return null;
   if (!doc.fullscreenEnabled || typeof root?.requestFullscreen !== 'function') {
     button.hidden = true;   // e.g. an embed without allow="fullscreen", or iOS Safari on iPhone
@@ -19,6 +19,8 @@ export function createFullscreenToggle({ doc, root, button, frost = null, reduce
 
   function sync() {
     const full = isFull();
+    if (full) Promise.resolve(nav?.keyboard?.lock?.(['Escape'])).catch(() => {});
+    else nav?.keyboard?.unlock?.();
     const label = full ? FULLSCREEN_LABELS.exit : FULLSCREEN_LABELS.enter;
     button.setAttribute('aria-pressed', String(full));
     button.setAttribute('aria-label', label);

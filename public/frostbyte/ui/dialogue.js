@@ -1,5 +1,6 @@
 // ui/dialogue.js — singleton controller for the existing #dialogue-overlay (World Plan W0).
 // Existing ids stay intact; W0 adds portrait/name/page/choice affordances around them.
+import { closeOnBackdrop } from './backdrop.js';
 
 let instance = null;
 
@@ -100,7 +101,7 @@ export function createDialogue() {
     else focusAdvanceTarget();
   };
   closeBtn.onclick = close;
-  overlay?.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
 
   instance = { open, close, isOpen };
   return instance;

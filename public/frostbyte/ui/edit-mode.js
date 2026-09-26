@@ -257,12 +257,6 @@ export function createEditMode(opts) {
   exitBtn.onclick = () => cb.onExit?.();
   flipBtn.onclick = () => cb.onFlipSelected?.();
   storeBtn.onclick = () => cb.onStoreSelected?.();
-  // Document-level (not scoped to `tray`): unlike the full-screen scrim overlays, this tray is
-  // non-modal — the room canvas stays clickable, so focus routinely lands outside the tray's DOM
-  // subtree (e.g. after clicking the canvas to place a picked item). A tray-scoped keydown listener
-  // would miss Esc in that case; the isOpen() guard keeps this inert whenever the tray is hidden, so
-  // it's still safe as a permanent (singleton-built-once) document listener.
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) cb.onExit?.(); });
 
   instance = { open, close, isOpen, refresh, setSelected, clearPick };
   return instance;
