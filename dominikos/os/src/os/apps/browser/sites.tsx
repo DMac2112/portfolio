@@ -87,6 +87,40 @@ function FrostbyteFrame({ focused }: { focused: boolean }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const bridgeReady = useRef(false);
 
+  // While the game is full screen, Esc must reach it (to close its menus first) instead of the
+  // browser dropping out of full screen at once. Keyboard Lock only works from the top-level page,
+  // so the OS takes it for the frame; holding Esc still leaves. No-op where unsupported.
+  useEffect(() => {
+    const kb = (navigator as Navigator & {
+      keyboard?: { lock?: (keys: string[]) => Promise<void>; unlock?: () => void };
+    }).keyboard;
+    if (!kb?.lock) return;
+    let locked = false;
+    const sync = () => {
+      if (document.fullscreenElement === frameRef.current && frameRef.current) {
+        locked = true;
+        kb.lock?.(['Escape'])?.catch(() => { locked = false; });
+      } else if (locked) {
+        locked = false;
+        kb.unlock?.();
+      }
+    };
+    // Esc inside the frame never reaches this document; one that does means focus is out here,
+    // where the game can't see it — so leave full screen ourselves rather than swallow it.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && locked && document.fullscreenElement === frameRef.current) {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    };
+    document.addEventListener('fullscreenchange', sync);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('fullscreenchange', sync);
+      document.removeEventListener('keydown', onKey);
+      if (locked) kb.unlock?.();
+    };
+  }, []);
+
   useEffect(() => {
     const post = (type: 'pause' | 'resume') =>
       frameRef.current?.contentWindow?.postMessage({ ch: BRIDGE_CH, type }, window.location.origin);

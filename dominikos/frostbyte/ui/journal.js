@@ -1,6 +1,7 @@
 // ui/journal.js — singleton Curio Log overlay (World Plan W0). A knit-bound expedition book,
 // intentionally distinct from the game's frosted-glass utility chrome.
 import { isCurioFound, roomProgress, totalProgress } from '../engine/curios.js';
+import { closeOnBackdrop } from './backdrop.js';
 
 let instance = null;
 let stylesInjected = false;
@@ -184,7 +185,7 @@ export function createJournal({ registry, getState, getRoomLabel }) {
 
   const isOpen = () => !overlay.classList.contains('hidden');
   closeBtn.onclick = close;
-  overlay.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
   instance = { open, close, isOpen, refresh };
   return instance;
 }

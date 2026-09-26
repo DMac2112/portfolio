@@ -1,4 +1,5 @@
 // ui/newspaper.js — singleton cork-board/paper overlay for The Chillmere Chirper (World Plan W1).
+import { closeOnBackdrop } from './backdrop.js';
 
 let instance = null;
 let stylesInjected = false;
@@ -132,7 +133,7 @@ export function createNewspaper({ getIssue }) {
 
   const isOpen = () => !overlay.classList.contains('hidden');
   closeBtn.onclick = close;
-  overlay.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
   instance = { open, close, isOpen, refresh };
   return instance;
 }

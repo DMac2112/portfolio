@@ -9,6 +9,7 @@ import { resolveMoveVector, resolveFacing } from './engine/movement.js';
 import { computeCamPos, fitCamScale, clampCamPos, roomMapSize } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
+import { resumeTarget, snapshotPos, movedEnough } from './engine/resume.js';
 import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup, unlockItem, equipItem } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
@@ -62,6 +63,7 @@ import { addDodgeWisps } from './world/will-o-wisps.js';
 import { addEchoPresence } from './world/echo-runtime.js';
 import { addAuroraAmbient } from './world/aurora-ambient.js';
 import { createFullscreenToggle } from './world/fullscreen-toggle.js';
+import { handleEscape } from './ui/escape-key.js';
 
 // ?embedded=1 -> running inside a DominikOS window: the OS chrome provides close/back.
 const embedded = new URLSearchParams(location.search).get('embedded') === '1';
@@ -79,10 +81,18 @@ const reduceMotion = Boolean(save.prefs?.reducedMotion || window.matchMedia?.('(
 checkDailyLogin(save, todayISO, []);
 persist(save);
 
+// Leaving or hiding the page saves the player's exact spot; the room scene sets snapshotNow.
+let snapshotNow = null;
+window.addEventListener('pagehide', () => snapshotNow?.());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') snapshotNow?.();
+});
+
 // Full screen takes the whole display (past the OS window when embedded); the room camera
 // re-fits on the resize it causes, so the view stays inside the painted map.
 createFullscreenToggle({
   doc: document,
+  nav: navigator,
   root: document.documentElement,
   button: document.getElementById('fullscreen-btn'),
   frost: document.getElementById('frost-pane'),
@@ -181,6 +191,10 @@ function showDialogue(title, body) {
  * ------------------------------------------------------------------ */
 const HUD_BTN_IDS = ['map-btn', 'journal-btn', 'say-btn', 'dressup-btn', 'emote-bar'];
 let inMinigame = false;
+let escapeLayers = [];
+document.addEventListener('keydown', (event) => {
+  handleEscape(event, { layers: escapeLayers, inMinigame, doc: document });
+});
 function setHudVisible(v) {
   for (const id of HUD_BTN_IDS) { const el = document.getElementById(id); if (el) el.hidden = !v; }
 }
@@ -208,7 +222,6 @@ k.scene('room', (roomId, opts = {}) => {
   // Remember where the player is — the map's "You are here" pin reads this (H1).
   save.prefs.lastRoom = roomId;
   if (!save.visitedRooms.includes(roomId)) save.visitedRooms.push(roomId);
-  persist(save);
 
   // Back in a room: restore the HUD the minigame hid, and let travel guards relax.
   setHudVisible(true);
@@ -225,7 +238,14 @@ k.scene('room', (roomId, opts = {}) => {
       k.color(k.Color.fromHex('#f4f8fc')), k.z(100001)]);
   }
 
-  const spawn = room.spawnPoints[opts.spawn] ?? room.spawnPoints.default;
+  const catalogById = Object.fromEntries(FURNITURE_CATALOG.map((it) => [it.id, it]));
+  const collidePlayer = (pos) => resolveRoomCollision(room, pos, PLAYER_RADIUS, save.home.placed, catalogById);
+  let spawn = room.spawnPoints[opts.spawn] ?? room.spawnPoints.default;
+  if (opts.resumePos) {
+    const resolved = collidePlayer(opts.resumePos);
+    spawn = Math.hypot(resolved.x - opts.resumePos.x, resolved.y - opts.resumePos.y) < 0.5
+      ? opts.resumePos : room.spawnPoints.default;
+  }
   const avatar = makeAvatarActor(k, save.avatar, spawn, room.scale);
   const player = avatar.root;
 
@@ -244,7 +264,15 @@ k.scene('room', (roomId, opts = {}) => {
     }
   }
 
-  let facing = spawn.facing === 'left' ? 'left' : 'down';
+  let facing = spawn === opts.resumePos && ['left', 'right', 'up', 'down'].includes(spawn.facing)
+    ? spawn.facing : spawn.facing === 'left' ? 'left' : 'down';
+  save.prefs.lastPos = snapshotPos(roomId, spawn, facing);
+  persist(save);
+  snapshotNow = () => {
+    save.prefs.lastPos = snapshotPos(roomId, player.pos, facing);
+    persist(save);
+  };
+  let savePosElapsed = 0;
   let moveTarget = null;
   let animT = 0;
   let transitioning = false;
@@ -621,8 +649,6 @@ k.scene('room', (roomId, opts = {}) => {
    * ---------------------------------------------------------------- */
   const isHome = roomId === 'den';
   const furnLayer = isHome ? initFurnitureLayer(k, save.home, room.scale) : null;
-  const catalogById = Object.fromEntries(FURNITURE_CATALOG.map((it) => [it.id, it]));
-  const collidePlayer = (pos) => resolveRoomCollision(room, pos, PLAYER_RADIUS, save.home.placed, catalogById);
   let pickId = null;   // tray item armed for placement
   let selIdx = -1;     // selected placed-furniture index
   let dragging = false;
@@ -644,6 +670,7 @@ k.scene('room', (roomId, opts = {}) => {
     editMode.setSelected(idx >= 0 ? { label: furnitureById(save.home.placed[idx].id)?.label ?? '' } : null);
   };
 
+  const exitEditMode = () => { editMode.close(); pickId = null; dragging = false; editMode.clearPick(); selectPlaced(-1); };
   const editMode = createEditMode({
     getInventory: invList,
     getPlacedCount: () => save.home.placed.length,
@@ -655,7 +682,7 @@ k.scene('room', (roomId, opts = {}) => {
     },
     onFlipSelected: () => { if (selIdx >= 0 && flipFurn(save.home, selIdx, []).ok) syncEditUI(); },
     onOpenCatalog: () => catalogUI.open(),
-    onExit: () => { editMode.close(); pickId = null; dragging = false; editMode.clearPick(); selectPlaced(-1); },
+    onExit: exitEditMode,
   });
   const catalogUI = createCatalog({
     getCoins: () => save.coins,
@@ -723,7 +750,10 @@ k.scene('room', (roomId, opts = {}) => {
     ? initVisitorLayer(k, { scale: room.scale, doorPos: { x: 720, y: 800 }, getPlaced: () => save.home.placed })
     : null;
   const visitorPersonaIds = ROSTER.map((p) => p.id);
-  k.onSceneLeave(() => visitorLayer?.clear());
+  k.onSceneLeave(() => {
+    snapshotNow = null;
+    visitorLayer?.clear();
+  });
 
   // Trail pickups (H4) — walk-over coin glints, +1 each, daily-gated per id via
   // economy.collectPickup (the last of the S2 economy fns to go live). Already-collected
@@ -795,6 +825,8 @@ k.scene('room', (roomId, opts = {}) => {
     transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || journalUI.isOpen() ||
     newspaperUI.isOpen() || dialogueUI.isOpen() || traderUI.isOpen() || telescopeUI.isOpen() ||
     editMode.isOpen() || catalogUI.isOpen();
+  escapeLayers = [catalogUI, dialogueUI, chatUI, dressUp, traderUI, telescopeUI, newspaperUI, journalUI, mapUI,
+    { isOpen: editMode.isOpen, close: exitEditMode }];
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
@@ -964,6 +996,14 @@ k.scene('room', (roomId, opts = {}) => {
     if (autoVenue && autoVenue.id !== autoVenueLatch) { enterVenue(autoVenue); return; }
 
     facing = resolveFacing(dxPx, dyPx, facing);
+    savePosElapsed += dt;
+    if (savePosElapsed >= 2) {
+      savePosElapsed = 0;
+      if (movedEnough(player.pos, save.prefs.lastPos)) {
+        save.prefs.lastPos = snapshotPos(roomId, player.pos, facing);
+        persist(save);
+      }
+    }
     animT += dt;
     const walkFrame = moving ? Math.floor(animT * 8) % 4 : 0;
     syncFrame(avatar.parts, ROW_BASE[dirGroup(facing)] + walkFrame, facing === 'left');
@@ -1061,4 +1101,5 @@ k.scene('room', (roomId, opts = {}) => {
   k.onResize(fitCam);
 });
 
-k.go('room', 'plaza');
+const resume = resumeTarget(save, ROOM_REGISTRY);
+k.go('room', resume.roomId, { resumePos: resume.pos });

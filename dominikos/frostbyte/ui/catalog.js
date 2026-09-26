@@ -8,6 +8,7 @@
 // exact item count. This module never calls economy.spendCoins/unlockItem itself — it only reports
 // `onBuy(id)` upward; the integrator (main.js) owns the actual purchase + persist + coin refresh.
 import { FURNITURE_CATALOG, FURNITURE_CLASSES, byClass } from '../content/furniture-catalog.js';
+import { closeOnBackdrop } from './backdrop.js';
 
 const CLASS_LABELS = {
   all: 'All', seating: 'Seating', tables: 'Tables', lighting: 'Lighting',
@@ -220,7 +221,7 @@ export function createCatalog(opts) {
   const isOpen = () => !overlay.classList.contains('hidden');
 
   closeBtn.onclick = close;
-  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
 
   instance = { open, close, isOpen, refresh: render };
   return instance;

@@ -1,5 +1,6 @@
 // ui/telescope.js — Palefire's painted vista viewer (World Plan W4). Singleton DOM, date selection
 // injected by main.js, and no game-state mutation inside the presentation layer.
+import { closeOnBackdrop } from './backdrop.js';
 
 let stylesInjected = false;
 let instance = null;
@@ -96,7 +97,7 @@ export function createTelescope(opts) {
   }
   const isOpen = () => !overlay.classList.contains('hidden');
   closeBtn.onclick = close;
-  overlay.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
   instance = { open, close, isOpen };
   return instance;
 }

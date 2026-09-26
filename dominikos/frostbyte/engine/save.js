@@ -42,7 +42,7 @@ export function DEFAULT_SAVE(now = nowISO()) {
     visitedRooms: [...DEFAULT_VISITED_ROOMS],        // W3+: new map pins appear after first walk-in
     lastLoginDate: null,
     loginStreak: 0,
-    prefs: { muted: false, reducedMotion: prefersReducedMotion(), lastRoom: 'plaza' },
+    prefs: { muted: false, reducedMotion: prefersReducedMotion(), lastRoom: 'plaza', lastPos: null }, // { roomId, x, y, facing }
     createdAt: now,
     updatedAt: now,
   };

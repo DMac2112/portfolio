@@ -10,6 +10,7 @@
 // does with player text is hand the final local string to the caller-supplied `onSay`, which renders
 // it as the player's own local speech bubble. Chat text never leaves this device from here.
 import { CHAT_PHRASES, soften } from '../content/chat-phrases.js';
+import { closeOnBackdrop } from './backdrop.js';
 
 const MAX_LEN = 60;
 let stylesInjected = false;
@@ -173,7 +174,7 @@ export function createChat(opts) {
     sayFreeText();
   });
   closeBtn.onclick = close;
-  overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
 
   instance = { open, close, isOpen };
   return instance;

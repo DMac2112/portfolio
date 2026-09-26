@@ -1,6 +1,7 @@
 // ui/trader-stall.js — Captain Salka's two-crate cargo ledger (World Plan W3).
 // The UI owns presentation only. Date-seeded stock and economy mutations stay with content/docks.js
 // and main.js, keeping this singleton reusable and preventing scene re-entry DOM leaks.
+import { closeOnBackdrop } from './backdrop.js';
 
 let stylesInjected = false;
 let instance = null;
@@ -154,7 +155,7 @@ export function createTraderStall(opts) {
   }
   const isOpen = () => !overlay.classList.contains('hidden');
   closeBtn.onclick = close;
-  overlay.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+  closeOnBackdrop(overlay, close);
   instance = { open, close, isOpen, refresh: render };
   return instance;
 }

@@ -11,7 +11,7 @@ function fakeTarget() {
   };
 }
 
-function setup({ enabled = true, reducedMotion = false } = {}) {
+function setup({ enabled = true, reducedMotion = false, nav = null } = {}) {
   const doc = {
     ...fakeTarget(),
     fullscreenEnabled: enabled,
@@ -33,7 +33,7 @@ function setup({ enabled = true, reducedMotion = false } = {}) {
     offsetWidth: 0,
     classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c) },
   };
-  const toggle = createFullscreenToggle({ doc, root, button, frost, reducedMotion });
+  const toggle = createFullscreenToggle({ doc, root, button, frost, reducedMotion, nav });
   return { doc, root, button, attrs, classes, toggle };
 }
 
@@ -70,6 +70,30 @@ describe('full-screen toggle', () => {
     doc.fullscreenElement = null;
     doc.fire('fullscreenchange');
     expect(attrs['aria-label']).toBe(FULLSCREEN_LABELS.enter);
+  });
+
+  it('locks Escape on entry and unlocks it on exit', () => {
+    const nav = { keyboard: { lock: vi.fn(() => Promise.resolve()), unlock: vi.fn() } };
+    const { button } = setup({ nav });
+    button.fire('click');
+    expect(nav.keyboard.lock).toHaveBeenCalledWith(['Escape']);
+    button.fire('click');
+    expect(nav.keyboard.unlock).toHaveBeenCalled();
+  });
+
+  it('swallows a rejected keyboard lock', async () => {
+    const nav = { keyboard: { lock: vi.fn(() => Promise.reject(new Error('denied'))), unlock: vi.fn() } };
+    const { button } = setup({ nav });
+    button.fire('click');
+    await Promise.resolve();
+    expect(nav.keyboard.lock).toHaveBeenCalledWith(['Escape']);
+  });
+
+  it('works without a navigator dependency', () => {
+    const { button, doc } = setup();
+    button.fire('click');
+    button.fire('click');
+    expect(doc.exitFullscreen).toHaveBeenCalledOnce();
   });
 
   it('skips the frost-pane animation for reduced motion', () => {

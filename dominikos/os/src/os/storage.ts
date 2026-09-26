@@ -27,11 +27,17 @@ const hasStorage = (() => {
   }
 })();
 
-/** Wipe all dmos.* keys on schema version mismatch. */
+/** Wipe all dmos.* keys on schema version mismatch. A missing version key is a first OS boot,
+ *  not a mismatch: it must not wipe a Frostbyte save made by playing /frostbyte/ directly. */
 function ensureVersion(): void {
   if (!hasStorage) return;
   try {
-    if (localStorage.getItem(VERSION_KEY) === VERSION) return;
+    const stored = localStorage.getItem(VERSION_KEY);
+    if (stored === VERSION) return;
+    if (stored === null) {
+      localStorage.setItem(VERSION_KEY, VERSION);
+      return;
+    }
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);
       if (k && k.startsWith('dmos.')) localStorage.removeItem(k);
