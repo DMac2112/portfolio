@@ -59,8 +59,11 @@ const ENTRY_VECTORS = {
   down: { x: 0, y: 1 },
 };
 
+// Hotspots that open by walking into their painted doorway (given an entryDirection).
+const WALK_IN_KINDS = new Set(['venue', 'shop']);
+
 /**
- * Return the nearest venue doorway touched while moving in its declared entry direction.
+ * Return the nearest venue or shop doorway touched while moving in its declared entry direction.
  * @param {{x:number,y:number}} pos
  * @param {{x:number,y:number}} movement
  * @param {Interactable[]} candidates
@@ -74,7 +77,7 @@ export function findAutoEnterVenue(pos, movement, candidates, maxDist = AUTO_VEN
   let nearest = null;
   let nearestDist = Infinity;
   for (const candidate of candidates) {
-    const entry = candidate.kind === 'venue' && ENTRY_VECTORS[candidate.entryDirection];
+    const entry = WALK_IN_KINDS.has(candidate.kind) && ENTRY_VECTORS[candidate.entryDirection];
     if (!entry || movement.x * entry.x + movement.y * entry.y <= 0) continue;
     const dist = Math.hypot(candidate.pos.x - pos.x, candidate.pos.y - pos.y);
     if (dist <= maxDist && dist < nearestDist) {

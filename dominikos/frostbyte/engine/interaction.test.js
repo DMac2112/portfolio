@@ -193,12 +193,19 @@ describe('findAutoEnterVenue', () => {
     )).toBeNull();
   });
 
-  it('does not auto-open non-venue interactables', () => {
-    expect(findAutoEnterVenue(
-      { x: 398, y: 306 },
-      { x: 0, y: -4 },
-      [{ ...venue, kind: 'shop' }],
-    )).toBeNull();
+  it('opens a shop walked into through its painted doorway', () => {
+    const shop = { ...venue, id: 'shop-glimmerwool', kind: 'shop' };
+    expect(findAutoEnterVenue({ x: 398, y: 306 }, { x: 0, y: -4 }, [shop])).toBe(shop);
+  });
+
+  it('does not auto-open other interactables, even with an entry direction', () => {
+    for (const kind of ['landmark', 'minigame', 'newspaper', 'character']) {
+      expect(findAutoEnterVenue(
+        { x: 398, y: 306 },
+        { x: 0, y: -4 },
+        [{ ...venue, kind }],
+      ), kind).toBeNull();
+    }
   });
 
   it('does not auto-open a venue without a declared entry direction', () => {

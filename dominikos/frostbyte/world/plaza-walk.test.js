@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { ROOM_REGISTRY } from '../content/rooms.js';
 import { SPEED } from '../engine/movement.js';
 import { findAutoEnterDoor } from '../engine/travel.js';
-import { PLAZA_GROUND } from './plaza-ground.js';
+import { findAutoEnterVenue } from '../engine/interaction.js';
+import { GROUND as PLAZA_GROUND } from './ground/room-plaza.js';
 import { resolveRoomCollision } from './room-collision.js';
 
 const R = 12;
@@ -52,6 +53,21 @@ describe('plaza: painted doors, frame by frame', () => {
     expect(Math.hypot(spawn.x - d.x, spawn.y - d.y)).toBeGreaterThan(d.autoEnterRadius);
     const run = walk(plaza, spawn, [{ x: d.x, y: d.y - 40 }]);
     expect(run.door?.id).toBe('door-workshop');
+  });
+
+  it('opens Glimmer & Wool by walking up into its painted door, from every lane of the door', () => {
+    const shop = plaza.hotspots.find((h) => h.id === 'shop-glimmerwool');
+    const candidates = plaza.hotspots.map((h) => ({ ...h, pos: { x: h.x, y: h.y } }));
+    for (const dx of [-12, 0, 12]) {
+      let pos = { x: shop.x + dx, y: shop.y + 90 };
+      let opened = null;
+      for (let f = 0; f < 60 && !opened; f++) {
+        const movement = { x: 0, y: -STEP };
+        pos = resolveRoomCollision(plaza, { x: pos.x, y: pos.y + movement.y }, R);
+        opened = findAutoEnterVenue(pos, movement, candidates);
+      }
+      expect(opened?.id, `lane dx=${dx}`).toBe('shop-glimmerwool');
+    }
   });
 
   it('does not pull in players strolling past the workshop door along the snow', () => {

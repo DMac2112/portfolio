@@ -406,9 +406,9 @@ describe('room configs', () => {
 
   it('docks: keeps both arrival spawns, the Palefire causeway, and the under-pier ledge walkable', () => {
     const docks = ROOM_REGISTRY.docks;
-    const cache = docks.clickables.find((prop) => prop.id === 'underpier-cache');
     const variants = [
-      { room: resolveDocksRoom(docks, '2026-07-23'), ledgeApproach: { x: 1098, y: 772 } },
+      // The away backdrop has no ledge: its cache sits under the east pier's edge, reached from the planks.
+      { room: resolveDocksRoom(docks, '2026-07-23'), ledgeApproach: { x: 1050, y: 665 } },
       { room: resolveDocksRoom(docks, '2026-07-25'), ledgeApproach: { x: 1120, y: 810 } },
     ];
     const expectWalkable = (room, point) => {
@@ -421,6 +421,7 @@ describe('room configs', () => {
       expectWalkable(room, room.doors.find((door) => door.id === 'door-lighthouse'));
       expectWalkable(room, { x: 990, y: 300 });
       expectWalkable(room, ledgeApproach);
+      const cache = room.clickables.find((prop) => prop.id === 'underpier-cache');
       expect(Math.hypot(cache.x - ledgeApproach.x, cache.y - ledgeApproach.y)).toBeLessThanOrEqual(120);
     }
   });

@@ -3,7 +3,7 @@
 // Architecture §1). Boot config + camera conventions are forked from game1/main.js.
 import kaplay from './vendor/kaplay.mjs';
 import { ROOM_REGISTRY } from './content/rooms.js';
-import { buildRoom } from './world/build-room.js';
+import { buildRoom, loadOccluders } from './world/build-room.js';
 import { loadAvatarSprites, makeAvatarActor } from './world/build-avatar.js';
 import { resolveMoveVector, resolveFacing } from './engine/movement.js';
 import { computeCamPos, fitCamScale, clampCamPos, roomMapSize } from './engine/camera.js';
@@ -126,6 +126,7 @@ k.loadSprite('room-lighthouse-gallery', './assets/room-lighthouse-gallery.jpg');
 k.loadSprite('room-whisperpine', './assets/room-whisperpine.jpg');
 k.loadSprite('room-moonwell', './assets/room-moonwell.jpg');
 k.loadSprite('room-caverns', './assets/room-caverns.jpg');
+loadOccluders(k);
 k.loadSprite('pickup-glint', './assets/pickup-glint.png');
 loadAvatarSprites(k);
 loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY);
@@ -309,7 +310,9 @@ k.scene('room', (roomId, opts = {}) => {
     if (!venue) return false;
     autoVenueLatch = venue.id;
     moveTarget = null;
-    showDialogue(venue.label, venue.copy ?? 'Warm lights glow behind the frosted windows.');
+    // A shop walked into through its door opens the shop itself, same as its prompt does.
+    if (venue.kind === 'shop') dressUp.open();
+    else showDialogue(venue.label, venue.copy ?? 'Warm lights glow behind the frosted windows.');
     return true;
   }
   function enterDoor(door) {

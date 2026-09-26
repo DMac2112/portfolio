@@ -5,6 +5,7 @@ import { ROOM_REGISTRY } from '../content/rooms.js';
 import { findNearestInteractable } from '../engine/interaction.js';
 import { SPEED } from '../engine/movement.js';
 import { AUTO_DOOR_R, findAutoEnterDoor } from '../engine/travel.js';
+import { TRACED_ART } from './ground/index.js';
 import { collisionProfileForRoom, resolveRoomCollision } from './room-collision.js';
 
 const PLAYER_RADIUS = 12;
@@ -46,7 +47,7 @@ const BLOCKED_SAMPLES = {
   ],
   court: [
     { label: 'Snowtail roof', x: 200, y: 180 },
-    { label: 'market cart', x: 495, y: 535 },
+    { label: 'market cart wheels', x: 470, y: 600 },
     { label: 'patio brazier', x: 760, y: 825 },
     { label: 'southwest roof', x: 300, y: 850 },
   ],
@@ -66,7 +67,7 @@ const BLOCKED_SAMPLES = {
     { label: 'west harbor water', x: 90, y: 600 },
     { label: 'warehouse', x: 270, y: 150 },
     { label: 'crane', x: 1260, y: 210 },
-    { label: 'southwest roof', x: 180, y: 840 },
+    { label: 'ship hull', x: 1050, y: 670 },
   ],
   'lighthouse-rest': [
     { label: 'west wall', x: 30, y: 480 },
@@ -78,10 +79,10 @@ const BLOCKED_SAMPLES = {
     { label: 'balcony edge', x: 1390, y: 760 },
     { label: 'great lamp', x: 720, y: 300 },
     { label: 'telescope', x: 1140, y: 375 },
-    { label: 'supply chest', x: 370, y: 700 },
+    { label: 'supply chest base', x: 370, y: 790 },
   ],
   whisperpine: [
-    { label: 'listening grove pines', x: 720, y: 450 },
+    { label: 'listening grove trunks', x: 720, y: 560 },
     { label: 'root den', x: 245, y: 285 },
     { label: 'west trees', x: 40, y: 700 },
     { label: 'fallen root', x: 1160, y: 480 },
@@ -90,7 +91,7 @@ const BLOCKED_SAMPLES = {
     { label: 'moonwell pool', x: 720, y: 450 },
     { label: 'west forest', x: 90, y: 120 },
     { label: 'east forest', x: 1350, y: 720 },
-    { label: 'bench', x: 450, y: 680 },
+    { label: 'bench feet', x: 460, y: 720 },
   ],
   caverns: [
     { label: 'west crystals', x: 270, y: 300 },
@@ -250,6 +251,20 @@ describe('painted-room collision coverage', () => {
     expect(stable(plaza, { x: 1130, y: 540 })).toBe(true);
     expect(stable(plaza, plaza.spawnPoints.fromCourt)).toBe(true);
     expect(stable(plaza, plaza.doors.find(({ id }) => id === 'door-court'))).toBe(true);
+  });
+
+  it('blocks plaza lamp posts only at their base and draws them over anyone standing behind', () => {
+    const plaza = ROOM_REGISTRY.plaza;
+    // [label, base centre] for lamps with painted ground behind their pole.
+    for (const [label, base] of [['lamp trail east', { x: 855, y: 276 }], ['lamp den east', { x: 905, y: 856 }]]) {
+      expect(stable(plaza, { x: base.x, y: base.y - 4 }), `${label} base`).toBe(false);
+      const behind = { x: base.x, y: base.y - 40 };
+      expect(stable(plaza, behind), `${label} behind the pole`).toBe(true);
+      // An occluder piece covers the penguin's body there and sorts in front of its feet.
+      const covered = TRACED_ART['room-plaza'].OCCLUDERS.some(([x, y, w, h, z]) =>
+        behind.x >= x && behind.x < x + w && behind.y - 20 >= y && behind.y - 20 < y + h && z > behind.y);
+      expect(covered, `${label} occluder`).toBe(true);
+    }
   });
 
   it('matches the marked den landing point, red floor edge, and blue two-stage exit', () => {
