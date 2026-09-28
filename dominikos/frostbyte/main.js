@@ -19,6 +19,7 @@ import { ROOM_SPAWN } from './content/npc-spawn.js';
 import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
 import { registerMinigameBell } from './world/minigame-bell.js';
 import { registerMinigameFloe } from './world/minigame-floe.js';
+import { registerMinigameThaw } from './world/minigame-thaw.js';
 import {
   AUTO_VENUE_R,
   AUTO_VENUE_RESET_R,
@@ -156,6 +157,7 @@ k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
 registerMinigameSnowdrift(k, { reducedMotion: reduceMotion });
 registerMinigameBell(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
 registerMinigameFloe(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
+registerMinigameThaw(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
 
 /* ------------------------------------------------------------------ *
  * Coin HUD
@@ -1159,6 +1161,7 @@ k.scene('room', (roomId, opts = {}) => {
       if (action && !frozen) {
         interactPrompt.textContent =
           action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
+          action === 'locked' ? `${nearest.label} (sealed)` :
           action === 'shop' ? '👕 Dress Up' :
           action === 'venue' ? `🏪 ${nearest.prompt ?? `Visit ${nearest.label}`}` :
           action === 'newspaper' ? `📰 ${nearest.prompt ?? `Read ${nearest.label}`}` :

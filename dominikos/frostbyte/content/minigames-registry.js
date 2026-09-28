@@ -11,6 +11,11 @@ export const MINIGAMES = {
     requires: (save) => favorState(save, 'pat-weather-bell-parts')?.status === FAVOR_STATUS.DONE,
   },
   floe: { hotspotId: 'floe-fishing', sceneId: 'minigame-floe', note: 'floe' },
+  thaw: {
+    hotspotId: 'moonwell-floor', sceneId: 'minigame-thaw', note: 'moon',
+    requires: (save) => favorState(save, 'maren-sighting-gull')?.status === FAVOR_STATUS.DONE,
+    lockedLine: 'Frost seals the well floor. Maren says the lens light will find it.',
+  },
 };
 
 /** The minigame whose hotspot id matches, or null. */
@@ -22,7 +27,7 @@ export function minigameActionForHotspot(hotspotId, save, fallbackKind = null) {
   const game = minigameForHotspot(hotspotId);
   if (!game) return fallbackKind;
   if (!game.requires || game.requires(save)) return 'minigame';
-  return fallbackKind ?? (game.lockedLine ? 'locked' : null);
+  return game.lockedLine ? 'locked' : fallbackKind;
 }
 
 export function grantMinigameResultNote(save, result) {

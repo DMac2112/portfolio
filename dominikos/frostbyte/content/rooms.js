@@ -691,7 +691,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'moonwell-pool', label: 'The Still Pool', kind: 'landmark', x: 720, y: 450, lore: 'Aurora light waits in the pool as if the Hollowfrost crystals were looking up.' },
+      { id: 'moonwell-floor', label: 'The Still Pool', kind: 'landmark', x: 720, y: 450, lore: 'Aurora light waits in the pool as if the Hollowfrost crystals were looking up.' },
       { id: 'moonwell-bench', label: null, kind: 'sit', x: 350, y: 650 },
     ],
     doors: [

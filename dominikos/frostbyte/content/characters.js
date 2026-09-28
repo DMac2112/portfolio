@@ -370,7 +370,7 @@ export const MAREN_DIALOGUE_TREE = Object.freeze({
     'accepted-gull': Object.freeze({ pages: Object.freeze(['On an away-day the telescope will find Salka beyond the floes. Her pennant is orange oilskin.']) }),
     'reminder-gull': Object.freeze({ pages: Object.freeze(['If the berth is empty, climb to the telescope. The Gull should be somewhere in the outer current.']) }),
     'reported-gull': Object.freeze({ pages: Object.freeze(['Eastbound and steady. I’ll mark the course; the harbor can breathe easier.']) }),
-    completed: Object.freeze({ pages: Object.freeze(['Three careful sightings, three honest reports. The blank pages look less lonely now.']) }),
+    completed: Object.freeze({ pages: Object.freeze(['Three careful sightings, three honest reports. The old lens light falls on a well beyond the Listening Pines. Walk its floor and you’ll hear the third note.']) }),
   }),
 });
 
