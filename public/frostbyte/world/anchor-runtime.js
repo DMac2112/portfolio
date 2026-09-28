@@ -48,5 +48,19 @@ export function spawnRoomAnchors(k, room, characters, reducedMotion = false) {
       character,
     });
   }
-  return { actors, interactables };
+  return {
+    actors,
+    interactables,
+    hitAt(point) {
+      for (const { actor, character } of [...actors].reverse()) {
+        const width = actor.width * actor.scale.x;
+        const height = actor.height * actor.scale.y;
+        if (Math.abs(point.x - actor.pos.x) <= width / 2 &&
+          point.y <= actor.pos.y && point.y >= actor.pos.y - height) {
+          return interactables.find((entry) => entry.id === character.id);
+        }
+      }
+      return null;
+    },
+  };
 }

@@ -15,6 +15,7 @@ export const ROOM_REGISTRY = {
   plaza: {
     id: 'plaza',
     title: 'Chillmere Plaza',
+    outdoors: true,
     mapAsset: 'room-plaza',                          // ./assets/room-plaza.png
     tile: 16, gridCols: 30, gridRows: 20,             // native map = 480x320px
     scale: 3,
@@ -34,14 +35,14 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 1000, y: 400 },
+      { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 1000, y: 400, lore: 'Driftback heard three notes beneath the sea ice and founded Chillmere where they rang loudest.' },
       // On the painted door of the timber house just north-east of the fountain: walking up into
       // the door opens the shop, the same as its prompt.
       { id: 'shop-glimmerwool', label: 'Glimmer & Wool', kind: 'shop', x: 1148, y: 290, entryDirection: 'up' },
       { id: 'minigame-snowdrift', label: 'Snowdrift Toss', kind: 'minigame', x: 1128, y: 552 },
-      { id: 'noticeboard-chronicle', label: 'The Chillmere Chirper', kind: 'noticeboard', x: 168, y: 792 },
-      { id: 'bench-north', label: null, kind: 'sit', x: 408, y: 264 },
-      { id: 'bench-south', label: null, kind: 'sit', x: 552, y: 696 },
+      { id: 'noticeboard-chronicle', label: 'The Chillmere Chirper', kind: 'noticeboard', x: 190, y: 430 },
+      { id: 'bench-north', label: null, kind: 'sit', x: 530, y: 300 },
+      { id: 'bench-south', label: null, kind: 'sit', x: 1010, y: 740 },
     ],
     doors: [
       // The top of the painted trail, where the path meets the tree line. A threshold across the
@@ -90,7 +91,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'hearth-den', label: 'The Hearth', kind: 'landmark', x: 720, y: 280 },
+      { id: 'hearth-den', label: 'The Hearth', kind: 'landmark', x: 720, y: 280, lore: 'The hearth keeps a small, stubborn warmth against the sea ice.' },
       { id: 'door-sign-den', label: 'Door Sign', kind: 'sign', x: 900, y: 720 },
     ],
     doors: [
@@ -111,6 +112,7 @@ export const ROOM_REGISTRY = {
   trail: {
     id: 'trail',
     title: 'Frostline Trail',
+    outdoors: true,
     mapAsset: 'room-trail',                          // ./assets/room-trail.png
     tile: 16, gridCols: 30, gridRows: 20,             // native map = 480x320px
     scale: 3,
@@ -123,8 +125,8 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'falls-frostline', label: 'The Frozen Falls', kind: 'landmark', x: 720, y: 220 },
-      { id: 'signpost-trail', label: 'Old Signpost', kind: 'landmark', x: 1100, y: 760 },
+      { id: 'falls-frostline', label: 'The Frozen Falls', kind: 'landmark', x: 720, y: 220, lore: 'Under the frozen rush, something hums three low notes, then stops to listen.' },
+      { id: 'signpost-trail', label: 'Old Signpost', kind: 'landmark', x: 1070, y: 380, lore: 'Driftback marked this route with old lighthouse lenses so ships could find home.' },
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 880, targetRoom: 'plaza', locked: false, targetSpawn: 'fromTrail' },
@@ -148,7 +150,7 @@ export const ROOM_REGISTRY = {
     ],
     clickables: [
       {
-        id: 'weather-bell-vane', reaction: 'chime', x: 1104, y: 747, w: 72, h: 72,
+        id: 'weather-bell-vane', reaction: 'chime', x: 1070, y: 380, w: 130, h: 130,
         line: 'A small brass vane has twisted itself around the old signpost.', reactionColor: '#ffb45e',
         favorStep: {
           favorId: 'pat-weather-bell-parts', stepId: 'recover-trail-vane',
@@ -157,7 +159,7 @@ export const ROOM_REGISTRY = {
         onlyWhenFavorStep: true,
       },
       {
-        id: 'palefire-trail-ribbon', reaction: 'wave', x: 840, y: 540, w: 150, h: 90,
+        id: 'palefire-trail-ribbon', reaction: 'wave', x: 1090, y: 470, w: 170, h: 100,
         line: 'A blue ribbon of light folds once between the old lenses, then returns toward Palefire.', reactionColor: '#7fd6ff',
         favorStep: {
           favorId: 'maren-sighting-trail', stepId: 'witness-trail-event',
@@ -172,6 +174,7 @@ export const ROOM_REGISTRY = {
   court: {
     id: 'court',
     title: 'Glasswind Court',
+    outdoors: true,
     mapAsset: 'room-court',
     tile: 16, gridCols: 30, gridRows: 20,
     scale: 3,
@@ -206,7 +209,7 @@ export const ROOM_REGISTRY = {
         copy: 'Tonight\'s special is ember-roasted root stew with iceleaf rolls. A warm corner table is ready.',
       },
       {
-        id: 'noticeboard-chirper', label: 'The Chillmere Chirper', kind: 'newspaper', x: 1095, y: 822,
+        id: 'noticeboard-chirper', label: 'The Chillmere Chirper', kind: 'newspaper', x: 190, y: 430,
         prompt: 'Read this week’s Chirper',
       },
     ],
@@ -232,41 +235,41 @@ export const ROOM_REGISTRY = {
     clickables: [
       {
         id: 'window-wave', curioId: 'court-window-wave', reaction: 'wave',
-        x: 219, y: 207, w: 228, h: 90,
+        x: 465, y: 270, w: 165, h: 115,
         line: 'Two tiny silhouettes wave back from the warm window.', reactionColor: '#6fe0b2',
       },
       {
         id: 'fountain-glimmer', curioId: 'court-fountain-glimmer', reaction: 'glimmer',
-        x: 579, y: 490, w: 300, h: 220,
-        line: 'A coin glints once beneath the frozen court.', reactionColor: '#ffb45e',
+        x: 755, y: 795, w: 85, h: 95,
+        line: 'A bright ember glints beneath the patio brazier.', reactionColor: '#ffb45e',
       },
       {
         id: 'wind-chimes', curioId: 'court-wind-chimes', reaction: 'chime',
-        x: 846, y: 120, w: 84, h: 48,
+        x: 740, y: 245, w: 66, h: 100,
         line: 'The ice chimes answer in three bright notes.', reactionColor: '#7fd6ff',
       },
       {
         id: 'awning-snow', curioId: 'court-awning-snow', reaction: 'snow',
-        x: 285, y: 132, w: 420, h: 48,
+        x: 500, y: 485, w: 180, h: 115,
         line: 'Whump. The awning looks much lighter now.', reactionColor: '#cfe0f2',
       },
       {
         id: 'kettle-steam', curioId: 'court-kettle-steam', reaction: 'steam',
-        x: 705, y: 520, w: 150, h: 96,
+        x: 830, y: 305, w: 115, h: 150,
         line: 'The kettle answers with a determined puff.', reactionColor: '#f5fbff',
       },
       {
         id: 'postbox-rattle', curioId: 'court-postbox-rattle', reaction: 'rattle',
-        x: 1095, y: 810, w: 54, h: 96,
-        line: 'Rattle-rattle. No letter takes responsibility.', reactionColor: '#ff784f',
+        x: 195, y: 430, w: 105, h: 125,
+        line: 'The noticeboard rattles. No pinned notice takes responsibility.', reactionColor: '#ff784f',
       },
       {
-        id: 'loose-cobble', reaction: 'hum', x: 900, y: 861, w: 90, h: 42,
-        line: 'Three low notes hum beneath the ice, then slip deeper.', reactionColor: '#6fe0b2',
+        id: 'loose-cobble', reaction: 'hum', x: 850, y: 838, w: 80, h: 100,
+        line: 'Three low notes hum beneath the patio chair, then slip deeper.', reactionColor: '#6fe0b2',
       },
       {
-        id: 'weather-bell-coil', reaction: 'chime', x: 411, y: 744, w: 60, h: 60,
-        line: 'A warm brass spiral is hiding beneath the companion pen rail.', reactionColor: '#ffb45e',
+        id: 'weather-bell-coil', reaction: 'chime', x: 545, y: 585, w: 70, h: 70,
+        line: 'A warm brass spiral rolled under the market cart by the pet shop.', reactionColor: '#ffb45e',
         favorStep: {
           favorId: 'pat-weather-bell-parts', stepId: 'recover-court-coil',
           successText: 'Weather Bell part 1/3 — next: Frostline Trail',
@@ -294,7 +297,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'weather-bell', label: 'The Weather Bell', kind: 'landmark', x: 720, y: 390 },
+      { id: 'weather-bell', label: 'The Weather Bell', kind: 'landmark', x: 720, y: 390, lore: 'Driftback cast the Weather Bell to answer the song. It hasn’t rung true since.' },
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 888, targetRoom: 'plaza', locked: false, targetSpawn: 'fromWorkshop' },
@@ -319,22 +322,22 @@ export const ROOM_REGISTRY = {
     clickables: [
       {
         id: 'bellows-puff', curioId: 'workshop-bellows-puff', reaction: 'steam',
-        x: 270, y: 600, w: 126, h: 120,
+        x: 215, y: 650, w: 190, h: 170,
         line: 'The bellows sighs out one coal-scented cloud.', reactionColor: '#f5fbff',
       },
       {
         id: 'gizmo-chain', curioId: 'workshop-gizmo-chain', reaction: 'chain',
-        x: 300, y: 270, w: 210, h: 120,
+        x: 430, y: 335, w: 260, h: 240,
         line: 'Click. Zip. Bonk. Seven mechanisms celebrate doing almost nothing.', reactionColor: '#6fe0b2',
       },
       {
         id: 'tube-thunk', curioId: 'workshop-tube-thunk', reaction: 'rattle',
-        x: 1170, y: 230, w: 84, h: 150,
-        line: 'Thunk. The tube delivers a blank order slip and one warm washer.', reactionColor: '#ff784f',
+        x: 1120, y: 490, w: 95, h: 90,
+        line: 'Thunk. A warm washer rattles across Pat\'s workbench.', reactionColor: '#ff784f',
       },
       {
         id: 'blueprint-cycle', curioId: 'workshop-blueprint-cycle', reaction: 'wave',
-        x: 720, y: 195, w: 270, h: 102, reactionColor: '#7fd6ff',
+        x: 960, y: 300, w: 280, h: 360, reactionColor: '#7fd6ff',
         lines: [
           'A rotating sketch proposes an umbrella for the lighthouse.',
           'Next design: a kettle that whistles only when nobody is watching.',
@@ -343,12 +346,14 @@ export const ROOM_REGISTRY = {
       },
       {
         id: 'snowputer', curioId: 'workshop-snowputer', reaction: 'snow',
-        x: 1140, y: 690, w: 120, h: 105,
+        x: 1170, y: 605, w: 300, h: 260,
         line: 'The snowputer calculates: “probably flurries.” A tiny fan applauds.', reactionColor: '#cfe0f2',
       },
       {
-        id: 'weather-bell-test', reaction: 'chime', x: 720, y: 390, w: 210, h: 210,
+        id: 'weather-bell-test', reaction: 'chime', x: 705, y: 390, w: 250, h: 540,
         line: 'The half-built Bell answers with one brave note and two nervous rattles.', reactionColor: '#ffb45e',
+        repairedLine: 'The repaired Bell rings three clear notes. Even the floor listens.',
+        onlyWhenFavorStep: true,
         favorStep: {
           favorId: 'edda-tip-workshop-test', stepId: 'witness-workshop-test',
           successText: 'Story tip witnessed — report the test-firing to Edda!',
@@ -366,6 +371,7 @@ export const ROOM_REGISTRY = {
   docks: {
     id: 'docks',
     title: 'Driftgate Docks',
+    outdoors: true,
     mapAsset: 'room-docks-away',
     stateAssets: { inPort: 'room-docks-port', away: 'room-docks-away' },
     // The two backdrops are painted differently. Away: the lighthouse stairs sit further west, and
@@ -376,12 +382,29 @@ export const ROOM_REGISTRY = {
       away: {
         spawnPoints: { fromLighthouse: { x: 903 } },
         doors: { 'door-lighthouse': { x: 940 } },
-        clickables: { 'underpier-cache': { x: 1110, y: 700 } },
+        clickables: {
+          'tidepool-duck': { x: 330, y: 660 },
+          'bottle-post': { x: 520, y: 260 },
+          'harbor-bell': { x: 640, y: 160 },
+          'crane-swing': { x: 1230, y: 300 },
+          'buoy-bob': { x: 900, y: 730 },
+          'gull-scatter': { x: 1130, y: 300 },
+          'underpier-cache': { x: 1110, y: 700 },
+        },
       },
       inPort: {
         spawnPoints: { fromCourt: { y: 369 } },
         doors: { 'door-court': { y: 326 } },
-        hotspots: { 'salka-trader-stall': { x: 990, y: 620 } },
+        hotspots: { 'salka-trader-stall': { x: 850, y: 600 } },
+        clickables: {
+          'tidepool-duck': { x: 310, y: 450 },
+          'bottle-post': { x: 530, y: 175 },
+          'harbor-bell': { x: 660, y: 160 },
+          'crane-swing': { x: 1280, y: 265 },
+          'buoy-bob': { x: 1090, y: 210 },
+          'gull-scatter': { x: 800, y: 415 },
+          'underpier-cache': { x: 1180, y: 855 },
+        },
       },
     },
     tile: 16, gridCols: 30, gridRows: 20,
@@ -395,6 +418,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
+      { id: 'floe-fishing', label: 'Floe Fishing', kind: 'minigame', x: 828, y: 720, bargeState: 'away' }, // in port, the Gull's deck covers this water
       {
         id: 'salka-trader-stall', label: 'Salka’s Cargo Stall', kind: 'trader',
         x: 1050, y: 670, prompt: 'Browse today’s two cargo finds', bargeState: 'in-port',
@@ -426,28 +450,28 @@ export const ROOM_REGISTRY = {
       },
       {
         id: 'bottle-post', curioId: 'docks-bottle-post', reaction: 'rattle',
-        x: 480, y: 420, w: 80, h: 110,
-        line: 'A salt-clouded bottle carries this week’s short dispatch.', reactionColor: '#7fd6ff',
+        x: 520, y: 260, w: 105, h: 125,
+        line: 'A cargo note carries this week’s short dispatch.', reactionColor: '#7fd6ff',
       },
       {
         id: 'harbor-bell', curioId: 'docks-harbor-bell', reaction: 'chime',
-        x: 780, y: 300, w: 96, h: 120,
+        x: 650, y: 160, w: 90, h: 128,
         line: 'The harbor bell sends one round note across the floes.', reactionColor: '#ffb45e',
       },
       {
         id: 'crane-swing', curioId: 'docks-crane-swing', reaction: 'swing',
-        x: 1110, y: 390, w: 210, h: 180,
+        x: 1275, y: 265, w: 175, h: 330,
         line: 'The cargo crane swings seaward, pauses, then remembers its manners.', reactionColor: '#ff784f',
       },
       {
         id: 'buoy-bob', curioId: 'docks-buoy-bob', reaction: 'bob',
-        x: 1230, y: 630, w: 108, h: 120,
-        line: 'The outer buoy gives the pier a solemn little nod.', reactionColor: '#ff784f',
+        x: 900, y: 730, w: 115, h: 170,
+        line: 'The pier lantern gives the water a solemn little nod.', reactionColor: '#ff784f',
       },
       {
         id: 'gull-scatter', curioId: 'docks-gull-scatter', reaction: 'scatter',
-        x: 720, y: 180, w: 260, h: 90,
-        line: 'A whitewing flock bursts apart and reforms one piling over.', reactionColor: '#f5fbff',
+        x: 1130, y: 300, w: 120, h: 100,
+        line: 'The timber creaks once, then settles against its fittings.', reactionColor: '#f5fbff',
       },
       {
         id: 'underpier-cache', curioId: 'docks-underpier-cache', reaction: 'glimmer',
@@ -455,7 +479,7 @@ export const ROOM_REGISTRY = {
         line: 'At the end of the narrow ledge: a sea-glass knot tucked beneath the pier.', reactionColor: '#6fe0b2',
       },
       {
-        id: 'weather-bell-clapper', reaction: 'chime', x: 1010, y: 555, w: 80, h: 80,
+        id: 'weather-bell-clapper', reaction: 'chime', x: 850, y: 600, w: 150, h: 125,
         line: 'A heavy brass clapper is tagged for Pat Hocket’s workshop.', reactionColor: '#ffb45e',
         bargeState: 'in-port', onlyWhenFavorStep: true,
         favorStep: {
@@ -484,7 +508,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'keeper-logbook', label: 'Keeper’s Logbook', kind: 'logbook', x: 390, y: 510, prompt: 'Read the growing sighting log' },
+      { id: 'keeper-logbook', label: 'Keeper’s Logbook', kind: 'logbook', x: 250, y: 470, prompt: 'Read the growing sighting log' },
     ],
     doors: [
       { id: 'door-docks', label: 'Driftgate Docks', x: 720, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromLighthouse' },
@@ -503,17 +527,17 @@ export const ROOM_REGISTRY = {
     clickables: [
       {
         id: 'keeper-stove-sigh', curioId: 'lighthouse-rest-stove-sigh', reaction: 'steam',
-        x: 360, y: 285, w: 220, h: 170,
+        x: 500, y: 260, w: 190, h: 175,
         line: 'The little iron stove exhales cedar, salt, and one tiny spark.', reactionColor: '#ffb45e',
       },
       {
         id: 'keeper-kettle-tick', curioId: 'lighthouse-rest-kettle-tick', reaction: 'chime',
-        x: 620, y: 315, w: 110, h: 90,
+        x: 540, y: 220, w: 95, h: 145,
         line: 'The kettle lid counts three patient ticks against the wind.', reactionColor: '#ffe2a1',
       },
       {
         id: 'keeper-cot-quilt', curioId: 'lighthouse-rest-cot-quilt', reaction: 'snow',
-        x: 930, y: 700, w: 240, h: 120,
+        x: 1030, y: 650, w: 520, h: 300,
         line: 'A stitched map of old currents hides beneath the folded quilt.', reactionColor: '#a78bfa',
       },
       {
@@ -528,6 +552,7 @@ export const ROOM_REGISTRY = {
   // Palefire Light — upper gallery, telescope balcony, and the slowly sweeping great lamp.
   'lighthouse-gallery': {
     id: 'lighthouse-gallery',
+    outdoors: true,
     avatarScale: 7.5,
     title: 'Palefire Light — Lantern Gallery',
     mapAsset: 'room-lighthouse-gallery',
@@ -541,7 +566,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'great-lamp', label: 'The Great Lamp', kind: 'landmark', x: 720, y: 330 },
+      { id: 'great-lamp', label: 'The Great Lamp', kind: 'landmark', x: 720, y: 330, lore: 'Driftback set an old lighthouse lens here. Maren says its Moon note is still listening.' },
       { id: 'palefire-telescope', label: 'Palefire Telescope', kind: 'telescope', x: 1140, y: 390, prompt: 'Look across the floes' },
     ],
     doors: [
@@ -561,7 +586,7 @@ export const ROOM_REGISTRY = {
       },
       {
         id: 'gallery-pennant-snap', curioId: 'lighthouse-gallery-pennant', reaction: 'wave',
-        x: 360, y: 210, w: 150, h: 90,
+        x: 420, y: 355, w: 220, h: 470,
         line: 'The balcony pennant snaps once toward a wind you cannot feel.', reactionColor: '#ff784f',
       },
       {
@@ -583,6 +608,7 @@ export const ROOM_REGISTRY = {
   whisperpine: {
     id: 'whisperpine',
     title: 'Whisperpine Hollow',
+    outdoors: true,
     mapAsset: 'room-whisperpine',
     tile: 16, gridCols: 30, gridRows: 20,
     scale: 3,
@@ -596,7 +622,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'whisperpine-heart', label: 'The Listening Pines', kind: 'landmark', x: 720, y: 480 },
+      { id: 'whisperpine-heart', label: 'The Listening Pines', kind: 'landmark', x: 720, y: 480, lore: 'The pines hear the Echo: aurora light trapped in Hollowfrost crystals.' },
     ],
     doors: [
       { id: 'door-trail', label: 'Frostline Trail', x: 120, y: 540, targetRoom: 'trail', locked: false, targetSpawn: 'fromWhisperpine' },
@@ -619,9 +645,9 @@ export const ROOM_REGISTRY = {
       { id: 'berry-snowbank', x: 430, y: 790, w: 180, h: 80 },
     ],
     vesperDens: [
-      { id: 'root-den', x: 330, y: 370 },
-      { id: 'owl-den', x: 900, y: 330 },
-      { id: 'fallen-den', x: 1040, y: 740 },
+      { id: 'root-den', x: 230, y: 290 },
+      { id: 'owl-den', x: 1120, y: 190 },
+      { id: 'fallen-den', x: 1300, y: 790 },
     ],
     anchors: [],
     wisps: [
@@ -632,24 +658,24 @@ export const ROOM_REGISTRY = {
     clickables: [
       {
         id: 'whisperpine-hare', curioId: 'whisperpine-snow-hare', reaction: 'scatter',
-        x: 250, y: 650, w: 140, h: 100,
-        line: 'A snow hare becomes three white bounds and one questioning ear.', reactionColor: '#f7fbff',
+        x: 200, y: 540, w: 155, h: 170,
+        line: 'Snow slips from the western pine in three white bursts.', reactionColor: '#f7fbff',
       },
       {
         id: 'whisperpine-owl', curioId: 'whisperpine-ice-owl', reaction: 'glimmer',
-        x: 900, y: 225, w: 120, h: 100,
-        line: 'The ice owl blinks. Snow falls from the eye that moved second.', reactionColor: '#c8f4ff',
+        x: 1120, y: 195, w: 165, h: 150,
+        line: 'The owl den glows. Snow falls from the root that moved second.', reactionColor: '#c8f4ff',
       },
       {
         id: 'whisperpine-icicle', curioId: 'whisperpine-icicle-drop', reaction: 'snow',
-        x: 530, y: 250, w: 130, h: 120,
-        line: 'One icicle drops upward into the branch and leaves no gap behind.', reactionColor: '#7fd6ff',
+        x: 450, y: 190, w: 155, h: 140,
+        line: 'One snowy bough shakes upward and leaves no gap behind.', reactionColor: '#7fd6ff',
       },
       {
         id: 'whisperpine-echo-log', curioId: 'whisperpine-echo-log', reaction: 'hum',
-        x: 1040, y: 650, w: 250, h: 110,
+        x: 1220, y: 520, w: 200, h: 190,
         lines: [
-          'The fallen log repeats your tap in three notes.',
+          'The hollow stump repeats your tap in three notes.',
           'On the second tap, a fourth note answers from under the roots.',
         ],
         reactionColor: '#6fe0b2',
@@ -673,6 +699,7 @@ export const ROOM_REGISTRY = {
   moonwell: {
     id: 'moonwell',
     title: 'Moonwell Clearing',
+    outdoors: true,
     mapAsset: 'room-moonwell',
     tile: 16, gridCols: 30, gridRows: 20,
     scale: 3,
@@ -683,7 +710,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'moonwell-pool', label: 'The Still Pool', kind: 'landmark', x: 720, y: 450 },
+      { id: 'moonwell-floor', label: 'The Still Pool', kind: 'landmark', x: 720, y: 450, lore: 'Aurora light waits in the pool as if the Hollowfrost crystals were looking up.' },
       { id: 'moonwell-bench', label: null, kind: 'sit', x: 350, y: 650 },
     ],
     doors: [
@@ -697,7 +724,7 @@ export const ROOM_REGISTRY = {
     clickables: [
       {
         id: 'moonwell-reflection', curioId: 'moonwell-reflection', reaction: 'glimmer',
-        x: 720, y: 450, w: 400, h: 230,
+        x: 600, y: 400, w: 750, h: 400,
         line: 'Your reflection looks up a heartbeat before you look down.', reactionColor: '#c8f4ff',
       },
     ],
@@ -766,7 +793,7 @@ export const ROOM_REGISTRY = {
       },
       {
         id: 'echo-shard-pool', curioId: 'caverns-echo-shard-pool', reaction: 'chime',
-        x: 720, y: 760, w: 180, h: 120,
+        x: 600, y: 760, w: 450, h: 200,
         line: 'The pool keeps the note below its surface, then gives it back brighter.', reactionColor: '#72e2bd',
       },
       {

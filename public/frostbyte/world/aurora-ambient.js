@@ -13,7 +13,7 @@ export function auroraRibbonState(index, elapsedSeconds, intensified, reducedMot
 }
 
 export function addAuroraAmbient(k, room, getIntensified = () => false, reducedMotion = false) {
-  if (!room) return null;
+  if (!room?.outdoors) return null;
   const colors = ['#72e2bd', '#7fd6ff', '#a78bfa'];
   const ribbons = colors.map((hex, index) => k.add([
     k.rect(1120 - index * 90, 42 + index * 7, { radius: 26 }),

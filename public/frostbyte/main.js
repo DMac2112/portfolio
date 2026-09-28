@@ -9,20 +9,30 @@ import { resolveMoveVector, resolveFacing, SPEED } from './engine/movement.js';
 import { computeCamPos, fitCamScale, clampCamPos, roomMapSize } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
+import { storyOf, completeFinale, claimFinaleGreeting } from './engine/story.js';
+import { nextBargeArrival } from './engine/barge-schedule.js';
 import { resumeTarget, snapshotPos, movedEnough } from './engine/resume.js';
 import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup, unlockItem, equipItem } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
 import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
+import { registerMinigameBell } from './world/minigame-bell.js';
+import { registerMinigameFloe } from './world/minigame-floe.js';
+import { registerMinigameThaw } from './world/minigame-thaw.js';
 import {
   AUTO_VENUE_R,
   AUTO_VENUE_RESET_R,
+  INTERACT_R,
+  advancePendingAction,
+  clickDecision,
+  cycleDevSpeed,
   findAutoEnterVenue,
+  pendingAction,
   findNearestInteractable,
   mergeInteractables,
 } from './engine/interaction.js';
-import { minigameForHotspot } from './content/minigames-registry.js';
+import { minigameForHotspot, minigameActionForHotspot, grantMinigameResultNote } from './content/minigames-registry.js';
 import { recordCoins, remainingToday } from './engine/minigame-daily.js';
 import { newChat, addBubble, tick as tickChat, active as activeChat } from './engine/chat.js';
 import { createChat } from './ui/chat.js';
@@ -42,13 +52,14 @@ import { createEditMode } from './ui/edit-mode.js';
 import { createCatalog } from './ui/catalog.js';
 import { newVisitorScheduler, tick as tickVisitors } from './engine/visitors.js';
 import { initVisitorLayer } from './world/visitor-runtime.js';
-import { ROSTER } from './content/npc-roster.js';
+import { ROSTER, personaById } from './content/npc-roster.js';
+import { LINE_POOLS } from './content/dialogue-lines.js';
 import { addSnowfall, createWalkPuffs, fadeIn, fadeTo, showCoinSparkle, showMovePing } from './world/game-feel.js';
 import { resolveRoomCollision } from './world/room-collision.js';
 import { CURIO_REGISTRY } from './content/curios.js';
 import { claimIsleCompletionReward, curioById, discoverCurio } from './engine/curios.js';
-import { spawnClickables } from './world/clickable.js';
-import { ANCHOR_CHARACTERS, characterById } from './content/characters.js';
+import { reactionBurst, spawnClickables } from './world/clickable.js';
+import { ANCHOR_CHARACTERS, CHOWDER_CHARACTER, characterById } from './content/characters.js';
 import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
 import { chooseDialogue, dailyLine, startDialogue } from './engine/dialogue-tree.js';
 import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
@@ -62,6 +73,7 @@ import { resolveCavernEntrances } from './content/caverns.js';
 import { claimVesperHint, nextVesperHint } from './engine/vesper.js';
 import { addDodgeWisps } from './world/will-o-wisps.js';
 import { addEchoPresence } from './world/echo-runtime.js';
+import { playBell } from './world/bell-tone.js';
 import { addAuroraAmbient } from './world/aurora-ambient.js';
 import { createFullscreenToggle } from './world/fullscreen-toggle.js';
 import { handleEscape } from './ui/escape-key.js';
@@ -122,6 +134,41 @@ window.__osBridge?.onReady({
 
 const PLAYER_RADIUS = 12;
 
+function stored(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function remember(key, value) {
+  try { localStorage.setItem(key, String(value)); } catch { /* Storage can be unavailable in embeds. */ }
+}
+let parentDev = false;
+try { parentDev = window.parent !== window && new URL(window.parent.location.href).searchParams.has('dev'); }
+catch { /* A cross-origin parent cannot expose its URL. */ }
+const savedDevMode = stored('frostbyte.dev');
+let devMode = savedDevMode == null
+  ? new URLSearchParams(location.search).has('dev') ||
+    parentDev || ['localhost', '127.0.0.1'].includes(location.hostname)
+  : savedDevMode === 'true';
+let devSpeed = [1, 2, 3].includes(Number(stored('frostbyte.devSpeed')))
+  ? Number(stored('frostbyte.devSpeed')) : 1;
+const devSpeedBtn = document.getElementById('dev-speed-btn');
+function refreshDevSpeed() {
+  if (!devSpeedBtn) return;
+  devSpeedBtn.hidden = !devMode || inMinigame;
+  devSpeedBtn.textContent = `${devSpeed}×`;
+  devSpeedBtn.setAttribute('aria-label', `Walk speed (dev): ${devSpeed}×`);
+}
+if (devSpeedBtn) devSpeedBtn.onclick = () => {
+  devSpeed = cycleDevSpeed(devSpeed);
+  remember('frostbyte.devSpeed', devSpeed);
+  refreshDevSpeed();
+};
+document.addEventListener('keydown', (event) => {
+  if (event.code !== 'Backquote' || event.repeat) return;
+  devMode = !devMode;
+  remember('frostbyte.dev', devMode);
+  refreshDevSpeed();
+});
+
 /* ------------------------------------------------------------------ *
  * Asset loading
  * ------------------------------------------------------------------ */
@@ -150,6 +197,9 @@ k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
 
 // Register the Snowdrift Toss scene (a sibling scene entered/exited via the room ↔ minigame contract).
 registerMinigameSnowdrift(k, { reducedMotion: reduceMotion });
+registerMinigameBell(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
+registerMinigameFloe(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
+registerMinigameThaw(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
 
 /* ------------------------------------------------------------------ *
  * Coin HUD
@@ -198,6 +248,7 @@ document.addEventListener('keydown', (event) => {
 });
 function setHudVisible(v) {
   for (const id of HUD_BTN_IDS) { const el = document.getElementById(id); if (el) el.hidden = !v; }
+  if (devSpeedBtn) devSpeedBtn.hidden = !v || !devMode;
 }
 
 /* ------------------------------------------------------------------ *
@@ -217,8 +268,14 @@ k.scene('room', (roomId, opts = {}) => {
   const map = roomMapSize(room);
   let camScale = 1;
   const auroraLayer = addAuroraAmbient(k, room, () => save.secrets?.auroraIntensified === true, reduceMotion);
+  const isMuted = () => Boolean(save.prefs?.muted || k.getVolume?.() === 0);
   const echoCharacter = characterById('the-echo');
   const echoLayer = addEchoPresence(k, room, echoCharacter?.linePools?.song, reduceMotion);
+  if (roomId === 'caverns' && !storyOf(save).echoGreeted) {
+    echoLayer?.singNext(echoCharacter?.linePools?.greeting?.[0]);
+    storyOf(save).echoGreeted = true;
+    persist(save);
+  }
   addLighthouseSweep(k, room, reduceMotion);
   addDodgeWisps(k, room, reduceMotion);
   addSnowfall(k, room, reduceMotion);
@@ -231,6 +288,7 @@ k.scene('room', (roomId, opts = {}) => {
   // Back in a room: restore the HUD the minigame hid, and let travel guards relax.
   setHudVisible(true);
   inMinigame = false;
+  refreshDevSpeed();
 
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
@@ -255,6 +313,10 @@ k.scene('room', (roomId, opts = {}) => {
   const avatar = makeAvatarActor(k, save.avatar, spawn, avatarScale);
   const player = avatar.root;
 
+  // Story notes are one-time rewards, independent of the daily coin cap.
+  const learned = grantMinigameResultNote(save, opts.result);
+  if (learned) persist(save);
+
   // Returning from the minigame: credit the earned coins (re-clamped to today's remaining cap).
   if (opts.coinsEarned > 0) {
     const credited = Math.min(opts.coinsEarned, remainingToday(save, todayISO));
@@ -270,6 +332,8 @@ k.scene('room', (roomId, opts = {}) => {
     }
   }
 
+  if (learned) showCoinToast(`You learned the ${learned.note[0].toUpperCase() + learned.note.slice(1)} note (${learned.count}/3)`);
+
   let facing = spawn === opts.resumePos && ['left', 'right', 'up', 'down'].includes(spawn.facing)
     ? spawn.facing : spawn.facing === 'left' ? 'left' : 'down';
   save.prefs.lastPos = snapshotPos(roomId, spawn, facing);
@@ -280,11 +344,13 @@ k.scene('room', (roomId, opts = {}) => {
   };
   let savePosElapsed = 0;
   let moveTarget = null;
+  let pending = null;
   let animT = 0;
   let transitioning = false;
   const walkPuffs = createWalkPuffs(k, reduceMotion, bf);
   const changeScene = (go) => {
     if (transitioning) return;
+    pending = pendingAction(pending, { type: 'cancel' });
     transitioning = true;
     fadeTo(k, reduceMotion, go);
   };
@@ -309,11 +375,11 @@ k.scene('room', (roomId, opts = {}) => {
   const anchorLayer = spawnRoomAnchors(k, room, ANCHOR_CHARACTERS, reduceMotion);
 
   // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. Minigames, shops,
-  // venues, newspapers, anchors, signs and doors are actionable; NPCs/landmarks stay promptless and
-  // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
+  // venues, newspapers, NPCs, anchors, signs and doors are actionable.
   const hotspotInteractables = (room.hotspots ?? []).map((h) => ({
     id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label,
-    prompt: h.prompt, copy: h.copy, entryDirection: h.entryDirection,
+    prompt: h.prompt, copy: h.copy, lore: h.lore, entryDirection: h.entryDirection,
+    interactionRadius: h.kind === 'landmark' ? 300 : undefined,
   }));
   const doorInteractables = (room.doors ?? [])
     .filter((door) => !door.hidden)
@@ -327,15 +393,18 @@ k.scene('room', (roomId, opts = {}) => {
 
   const actionFor = (hit) => {
     if (!hit) return null;
-    if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
+    const gameAction = minigameActionForHotspot(hit.id, save, hit.kind === 'minigame' ? null : hit.kind);
+    if (gameAction === 'minigame' || gameAction === 'locked') return gameAction;
     if (hit.kind === 'shop') return 'shop';
     if (hit.kind === 'venue') return 'venue';
-    if (hit.kind === 'newspaper') return 'newspaper';
+    if (hit.kind === 'newspaper' || hit.kind === 'noticeboard') return 'newspaper';
+    if (hit.kind === 'landmark') return 'landmark';
     if (hit.kind === 'trader') return 'trader';
     if (hit.kind === 'telescope') return 'telescope';
     if (hit.kind === 'logbook') return 'logbook';
     if (hit.kind === 'echo') return 'echo';
     if (hit.kind === 'character') return 'character';
+    if (hit.kind === 'npc') return 'npc';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
     return null;
@@ -343,6 +412,7 @@ k.scene('room', (roomId, opts = {}) => {
   function enterVenue(venue) {
     if (!venue) return false;
     autoVenueLatch = venue.id;
+    pending = pendingAction(pending, { type: 'cancel' });
     moveTarget = null;
     // A shop walked into through its door opens the shop itself, same as its prompt does.
     if (venue.kind === 'shop') dressUp.open();
@@ -351,6 +421,7 @@ k.scene('room', (roomId, opts = {}) => {
   }
   function enterDoor(door) {
     if (!door || door.locked) return false;
+    pending = pendingAction(pending, { type: 'cancel' });
     moveTarget = null;
     if (interactPrompt) interactPrompt.classList.remove('show');
     changeScene(() => k.go('room', door.targetRoom, { spawn: door.targetSpawn ?? arriveSpawnId(roomId) }));
@@ -387,6 +458,10 @@ k.scene('room', (roomId, opts = {}) => {
   function advanceTrackedFavor(definition, stepId) {
     const events = [];
     if (!definition || !advanceFavor(save, definition, stepId, events)) return null;
+    if (events.some((event) => event.type === 'favor-done')) {
+      save.favors[definition.id].reportOrder = 1 + Math.max(0,
+        ...Object.values(save.favors).map((state) => state.reportOrder ?? 0));
+    }
     persist(save);
     return events;
   }
@@ -402,6 +477,16 @@ k.scene('room', (roomId, opts = {}) => {
 
   // Walking into an occupied berth is Edda's evidence. The date-resolved room prevents this from
   // advancing on an away day or from seeing the undiscovered map pin.
+  if (roomId === 'docks' && !room.docksState?.inPort) {
+    const days = nextBargeArrival(todayISO)?.days;
+    if (days) showCoinToast(`The berth is empty. The Gull is due ${days === 1 ? 'tomorrow' : `in ${days} days`}.`);
+  }
+  if (roomId === 'plaza' && resolveDocksRoom(ROOM_REGISTRY.docks, todayISO).docksState?.inPort &&
+      favorState(save, WEATHER_BELL_FAVOR.id)?.status === 'done' && storyOf(save).bellChimedOn !== todayISO) {
+    storyOf(save).bellChimedOn = todayISO;
+    persist(save);
+    for (const lane of [0, 1, 2]) k.wait(lane * 0.23, () => playBell(lane, isMuted));
+  }
   if (roomId === 'docks' && room.docksState?.inPort) {
     const bargeTip = favorById('edda-tip-barge-arrival');
     if (currentFavorStep(save, bargeTip)?.id === 'witness-barge-in-port') {
@@ -446,6 +531,16 @@ k.scene('room', (roomId, opts = {}) => {
   }
 
   function talkToCharacter(character) {
+    if (character.linePools?.finale?.length && claimFinaleGreeting(save, character.id)) {
+      persist(save);
+      showDialogue(character.name, character.linePools.finale[0]);
+      return;
+    }
+    if (character.id === 'captain-salka' &&
+        currentFavorStep(save, WEATHER_BELL_FAVOR)?.id === 'recover-docks-clapper') {
+      openCharacterDialogue(character, 'clapper');
+      return;
+    }
     if (character.id === 'pat-hocket') {
       const step = currentFavorStep(save, WEATHER_BELL_FAVOR);
       if (step?.id === 'return-to-pat') {
@@ -530,6 +625,19 @@ k.scene('room', (roomId, opts = {}) => {
       openCharacterDialogue(character, character.dialogueTree?.start);
       return;
     }
+    if (!storyOf(save).eddaHired) {
+      storyOf(save).eddaHired = true;
+      persist(save);
+      openCharacterDialogue(character, 'first-meeting');
+      return;
+    }
+    if (Object.values(save.curios.found).filter(Boolean).length >= 4 &&
+        !save.secrets.vesperHints?.length && !storyOf(save).vesperPointerSeen) {
+      storyOf(save).vesperPointerSeen = true;
+      persist(save);
+      openCharacterDialogue(character, 'vesper-pointer');
+      return;
+    }
 
     const reportable = EDDA_STORY_TIP_FAVORS.find((definition) =>
       currentFavorStep(save, definition)?.id === 'report-to-edda');
@@ -560,20 +668,25 @@ k.scene('room', (roomId, opts = {}) => {
     openCharacterDialogue(character, startNode);
   }
 
-  function doInteract() {
+  function doInteract(target = nearest) {
     if (anyOverlayOpen()) return; // 'e' typed into the chat box (or any open modal) must not interact
-    const action = actionFor(nearest);
+    const action = actionFor(target);
     if (action === 'minigame') {
       if (interactPrompt) interactPrompt.classList.remove('show'); // hide before leaving the scene
       setHudVisible(false); // persistent DOM buttons must not float over (or act on) the minigame
       inMinigame = true;
-      changeScene(() => k.go(minigameForHotspot(nearest.id).sceneId, { from: roomId }));
+      changeScene(() => k.go(minigameForHotspot(target.id).sceneId, { from: roomId }));
     } else if (action === 'shop') {
       dressUp.open();
     } else if (action === 'venue') {
-      enterVenue(nearest);
+      enterVenue(target);
     } else if (action === 'newspaper') {
       newspaperUI.open();
+    } else if (action === 'landmark') {
+      reactionBurst(k, { x: target.pos.x, y: target.pos.y, line: target.lore }, reduceMotion);
+    } else if (action === 'locked') {
+      const line = minigameForHotspot(target.id)?.lockedLine;
+      if (line) showCoinToast(line);
     } else if (action === 'trader') {
       traderUI.open();
     } else if (action === 'telescope') {
@@ -584,11 +697,22 @@ k.scene('room', (roomId, opts = {}) => {
         pages: lighthouseLogbookPages(save),
       });
     } else if (action === 'echo') {
-      echoLayer?.singNext();
+      if (completeFinale(save)) {
+        for (const lane of [0, 1, 2]) k.wait(lane * 0.23, () => playBell(lane, isMuted));
+        echoLayer?.singNext(echoCharacter?.linePools?.finale?.[0]);
+        persist(save);
+        auroraLayer?.refresh();
+        showCoinToast('The aurora is loose over Chillmere');
+      } else echoLayer?.singNext();
     } else if (action === 'character') {
-      talkToCharacter(nearest.character);
+      talkToCharacter(target.character);
+    } else if (action === 'npc') {
+      const personaId = target.personaId ??
+        crowd?.getRoom().npcs.find((npc) => npc.id === target.id)?.personaId;
+      const persona = personaById(personaId);
+      showDialogue(persona?.name ?? 'Penguin', LINE_POOLS.AMBIENT[0]?.text ?? '');
     } else if (action === 'door') {
-      const d = nearest.door;
+      const d = target.door;
       if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
       enterDoor(d);
     } else if (action === 'sign') {
@@ -598,8 +722,8 @@ k.scene('room', (roomId, opts = {}) => {
       showCoinToast(save.home.open ? 'Den open — visitors welcome!' : 'Den closed.');
     }
   }
-  k.onKeyPress('e', doInteract);
-  if (interactPrompt) interactPrompt.onclick = doInteract;
+  k.onKeyPress('e', () => doInteract());
+  if (interactPrompt) interactPrompt.onclick = () => doInteract();
 
   /* ------------------------------------------------------------------ *
    * Chat & emotes — strictly LOCAL. Player text renders only as their own
@@ -771,6 +895,14 @@ k.scene('room', (roomId, opts = {}) => {
       k.scale(room.scale), k.z(p.y), 'pickup']);
     pickupObjs.push({ id: p.id, obj });
   }
+  const trailTip = favorById('edda-tip-trail-glint');
+  if (roomId === 'trail' && pickupObjs.length === 0 && room.pickups?.length &&
+      currentFavorStep(save, trailTip)?.id === 'witness-trail-glint') {
+    const spot = room.pickups[0];
+    const obj = k.add([k.sprite('pickup-glint'), k.pos(spot.x, spot.y), k.anchor('center'),
+      k.scale(room.scale), k.z(spot.y), 'pickup']);
+    pickupObjs.push({ id: 'story-trail-glint', obj, story: true });
+  }
 
   // Island-map travel (H1) — the ui singleton renders pins from content/map.js; the pure
   // engine/travel.js guard decides legality so the rules stay testable headless.
@@ -792,9 +924,11 @@ k.scene('room', (roomId, opts = {}) => {
     registry: CURIO_REGISTRY,
     getState: () => save.curios,
     getRoomLabel: (id) => ROOM_REGISTRY[id]?.title ?? id,
+    getSave: () => save,
   });
   const newspaperUI = createNewspaper({
     getIssue: () => chirperIssueForDate(todayISO),
+    getSave: () => save,
   });
   const traderUI = createTraderStall({
     getStock: () => room.docksState?.inPort ? salkaStockForDate(todayISO) : [],
@@ -833,6 +967,10 @@ k.scene('room', (roomId, opts = {}) => {
     editMode.isOpen() || catalogUI.isOpen();
   escapeLayers = [catalogUI, dialogueUI, chatUI, dressUp, traderUI, telescopeUI, newspaperUI, journalUI, mapUI,
     { isOpen: editMode.isOpen, close: exitEditMode }];
+  if (!storyOf(save).introSeen) journalUI.openIntro(() => {
+    storyOf(save).introSeen = true;
+    persist(save);
+  });
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
@@ -843,14 +981,18 @@ k.scene('room', (roomId, opts = {}) => {
   };
   k.onKeyPress('j', () => { if (!anyOverlayOpen()) journalUI.open(); });
 
-  // Direct-click props use one scene-scoped mouse path. touchToMouse synthesizes that path for taps,
-  // so no parallel touch listener exists and a Curio can never register twice from one tap.
+  // Props share the scene's single mouse path with characters and hotspots.
+  // touchToMouse synthesizes that path for taps.
   const clickableLayer = spawnClickables(k, {
-    props: room.clickables ?? [],
+    props: (room.clickables ?? []).map((prop) => prop.id === 'weather-bell-test'
+      ? { ...prop, get line() {
+        return favorState(save, WEATHER_BELL_FAVOR.id)?.status === 'done' ? prop.repairedLine : prop.line;
+      } } : prop),
     anyOverlayOpen,
     reducedMotion: reduceMotion,
+    listen: false,
     isEnabled: (prop) => {
-      if (prop.requiresProximity && Math.hypot(player.pos.x - prop.x, player.pos.y - prop.y) > 120 + pad) return false;
+      if (prop.id === 'weather-bell-test' && minigameActionForHotspot('weather-bell', save) === 'minigame') return false;
       if (!prop.onlyWhenFavorStep) return true;
       const link = prop.favorStep;
       const definition = favorById(link?.favorId);
@@ -877,7 +1019,6 @@ k.scene('room', (roomId, opts = {}) => {
       if (coinEvent) refreshCoins(true);
       const curio = curioById(CURIO_REGISTRY, curioId);
       if (isleComplete) {
-        auroraLayer?.refresh();
         dressUp.render();
         syncEditUI();
         showCoinToast('Isle complete — Echoglass Lantern and den trophy earned');
@@ -933,28 +1074,61 @@ k.scene('room', (roomId, opts = {}) => {
     bubbleObjs.txt.opacity = top.alpha;
   }
 
-  // Movement input is ignored while ANY overlay is open — one shared frozen predicate so
-  // pointer, keys and prompts can never disagree (H1 audit fix). Edit mode instead routes
+  // Movement input is ignored while ANY overlay is open. Edit mode instead routes
   // canvas presses to the furniture editor (the tray is non-modal by design).
+  const cancelPending = () => { pending = pendingAction(pending, { type: 'cancel' }); };
+  document.addEventListener('pointerdown', cancelPending, true);
+  k.onSceneLeave(() => document.removeEventListener('pointerdown', cancelPending, true));
   k.onMousePress(() => {
-    if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
-    if (clickableLayer.consumePress()) { moveTarget = null; return; }
-    if (!anyOverlayOpen()) {
-      moveTarget = collidePlayer(k.toWorld(k.mousePos()));
+    pending = pendingAction(pending, { type: 'cancel' });
+    const point = k.toWorld(k.mousePos());
+    if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(point); return; }
+    if (anyOverlayOpen()) return;
+
+    const prop = clickableLayer.hit(point);
+    const anchor = !prop && anchorLayer.hitAt(point);
+    const npc = !prop && !anchor && crowd?.hitAt(point);
+    const npcTarget = npc?.personaId === 'chowder' && storyOf(save).finaleSeen
+      ? { id: 'chowder-talk', pos: npc.pos, kind: 'character', label: 'Chowder',
+        character: CHOWDER_CHARACTER, npcId: npc.id }
+      : npc ? { id: npc.id, pos: npc.pos, kind: 'npc', personaId: npc.personaId, npcId: npc.id } : null;
+    const worldTarget = !prop && (anchor || npcTarget ||
+      [...doorInteractables, ...hotspotInteractables].reverse().find((candidate) => {
+        if (!actionFor(candidate)) return false;
+        if (candidate.id === 'weather-bell' &&
+          minigameActionForHotspot(candidate.id, save) === 'minigame') {
+          return Math.abs(point.x - candidate.pos.x) <= 105 &&
+            Math.abs(point.y - candidate.pos.y) <= 105;
+        }
+        return Math.abs(point.x - candidate.pos.x) <= 24 &&
+          Math.abs(point.y - candidate.pos.y) <= 24;
+      }));
+    const target = prop
+      ? { kind: 'prop', pos: { x: prop.x, y: prop.y }, clickPoint: point }
+      : worldTarget ? { kind: 'interaction', pos: worldTarget.pos, hit: worldTarget } : null;
+    if (!target) {
+      moveTarget = collidePlayer(point);
       showMovePing(k, moveTarget, reduceMotion);
+      return;
     }
-  });
-  k.onTouchStart((pos) => {
-    // touchToMouse:true already synthesizes a mousePress for every tap, so editPress must be
-    // routed ONLY through onMousePress — wiring it here too would double-fire on one tap
-    // (double stock burn / duplicate placement — H2 review blocker). The idempotent moveTarget
-    // assignment is safe to keep on both paths.
-    if (!anyOverlayOpen() && !clickableLayer.contains(k.toWorld(pos))) moveTarget = collidePlayer(k.toWorld(pos));
+    const range = prop ? 120 + pad : Math.min(INTERACT_R + pad,
+      worldTarget.interactionRadius ?? INTERACT_R + pad);
+    const dist = Math.hypot(player.pos.x - target.pos.x, player.pos.y - target.pos.y);
+    if (clickDecision({ dist, range }) === 'act') {
+      moveTarget = null;
+      if (prop) clickableLayer.trigger(target.clickPoint);
+      else doInteract(worldTarget);
+      return;
+    }
+    pending = pendingAction(pending, { type: 'set', target: { ...target, range } });
+    moveTarget = target.pos;
+    showMovePing(k, moveTarget, reduceMotion);
   });
 
   k.onUpdate(() => {
     const dt = Math.min(k.dt(), 0.05); // defensive clamp against tab-switch spikes
     const frozen = anyOverlayOpen();
+    if (frozen) pending = pendingAction(pending, { type: 'cancel' });
 
     // Drag-move a selected furniture piece while the mouse stays down (edit mode only).
     if (dragging && editMode.isOpen() && selIdx >= 0 && k.isMouseDown()) {
@@ -970,15 +1144,41 @@ k.scene('room', (roomId, opts = {}) => {
       down: k.isKeyDown('down') || k.isKeyDown('s'),
     };
     const { dxPx, dyPx, moving, arrived, keysCancelTarget } =
-      resolveMoveVector({ keys, moveTarget: frozen ? null : moveTarget, pos: player.pos, dt, speed: SPEED * Math.sqrt(bf) });
+      resolveMoveVector({ keys, moveTarget: frozen ? null : moveTarget, pos: player.pos, dt,
+        speed: SPEED * Math.sqrt(bf) * devSpeed });
 
-    if (keysCancelTarget) moveTarget = null;
+    if (keysCancelTarget) {
+      moveTarget = null;
+      pending = pendingAction(pending, { type: 'cancel' });
+    }
     if (arrived) moveTarget = null;
 
     let next = { x: player.pos.x + dxPx, y: player.pos.y + dyPx };
     next = collidePlayer(next);
     player.pos.x = next.x;
     player.pos.y = next.y;
+
+    if (pending) {
+      if (pending.hit?.npcId) {
+        const live = crowd?.getRoom().npcs.find((npc) => npc.id === pending.hit.npcId);
+        if (live) {
+          pending.hit.pos = live.pos;
+          pending.pos = live.pos;
+          moveTarget = live.pos;
+        } else pending = pendingAction(pending, { type: 'cancel' });
+      }
+      if (pending) {
+        const dist = Math.hypot(player.pos.x - pending.pos.x, player.pos.y - pending.pos.y);
+        const result = advancePendingAction(pending, dist, pending.range);
+        pending = result.pending;
+        if (result.action) {
+          moveTarget = null;
+          if (result.action.kind === 'prop') clickableLayer.trigger(result.action.clickPoint);
+          else doInteract(result.action.hit);
+          if (anyOverlayOpen()) return;
+        }
+      }
+    }
 
     const autoDoor = findAutoEnterDoor(
       next,
@@ -1026,6 +1226,13 @@ k.scene('room', (roomId, opts = {}) => {
       const pdx = player.pos.x - p.obj.pos.x;
       const pdy = player.pos.y - p.obj.pos.y;
       if (pdx * pdx + pdy * pdy < (40 + pad) ** 2) {
+        if (p.story) {
+          if (advanceTrackedFavor(trailTip, 'witness-trail-glint'))
+            showCoinToast('Story tip witnessed — report to Edda');
+          k.destroy(p.obj);
+          pickupObjs.splice(i, 1);
+          continue;
+        }
         if (collectPickup(save, p.id, todayISO, [])) {
           const trailTip = favorById('edda-tip-trail-glint');
           const witnessed = currentFavorStep(save, trailTip)?.id === 'witness-trail-glint'
@@ -1072,13 +1279,17 @@ k.scene('room', (roomId, opts = {}) => {
       visitorLayer.tick(dt);
     }
 
-    // Nearest-ACTIONABLE scan (hotspots + doors + live NPCs) — NPCs have no action yet, so the
-    // isActionable filter keeps a nearby waddler from shadowing a shop/minigame/door prompt.
+    // Nearest actionable hotspot, door, or character for the E-key prompt.
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];
+    const chowder = liveNpcs.find((npc) => npc.personaId === 'chowder');
+    const chowderInteractables = chowder && storyOf(save).finaleSeen
+      ? [{ id: 'chowder-talk', pos: chowder.pos, kind: 'character', label: 'Chowder',
+        character: CHOWDER_CHARACTER }] : [];
     nearest = findNearestInteractable(
       player.pos,
-      mergeInteractables(hotspotInteractables.concat(doorInteractables, anchorLayer.interactables), liveNpcs),
-      undefined,
+      mergeInteractables(hotspotInteractables.concat(doorInteractables, anchorLayer.interactables,
+        chowderInteractables), liveNpcs),
+      INTERACT_R + pad,
       { isActionable: (c) => actionFor(c) !== null },
     );
     const action = actionFor(nearest);
@@ -1086,13 +1297,16 @@ k.scene('room', (roomId, opts = {}) => {
       if (action && !frozen) {
         interactPrompt.textContent =
           action === 'minigame' ? `▶ Play ${nearest.label ?? 'game'}` :
+          action === 'locked' ? `${nearest.label} (sealed)` :
           action === 'shop' ? '👕 Dress Up' :
           action === 'venue' ? `🏪 ${nearest.prompt ?? `Visit ${nearest.label}`}` :
           action === 'newspaper' ? `📰 ${nearest.prompt ?? `Read ${nearest.label}`}` :
+          action === 'landmark' ? `Look at ${nearest.label}` :
           action === 'telescope' ? `🔭 ${nearest.prompt ?? 'Look through the telescope'}` :
           action === 'logbook' ? `📖 ${nearest.prompt ?? 'Read the logbook'}` :
           action === 'echo' ? `♪ ${nearest.prompt ?? 'Listen for The Echo'}` :
           action === 'character' ? `💬 Talk to ${nearest.label}` :
+          action === 'npc' ? `💬 Talk to ${personaById(liveNpcs.find((npc) => npc.id === nearest.id)?.personaId)?.name ?? 'Penguin'}` :
           action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');

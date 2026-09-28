@@ -8,7 +8,7 @@ export const VESPER_DEN_IDS = Object.freeze(['root-den', 'owl-den', 'fallen-den'
 export const VESPER_HINTS = Object.freeze([
   Object.freeze({
     id: 'court-cobble', requiredCurios: 6,
-    text: 'The cobble in the Court isn’t loose by accident. It is keeping a three-note door from forgetting itself.',
+    text: 'The Court cobble hums three notes. Three people on the isle each hold one; listen to Pat, Salka and Maren.',
   }),
   Object.freeze({
     id: 'moonwell-gap', requiredCurios: 14, unlocks: 'moonwell',

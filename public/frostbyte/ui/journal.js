@@ -1,7 +1,14 @@
 // ui/journal.js — singleton Curio Log overlay (World Plan W0). A knit-bound expedition book,
 // intentionally distinct from the game's frosted-glass utility chrome.
 import { isCurioFound, roomProgress, totalProgress } from '../engine/curios.js';
+import { NOTE_IDS, hasNote } from '../engine/story.js';
 import { closeOnBackdrop } from './backdrop.js';
+
+export function journalNotes(save) {
+  const places = { bell: 'Emberlight Workshop', floe: 'Driftgate Docks',
+    moon: save.secrets?.moonwellUnlocked ? 'the Moonwell' : '???' };
+  return NOTE_IDS.map((id) => ({ id, held: hasNote(save, id), place: places[id] }));
+}
 
 let instance = null;
 let stylesInjected = false;
@@ -9,6 +16,7 @@ const cb = {
   registry: [],
   getState: () => ({ found: {} }),
   getRoomLabel: (roomId) => roomId,
+  getSave: () => ({}),
 };
 
 function injectStyles() {
@@ -53,6 +61,10 @@ function injectStyles() {
       border:2px dashed currentColor; background:#d5e4f1; transform:rotate(-2deg); }
     .journal-stitch:nth-child(even) { transform:rotate(2deg); }
     .journal-stitch.is-found { color:#315e4b; background:#a9ddc7; }
+    #journal-notes { margin:14px 0 0; }
+    #journal-notes .journal-stitches { margin:6px 0; }
+    #journal-notes .journal-stitch.is-found { background:#6fe0b2; }
+    #journal-notes .journal-entry-list { display:flex; flex-wrap:wrap; gap:6px 16px; }
     .journal-entry-list { list-style:none; padding:0; margin:0; display:grid; gap:5px; }
     .journal-entry { font-size:13px; color:#486176; }
     .journal-entry.is-found { color:#243548; font-weight:750; }
@@ -107,25 +119,55 @@ function roomIds(registry) {
   return [...new Set(registry.map((curio) => curio.roomId))];
 }
 
-export function createJournal({ registry, getState, getRoomLabel }) {
+export function createJournal({ registry, getState, getRoomLabel, getSave }) {
   cb.registry = registry ?? [];
   cb.getState = getState ?? cb.getState;
   cb.getRoomLabel = getRoomLabel ?? cb.getRoomLabel;
+  cb.getSave = getSave ?? cb.getSave;
   if (instance) return instance;
 
   injectStyles();
   const { overlay, body, summary, closeBtn } = buildDom();
+  const title = document.getElementById('journal-title');
   let lastFocused = null;
+  let introClose = null;
 
   function refresh() {
     const state = cb.getState?.() ?? { found: {} };
-    const total = totalProgress(cb.registry, state);
+    const save = cb.getSave?.() ?? {};
+    const visibleRegistry = cb.registry.filter((curio) =>
+      (curio.roomId !== 'moonwell' || save.secrets?.moonwellUnlocked) &&
+      (curio.roomId !== 'caverns' || save.secrets?.cavernsUnlocked));
+    const total = totalProgress(visibleRegistry.filter((curio) =>
+      save.visitedRooms?.includes(curio.roomId)), state);
     summary.textContent = state.isleRewardClaimed
       ? `${total.found} of ${total.total} discoveries — Echoglass Lantern and den trophy earned`
       : total.total ? `${total.found} of ${total.total} discoveries` : 'Your expedition starts here';
     body.replaceChildren();
+    const notes = document.createElement('section');
+    notes.id = 'journal-notes';
+    const noteHeading = document.createElement('strong');
+    noteHeading.textContent = 'Three notes';
+    const marks = document.createElement('div');
+    marks.className = 'journal-stitches';
+    const labels = document.createElement('ul');
+    labels.className = 'journal-entry-list';
+    for (const note of journalNotes(save)) {
+      const mark = document.createElement('span');
+      mark.className = 'journal-stitch' + (note.held ? ' is-found' : '');
+      mark.textContent = note.held ? '×' : '';
+      mark.setAttribute('aria-hidden', 'true');
+      const label = document.createElement('li');
+      label.className = 'journal-entry' + (note.held ? ' is-found' : '');
+      label.textContent = note.id[0].toUpperCase() + note.id.slice(1) + ' — ' +
+        (note.held ? 'held' : note.place);
+      marks.appendChild(mark);
+      labels.appendChild(label);
+    }
+    notes.append(noteHeading, marks, labels);
+    body.appendChild(notes);
 
-    if (cb.registry.length === 0) {
+    if (visibleRegistry.length === 0) {
       const empty = document.createElement('p');
       empty.id = 'journal-empty';
       empty.textContent = 'Blank pages for now. New curios will appear as the isle opens up.';
@@ -135,14 +177,21 @@ export function createJournal({ registry, getState, getRoomLabel }) {
 
     const rooms = document.createElement('div');
     rooms.id = 'journal-rooms';
-    for (const roomId of roomIds(cb.registry)) {
-      const progress = roomProgress(cb.registry, state, roomId);
+    for (const roomId of roomIds(visibleRegistry)) {
+      const charted = save.visitedRooms?.includes(roomId);
+      const progress = roomProgress(visibleRegistry, state, roomId);
       const section = document.createElement('section');
-      section.className = `journal-room${progress.complete ? ' is-complete' : ''}`;
+      section.className = `journal-room${charted && progress.complete ? ' is-complete' : ''}`;
       const head = document.createElement('div');
       head.className = 'journal-room-head';
       const heading = document.createElement('h3');
-      heading.textContent = cb.getRoomLabel(roomId);
+      heading.textContent = charted ? cb.getRoomLabel(roomId) : '??? — uncharted';
+      if (!charted) {
+        section.appendChild(head);
+        head.appendChild(heading);
+        rooms.appendChild(section);
+        continue;
+      }
       const count = document.createElement('span');
       count.className = 'journal-count';
       count.textContent = `${progress.found}/${progress.total}`;
@@ -153,7 +202,7 @@ export function createJournal({ registry, getState, getRoomLabel }) {
       stitches.setAttribute('aria-hidden', 'true');
       const list = document.createElement('ul');
       list.className = 'journal-entry-list';
-      for (const curio of cb.registry.filter((entry) => entry.roomId === roomId)) {
+      for (const curio of visibleRegistry.filter((entry) => entry.roomId === roomId)) {
         const found = isCurioFound(state, curio.id);
         const stitch = document.createElement('span');
         stitch.className = `journal-stitch${found ? ' is-found' : ''}`;
@@ -172,13 +221,34 @@ export function createJournal({ registry, getState, getRoomLabel }) {
 
   function close() {
     overlay.classList.add('hidden');
+    const onIntroClose = introClose;
+    introClose = null;
+    onIntroClose?.();
     lastFocused?.focus?.();
     lastFocused = null;
   }
 
   function open() {
+    title.textContent = 'Curio Log';
+    closeBtn.textContent = 'Close ✕';
+    summary.hidden = false;
     lastFocused = document.activeElement;
     refresh();
+    overlay.classList.remove('hidden');
+    closeBtn.focus();
+  }
+
+  function openIntro(onClose) {
+    lastFocused = document.activeElement;
+    introClose = onClose;
+    title.textContent = 'Your Curio Log';
+    summary.hidden = true;
+    body.replaceChildren();
+    const page = document.createElement('p');
+    page.id = 'journal-empty';
+    page.textContent = 'You step off the Driftwood Gull with a blank Log and nowhere to be. Edda, who runs the Chirper in Glasswind Court, is looking for someone to fill its pages.';
+    body.appendChild(page);
+    closeBtn.textContent = 'Step ashore';
     overlay.classList.remove('hidden');
     closeBtn.focus();
   }
@@ -186,6 +256,6 @@ export function createJournal({ registry, getState, getRoomLabel }) {
   const isOpen = () => !overlay.classList.contains('hidden');
   closeBtn.onclick = close;
   closeOnBackdrop(overlay, close);
-  instance = { open, close, isOpen, refresh };
+  instance = { open, openIntro, close, isOpen, refresh };
   return instance;
 }

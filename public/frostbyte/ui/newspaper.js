@@ -1,9 +1,19 @@
 // ui/newspaper.js — singleton cork-board/paper overlay for The Chillmere Chirper (World Plan W1).
 import { closeOnBackdrop } from './backdrop.js';
+import { FAVOR_DEFINITIONS } from '../content/favors.js';
+
+export function readerReports(save, definitions = FAVOR_DEFINITIONS) {
+  return definitions
+    .map((favor, index) => ({ favor, index, state: save.favors?.[favor.id] }))
+    .filter(({ state }) => state?.status === 'done')
+    .sort((a, b) => (b.state.reportOrder ?? -1) - (a.state.reportOrder ?? -1) || b.index - a.index)
+    .slice(0, 5)
+    .map(({ favor }) => favor.report);
+}
 
 let instance = null;
 let stylesInjected = false;
-const cb = { getIssue: () => null };
+const cb = { getIssue: () => null, getSave: () => ({}) };
 
 function injectStyles() {
   if (stylesInjected) return;
@@ -27,6 +37,7 @@ function injectStyles() {
     #chirper-header { display:flex; align-items:flex-start; gap:12px; padding-bottom:10px;
       border-bottom:4px double #566577; }
     #chirper-masthead { flex:1; }
+    #chirper-header.is-finale { background:#6fe0b2; border-bottom:8px solid #7fd6ff; }
     #chirper-title { margin:0; color:#16283e; font-size:clamp(23px, 6vw, 38px); line-height:1;
       letter-spacing:-.03em; }
     #chirper-date { margin:5px 0 0; color:#657383; font-size:12px; font-weight:800; text-transform:uppercase;
@@ -42,6 +53,11 @@ function injectStyles() {
     .chirper-article h3 { margin:0 0 7px; color:#243548; font-size:16px; line-height:1.08;
       text-transform:uppercase; }
     .chirper-article p { margin:0; font-family:inherit; font-size:14px; line-height:1.45; }
+    #chirper-front { margin-top:16px; padding-bottom:12px; border-bottom:4px double #566577; }
+    #chirper-front h3, #chirper-reports h3 { margin:0 0 7px; color:#243548; font-size:16px; line-height:1.08; text-transform:uppercase; }
+    #chirper-front p, #chirper-reports li { margin:0; font-size:14px; line-height:1.45; }
+    #chirper-reports { margin-top:16px; }
+    #chirper-reports ul { margin:0; padding-left:20px; }
     #chirper-hint { margin:16px 0 0; padding:11px 13px; color:#3f321f; font-weight:750;
       border:2px dashed #9b6b31; background:#ffdf9e80; transform:rotate(.35deg); }
     @media (max-width:620px) {
@@ -83,26 +99,47 @@ function buildDom() {
   closeBtn.type = 'button';
   closeBtn.textContent = 'Fold away ✕';
   header.append(masthead, closeBtn);
+  const front = document.createElement('section');
+  front.id = 'chirper-front';
   const articles = document.createElement('div');
   articles.id = 'chirper-articles';
+  const reports = document.createElement('section');
+  reports.id = 'chirper-reports';
   const hint = document.createElement('p');
   hint.id = 'chirper-hint';
-  paper.append(header, articles, hint);
+  paper.append(header, front, articles, reports, hint);
   board.appendChild(paper);
   overlay.appendChild(board);
   document.body.appendChild(overlay);
-  return { overlay, date, articles, hint, closeBtn };
+  return { overlay, header, date, front, articles, reports, hint, closeBtn };
 }
 
-export function createNewspaper({ getIssue }) {
+export function createNewspaper({ getIssue, getSave }) {
   cb.getIssue = getIssue ?? cb.getIssue;
+  cb.getSave = getSave ?? cb.getSave;
   if (instance) return instance;
   injectStyles();
-  const { overlay, date, articles, hint, closeBtn } = buildDom();
+  const { overlay, header, date, front, articles, reports, hint, closeBtn } = buildDom();
   let lastFocused = null;
 
   function refresh() {
     const issue = cb.getIssue?.();
+    const save = cb.getSave?.() ?? {};
+    const finale = save.story?.finaleSeen === true;
+    header.classList.toggle('is-finale', finale);
+    front.hidden = !finale;
+    front.replaceChildren();
+    if (finale) {
+      const headline = document.createElement('h3');
+      headline.textContent = 'Aurora Loose Over Chillmere';
+      const copy = document.createElement('p');
+      copy.textContent = 'Three notes answered the song beneath Hollowfrost.';
+      const second = document.createElement('p');
+      second.textContent = 'The sky took it from there.';
+      const byline = document.createElement('p');
+      byline.textContent = 'By our stringer';
+      front.append(headline, copy, second, byline);
+    }
     date.textContent = issue ? `Weekly edition · Week of ${issue.weekOf}` : 'No edition available';
     articles.replaceChildren();
     for (const story of issue?.articles ?? []) {
@@ -114,6 +151,23 @@ export function createNewspaper({ getIssue }) {
       copy.textContent = story.body;
       article.append(heading, copy);
       articles.appendChild(article);
+    }
+    reports.replaceChildren();
+    const reportHeading = document.createElement('h3');
+    reportHeading.textContent = 'Reader reports';
+    const filed = readerReports(save);
+    if (filed.length) {
+      const list = document.createElement('ul');
+      for (const report of filed) {
+        const item = document.createElement('li');
+        item.textContent = report;
+        list.appendChild(item);
+      }
+      reports.append(reportHeading, list);
+    } else {
+      const empty = document.createElement('p');
+      empty.textContent = 'Nothing filed yet. Edda is waiting.';
+      reports.append(reportHeading, empty);
     }
     hint.textContent = issue?.hint?.text ?? 'The editor is still chasing this week’s hunch.';
   }

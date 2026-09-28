@@ -4,10 +4,10 @@ import { chirperWeekKey } from './chirper-issues.js';
 import { bargeStateForDate } from '../engine/barge-schedule.js';
 
 export const BOTTLE_MESSAGES = Object.freeze([
-  Object.freeze({ id: 'north-current', text: 'Bottle post: “North current calm. Lantern visible. Soup acceptable.”' }),
-  Object.freeze({ id: 'three-feathers', text: 'Bottle post: “Three white feathers at sea. None admit belonging to a gull.”' }),
-  Object.freeze({ id: 'blue-rope', text: 'Bottle post: “Blue rope on the outer marker. Leave it; the tide is measuring something.”' }),
-  Object.freeze({ id: 'warm-stone', text: 'Bottle post: “Found one warm stone beyond the floes. Sending the story, keeping the stone.”' }),
+  Object.freeze({ id: 'north-current', text: 'Cargo note: “North current calm. Lantern visible. Soup acceptable.”' }),
+  Object.freeze({ id: 'three-feathers', text: 'Cargo note: “Three white feathers at sea. None admit belonging to a gull.”' }),
+  Object.freeze({ id: 'blue-rope', text: 'Cargo note: “Blue rope on the outer marker. Leave it; the tide is measuring something.”' }),
+  Object.freeze({ id: 'warm-stone', text: 'Cargo note: “Found one warm stone beyond the floes. Sending the story, keeping the stone.”' }),
 ]);
 
 function hashString(value) {

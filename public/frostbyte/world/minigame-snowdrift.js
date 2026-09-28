@@ -58,17 +58,20 @@ export function registerMinigameSnowdrift(k, { reducedMotion = false } = {}) {
     });
     k.onKeyPress('space', () => { tossQueued = true; });
     k.onKeyPress('enter', () => {
-      if (state.phase === 'over') goToPlaza(coinsEarned);
+      if (state.phase === 'over') goToPlaza(coinsEarned, true);
     });
     // Leave is available both mid-play and on the end panel — always exits with 0 coins.
     k.onKeyPress('escape', () => goToPlaza(0));
 
-    function goToPlaza(coins) {
+    function goToPlaza(coins, won = false) {
       if (leaving) return;
       leaving = true;
       // The plaza is the parameterized 'room' scene (main.js: k.scene('room', (roomId, opts) => …)),
       // entered as k.go('room', 'plaza', opts) — not a standalone 'plaza' scene.
-      fadeTo(k, reducedMotion, () => k.go('room', from || 'plaza', { spawn: 'fromMinigame', coinsEarned: coins }));
+      fadeTo(k, reducedMotion, () => k.go('room', from || 'plaza', {
+        from, spawn: 'fromMinigame', coinsEarned: coins,
+        result: { gameId: 'snowdrift', won },
+      }));
     }
 
     /* ---------------------------------------------------------------- *
@@ -152,7 +155,7 @@ export function registerMinigameSnowdrift(k, { reducedMotion = false } = {}) {
     }
     function handleEndClick(screenPos) {
       if (!endHit) return;
-      if (pointInRect(screenPos, endHit.collectRect)) goToPlaza(coinsEarned);
+      if (pointInRect(screenPos, endHit.collectRect)) goToPlaza(coinsEarned, true);
       else if (pointInRect(screenPos, endHit.leaveRect)) goToPlaza(0);
     }
     function destroyEndPanel() {

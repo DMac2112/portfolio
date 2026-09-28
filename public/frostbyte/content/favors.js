@@ -17,6 +17,7 @@ export const EDDA_STORY_TIP_FAVORS = Object.freeze([
     id: 'edda-tip-trail-glint',
     ownerId: 'edda-quill',
     title: 'A Light on the Trail',
+    report: 'Blue light spotted on Frostline Trail — filed by our stringer.',
     steps: [
       { id: 'witness-trail-glint', label: 'Witness a glint on Frostline Trail' },
       { id: 'report-to-edda', label: 'Report the sighting to Edda' },
@@ -27,6 +28,7 @@ export const EDDA_STORY_TIP_FAVORS = Object.freeze([
     id: 'edda-tip-workshop-test',
     ownerId: 'edda-quill',
     title: 'A Bell Before the Weather',
+    report: 'Workshop Bell tests the weather — filed by our stringer.',
     steps: [
       { id: 'witness-workshop-test', label: 'Witness the Workshop test-firing' },
       { id: 'report-to-edda', label: 'Report the test to Edda' },
@@ -37,6 +39,7 @@ export const EDDA_STORY_TIP_FAVORS = Object.freeze([
     id: 'edda-tip-barge-arrival',
     ownerId: 'edda-quill',
     title: 'Gull at the Breakwater',
+    report: 'The Gull returns to Driftgate — filed by our stringer.',
     steps: [
       { id: 'witness-barge-in-port', label: 'See the Driftwood Gull in port' },
       { id: 'report-to-edda', label: 'Report the arrival to Edda' },
@@ -49,6 +52,7 @@ export const WEATHER_BELL_FAVOR = freezeFavor({
   id: 'pat-weather-bell-parts',
   ownerId: 'pat-hocket',
   title: 'Three Notes Missing',
+  report: 'Weather Bell rebuilt in Emberlight — filed by our stringer.',
   steps: [
     { id: 'recover-court-coil', label: 'Recover the resonator coil in Glasswind Court' },
     { id: 'recover-trail-vane', label: 'Recover the wind vane on Frostline Trail' },
@@ -63,6 +67,7 @@ export const MAREN_SIGHTING_FAVORS = Object.freeze([
     id: 'maren-sighting-vista',
     ownerId: 'old-maren',
     title: 'A Patient Horizon',
+    report: 'Palefire telescope catches a new sight — filed by our stringer.',
     steps: [
       { id: 'view-telescope-vista', label: 'Study a vista through the Palefire telescope' },
       { id: 'report-to-maren', label: 'Report the sighting to Old Maren' },
@@ -73,6 +78,7 @@ export const MAREN_SIGHTING_FAVORS = Object.freeze([
     id: 'maren-sighting-trail',
     ownerId: 'old-maren',
     title: 'The Trail Answers Back',
+    report: 'Blue ribbon crosses the Trail — filed by our stringer.',
     requires: ['maren-sighting-vista'],
     steps: [
       { id: 'witness-trail-event', label: 'Witness the blue ribbon on Frostline Trail' },
@@ -84,6 +90,7 @@ export const MAREN_SIGHTING_FAVORS = Object.freeze([
     id: 'maren-sighting-gull',
     ownerId: 'old-maren',
     title: 'Orange Pennant at Sea',
+    report: 'Salka sails east under orange pennant — filed by our stringer.',
     requires: ['maren-sighting-trail'],
     steps: [
       { id: 'spot-salka-at-sea', label: 'Spot The Driftwood Gull under sail' },

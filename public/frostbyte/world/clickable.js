@@ -145,7 +145,7 @@ function addVariantReaction(k, prop, color, reducedMotion) {
   }
 }
 
-function reactionBurst(k, prop, reducedMotion) {
+export function reactionBurst(k, prop, reducedMotion) {
   const color = k.Color.fromHex(prop.reactionColor ?? '#ffb45e');
   const burst = k.add([
     k.rect(14, 14, { radius: 4 }),
@@ -218,7 +218,8 @@ export function spawnClickables(k, opts = {}) {
   }
 
   // Scene listener, not window/document. It is cancelled explicitly as well as by KAPLAY teardown.
-  const mousePress = k.onMousePress(() => { handledPress = Boolean(trigger(k.toWorld(k.mousePos()))); });
+  const mousePress = opts.listen === false ? null
+    : k.onMousePress(() => { handledPress = Boolean(trigger(k.toWorld(k.mousePos()))); });
   k.onSceneLeave(() => {
     active = false;
     mousePress?.cancel?.();
@@ -226,6 +227,10 @@ export function spawnClickables(k, opts = {}) {
 
   return {
     trigger,
+    hit: (point) => clickableAt(
+      opts.isEnabled ? props.filter((prop) => opts.isEnabled(prop)) : props,
+      point,
+    ),
     contains: (point) => Boolean(clickableAt(
       opts.isEnabled ? props.filter((prop) => opts.isEnabled(prop)) : props,
       point,
