@@ -17,6 +17,7 @@ import { createDressUp } from './ui/dress-up.js';
 import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
 import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
+import { registerMinigameBell } from './world/minigame-bell.js';
 import {
   AUTO_VENUE_R,
   AUTO_VENUE_RESET_R,
@@ -24,7 +25,7 @@ import {
   findNearestInteractable,
   mergeInteractables,
 } from './engine/interaction.js';
-import { minigameForHotspot } from './content/minigames-registry.js';
+import { minigameForHotspot, minigameActionForHotspot, grantMinigameResultNote } from './content/minigames-registry.js';
 import { recordCoins, remainingToday } from './engine/minigame-daily.js';
 import { newChat, addBubble, tick as tickChat, active as activeChat } from './engine/chat.js';
 import { createChat } from './ui/chat.js';
@@ -152,6 +153,7 @@ k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
 
 // Register the Snowdrift Toss scene (a sibling scene entered/exited via the room ↔ minigame contract).
 registerMinigameSnowdrift(k, { reducedMotion: reduceMotion });
+registerMinigameBell(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
 
 /* ------------------------------------------------------------------ *
  * Coin HUD
@@ -262,6 +264,10 @@ k.scene('room', (roomId, opts = {}) => {
   const avatar = makeAvatarActor(k, save.avatar, spawn, avatarScale);
   const player = avatar.root;
 
+  // Story notes are one-time rewards, independent of the daily coin cap.
+  const learned = grantMinigameResultNote(save, opts.result);
+  if (learned) persist(save);
+
   // Returning from the minigame: credit the earned coins (re-clamped to today's remaining cap).
   if (opts.coinsEarned > 0) {
     const credited = Math.min(opts.coinsEarned, remainingToday(save, todayISO));
@@ -276,6 +282,8 @@ k.scene('room', (roomId, opts = {}) => {
       showCoinToast('Daily coin cap reached');
     }
   }
+
+  if (learned) showCoinToast(`You learned the ${learned.note[0].toUpperCase() + learned.note.slice(1)} note (${learned.count}/3)`);
 
   let facing = spawn === opts.resumePos && ['left', 'right', 'up', 'down'].includes(spawn.facing)
     ? spawn.facing : spawn.facing === 'left' ? 'left' : 'down';
@@ -335,7 +343,8 @@ k.scene('room', (roomId, opts = {}) => {
 
   const actionFor = (hit) => {
     if (!hit) return null;
-    if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
+    const gameAction = minigameActionForHotspot(hit.id, save, hit.kind === 'minigame' ? null : hit.kind);
+    if (gameAction === 'minigame' || gameAction === 'locked') return gameAction;
     if (hit.kind === 'shop') return 'shop';
     if (hit.kind === 'venue') return 'venue';
     if (hit.kind === 'newspaper' || hit.kind === 'noticeboard') return 'newspaper';
@@ -607,6 +616,9 @@ k.scene('room', (roomId, opts = {}) => {
       newspaperUI.open();
     } else if (action === 'landmark') {
       reactionBurst(k, { x: nearest.pos.x, y: nearest.pos.y, line: nearest.lore }, reduceMotion);
+    } else if (action === 'locked') {
+      const line = minigameForHotspot(nearest.id)?.lockedLine;
+      if (line) showCoinToast(line);
     } else if (action === 'trader') {
       traderUI.open();
     } else if (action === 'telescope') {
@@ -896,6 +908,7 @@ k.scene('room', (roomId, opts = {}) => {
     anyOverlayOpen,
     reducedMotion: reduceMotion,
     isEnabled: (prop) => {
+      if (prop.id === 'weather-bell-test' && minigameActionForHotspot('weather-bell', save) === 'minigame') return false;
       if (prop.requiresProximity && Math.hypot(player.pos.x - prop.x, player.pos.y - prop.y) > 120 + pad) return false;
       if (!prop.onlyWhenFavorStep) return true;
       const link = prop.favorStep;
@@ -985,6 +998,11 @@ k.scene('room', (roomId, opts = {}) => {
   k.onMousePress(() => {
     if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
     if (clickableLayer.consumePress()) { moveTarget = null; return; }
+    if (!anyOverlayOpen() && nearest?.id === 'weather-bell'
+      && minigameActionForHotspot(nearest.id, save) === 'minigame') {
+      const point = k.toWorld(k.mousePos());
+      if (Math.abs(point.x - 720) <= 105 && Math.abs(point.y - 390) <= 105) { doInteract(); return; }
+    }
     if (!anyOverlayOpen()) {
       moveTarget = collidePlayer(k.toWorld(k.mousePos()));
       showMovePing(k, moveTarget, reduceMotion);
