@@ -329,6 +329,14 @@ describe('room configs', () => {
     expect(Math.hypot(game.x - tove.x, game.y - tove.y)).toBeGreaterThanOrEqual(INTERACT_R);
   });
 
+  it('ladle: Cocoa Rounds sits on the hearth floor, clear of Brann', () => {
+    const room = ROOM_REGISTRY.ladle;
+    const game = room.hotspots.find((hotspot) => hotspot.id === 'cocoa-rounds');
+    const brann = room.anchors.find((anchor) => anchor.characterId === 'brann');
+    expect(game).toMatchObject({ label: 'Cocoa Rounds', kind: 'minigame', x: 1040, y: 650 });
+    expect(Math.hypot(game.x - brann.x, game.y - brann.y)).toBeGreaterThanOrEqual(INTERACT_R);
+  });
+
   it('court: Bluehour Coffee and Lantern Ladle are real doors; only the pet shop is a venue', () => {
     expect(ROOM_REGISTRY.court.doors.find(d => d.id === 'door-bluehour'))
       .toMatchObject({ targetRoom: 'bluehour', targetSpawn: 'fromCourt', locked: false });

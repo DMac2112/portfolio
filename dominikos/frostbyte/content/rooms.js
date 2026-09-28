@@ -329,7 +329,9 @@ export const ROOM_REGISTRY = {
       fromMap: { x: 760, y: 770, facing: 'up' },
     },
     camera: { leadY: -50 },
-    hotspots: [],
+    hotspots: [
+      { id: 'cocoa-rounds', label: 'Cocoa Rounds', kind: 'minigame', x: 1040, y: 650 },
+    ],
     doors: [
       { id: 'door-back', label: 'Glasswind Court', x: 745, y: 930,
         targetRoom: 'court', targetSpawn: 'fromLadle', locked: false },

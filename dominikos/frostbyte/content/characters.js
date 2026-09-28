@@ -480,7 +480,7 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     palette: { body: '#26343c', accent: '#bd513c', warm: '#e88741' },
     linePools: { greeting: [
       'Tonight’s special is ember-roasted root stew with iceleaf rolls.',
-      'Short a pair of flippers tonight. If you can carry a mug, I’ll have work for you soon.',
+      'Short a pair of flippers tonight. Cocoa rounds, one minute a shift: ladle, topping, table.',
     ] },
     favorDefs: [],
   },

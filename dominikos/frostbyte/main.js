@@ -19,6 +19,7 @@ import { ROOM_SPAWN } from './content/npc-spawn.js';
 import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
 import { registerMinigameBell } from './world/minigame-bell.js';
 import { registerMinigameBoxes } from './world/minigame-boxes.js';
+import { registerMinigameCocoa } from './world/minigame-cocoa.js';
 import { registerMinigameFloe } from './world/minigame-floe.js';
 import { registerMinigameThaw } from './world/minigame-thaw.js';
 import {
@@ -202,6 +203,7 @@ k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
 registerMinigameSnowdrift(k, { reducedMotion: reduceMotion });
 registerMinigameBell(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
 registerMinigameBoxes(k, { reducedMotion: reduceMotion });
+registerMinigameCocoa(k, { reducedMotion: reduceMotion });
 registerMinigameFloe(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
 registerMinigameThaw(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
 
