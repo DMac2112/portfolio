@@ -5,6 +5,12 @@ import { resolveRoomCollision } from '../world/room-collision.js';
 
 const INTERACT_R = 168; // must match main.js's interaction radius (P3's interaction.js)
 const EXPECTED_CLOSE_PAIRS = {
+  plaza: {
+    'door-workshop|noticeboard-chronicle': Math.hypot(110, 13),
+  },
+  court: {
+    'door-back|noticeboard-chirper': Math.hypot(118, 50),
+  },
   docks: {
     'anchor-captain-salka|salka-trader-stall': Math.hypot(150, 70),
     'anchor-captain-salka|floe-fishing': Math.hypot(72, 120),

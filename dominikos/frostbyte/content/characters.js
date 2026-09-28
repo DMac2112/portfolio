@@ -231,10 +231,10 @@ export const PAT_DIALOGUE_TREE = Object.freeze({
       ]),
     }),
     accepted: Object.freeze({
-      pages: Object.freeze(['Start in the Court. The resonator coil bounced toward the companion pen. Try not to let it adopt you.']),
+      pages: Object.freeze(['Start in the Court. The resonator coil rolled under the market cart by the pet shop.']),
     }),
     'reminder-court': Object.freeze({
-      pages: Object.freeze(['First: the resonator coil in Glasswind Court, near the companion pen. Brass spiral, faintly warm.']),
+      pages: Object.freeze(['First: the resonator coil under the market cart by the pet shop. Brass spiral, faintly warm.']),
     }),
     'reminder-trail': Object.freeze({
       pages: Object.freeze(['Next: the wind vane snagged on the old signpost along Frostline Trail.']),
