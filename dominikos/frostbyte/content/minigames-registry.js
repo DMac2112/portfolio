@@ -10,6 +10,7 @@ export const MINIGAMES = {
     hotspotId: 'weather-bell', sceneId: 'minigame-bell', note: 'bell',
     requires: (save) => favorState(save, 'pat-weather-bell-parts')?.status === FAVOR_STATUS.DONE,
   },
+  floe: { hotspotId: 'floe-fishing', sceneId: 'minigame-floe', note: 'floe' },
 };
 
 /** The minigame whose hotspot id matches, or null. */

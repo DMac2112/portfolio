@@ -399,6 +399,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
+      { id: 'floe-fishing', label: 'Floe Fishing', kind: 'minigame', x: 828, y: 720, bargeState: 'away' }, // in port, the Gull's deck covers this water
       {
         id: 'salka-trader-stall', label: 'Salka’s Cargo Stall', kind: 'trader',
         x: 1050, y: 670, prompt: 'Browse today’s two cargo finds', bargeState: 'in-port',

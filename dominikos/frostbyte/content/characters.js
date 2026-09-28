@@ -279,7 +279,7 @@ export const SALKA_DIALOGUE_TREE = Object.freeze({
       pages: Object.freeze(['Only the two pieces on the cargo ledger. Tomorrow’s tide may bring a completely different pair.']),
     }),
     route: Object.freeze({
-      pages: Object.freeze(['Past Palefire Light, beyond the blue floes, then home by whichever current remembers us.']),
+      pages: Object.freeze(['Past Palefire Light, beyond the blue floes, then home by whichever current remembers us.', 'The floes sing if you fish long enough.']),
     }),
   }),
 });

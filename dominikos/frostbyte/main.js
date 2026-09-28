@@ -18,6 +18,7 @@ import { initRoomCrowd } from './world/npc-runtime.js';
 import { ROOM_SPAWN } from './content/npc-spawn.js';
 import { registerMinigameSnowdrift } from './world/minigame-snowdrift.js';
 import { registerMinigameBell } from './world/minigame-bell.js';
+import { registerMinigameFloe } from './world/minigame-floe.js';
 import {
   AUTO_VENUE_R,
   AUTO_VENUE_RESET_R,
@@ -154,6 +155,7 @@ k.loadSprite('toss-bg', './assets/minigame/toss-bg.png');
 // Register the Snowdrift Toss scene (a sibling scene entered/exited via the room ↔ minigame contract).
 registerMinigameSnowdrift(k, { reducedMotion: reduceMotion });
 registerMinigameBell(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
+registerMinigameFloe(k, { reducedMotion: reduceMotion, isMuted: () => Boolean(save.prefs?.muted || k.getVolume?.() === 0) });
 
 /* ------------------------------------------------------------------ *
  * Coin HUD
