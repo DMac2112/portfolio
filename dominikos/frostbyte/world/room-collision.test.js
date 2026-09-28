@@ -51,6 +51,12 @@ const BLOCKED_SAMPLES = {
     { label: 'patio brazier', x: 760, y: 825 },
     { label: 'southwest roof', x: 300, y: 850 },
   ],
+  bluehour: [
+    { label: 'window', x: 720, y: 180 },
+    { label: 'counter', x: 150, y: 550 },
+    { label: 'stove', x: 1195, y: 320 },
+    { label: 'window table', x: 745, y: 305 },
+  ],
   workshop: [
     { label: 'north wall', x: 720, y: 120 },
     { label: 'forge', x: 235, y: 475 },

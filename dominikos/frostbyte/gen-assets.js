@@ -2483,6 +2483,149 @@ function buildPickupGlint() {
   return save('pickup-glint.png', img);
 }
 
+/* ----------------------------- ANCHOR: Bluehour Coffee ----------------- */
+// Ilse is a small fairy penguin: blue crown, round white face, copper apron and service cloth.
+function buildIlseSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  const blue = hex('#426b82'), blueL = hex('#658ba0'), copper = hex('#a7633e'), copperL = hex('#c88a56');
+  oval(img, 12, 29, 7, 2, [...A.inkDeep, 70]);
+  oval(img, 12, 21, 8, 9, A.inkDeep); oval(img, 12, 20, 7, 8, blue);
+  oval(img, 12, 12, 8, 8, A.inkDeep); oval(img, 12, 11, 7, 7, blue);
+  rect(img, 7, 6, 7, 2, blueL); px(img, 6, 8, blueL);
+  oval(img, 12, 14, 5, 5, A.snowL);
+  oval(img, 12, 22, 5, 6, A.snowL);
+  px(img, 9, 12, A.inkDeep); px(img, 15, 12, A.inkDeep);
+  px(img, 9, 11, A.snowL); px(img, 15, 11, A.snowL);
+  rect(img, 11, 15, 3, 2, A.beak); px(img, 12, 17, A.beakD);
+  oval(img, 5, 20, 2, 5, A.inkDeep); oval(img, 5, 20, 1, 4, blue);
+  oval(img, 19, 20, 2, 5, A.inkDeep); oval(img, 19, 20, 1, 4, blueL);
+  // Apron straps remain visible above the rounded copper bib.
+  rect(img, 8, 18, 2, 5, copperL); rect(img, 15, 18, 2, 5, copperL);
+  rrect(img, 8, 21, 9, 8, A.inkDeep); rrect(img, 9, 21, 7, 7, copper);
+  rect(img, 10, 25, 5, 1, copperL);
+  // Two white folds hang over the raised serving flipper.
+  rect(img, 18, 18, 4, 2, A.snowL); rect(img, 18, 20, 3, 3, A.snowD);
+  px(img, 21, 21, A.snowL);
+  px(img, 12, 21, A.beak); px(img, 11, 22, A.beak);
+  px(img, 13, 22, A.beak); px(img, 12, 23, A.amberL);
+  rect(img, 7, 28, 4, 2, A.beak); rect(img, 14, 28, 4, 2, A.beak);
+  return save(path.join('characters', 'ilse.png'), img);
+}
+
+function buildIlsePortrait() {
+  const img = Img(128, 128), A = ARCTIC_DUSK;
+  const blue = hex('#426b82'), blueL = hex('#658ba0'), copper = hex('#a7633e'), copperL = hex('#c88a56');
+  let noise = 0x11ceca5e;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+  for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) {
+    const t = y / 127, grain = (nextNoise() - 0.5) * 10;
+    const top = hex('#8e563b'), bottom = hex('#4a302f');
+    px(img, x, y, top.map((v, i) => Math.max(0, Math.min(255, v * (1 - t) + bottom[i] * t + grain))));
+  }
+  // Counter shelves and a blurred amber lamp establish the café's warm side.
+  for (let r = 35; r > 2; r -= 3) disc(img, 106, 34, r, [...A.amber, Math.max(3, 30 - r / 2)]);
+  rect(img, 103, 21, 9, 22, A.wood); rect(img, 105, 24, 5, 16, A.amberL);
+  rect(img, 4, 49, 32, 5, A.wood); rect(img, 9, 30, 8, 19, copperL);
+  rect(img, 21, 34, 10, 15, A.amberL); rect(img, 0, 108, 128, 20, A.wood);
+  oval(img, 64, 121, 44, 42, A.inkDeep); oval(img, 64, 119, 41, 39, blue);
+  oval(img, 64, 63, 40, 43, A.inkDeep); oval(img, 64, 61, 37, 40, blue);
+  oval(img, 66, 67, 27, 31, A.snowL); oval(img, 64, 110, 26, 28, A.snowL);
+  oval(img, 32, 102, 12, 25, A.inkDeep); oval(img, 34, 101, 9, 21, blue);
+  oval(img, 98, 102, 12, 25, A.inkDeep); oval(img, 96, 101, 9, 21, blueL);
+  rect(img, 39, 35, 22, 5, blueL); rect(img, 33, 42, 5, 16, blueL);
+  disc(img, 50, 61, 4, A.inkDeep); disc(img, 79, 61, 4, A.inkDeep);
+  px(img, 49, 59, A.snowL); px(img, 78, 59, A.snowL);
+  oval(img, 65, 76, 9, 6, A.beak); rect(img, 59, 79, 12, 3, A.beakD);
+  // Copper apron, cinnamon snowflake pin, and folded bar cloth.
+  rect(img, 43, 93, 9, 20, copperL); rect(img, 79, 93, 9, 20, copperL);
+  rrect(img, 43, 105, 45, 23, A.inkDeep); rrect(img, 46, 105, 39, 23, copper);
+  rect(img, 50, 113, 31, 3, copperL);
+  disc(img, 62, 108, 4, A.beak); rect(img, 61, 102, 2, 13, A.amberL);
+  rect(img, 56, 107, 13, 2, A.amberL);
+  rect(img, 94, 95, 20, 7, A.snowL); rect(img, 97, 102, 15, 20, A.snowD);
+  rect(img, 101, 103, 2, 17, A.snowL); rect(img, 109, 103, 2, 17, A.snowL);
+  for (let i = 0; i < 70; i++) {
+    const x = 20 + Math.floor(nextNoise() * 90), y = 24 + Math.floor(nextNoise() * 100);
+    px(img, x, y, [...A.amberL, 24]);
+  }
+  return save(path.join('portraits', 'ilse.png'), img);
+}
+
+// Tove's rounded flat cap and wide knit shoulders distinguish him from Salka's oilskin.
+function buildToveSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  const mustard = hex('#b69a4e'), knitL = hex('#d6b765'), cap = hex('#5a6870');
+  oval(img, 12, 29, 9, 2, [...A.inkDeep, 70]);
+  oval(img, 12, 20, 10, 11, A.inkDeep);
+  oval(img, 12, 11, 8, 9, A.inkDeep); oval(img, 12, 12, 6, 7, A.snowL);
+  oval(img, 12, 20, 6, 7, A.snowL);
+  px(img, 9, 11, A.inkDeep); px(img, 15, 11, A.inkDeep);
+  rect(img, 10, 14, 5, 2, A.beak);
+  // One-pixel side bars and two-pixel underline keep the chinstrap legible.
+  rect(img, 6, 15, 2, 2, A.inkDeep); rect(img, 16, 15, 2, 2, A.inkDeep);
+  rect(img, 8, 17, 9, 2, A.inkDeep);
+  oval(img, 12, 6, 8, 4, A.inkDeep); oval(img, 12, 5, 7, 3, cap);
+  rect(img, 4, 7, 16, 2, A.inkDeep); rect(img, 5, 7, 14, 1, A.stone);
+  // Thick ribbed sweater, with a high collar and alternating knit stitches.
+  rrect(img, 3, 19, 18, 10, A.inkDeep); rrect(img, 4, 20, 16, 8, mustard);
+  rect(img, 8, 19, 9, 3, knitL); rect(img, 9, 20, 1, 3, A.wood);
+  rect(img, 12, 20, 1, 3, A.wood); rect(img, 15, 20, 1, 3, A.wood);
+  for (const x of [6, 10, 14, 18]) { px(img, x, 24, knitL); px(img, x + 1, 26, A.wood); }
+  rect(img, 4, 27, 16, 2, A.wood);
+  // A mug sits outside the body silhouette; steam rises above its rim.
+  rect(img, 19, 20, 4, 6, A.inkDeep); rect(img, 20, 21, 3, 4, A.snowD);
+  px(img, 20, 18, A.snowL); px(img, 22, 16, A.snowL);
+  px(img, 21, 14, A.snowD);
+  rect(img, 5, 28, 4, 2, A.beak); rect(img, 15, 28, 4, 2, A.beak);
+  return save(path.join('characters', 'tove.png'), img);
+}
+
+function buildTovePortrait() {
+  const img = Img(128, 128), A = ARCTIC_DUSK;
+  const mustard = hex('#b69a4e'), knitL = hex('#d6b765'), cap = hex('#5a6870');
+  let noise = 0x70be7123;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+  for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) {
+    const t = y / 127, grain = (nextNoise() - 0.5) * 11;
+    const top = A.nightL, bottom = A.inkDeep;
+    px(img, x, y, top.map((v, i) => Math.max(0, Math.min(255, v * (1 - t) + bottom[i] * t + grain))));
+  }
+  // Frosted café window casts blue light over the cap and mug.
+  rect(img, 7, 10, 114, 94, A.inkDeep); rect(img, 11, 14, 106, 86, A.iceD);
+  rect(img, 15, 18, 98, 78, A.nightL);
+  rect(img, 58, 18, 5, 78, A.iceD); rect(img, 15, 58, 98, 4, A.iceD);
+  for (let i = 0; i < 26; i++) {
+    const x = 17 + Math.floor(nextNoise() * 95), y = 20 + Math.floor(nextNoise() * 72);
+    rect(img, x, y, 2, 5, [...A.iceL, 70]);
+  }
+  oval(img, 64, 119, 51, 46, A.iceD); oval(img, 64, 119, 48, 44, A.inkDeep);
+  oval(img, 64, 114, 45, 35, mustard); rect(img, 24, 99, 80, 9, knitL);
+  rect(img, 26, 111, 77, 4, A.wood); rect(img, 31, 119, 68, 4, knitL);
+  for (const x of [34, 47, 60, 73, 86]) {
+    rect(img, x, 107, 3, 6, A.wood); rect(img, x + 5, 116, 3, 7, knitL);
+  }
+  oval(img, 64, 61, 40, 42, A.inkDeep); oval(img, 64, 67, 29, 31, A.snowL);
+  disc(img, 50, 59, 4, A.inkDeep); disc(img, 78, 59, 4, A.inkDeep);
+  px(img, 49, 58, A.snowL); px(img, 77, 58, A.snowL);
+  oval(img, 64, 72, 9, 6, A.beak); rect(img, 58, 74, 13, 3, A.beakD);
+  rect(img, 33, 75, 10, 4, A.inkDeep); rect(img, 85, 75, 10, 4, A.inkDeep);
+  rect(img, 42, 79, 44, 5, A.inkDeep);
+  oval(img, 64, 29, 39, 16, A.inkDeep); oval(img, 64, 27, 36, 13, cap);
+  rect(img, 31, 34, 70, 7, A.inkDeep); rect(img, 35, 34, 64, 4, A.stone);
+  rect(img, 45, 18, 31, 3, A.stoneL);
+  // Steaming mug overlaps one sweater sleeve at the frame edge.
+  rrect(img, 91, 91, 24, 32, A.inkDeep); rect(img, 94, 94, 18, 25, A.snowD);
+  ovalRing(img, 116, 105, 9, 11, A.snowL); rect(img, 95, 95, 16, 4, A.wood);
+  for (const x of [98, 105]) {
+    px(img, x, 84, A.iceL); px(img, x + 2, 79, A.iceL); px(img, x, 74, A.iceL);
+  }
+  for (let i = 0; i < 65; i++) {
+    const x = 18 + Math.floor(nextNoise() * 94), y = 22 + Math.floor(nextNoise() * 100);
+    px(img, x, y, [...A.iceL, 22]);
+  }
+  return save(path.join('portraits', 'tove.png'), img);
+}
+
 /* ----------------------------- run -------------------------------------- */
 const made = [
   buildPenguinBody(),
@@ -2520,6 +2663,10 @@ const made = [
   buildWhaleVista(),
   buildAuroraVista(),
   buildGullVista(),
+  buildIlseSprite(),
+  buildIlsePortrait(),
+  buildToveSprite(),
+  buildTovePortrait(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

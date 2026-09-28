@@ -25,20 +25,24 @@ describe('anchor runtime content binding', () => {
     });
   });
 
-  it('loads only visible anchors through W6 and leaves The Echo unseen', () => {
+  it('loads visible anchors, including the Bluehour regulars, and leaves The Echo unseen', () => {
     const k = { loadSprite: vi.fn() };
     expect(loadAnchorSprites(k, ANCHOR_CHARACTERS, ROOM_REGISTRY)).toEqual([
       'anchor-edda-quill',
       'anchor-pat-hocket',
+      'anchor-ilse',
+      'anchor-tove',
       'anchor-captain-salka',
       'anchor-old-maren',
       'anchor-vesper',
     ]);
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-edda-quill', './assets/characters/edda-quill.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-pat-hocket', './assets/characters/pat-hocket.png');
+    expect(k.loadSprite).toHaveBeenCalledWith('anchor-ilse', './assets/characters/ilse.png');
+    expect(k.loadSprite).toHaveBeenCalledWith('anchor-tove', './assets/characters/tove.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-captain-salka', './assets/characters/captain-salka.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-old-maren', './assets/characters/old-maren.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-vesper', './assets/characters/vesper.png');
-    expect(k.loadSprite).toHaveBeenCalledTimes(5);
+    expect(k.loadSprite).toHaveBeenCalledTimes(7);
   });
 });

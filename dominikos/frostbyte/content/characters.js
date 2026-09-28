@@ -4,6 +4,8 @@ import { EDDA_STORY_TIP_FAVORS, MAREN_SIGHTING_FAVORS, WEATHER_BELL_FAVOR } from
 export const ANCHOR_SLOTS = Object.freeze([
   Object.freeze({ id: 'court-editor', roomId: 'court', role: 'editor' }),
   Object.freeze({ id: 'workshop-tinkerer', roomId: 'workshop', role: 'tinkerer' }),
+  Object.freeze({ id: 'bluehour-barista', roomId: 'bluehour', role: 'barista' }),
+  Object.freeze({ id: 'bluehour-regular', roomId: 'bluehour', role: 'regular' }),
   Object.freeze({ id: 'docks-trader', roomId: 'docks', role: 'trader' }),
   Object.freeze({ id: 'lighthouse-keeper', roomId: 'lighthouse-rest', role: 'keeper' }),
   Object.freeze({ id: 'hollow-trickster', roomId: 'whisperpine', role: 'trickster' }),
@@ -447,6 +449,27 @@ export const ANCHOR_CHARACTERS = defineCharacters([
       finale: ['The Bell worked. I shall put that in writing before it changes its mind.'] },
     favorDefs: [WEATHER_BELL_FAVOR],
     dialogueTree: PAT_DIALOGUE_TREE,
+  },
+  {
+    id: 'ilse', name: 'Ilse', slotId: 'bluehour-barista', roomId: 'bluehour',
+    subtitle: 'Barista, Bluehour Coffee', species: 'little blue penguin',
+    portraitAsset: './assets/portraits/ilse.png',
+    spriteAsset: './assets/characters/ilse.png', spriteKey: 'anchor-ilse',
+    palette: { body: '#26384b', accent: '#ffb45e', warm: '#ff784f' },
+    linePools: { greeting: [
+      'Today’s Northlight Blend comes with cloudberry foam and a cinnamon snowflake on top.',
+      'Sit by the window if you like. The court goes blue for about an hour, then the lamps win.',
+    ] },
+    favorDefs: [],
+  },
+  {
+    id: 'tove', name: 'Tove', slotId: 'bluehour-regular', roomId: 'bluehour',
+    subtitle: 'Bluehour regular', species: 'chinstrap penguin',
+    portraitAsset: './assets/portraits/tove.png',
+    spriteAsset: './assets/characters/tove.png', spriteKey: 'anchor-tove',
+    palette: { body: '#334a58', accent: '#a78bfa', warm: '#ffb45e' },
+    linePools: { greeting: ['Fog’s thick on the glass tonight. I’ll have a game drawn up in it for you soon.'] },
+    favorDefs: [],
   },
   {
     id: 'captain-salka', name: 'Captain Salka', slotId: 'docks-trader', roomId: 'docks',

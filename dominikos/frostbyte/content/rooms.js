@@ -183,6 +183,7 @@ export const ROOM_REGISTRY = {
       default:    { x: 720, y: 420, facing: 'down' },
       fromPlaza:  { x: 168, y: 525, facing: 'right' },
       fromDocks:  { x: 1290, y: 858, facing: 'up' },
+      fromBluehour: { x: 840, y: 510, facing: 'down' },
       fromMap:    { x: 720, y: 720, facing: 'up' },
     },
     camera: { leadY: -50 },
@@ -193,13 +194,6 @@ export const ROOM_REGISTRY = {
         entryDirection: 'up',
         prompt: 'Visit the pet shop',
         copy: 'Warm nests and tiny scarves fill the window, but the nests are empty. A card reads: ‘Snowtails arrive with the spring sailing.’',
-      },
-      {
-        id: 'venue-bluehour-coffee', label: 'Bluehour Coffee', kind: 'venue', x: 840, y: 420,
-        solidId: 'bluehour-coffee',
-        entryDirection: 'up',
-        prompt: 'Visit the coffee shop',
-        copy: 'Today\'s Northlight Blend comes with cloudberry foam and a cinnamon snowflake on top.',
       },
       {
         id: 'venue-lantern-ladle', label: 'Lantern Ladle Restaurant', kind: 'venue', x: 1125, y: 620,
@@ -216,6 +210,11 @@ export const ROOM_REGISTRY = {
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 72, y: 480, targetRoom: 'plaza', locked: false, targetSpawn: 'fromCourt' },
       { id: 'door-docks', label: 'Driftgate Docks', x: 1290, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromCourt' },
+      {
+        id: 'door-bluehour', label: 'Bluehour Coffee', x: 840, y: 420,
+        targetRoom: 'bluehour', targetSpawn: 'fromCourt', locked: false,
+        solidId: 'bluehour-coffee', enterDir: { x: 0, y: -1 }, autoEnterRadius: 34,
+      },
     ],
     solids: [
       { id: 'snowtail-petshop', x: 291, y: 190, w: 438, h: 188 },
@@ -276,6 +275,40 @@ export const ROOM_REGISTRY = {
         },
         onlyWhenFavorStep: true,
       },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Bluehour Coffee opens from the painted storefront on Glasswind Court.
+  bluehour: {
+    id: 'bluehour',
+    avatarScale: 7.5,
+    title: 'Bluehour Coffee',
+    mapAsset: 'room-bluehour',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 110, x1: 1400, y0: 120, y1: 936 }, // takes in the counter and the big window so both stay clickable
+    spawnPoints: {
+      default: { x: 720, y: 750, facing: 'up' },
+      fromCourt: { x: 720, y: 870, facing: 'up' },
+      fromMap: { x: 780, y: 740, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [],
+    doors: [
+      { id: 'door-back', label: 'Glasswind Court', x: 720, y: 930,
+        targetRoom: 'court', targetSpawn: 'fromBluehour', locked: false },
+    ],
+    solids: [],
+    anchors: [
+      { characterId: 'ilse', x: 465, y: 555 },
+      { characterId: 'tove', x: 905, y: 400 }, // beside the window table's right chair
+    ],
+    clickables: [
+      { id: 'espresso-machine', x: 300, y: 500, w: 350, h: 220,
+        line: 'It hisses like it has opinions.' },
+      { id: 'bluehour-window', x: 750, y: 300, w: 700, h: 350,
+        line: 'The whole court, gone blue. Somebody’s lantern is walking home.' },
     ],
     npcSpawnAnchors: [],
   },

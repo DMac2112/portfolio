@@ -123,7 +123,7 @@ describe('room configs', () => {
   it('door graph: locked doors in the vignette point at real (future) ids, not typos', () => {
     const knownFutureIds = [
       'plaza', 'den', 'court', 'workshop', 'trail', 'docks',
-      'lighthouse-rest', 'lighthouse-gallery', 'whisperpine', 'moonwell', 'caverns',
+      'lighthouse-rest', 'lighthouse-gallery', 'whisperpine', 'moonwell', 'caverns', 'bluehour',
     ];
     for (const room of Object.values(ROOM_REGISTRY)) {
       for (const d of room.doors) {
@@ -321,11 +321,14 @@ describe('room configs', () => {
     expect(plazaDoorCourt).toMatchObject({ targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' });
   });
 
-  it('court: exposes one pet shop, one coffee shop, and one restaurant as venues', () => {
+  it('court: Bluehour Coffee is a real door; the pet shop and restaurant are still venues', () => {
+    expect(ROOM_REGISTRY.court.doors.find(d => d.id === 'door-bluehour'))
+      .toMatchObject({ targetRoom: 'bluehour', targetSpawn: 'fromCourt', locked: false });
+    expect(ROOM_REGISTRY.bluehour.doors.find(d => d.id === 'door-back'))
+      .toMatchObject({ targetRoom: 'court', targetSpawn: 'fromBluehour' });
     const venues = ROOM_REGISTRY.court.hotspots.filter(h => h.kind === 'venue');
     expect(venues.map(v => v.label)).toEqual([
       'Snowtail Pet Shop',
-      'Bluehour Coffee',
       'Lantern Ladle Restaurant',
     ]);
     for (const venue of venues) {
