@@ -37,7 +37,7 @@ export function DEFAULT_SAVE(now = nowISO()) {
     furniture: {},                                 // { itemId: count } owned-but-not-placed stock (H2)
     curios: createCurioState(),                     // Curio Log (W0): found ids + once-only completion rewards
     favors: {},                                     // { favorId: {status,stepIndex} } cross-room threads (W0)
-    story: { introSeen: false, notes: {}, echoGreeted: false, finaleSeen: false },
+    story: { introSeen: false, notes: {}, echoGreeted: false, finaleSeen: false, finaleGreeted: {} },
     secrets: {
       vesperHints: [], moonwellUnlocked: false, cavernsUnlocked: false, auroraIntensified: false,
     },                                                    // W5/W6: persistent secret gates + isle payoff
@@ -98,6 +98,7 @@ export function migrateSave(raw, now = nowISO()) {
       echoGreeted: savedStory.echoGreeted === true,
       finaleSeen: savedStory.finaleSeen === true,
       notes: { ...savedStory.notes },
+      finaleGreeted: { ...(savedStory.finaleGreeted ?? {}) },
     },
     secrets: {
       ...base.secrets,

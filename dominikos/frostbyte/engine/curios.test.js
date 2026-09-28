@@ -55,7 +55,7 @@ describe('Curio Log progress', () => {
     expect(s.curios.roomRewards.court).toBe(true);
   });
 
-  it('claims the cosmetic, trophy, and aurora payoff only after full completion and only once', () => {
+  it('claims the cosmetic and trophy only after full completion and only once', () => {
     const s = save();
     expect(claimIsleCompletionReward(s, REGISTRY)).toBe(false);
     for (const curio of REGISTRY) discoverCurio(s, REGISTRY, curio.id);
@@ -64,9 +64,9 @@ describe('Curio Log progress', () => {
     expect(s.curios.isleRewardClaimed).toBe(true);
     expect(s.ownedItems).toContain(ISLE_REWARD_ITEM_ID);
     expect(s.furniture[ISLE_REWARD_FURNITURE_ID]).toBe(1);
-    expect(s.secrets.auroraIntensified).toBe(true);
+    expect(s.secrets?.auroraIntensified).not.toBe(true);
     expect(events.map((event) => event.type)).toEqual([
-      'item-unlocked', 'furniture-added', 'aurora-intensified', 'isle-reward-claimed',
+      'item-unlocked', 'furniture-added', 'isle-reward-claimed',
     ]);
     expect(claimIsleCompletionReward(s, REGISTRY, events)).toBe(false);
     expect(s.ownedItems.filter((id) => id === ISLE_REWARD_ITEM_ID)).toHaveLength(1);

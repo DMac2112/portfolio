@@ -9,7 +9,7 @@ import { resolveMoveVector, resolveFacing, SPEED } from './engine/movement.js';
 import { computeCamPos, fitCamScale, clampCamPos, roomMapSize } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
-import { storyOf } from './engine/story.js';
+import { storyOf, completeFinale, claimFinaleGreeting } from './engine/story.js';
 import { nextBargeArrival } from './engine/barge-schedule.js';
 import { resumeTarget, snapshotPos, movedEnough } from './engine/resume.js';
 import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup, unlockItem, equipItem } from './engine/economy.js';
@@ -53,7 +53,7 @@ import { resolveRoomCollision } from './world/room-collision.js';
 import { CURIO_REGISTRY } from './content/curios.js';
 import { claimIsleCompletionReward, curioById, discoverCurio } from './engine/curios.js';
 import { reactionBurst, spawnClickables } from './world/clickable.js';
-import { ANCHOR_CHARACTERS, characterById } from './content/characters.js';
+import { ANCHOR_CHARACTERS, CHOWDER_CHARACTER, characterById } from './content/characters.js';
 import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
 import { chooseDialogue, dailyLine, startDialogue } from './engine/dialogue-tree.js';
 import { advanceFavor, currentFavorStep, favorState, offerFavor, startFavor } from './engine/favors.js';
@@ -67,6 +67,7 @@ import { resolveCavernEntrances } from './content/caverns.js';
 import { claimVesperHint, nextVesperHint } from './engine/vesper.js';
 import { addDodgeWisps } from './world/will-o-wisps.js';
 import { addEchoPresence } from './world/echo-runtime.js';
+import { playBell } from './world/bell-tone.js';
 import { addAuroraAmbient } from './world/aurora-ambient.js';
 import { createFullscreenToggle } from './world/fullscreen-toggle.js';
 import { handleEscape } from './ui/escape-key.js';
@@ -225,6 +226,7 @@ k.scene('room', (roomId, opts = {}) => {
   const map = roomMapSize(room);
   let camScale = 1;
   const auroraLayer = addAuroraAmbient(k, room, () => save.secrets?.auroraIntensified === true, reduceMotion);
+  const isMuted = () => Boolean(save.prefs?.muted || k.getVolume?.() === 0);
   const echoCharacter = characterById('the-echo');
   const echoLayer = addEchoPresence(k, room, echoCharacter?.linePools?.song, reduceMotion);
   if (roomId === 'caverns' && !storyOf(save).echoGreeted) {
@@ -409,6 +411,10 @@ k.scene('room', (roomId, opts = {}) => {
   function advanceTrackedFavor(definition, stepId) {
     const events = [];
     if (!definition || !advanceFavor(save, definition, stepId, events)) return null;
+    if (events.some((event) => event.type === 'favor-done')) {
+      save.favors[definition.id].reportOrder = 1 + Math.max(0,
+        ...Object.values(save.favors).map((state) => state.reportOrder ?? 0));
+    }
     persist(save);
     return events;
   }
@@ -427,6 +433,12 @@ k.scene('room', (roomId, opts = {}) => {
   if (roomId === 'docks' && !room.docksState?.inPort) {
     const days = nextBargeArrival(todayISO)?.days;
     if (days) showCoinToast(`The berth is empty. The Gull is due ${days === 1 ? 'tomorrow' : `in ${days} days`}.`);
+  }
+  if (roomId === 'plaza' && resolveDocksRoom(ROOM_REGISTRY.docks, todayISO).docksState?.inPort &&
+      favorState(save, WEATHER_BELL_FAVOR.id)?.status === 'done' && storyOf(save).bellChimedOn !== todayISO) {
+    storyOf(save).bellChimedOn = todayISO;
+    persist(save);
+    for (const lane of [0, 1, 2]) k.wait(lane * 0.23, () => playBell(lane, isMuted));
   }
   if (roomId === 'docks' && room.docksState?.inPort) {
     const bargeTip = favorById('edda-tip-barge-arrival');
@@ -472,6 +484,11 @@ k.scene('room', (roomId, opts = {}) => {
   }
 
   function talkToCharacter(character) {
+    if (character.linePools?.finale?.length && claimFinaleGreeting(save, character.id)) {
+      persist(save);
+      showDialogue(character.name, character.linePools.finale[0]);
+      return;
+    }
     if (character.id === 'captain-salka' &&
         currentFavorStep(save, WEATHER_BELL_FAVOR)?.id === 'recover-docks-clapper') {
       openCharacterDialogue(character, 'clapper');
@@ -633,7 +650,13 @@ k.scene('room', (roomId, opts = {}) => {
         pages: lighthouseLogbookPages(save),
       });
     } else if (action === 'echo') {
-      echoLayer?.singNext();
+      if (completeFinale(save)) {
+        for (const lane of [0, 1, 2]) k.wait(lane * 0.23, () => playBell(lane, isMuted));
+        echoLayer?.singNext(echoCharacter?.linePools?.finale?.[0]);
+        persist(save);
+        auroraLayer?.refresh();
+        showCoinToast('The aurora is loose over Chillmere');
+      } else echoLayer?.singNext();
     } else if (action === 'character') {
       talkToCharacter(nearest.character);
     } else if (action === 'door') {
@@ -853,6 +876,7 @@ k.scene('room', (roomId, opts = {}) => {
   });
   const newspaperUI = createNewspaper({
     getIssue: () => chirperIssueForDate(todayISO),
+    getSave: () => save,
   });
   const traderUI = createTraderStall({
     getStock: () => room.docksState?.inPort ? salkaStockForDate(todayISO) : [],
@@ -908,7 +932,10 @@ k.scene('room', (roomId, opts = {}) => {
   // Direct-click props use one scene-scoped mouse path. touchToMouse synthesizes that path for taps,
   // so no parallel touch listener exists and a Curio can never register twice from one tap.
   const clickableLayer = spawnClickables(k, {
-    props: room.clickables ?? [],
+    props: (room.clickables ?? []).map((prop) => prop.id === 'weather-bell-test'
+      ? { ...prop, get line() {
+        return favorState(save, WEATHER_BELL_FAVOR.id)?.status === 'done' ? prop.repairedLine : prop.line;
+      } } : prop),
     anyOverlayOpen,
     reducedMotion: reduceMotion,
     isEnabled: (prop) => {
@@ -940,7 +967,6 @@ k.scene('room', (roomId, opts = {}) => {
       if (coinEvent) refreshCoins(true);
       const curio = curioById(CURIO_REGISTRY, curioId);
       if (isleComplete) {
-        auroraLayer?.refresh();
         dressUp.render();
         syncEditUI();
         showCoinToast('Isle complete — Echoglass Lantern and den trophy earned');
@@ -1150,9 +1176,14 @@ k.scene('room', (roomId, opts = {}) => {
     // Nearest-ACTIONABLE scan (hotspots + doors + live NPCs) — NPCs have no action yet, so the
     // isActionable filter keeps a nearby waddler from shadowing a shop/minigame/door prompt.
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];
+    const chowder = liveNpcs.find((npc) => npc.personaId === 'chowder');
+    const chowderInteractables = chowder && storyOf(save).finaleSeen
+      ? [{ id: 'chowder-talk', pos: chowder.pos, kind: 'character', label: 'Chowder',
+        character: CHOWDER_CHARACTER }] : [];
     nearest = findNearestInteractable(
       player.pos,
-      mergeInteractables(hotspotInteractables.concat(doorInteractables, anchorLayer.interactables), liveNpcs),
+      mergeInteractables(hotspotInteractables.concat(doorInteractables, anchorLayer.interactables,
+        chowderInteractables), liveNpcs),
       undefined,
       { isActionable: (c) => actionFor(c) !== null },
     );

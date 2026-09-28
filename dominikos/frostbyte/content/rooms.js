@@ -352,6 +352,7 @@ export const ROOM_REGISTRY = {
       {
         id: 'weather-bell-test', reaction: 'chime', x: 720, y: 390, w: 210, h: 210,
         line: 'The half-built Bell answers with one brave note and two nervous rattles.', reactionColor: '#ffb45e',
+        repairedLine: 'The repaired Bell rings three clear notes. Even the floor listens.',
         favorStep: {
           favorId: 'edda-tip-workshop-test', stepId: 'witness-workshop-test',
           successText: 'Story tip witnessed — report the test-firing to Edda!',

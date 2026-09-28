@@ -81,7 +81,7 @@ export function discoverCurio(save, registry, curioId, ev = [], roomReward = ROO
 
 /**
  * Claim the once-only full-journal reward after every registered Curio has been found.
- * The cosmetic, den trophy, and ambient flag are additive fields on the existing v1 save.
+ * The cosmetic and den trophy are additive fields on the existing v1 save.
  */
 export function claimIsleCompletionReward(save, registry, ev = []) {
   if (!save || !Array.isArray(registry)) return false;
@@ -94,13 +94,8 @@ export function claimIsleCompletionReward(save, registry, ev = []) {
   save.furniture = save.furniture && typeof save.furniture === 'object' && !Array.isArray(save.furniture)
     ? save.furniture : {};
   save.furniture[ISLE_REWARD_FURNITURE_ID] = (save.furniture[ISLE_REWARD_FURNITURE_ID] ?? 0) + 1;
-  save.secrets = save.secrets && typeof save.secrets === 'object' && !Array.isArray(save.secrets)
-    ? save.secrets : {};
-  save.secrets.auroraIntensified = true;
-
   ev.push({ type: 'item-unlocked', itemId: ISLE_REWARD_ITEM_ID, source: 'curio-isle' });
   ev.push({ type: 'furniture-added', itemId: ISLE_REWARD_FURNITURE_ID, amount: 1, source: 'curio-isle' });
-  ev.push({ type: 'aurora-intensified' });
   ev.push({ type: 'isle-reward-claimed' });
   return true;
 }

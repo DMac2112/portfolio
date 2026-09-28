@@ -30,3 +30,19 @@ export function notesHeld(save) {
 export function finaleReady(save) {
   return notesHeld(save) === NOTE_IDS.length && !storyOf(save).finaleSeen;
 }
+
+export function completeFinale(save) {
+  if (!finaleReady(save)) return false;
+  storyOf(save).finaleSeen = true;
+  save.secrets ??= {};
+  save.secrets.auroraIntensified = true;
+  return true;
+}
+
+export function claimFinaleGreeting(save, characterId) {
+  if (!storyOf(save).finaleSeen || !characterId) return false;
+  const greeted = storyOf(save).finaleGreeted ??= {};
+  if (greeted[characterId]) return false;
+  greeted[characterId] = true;
+  return true;
+}

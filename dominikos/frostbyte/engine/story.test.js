@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { DEFAULT_SAVE, migrateSave } from './save.js';
-import { NOTE_IDS, storyOf, hasNote, grantNote, notesHeld, finaleReady } from './story.js';
+import { NOTE_IDS, storyOf, hasNote, grantNote, notesHeld, finaleReady,
+  completeFinale, claimFinaleGreeting } from './story.js';
 
 describe('story milestones', () => {
   it('creates defaults on an old save', () => {
@@ -27,6 +28,26 @@ describe('story milestones', () => {
     expect(finaleReady(save)).toBe(true);
     save.story.finaleSeen = true;
     expect(finaleReady(save)).toBe(false);
+  });
+
+  it('completes the finale only with three notes and only once', () => {
+    const save = DEFAULT_SAVE();
+    expect(completeFinale(save)).toBe(false);
+    for (const id of NOTE_IDS.slice(0, 2)) grantNote(save, id);
+    expect(completeFinale(save)).toBe(false);
+    grantNote(save, NOTE_IDS[2]);
+    expect(completeFinale(save)).toBe(true);
+    expect(save.secrets.auroraIntensified).toBe(true);
+    expect(completeFinale(save)).toBe(false);
+  });
+
+  it('gives each character one finale greeting', () => {
+    const save = DEFAULT_SAVE();
+    expect(claimFinaleGreeting(save, 'pat-hocket')).toBe(false);
+    save.story.finaleSeen = true;
+    expect(claimFinaleGreeting(save, 'pat-hocket')).toBe(true);
+    expect(claimFinaleGreeting(save, 'pat-hocket')).toBe(false);
+    expect(claimFinaleGreeting(save, 'old-maren')).toBe(true);
   });
 
   it('preserves story state and skips the arrival for returning curio owners', () => {

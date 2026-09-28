@@ -246,7 +246,7 @@ export const PAT_DIALOGUE_TREE = Object.freeze({
       pages: Object.freeze(['All three! Hold the pieces steady while I persuade the Bell to become one machine.']),
     }),
     completed: Object.freeze({
-      pages: Object.freeze(['The Weather Bell has all its notes. Now we find out whether the weather agrees.']),
+      pages: Object.freeze(['The Weather Bell is repaired. Play its three notes; something below may answer.']),
     }),
   }),
 });
@@ -432,7 +432,8 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     species: 'emperor penguin', portraitAsset: './assets/portraits/edda-quill.png',
     spriteAsset: './assets/characters/edda-quill.png', spriteKey: 'anchor-edda-quill',
     palette: { body: '#26384b', accent: '#a78bfa', warm: '#ffb45e' },
-    linePools: { greeting: ['Tea warm, ink dry, and the whole isle refusing to stay quiet. Perfect.'] },
+    linePools: { greeting: ['Tea warm, ink dry, and the whole isle refusing to stay quiet. Perfect.'],
+      finale: ['Aurora over Chillmere. At last, a headline that wrote itself.'] },
     favorDefs: EDDA_STORY_TIP_FAVORS,
     dialogueTree: EDDA_DIALOGUE_TREE,
   },
@@ -442,7 +443,8 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     species: 'puffin', portraitAsset: './assets/portraits/pat-hocket.png',
     spriteAsset: './assets/characters/pat-hocket.png', spriteKey: 'anchor-pat-hocket',
     palette: { body: '#24384a', accent: '#ffb45e', warm: '#ff784f' },
-    linePools: { greeting: ['If it clicks twice, duck once. That is the current rule.'] },
+    linePools: { greeting: ['If it clicks twice, duck once. That is the current rule.'],
+      finale: ['The Bell worked. I shall put that in writing before it changes its mind.'] },
     favorDefs: [WEATHER_BELL_FAVOR],
     dialogueTree: PAT_DIALOGUE_TREE,
   },
@@ -452,7 +454,8 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     species: 'chinstrap penguin', portraitAsset: './assets/portraits/captain-salka.png',
     spriteAsset: './assets/characters/captain-salka.png', spriteKey: 'anchor-captain-salka',
     palette: { body: '#334a58', accent: '#6b4a33', warm: '#ffb45e' },
-    linePools: { greeting: ['Cargo first, gossip second. Unless the gossip is perishable.'] }, favorDefs: [],
+    linePools: { greeting: ['Cargo first, gossip second. Unless the gossip is perishable.'],
+      finale: ['Even the tide stopped to watch that sky. Do not tell it I noticed.'] }, favorDefs: [],
     dialogueTree: SALKA_DIALOGUE_TREE,
   },
   {
@@ -461,7 +464,8 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     species: 'gentoo penguin', portraitAsset: './assets/portraits/old-maren.png',
     spriteAsset: './assets/characters/old-maren.png', spriteKey: 'anchor-old-maren',
     palette: { body: '#435669', accent: '#cfe0f2', warm: '#ffb45e' },
-    linePools: { greeting: ['The light sees far. A keeper learns to listen farther.'] },
+    linePools: { greeting: ['The light sees far. A keeper learns to listen farther.'],
+      finale: ['The old glass never showed me colours like these. Good thing I kept looking.'] },
     favorDefs: MAREN_SIGHTING_FAVORS,
     dialogueTree: MAREN_DIALOGUE_TREE,
   },
@@ -475,7 +479,7 @@ export const ANCHOR_CHARACTERS = defineCharacters([
       'You found this den. I never said it was mine.',
       'The forest moved me again. Or you. Hard to tell from here.',
       'A stitched Curio is a secret that agreed to be remembered.',
-    ] }, favorDefs: [],
+    ], finale: ['I knew the sky had a secret. I was only wrong about its size.'] }, favorDefs: [],
   },
   {
     id: 'the-echo', name: 'The Echo', slotId: 'caverns-voice', roomId: 'caverns',
@@ -484,6 +488,7 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     palette: { body: '#7fd6ff', accent: '#6fe0b2', warm: '#cfe0f2' },
     linePools: {
       greeting: ['A note returns differently after someone hears it.'],
+      finale: ['I have been waiting to be answered. Now even the sky knows the tune.'],
       song: [
         'Two doors opened; one song came through.',
         'Stone remembers every careful footstep.',
@@ -493,6 +498,14 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     favorDefs: [],
   },
 ]);
+
+export const CHOWDER_CHARACTER = Object.freeze({
+  id: 'chowder', name: 'Chowder', subtitle: 'Court regular',
+  linePools: Object.freeze({
+    greeting: Object.freeze(['I thought the sky was a very large soup.']),
+    finale: Object.freeze(['The sky turned green! I did not put anything in it.']),
+  }),
+});
 
 export function characterById(id, characters = ANCHOR_CHARACTERS) {
   return characters.find((character) => character.id === id) ?? null;
