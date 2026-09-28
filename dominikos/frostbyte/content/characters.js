@@ -468,7 +468,7 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     portraitAsset: './assets/portraits/tove.png',
     spriteAsset: './assets/characters/tove.png', spriteKey: 'anchor-tove',
     palette: { body: '#334a58', accent: '#a78bfa', warm: '#ffb45e' },
-    linePools: { greeting: ['Fog’s thick on the glass tonight. I’ll have a game drawn up in it for you soon.'] },
+    linePools: { greeting: ['Fog’s thick on the glass tonight. Boxes? Loser buys the cloudberry buns.'] },
     favorDefs: [],
   },
   {

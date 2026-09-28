@@ -321,6 +321,14 @@ describe('room configs', () => {
     expect(plazaDoorCourt).toMatchObject({ targetRoom: 'court', locked: false, targetSpawn: 'fromPlaza' });
   });
 
+  it('bluehour: Window Boxes sits on the floor by the glass, clear of Tove', () => {
+    const room = ROOM_REGISTRY.bluehour;
+    const game = room.hotspots.find((hotspot) => hotspot.id === 'window-boxes');
+    const tove = room.anchors.find((anchor) => anchor.characterId === 'tove');
+    expect(game).toMatchObject({ label: 'Window Boxes', kind: 'minigame', x: 720, y: 555 });
+    expect(Math.hypot(game.x - tove.x, game.y - tove.y)).toBeGreaterThanOrEqual(INTERACT_R);
+  });
+
   it('court: Bluehour Coffee is a real door; the pet shop and restaurant are still venues', () => {
     expect(ROOM_REGISTRY.court.doors.find(d => d.id === 'door-bluehour'))
       .toMatchObject({ targetRoom: 'bluehour', targetSpawn: 'fromCourt', locked: false });

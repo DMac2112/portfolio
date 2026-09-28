@@ -294,7 +294,9 @@ export const ROOM_REGISTRY = {
       fromMap: { x: 780, y: 740, facing: 'up' },
     },
     camera: { leadY: -50 },
-    hotspots: [],
+    hotspots: [
+      { id: 'window-boxes', label: 'Window Boxes', kind: 'minigame', x: 720, y: 555 },
+    ],
     doors: [
       { id: 'door-back', label: 'Glasswind Court', x: 720, y: 930,
         targetRoom: 'court', targetSpawn: 'fromBluehour', locked: false },
