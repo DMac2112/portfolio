@@ -35,7 +35,7 @@ export function registerMinigameBell(k, { reducedMotion = false, isMuted = () =>
       block(x - 64, 372, 128, 28, '#ffb45e', 0.65);
       block(x - 52, 400, 104, 12, '#ffb45e', 0.65);
       block(x - 12, 412, 24, 16, '#ffb45e', 0.65);
-      label(['LOW', 'MIDDLE', 'HIGH'][lane], x - 42, 452, 16);
+      label(['Low', 'Middle', 'High'][lane], x - 42, 452, 16);
     }
     block(112, STRIKE_Y, 736, 4, '#f5fbff', 0.6, 3);
     const phraseText = label('Phrase 1/3', 28, 24, 18);

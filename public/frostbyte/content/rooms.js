@@ -183,39 +183,36 @@ export const ROOM_REGISTRY = {
       default:    { x: 720, y: 420, facing: 'down' },
       fromPlaza:  { x: 168, y: 525, facing: 'right' },
       fromDocks:  { x: 1290, y: 858, facing: 'up' },
+      fromBluehour: { x: 840, y: 510, facing: 'down' },
+      fromLadle: { x: 1125, y: 620, facing: 'left' },
+      fromPetshop: { x: 360, y: 420, facing: 'down' },
       fromMap:    { x: 720, y: 720, facing: 'up' },
     },
     camera: { leadY: -50 },
     hotspots: [
-      {
-        id: 'venue-snowtail-petshop', label: 'Snowtail Pet Shop', kind: 'venue', x: 360, y: 420,
-        solidId: 'snowtail-petshop',
-        entryDirection: 'up',
-        prompt: 'Visit the pet shop',
-        copy: 'Warm nests and tiny scarves fill the window, but the nests are empty. A card reads: ‘Snowtails arrive with the spring sailing.’',
-      },
-      {
-        id: 'venue-bluehour-coffee', label: 'Bluehour Coffee', kind: 'venue', x: 840, y: 420,
-        solidId: 'bluehour-coffee',
-        entryDirection: 'up',
-        prompt: 'Visit the coffee shop',
-        copy: 'Today\'s Northlight Blend comes with cloudberry foam and a cinnamon snowflake on top.',
-      },
-      {
-        id: 'venue-lantern-ladle', label: 'Lantern Ladle Restaurant', kind: 'venue', x: 1125, y: 620,
-        solidId: 'lantern-ladle',
-        entryDirection: 'right',
-        prompt: 'Visit the restaurant',
-        copy: 'Tonight\'s special is ember-roasted root stew with iceleaf rolls. A warm corner table is ready.',
-      },
       {
         id: 'noticeboard-chirper', label: 'The Chillmere Chirper', kind: 'newspaper', x: 190, y: 430,
         prompt: 'Read this week’s Chirper',
       },
     ],
     doors: [
+      {
+        id: 'door-petshop', label: 'Snowtail Pet Shop', x: 360, y: 420,
+        targetRoom: 'petshop', targetSpawn: 'fromCourt', locked: false,
+        solidId: 'snowtail-petshop', enterDir: { x: 0, y: -1 }, autoEnterRadius: 34,
+      },
       { id: 'door-back', label: 'Chillmere Plaza', x: 72, y: 480, targetRoom: 'plaza', locked: false, targetSpawn: 'fromCourt' },
       { id: 'door-docks', label: 'Driftgate Docks', x: 1290, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromCourt' },
+      {
+        id: 'door-bluehour', label: 'Bluehour Coffee', x: 840, y: 420,
+        targetRoom: 'bluehour', targetSpawn: 'fromCourt', locked: false,
+        solidId: 'bluehour-coffee', enterDir: { x: 0, y: -1 }, autoEnterRadius: 34,
+      },
+      {
+        id: 'door-ladle', label: 'Lantern Ladle', x: 1125, y: 620,
+        targetRoom: 'ladle', targetSpawn: 'fromCourt', locked: false,
+        solidId: 'lantern-ladle', enterDir: { x: 1, y: 0 }, autoEnterRadius: 34,
+      },
     ],
     solids: [
       { id: 'snowtail-petshop', x: 291, y: 190, w: 438, h: 188 },
@@ -276,6 +273,112 @@ export const ROOM_REGISTRY = {
         },
         onlyWhenFavorStep: true,
       },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Bluehour Coffee opens from the painted storefront on Glasswind Court.
+  bluehour: {
+    id: 'bluehour',
+    avatarScale: 7.5,
+    title: 'Bluehour Coffee',
+    mapAsset: 'room-bluehour',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 110, x1: 1400, y0: 120, y1: 936 }, // takes in the counter and the big window so both stay clickable
+    spawnPoints: {
+      default: { x: 720, y: 750, facing: 'up' },
+      fromCourt: { x: 720, y: 870, facing: 'up' },
+      fromMap: { x: 780, y: 740, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'window-boxes', label: 'Window Boxes', kind: 'minigame', x: 720, y: 555 },
+    ],
+    doors: [
+      { id: 'door-back', label: 'Glasswind Court', x: 720, y: 930,
+        targetRoom: 'court', targetSpawn: 'fromBluehour', locked: false },
+    ],
+    solids: [],
+    anchors: [
+      { characterId: 'ilse', x: 465, y: 555 },
+      { characterId: 'tove', x: 905, y: 400 }, // beside the window table's right chair
+    ],
+    clickables: [
+      { id: 'espresso-machine', x: 300, y: 500, w: 350, h: 220,
+        line: 'It hisses like it has opinions.' },
+      { id: 'bluehour-window', x: 750, y: 300, w: 700, h: 350,
+        line: 'The whole court, gone blue. Somebody’s lantern is walking home.' },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Lantern Ladle opens from the side-facing restaurant door on Glasswind Court.
+  ladle: {
+    id: 'ladle',
+    avatarScale: 7.5,
+    title: 'Lantern Ladle',
+    mapAsset: 'room-ladle',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 48, x1: 1392, y0: 64, y1: 936 }, // includes the hearth and low lantern hitboxes
+    spawnPoints: {
+      default: { x: 745, y: 830, facing: 'up' },
+      fromCourt: { x: 745, y: 850, facing: 'up' },
+      fromMap: { x: 760, y: 770, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'cocoa-rounds', label: 'Cocoa Rounds', kind: 'minigame', x: 1040, y: 650 },
+    ],
+    doors: [
+      { id: 'door-back', label: 'Glasswind Court', x: 745, y: 930,
+        targetRoom: 'court', targetSpawn: 'fromLadle', locked: false },
+    ],
+    solids: [],
+    anchors: [
+      { characterId: 'brann', x: 790, y: 465 },
+    ],
+    clickables: [
+      { id: 'cocoa-cauldron', x: 715, y: 320, w: 170, h: 165,
+        line: 'Cocoa thick enough to stand a ladle in. Someone has.' },
+      { id: 'family-lantern', x: 205, y: 320, w: 130, h: 190,
+        line: 'Every fishing family hangs a lantern here. The empty hook is for whoever’s still at sea.' },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Snowtail Pet Shop opens from its north-facing door on Glasswind Court.
+  petshop: {
+    id: 'petshop',
+    avatarScale: 7.5,
+    title: 'Snowtail Pet Shop',
+    mapAsset: 'room-petshop',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 48, x1: 1410, y0: 40, y1: 936 },
+    spawnPoints: {
+      default: { x: 745, y: 810, facing: 'up' },
+      fromCourt: { x: 745, y: 850, facing: 'up' },
+      fromMap: { x: 765, y: 745, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [
+      { id: 'snowtail-pen', label: 'Meet the snowtails', kind: 'pet', x: 424, y: 745 },
+    ],
+    doors: [
+      { id: 'door-back', label: 'Glasswind Court', x: 745, y: 930,
+        targetRoom: 'court', targetSpawn: 'fromPetshop', locked: false },
+    ],
+    solids: [],
+    anchors: [
+      { characterId: 'wren', x: 1040, y: 565 },
+    ],
+    clickables: [
+      { id: 'snowtail-nests', x: 770, y: 360, w: 810, h: 100,
+        line: 'Every nest is knitted by someone in Chillmere. The berry-red ones are Edda’s.' },
+      { id: 'snowtail-scarves', x: 1050, y: 340, w: 200, h: 120,
+        line: 'Tiny scarves in every colour. Snowtails lose about one a week.' },
     ],
     npcSpawnAnchors: [],
   },

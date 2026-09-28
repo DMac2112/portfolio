@@ -6,6 +6,8 @@ import { grantNote, notesHeld } from '../engine/story.js';
 
 export const MINIGAMES = {
   snowdrift: { hotspotId: 'minigame-snowdrift', sceneId: 'minigame-snowdrift' },
+  'window-boxes': { hotspotId: 'window-boxes', sceneId: 'minigame-boxes', label: 'Window Boxes' },
+  'cocoa-rounds': { hotspotId: 'cocoa-rounds', sceneId: 'minigame-cocoa', label: 'Cocoa Rounds' },
   bell: {
     hotspotId: 'weather-bell', sceneId: 'minigame-bell', note: 'bell',
     requires: (save) => favorState(save, 'pat-weather-bell-parts')?.status === FAVOR_STATUS.DONE,

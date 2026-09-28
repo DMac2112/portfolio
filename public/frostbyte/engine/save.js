@@ -6,6 +6,7 @@
 // and an optional `now` timestamp. Tests pass a Map-backed fake store + fixed timestamps.
 import { starterDyeIds } from '../content/cosmetics.js';
 import { createCurioState } from './curios.js';
+import { validPet } from './pet.js';
 import { storyOf } from './story.js';
 
 export const OS_NS = 'dmos.v1';                    // MUST match os/src/os/storage.ts NS exactly
@@ -36,6 +37,7 @@ export function DEFAULT_SAVE(now = nowISO()) {
     home: { open: false, shell: 'dome-basic', placed: [] }, // den decorating (H2): placed = [{id,x,y,flip}] world coords
     furniture: {},                                 // { itemId: count } owned-but-not-placed stock (H2)
     curios: createCurioState(),                     // Curio Log (W0): found ids + once-only completion rewards
+    pet: null,
     favors: {},                                     // { favorId: {status,stepIndex} } cross-room threads (W0)
     story: { introSeen: false, notes: {}, echoGreeted: false, finaleSeen: false, finaleGreeted: {} },
     secrets: {
@@ -75,6 +77,7 @@ export function migrateSave(raw, now = nowISO()) {
     ...base,
     ...s,
     schemaVersion: SCHEMA_VERSION,
+    pet: validPet(s.pet) ? { coat: s.pet.coat, scarf: s.pet.scarf, name: s.pet.name, adoptedOn: s.pet.adoptedOn } : null,
     // targeted deep-merge so a partial legacy avatar/prefs can't drop required sub-fields
     avatar: {
       ...base.avatar,
