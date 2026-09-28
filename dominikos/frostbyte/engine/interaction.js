@@ -4,6 +4,30 @@ export const INTERACT_R = 168; // default interaction radius, world px
 export const AUTO_VENUE_R = 20;
 export const AUTO_VENUE_RESET_R = 72;
 
+export function clickDecision({ dist, range }) {
+  return dist < range ? 'act' : 'approach';
+}
+
+export function pendingAction(pending, event) {
+  if (event.type === 'set') return event.target;
+  if (event.type === 'cancel') return null;
+  return pending;
+}
+
+export function shouldFire(pending, dist, range) {
+  return Boolean(pending && clickDecision({ dist, range }) === 'act');
+}
+
+export function advancePendingAction(pending, dist, range) {
+  return shouldFire(pending, dist, range)
+    ? { pending: null, action: pending }
+    : { pending, action: null };
+}
+
+export function cycleDevSpeed(speed) {
+  return speed === 1 ? 2 : speed === 2 ? 3 : 1;
+}
+
 /**
  * @typedef {Object} Interactable
  * @property {string} id

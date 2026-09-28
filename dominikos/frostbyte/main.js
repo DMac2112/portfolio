@@ -23,7 +23,12 @@ import { registerMinigameThaw } from './world/minigame-thaw.js';
 import {
   AUTO_VENUE_R,
   AUTO_VENUE_RESET_R,
+  INTERACT_R,
+  advancePendingAction,
+  clickDecision,
+  cycleDevSpeed,
   findAutoEnterVenue,
+  pendingAction,
   findNearestInteractable,
   mergeInteractables,
 } from './engine/interaction.js';
@@ -47,7 +52,8 @@ import { createEditMode } from './ui/edit-mode.js';
 import { createCatalog } from './ui/catalog.js';
 import { newVisitorScheduler, tick as tickVisitors } from './engine/visitors.js';
 import { initVisitorLayer } from './world/visitor-runtime.js';
-import { ROSTER } from './content/npc-roster.js';
+import { ROSTER, personaById } from './content/npc-roster.js';
+import { LINE_POOLS } from './content/dialogue-lines.js';
 import { addSnowfall, createWalkPuffs, fadeIn, fadeTo, showCoinSparkle, showMovePing } from './world/game-feel.js';
 import { resolveRoomCollision } from './world/room-collision.js';
 import { CURIO_REGISTRY } from './content/curios.js';
@@ -128,6 +134,41 @@ window.__osBridge?.onReady({
 
 const PLAYER_RADIUS = 12;
 
+function stored(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function remember(key, value) {
+  try { localStorage.setItem(key, String(value)); } catch { /* Storage can be unavailable in embeds. */ }
+}
+let parentDev = false;
+try { parentDev = window.parent !== window && new URL(window.parent.location.href).searchParams.has('dev'); }
+catch { /* A cross-origin parent cannot expose its URL. */ }
+const savedDevMode = stored('frostbyte.dev');
+let devMode = savedDevMode == null
+  ? new URLSearchParams(location.search).has('dev') ||
+    parentDev || ['localhost', '127.0.0.1'].includes(location.hostname)
+  : savedDevMode === 'true';
+let devSpeed = [1, 2, 3].includes(Number(stored('frostbyte.devSpeed')))
+  ? Number(stored('frostbyte.devSpeed')) : 1;
+const devSpeedBtn = document.getElementById('dev-speed-btn');
+function refreshDevSpeed() {
+  if (!devSpeedBtn) return;
+  devSpeedBtn.hidden = !devMode || inMinigame;
+  devSpeedBtn.textContent = `${devSpeed}×`;
+  devSpeedBtn.setAttribute('aria-label', `Walk speed (dev): ${devSpeed}×`);
+}
+if (devSpeedBtn) devSpeedBtn.onclick = () => {
+  devSpeed = cycleDevSpeed(devSpeed);
+  remember('frostbyte.devSpeed', devSpeed);
+  refreshDevSpeed();
+};
+document.addEventListener('keydown', (event) => {
+  if (event.code !== 'Backquote' || event.repeat) return;
+  devMode = !devMode;
+  remember('frostbyte.dev', devMode);
+  refreshDevSpeed();
+});
+
 /* ------------------------------------------------------------------ *
  * Asset loading
  * ------------------------------------------------------------------ */
@@ -207,6 +248,7 @@ document.addEventListener('keydown', (event) => {
 });
 function setHudVisible(v) {
   for (const id of HUD_BTN_IDS) { const el = document.getElementById(id); if (el) el.hidden = !v; }
+  if (devSpeedBtn) devSpeedBtn.hidden = !v || !devMode;
 }
 
 /* ------------------------------------------------------------------ *
@@ -246,6 +288,7 @@ k.scene('room', (roomId, opts = {}) => {
   // Back in a room: restore the HUD the minigame hid, and let travel guards relax.
   setHudVisible(true);
   inMinigame = false;
+  refreshDevSpeed();
 
   // In-world markers so the actionable hotspots (shop, minigame) are findable — a small floating
   // pill label, game1's technique. Non-actionable hotspots stay unmarked until they get real props.
@@ -301,11 +344,13 @@ k.scene('room', (roomId, opts = {}) => {
   };
   let savePosElapsed = 0;
   let moveTarget = null;
+  let pending = null;
   let animT = 0;
   let transitioning = false;
   const walkPuffs = createWalkPuffs(k, reduceMotion, bf);
   const changeScene = (go) => {
     if (transitioning) return;
+    pending = pendingAction(pending, { type: 'cancel' });
     transitioning = true;
     fadeTo(k, reduceMotion, go);
   };
@@ -330,8 +375,7 @@ k.scene('room', (roomId, opts = {}) => {
   const anchorLayer = spawnRoomAnchors(k, room, ANCHOR_CHARACTERS, reduceMotion);
 
   // Interaction: nearest hotspot/door/NPC scan → interact prompt → launch. Minigames, shops,
-  // venues, newspapers, anchors, signs and doors are actionable; NPCs/landmarks stay promptless and
-  // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
+  // venues, newspapers, NPCs, anchors, signs and doors are actionable.
   const hotspotInteractables = (room.hotspots ?? []).map((h) => ({
     id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label,
     prompt: h.prompt, copy: h.copy, lore: h.lore, entryDirection: h.entryDirection,
@@ -360,6 +404,7 @@ k.scene('room', (roomId, opts = {}) => {
     if (hit.kind === 'logbook') return 'logbook';
     if (hit.kind === 'echo') return 'echo';
     if (hit.kind === 'character') return 'character';
+    if (hit.kind === 'npc') return 'npc';
     if (hit.kind === 'door') return 'door';
     if (hit.kind === 'sign') return 'sign';
     return null;
@@ -367,6 +412,7 @@ k.scene('room', (roomId, opts = {}) => {
   function enterVenue(venue) {
     if (!venue) return false;
     autoVenueLatch = venue.id;
+    pending = pendingAction(pending, { type: 'cancel' });
     moveTarget = null;
     // A shop walked into through its door opens the shop itself, same as its prompt does.
     if (venue.kind === 'shop') dressUp.open();
@@ -375,6 +421,7 @@ k.scene('room', (roomId, opts = {}) => {
   }
   function enterDoor(door) {
     if (!door || door.locked) return false;
+    pending = pendingAction(pending, { type: 'cancel' });
     moveTarget = null;
     if (interactPrompt) interactPrompt.classList.remove('show');
     changeScene(() => k.go('room', door.targetRoom, { spawn: door.targetSpawn ?? arriveSpawnId(roomId) }));
@@ -621,24 +668,24 @@ k.scene('room', (roomId, opts = {}) => {
     openCharacterDialogue(character, startNode);
   }
 
-  function doInteract() {
+  function doInteract(target = nearest) {
     if (anyOverlayOpen()) return; // 'e' typed into the chat box (or any open modal) must not interact
-    const action = actionFor(nearest);
+    const action = actionFor(target);
     if (action === 'minigame') {
       if (interactPrompt) interactPrompt.classList.remove('show'); // hide before leaving the scene
       setHudVisible(false); // persistent DOM buttons must not float over (or act on) the minigame
       inMinigame = true;
-      changeScene(() => k.go(minigameForHotspot(nearest.id).sceneId, { from: roomId }));
+      changeScene(() => k.go(minigameForHotspot(target.id).sceneId, { from: roomId }));
     } else if (action === 'shop') {
       dressUp.open();
     } else if (action === 'venue') {
-      enterVenue(nearest);
+      enterVenue(target);
     } else if (action === 'newspaper') {
       newspaperUI.open();
     } else if (action === 'landmark') {
-      reactionBurst(k, { x: nearest.pos.x, y: nearest.pos.y, line: nearest.lore }, reduceMotion);
+      reactionBurst(k, { x: target.pos.x, y: target.pos.y, line: target.lore }, reduceMotion);
     } else if (action === 'locked') {
-      const line = minigameForHotspot(nearest.id)?.lockedLine;
+      const line = minigameForHotspot(target.id)?.lockedLine;
       if (line) showCoinToast(line);
     } else if (action === 'trader') {
       traderUI.open();
@@ -658,9 +705,14 @@ k.scene('room', (roomId, opts = {}) => {
         showCoinToast('The aurora is loose over Chillmere');
       } else echoLayer?.singNext();
     } else if (action === 'character') {
-      talkToCharacter(nearest.character);
+      talkToCharacter(target.character);
+    } else if (action === 'npc') {
+      const personaId = target.personaId ??
+        crowd?.getRoom().npcs.find((npc) => npc.id === target.id)?.personaId;
+      const persona = personaById(personaId);
+      showDialogue(persona?.name ?? 'Penguin', LINE_POOLS.AMBIENT[0]?.text ?? '');
     } else if (action === 'door') {
-      const d = nearest.door;
+      const d = target.door;
       if (d.locked) { showDialogue(d.label, d.lockedCopy ?? 'Snowed in for now.'); return; }
       enterDoor(d);
     } else if (action === 'sign') {
@@ -670,8 +722,8 @@ k.scene('room', (roomId, opts = {}) => {
       showCoinToast(save.home.open ? 'Den open — visitors welcome!' : 'Den closed.');
     }
   }
-  k.onKeyPress('e', doInteract);
-  if (interactPrompt) interactPrompt.onclick = doInteract;
+  k.onKeyPress('e', () => doInteract());
+  if (interactPrompt) interactPrompt.onclick = () => doInteract();
 
   /* ------------------------------------------------------------------ *
    * Chat & emotes — strictly LOCAL. Player text renders only as their own
@@ -929,8 +981,8 @@ k.scene('room', (roomId, opts = {}) => {
   };
   k.onKeyPress('j', () => { if (!anyOverlayOpen()) journalUI.open(); });
 
-  // Direct-click props use one scene-scoped mouse path. touchToMouse synthesizes that path for taps,
-  // so no parallel touch listener exists and a Curio can never register twice from one tap.
+  // Props share the scene's single mouse path with characters and hotspots.
+  // touchToMouse synthesizes that path for taps.
   const clickableLayer = spawnClickables(k, {
     props: (room.clickables ?? []).map((prop) => prop.id === 'weather-bell-test'
       ? { ...prop, get line() {
@@ -938,9 +990,9 @@ k.scene('room', (roomId, opts = {}) => {
       } } : prop),
     anyOverlayOpen,
     reducedMotion: reduceMotion,
+    listen: false,
     isEnabled: (prop) => {
       if (prop.id === 'weather-bell-test' && minigameActionForHotspot('weather-bell', save) === 'minigame') return false;
-      if (prop.requiresProximity && Math.hypot(player.pos.x - prop.x, player.pos.y - prop.y) > 120 + pad) return false;
       if (!prop.onlyWhenFavorStep) return true;
       const link = prop.favorStep;
       const definition = favorById(link?.favorId);
@@ -1022,33 +1074,61 @@ k.scene('room', (roomId, opts = {}) => {
     bubbleObjs.txt.opacity = top.alpha;
   }
 
-  // Movement input is ignored while ANY overlay is open — one shared frozen predicate so
-  // pointer, keys and prompts can never disagree (H1 audit fix). Edit mode instead routes
+  // Movement input is ignored while ANY overlay is open. Edit mode instead routes
   // canvas presses to the furniture editor (the tray is non-modal by design).
+  const cancelPending = () => { pending = pendingAction(pending, { type: 'cancel' }); };
+  document.addEventListener('pointerdown', cancelPending, true);
+  k.onSceneLeave(() => document.removeEventListener('pointerdown', cancelPending, true));
   k.onMousePress(() => {
-    if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(k.toWorld(k.mousePos())); return; }
-    if (clickableLayer.consumePress()) { moveTarget = null; return; }
-    if (!anyOverlayOpen() && nearest?.id === 'weather-bell'
-      && minigameActionForHotspot(nearest.id, save) === 'minigame') {
-      const point = k.toWorld(k.mousePos());
-      if (Math.abs(point.x - 720) <= 105 && Math.abs(point.y - 390) <= 105) { doInteract(); return; }
-    }
-    if (!anyOverlayOpen()) {
-      moveTarget = collidePlayer(k.toWorld(k.mousePos()));
+    pending = pendingAction(pending, { type: 'cancel' });
+    const point = k.toWorld(k.mousePos());
+    if (editMode.isOpen() && !catalogUI.isOpen()) { editPress(point); return; }
+    if (anyOverlayOpen()) return;
+
+    const prop = clickableLayer.hit(point);
+    const anchor = !prop && anchorLayer.hitAt(point);
+    const npc = !prop && !anchor && crowd?.hitAt(point);
+    const npcTarget = npc?.personaId === 'chowder' && storyOf(save).finaleSeen
+      ? { id: 'chowder-talk', pos: npc.pos, kind: 'character', label: 'Chowder',
+        character: CHOWDER_CHARACTER, npcId: npc.id }
+      : npc ? { id: npc.id, pos: npc.pos, kind: 'npc', personaId: npc.personaId, npcId: npc.id } : null;
+    const worldTarget = !prop && (anchor || npcTarget ||
+      [...doorInteractables, ...hotspotInteractables].reverse().find((candidate) => {
+        if (!actionFor(candidate)) return false;
+        if (candidate.id === 'weather-bell' &&
+          minigameActionForHotspot(candidate.id, save) === 'minigame') {
+          return Math.abs(point.x - candidate.pos.x) <= 105 &&
+            Math.abs(point.y - candidate.pos.y) <= 105;
+        }
+        return Math.abs(point.x - candidate.pos.x) <= 24 &&
+          Math.abs(point.y - candidate.pos.y) <= 24;
+      }));
+    const target = prop
+      ? { kind: 'prop', pos: { x: prop.x, y: prop.y }, clickPoint: point }
+      : worldTarget ? { kind: 'interaction', pos: worldTarget.pos, hit: worldTarget } : null;
+    if (!target) {
+      moveTarget = collidePlayer(point);
       showMovePing(k, moveTarget, reduceMotion);
+      return;
     }
-  });
-  k.onTouchStart((pos) => {
-    // touchToMouse:true already synthesizes a mousePress for every tap, so editPress must be
-    // routed ONLY through onMousePress — wiring it here too would double-fire on one tap
-    // (double stock burn / duplicate placement — H2 review blocker). The idempotent moveTarget
-    // assignment is safe to keep on both paths.
-    if (!anyOverlayOpen() && !clickableLayer.contains(k.toWorld(pos))) moveTarget = collidePlayer(k.toWorld(pos));
+    const range = prop ? 120 + pad : Math.min(INTERACT_R + pad,
+      worldTarget.interactionRadius ?? INTERACT_R + pad);
+    const dist = Math.hypot(player.pos.x - target.pos.x, player.pos.y - target.pos.y);
+    if (clickDecision({ dist, range }) === 'act') {
+      moveTarget = null;
+      if (prop) clickableLayer.trigger(target.clickPoint);
+      else doInteract(worldTarget);
+      return;
+    }
+    pending = pendingAction(pending, { type: 'set', target: { ...target, range } });
+    moveTarget = target.pos;
+    showMovePing(k, moveTarget, reduceMotion);
   });
 
   k.onUpdate(() => {
     const dt = Math.min(k.dt(), 0.05); // defensive clamp against tab-switch spikes
     const frozen = anyOverlayOpen();
+    if (frozen) pending = pendingAction(pending, { type: 'cancel' });
 
     // Drag-move a selected furniture piece while the mouse stays down (edit mode only).
     if (dragging && editMode.isOpen() && selIdx >= 0 && k.isMouseDown()) {
@@ -1064,15 +1144,41 @@ k.scene('room', (roomId, opts = {}) => {
       down: k.isKeyDown('down') || k.isKeyDown('s'),
     };
     const { dxPx, dyPx, moving, arrived, keysCancelTarget } =
-      resolveMoveVector({ keys, moveTarget: frozen ? null : moveTarget, pos: player.pos, dt, speed: SPEED * Math.sqrt(bf) });
+      resolveMoveVector({ keys, moveTarget: frozen ? null : moveTarget, pos: player.pos, dt,
+        speed: SPEED * Math.sqrt(bf) * devSpeed });
 
-    if (keysCancelTarget) moveTarget = null;
+    if (keysCancelTarget) {
+      moveTarget = null;
+      pending = pendingAction(pending, { type: 'cancel' });
+    }
     if (arrived) moveTarget = null;
 
     let next = { x: player.pos.x + dxPx, y: player.pos.y + dyPx };
     next = collidePlayer(next);
     player.pos.x = next.x;
     player.pos.y = next.y;
+
+    if (pending) {
+      if (pending.hit?.npcId) {
+        const live = crowd?.getRoom().npcs.find((npc) => npc.id === pending.hit.npcId);
+        if (live) {
+          pending.hit.pos = live.pos;
+          pending.pos = live.pos;
+          moveTarget = live.pos;
+        } else pending = pendingAction(pending, { type: 'cancel' });
+      }
+      if (pending) {
+        const dist = Math.hypot(player.pos.x - pending.pos.x, player.pos.y - pending.pos.y);
+        const result = advancePendingAction(pending, dist, pending.range);
+        pending = result.pending;
+        if (result.action) {
+          moveTarget = null;
+          if (result.action.kind === 'prop') clickableLayer.trigger(result.action.clickPoint);
+          else doInteract(result.action.hit);
+          if (anyOverlayOpen()) return;
+        }
+      }
+    }
 
     const autoDoor = findAutoEnterDoor(
       next,
@@ -1173,8 +1279,7 @@ k.scene('room', (roomId, opts = {}) => {
       visitorLayer.tick(dt);
     }
 
-    // Nearest-ACTIONABLE scan (hotspots + doors + live NPCs) — NPCs have no action yet, so the
-    // isActionable filter keeps a nearby waddler from shadowing a shop/minigame/door prompt.
+    // Nearest actionable hotspot, door, or character for the E-key prompt.
     const liveNpcs = crowd ? crowd.getRoom().npcs : [];
     const chowder = liveNpcs.find((npc) => npc.personaId === 'chowder');
     const chowderInteractables = chowder && storyOf(save).finaleSeen
@@ -1184,7 +1289,7 @@ k.scene('room', (roomId, opts = {}) => {
       player.pos,
       mergeInteractables(hotspotInteractables.concat(doorInteractables, anchorLayer.interactables,
         chowderInteractables), liveNpcs),
-      undefined,
+      INTERACT_R + pad,
       { isActionable: (c) => actionFor(c) !== null },
     );
     const action = actionFor(nearest);
@@ -1201,6 +1306,7 @@ k.scene('room', (roomId, opts = {}) => {
           action === 'logbook' ? `📖 ${nearest.prompt ?? 'Read the logbook'}` :
           action === 'echo' ? `♪ ${nearest.prompt ?? 'Listen for The Echo'}` :
           action === 'character' ? `💬 Talk to ${nearest.label}` :
+          action === 'npc' ? `💬 Talk to ${personaById(liveNpcs.find((npc) => npc.id === nearest.id)?.personaId)?.name ?? 'Penguin'}` :
           action === 'sign' ? (save.home.open ? '🪧 Close your den' : '🪧 Open your den') :
           nearest.door?.locked ? `🔒 ${nearest.label}` : `🚪 ${nearest.label}`;
         interactPrompt.classList.add('show');

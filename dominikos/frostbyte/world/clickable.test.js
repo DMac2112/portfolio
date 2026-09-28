@@ -51,6 +51,22 @@ function fakeKaplay() {
 }
 
 describe('spawnClickables', () => {
+  it('can defer a rect hit to the shared click path', () => {
+    const k = fakeKaplay();
+    const onReaction = vi.fn();
+    const controller = spawnClickables(k, {
+      props: [{ id: 'prop', x: 100, y: 100, w: 20, h: 20 }],
+      listen: false,
+      onReaction,
+      reducedMotion: true,
+    });
+    expect(k.onMousePress).not.toHaveBeenCalled();
+    expect(controller.hit({ x: 110, y: 100 })?.id).toBe('prop');
+    expect(controller.hit({ x: 111, y: 100 })).toBeNull();
+    controller.trigger({ x: 100, y: 100 });
+    expect(onReaction).toHaveBeenCalledTimes(1);
+  });
+
   it('uses one mouse path, gates overlays, and stops after scene leave', () => {
     const k = fakeKaplay();
     const onReaction = vi.fn();

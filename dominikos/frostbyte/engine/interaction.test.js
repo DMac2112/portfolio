@@ -1,11 +1,39 @@
 import { describe, it, expect } from 'vitest';
 import {
   AUTO_VENUE_R,
+  advancePendingAction,
+  clickDecision,
+  cycleDevSpeed,
   findAutoEnterVenue,
+  pendingAction,
+  shouldFire,
   findNearestInteractable,
   mergeInteractables,
   INTERACT_R,
 } from './interaction.js';
+
+describe('click interactions', () => {
+  it('acts only inside the same range used by the prompt', () => {
+    expect(clickDecision({ dist: 119, range: 120 })).toBe('act');
+    expect(clickDecision({ dist: 120, range: 120 })).toBe('approach');
+  });
+
+  it('sets, cancels, and fires a pending action once', () => {
+    const target = { id: 'character' };
+    let pending = pendingAction(null, { type: 'set', target });
+    expect(shouldFire(pending, 121, 120)).toBe(false);
+    expect(advancePendingAction(pending, 121, 120)).toEqual({ pending, action: null });
+    const fired = advancePendingAction(pending, 119, 120);
+    expect(fired).toEqual({ pending: null, action: target });
+    expect(advancePendingAction(fired.pending, 119, 120).action).toBeNull();
+    pending = pendingAction(pending, { type: 'cancel' });
+    expect(shouldFire(pending, 0, 120)).toBe(false);
+  });
+
+  it('cycles only the three dev walk speeds', () => {
+    expect([cycleDevSpeed(1), cycleDevSpeed(2), cycleDevSpeed(3)]).toEqual([2, 3, 1]);
+  });
+});
 
 describe('findNearestInteractable', () => {
   it('picks the closest of several candidates within range', () => {

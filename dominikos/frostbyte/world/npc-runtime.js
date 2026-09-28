@@ -143,5 +143,19 @@ export function initRoomCrowd(k, roomId, config, scale) {
     }
   });
 
-  return { getRoom: () => room };
+  return {
+    getRoom: () => room,
+    hitAt(point) {
+      for (const npc of [...room.npcs].reverse()) {
+        const actor = actors.get(npc.id);
+        const part = actor?.parts[0];
+        if (!part) continue;
+        const width = part.width * part.scale.x;
+        const height = part.height * part.scale.y;
+        if (Math.abs(point.x - npc.pos.x) <= width / 2 &&
+          point.y <= npc.pos.y && point.y >= npc.pos.y - height) return npc;
+      }
+      return null;
+    },
+  };
 }
