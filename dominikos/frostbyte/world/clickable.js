@@ -145,7 +145,7 @@ function addVariantReaction(k, prop, color, reducedMotion) {
   }
 }
 
-function reactionBurst(k, prop, reducedMotion) {
+export function reactionBurst(k, prop, reducedMotion) {
   const color = k.Color.fromHex(prop.reactionColor ?? '#ffb45e');
   const burst = k.add([
     k.rect(14, 14, { radius: 4 }),

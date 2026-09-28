@@ -22,13 +22,14 @@ export function addEchoPresence(k, room, lines = [], reducedMotion = false) {
   let activeLine = null;
   let active = true;
 
-  function singNext() {
+  function singNext(copy = null) {
     if (!active) return null;
     if (activeLine) k.destroy(activeLine);
-    const index = cursor++;
+    const index = cursor;
+    if (copy == null) cursor++;
     const start = echoLinePosition(index, 0, reducedMotion);
     const line = k.add([
-      k.text(lines[index % lines.length], { size: 16, width: 340, align: 'center' }),
+      k.text(copy ?? lines[index % lines.length], { size: 16, width: 340, align: 'center' }),
       k.pos(start.x, start.y),
       k.anchor('center'),
       k.color(k.Color.fromHex(index % 2 ? '#c8f4ff' : '#72e2bd')),

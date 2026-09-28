@@ -6,6 +6,7 @@
 // and an optional `now` timestamp. Tests pass a Map-backed fake store + fixed timestamps.
 import { starterDyeIds } from '../content/cosmetics.js';
 import { createCurioState } from './curios.js';
+import { storyOf } from './story.js';
 
 export const OS_NS = 'dmos.v1';                    // MUST match os/src/os/storage.ts NS exactly
 export const SAVE_KEY = `${OS_NS}.frostbyte.save`;
@@ -36,6 +37,7 @@ export function DEFAULT_SAVE(now = nowISO()) {
     furniture: {},                                 // { itemId: count } owned-but-not-placed stock (H2)
     curios: createCurioState(),                     // Curio Log (W0): found ids + once-only completion rewards
     favors: {},                                     // { favorId: {status,stepIndex} } cross-room threads (W0)
+    story: { introSeen: false, notes: {}, echoGreeted: false, finaleSeen: false },
     secrets: {
       vesperHints: [], moonwellUnlocked: false, cavernsUnlocked: false, auroraIntensified: false,
     },                                                    // W5/W6: persistent secret gates + isle payoff
@@ -57,6 +59,7 @@ export function migrateSave(raw, now = nowISO()) {
   const base = DEFAULT_SAVE(now);
   const savedCurios = s.curios && typeof s.curios === 'object' && !Array.isArray(s.curios) ? s.curios : {};
   const savedFavors = s.favors && typeof s.favors === 'object' && !Array.isArray(s.favors) ? s.favors : {};
+  const savedStory = storyOf({ story: s.story });
   const savedSecrets = s.secrets && typeof s.secrets === 'object' && !Array.isArray(s.secrets) ? s.secrets : {};
   const savedHintIds = Array.isArray(savedSecrets.vesperHints)
     ? [...new Set(savedSecrets.vesperHints.filter((id) => typeof id === 'string'))]
@@ -87,6 +90,15 @@ export function migrateSave(raw, now = nowISO()) {
       roomRewards: { ...base.curios.roomRewards, ...savedRoomRewards },
     },
     favors: { ...savedFavors },
+    story: {
+      ...savedStory,
+      introSeen: savedStory.introSeen === true || (s.story?.introSeen !== false && (
+        Object.values(savedFound).some((found) => found === true) || Object.keys(savedFavors).length > 0
+      )),
+      echoGreeted: savedStory.echoGreeted === true,
+      finaleSeen: savedStory.finaleSeen === true,
+      notes: { ...savedStory.notes },
+    },
     secrets: {
       ...base.secrets,
       ...savedSecrets,

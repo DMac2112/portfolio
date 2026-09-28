@@ -15,6 +15,7 @@ export const ROOM_REGISTRY = {
   plaza: {
     id: 'plaza',
     title: 'Chillmere Plaza',
+    outdoors: true,
     mapAsset: 'room-plaza',                          // ./assets/room-plaza.png
     tile: 16, gridCols: 30, gridRows: 20,             // native map = 480x320px
     scale: 3,
@@ -34,7 +35,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 1000, y: 400 },
+      { id: 'fountain-driftback', label: "Driftback's Fountain", kind: 'landmark', x: 1000, y: 400, lore: 'Driftback heard three notes beneath the sea ice and founded Chillmere where they rang loudest.' },
       // On the painted door of the timber house just north-east of the fountain: walking up into
       // the door opens the shop, the same as its prompt.
       { id: 'shop-glimmerwool', label: 'Glimmer & Wool', kind: 'shop', x: 1148, y: 290, entryDirection: 'up' },
@@ -90,7 +91,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'hearth-den', label: 'The Hearth', kind: 'landmark', x: 720, y: 280 },
+      { id: 'hearth-den', label: 'The Hearth', kind: 'landmark', x: 720, y: 280, lore: 'The hearth keeps a small, stubborn warmth against the sea ice.' },
       { id: 'door-sign-den', label: 'Door Sign', kind: 'sign', x: 900, y: 720 },
     ],
     doors: [
@@ -111,6 +112,7 @@ export const ROOM_REGISTRY = {
   trail: {
     id: 'trail',
     title: 'Frostline Trail',
+    outdoors: true,
     mapAsset: 'room-trail',                          // ./assets/room-trail.png
     tile: 16, gridCols: 30, gridRows: 20,             // native map = 480x320px
     scale: 3,
@@ -123,8 +125,8 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'falls-frostline', label: 'The Frozen Falls', kind: 'landmark', x: 720, y: 220 },
-      { id: 'signpost-trail', label: 'Old Signpost', kind: 'landmark', x: 1100, y: 760 },
+      { id: 'falls-frostline', label: 'The Frozen Falls', kind: 'landmark', x: 720, y: 220, lore: 'Under the frozen rush, something hums three low notes, then stops to listen.' },
+      { id: 'signpost-trail', label: 'Old Signpost', kind: 'landmark', x: 1100, y: 760, lore: 'Driftback marked this route with old lighthouse lenses so ships could find home.' },
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 880, targetRoom: 'plaza', locked: false, targetSpawn: 'fromTrail' },
@@ -172,6 +174,7 @@ export const ROOM_REGISTRY = {
   court: {
     id: 'court',
     title: 'Glasswind Court',
+    outdoors: true,
     mapAsset: 'room-court',
     tile: 16, gridCols: 30, gridRows: 20,
     scale: 3,
@@ -294,7 +297,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'weather-bell', label: 'The Weather Bell', kind: 'landmark', x: 720, y: 390 },
+      { id: 'weather-bell', label: 'The Weather Bell', kind: 'landmark', x: 720, y: 390, lore: 'Driftback cast the Weather Bell to answer the song. It hasn’t rung true since.' },
     ],
     doors: [
       { id: 'door-back', label: 'Chillmere Plaza', x: 720, y: 888, targetRoom: 'plaza', locked: false, targetSpawn: 'fromWorkshop' },
@@ -366,6 +369,7 @@ export const ROOM_REGISTRY = {
   docks: {
     id: 'docks',
     title: 'Driftgate Docks',
+    outdoors: true,
     mapAsset: 'room-docks-away',
     stateAssets: { inPort: 'room-docks-port', away: 'room-docks-away' },
     // The two backdrops are painted differently. Away: the lighthouse stairs sit further west, and
@@ -528,6 +532,7 @@ export const ROOM_REGISTRY = {
   // Palefire Light — upper gallery, telescope balcony, and the slowly sweeping great lamp.
   'lighthouse-gallery': {
     id: 'lighthouse-gallery',
+    outdoors: true,
     avatarScale: 7.5,
     title: 'Palefire Light — Lantern Gallery',
     mapAsset: 'room-lighthouse-gallery',
@@ -541,7 +546,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'great-lamp', label: 'The Great Lamp', kind: 'landmark', x: 720, y: 330 },
+      { id: 'great-lamp', label: 'The Great Lamp', kind: 'landmark', x: 720, y: 330, lore: 'Driftback set an old lighthouse lens here. Maren says its Moon note is still listening.' },
       { id: 'palefire-telescope', label: 'Palefire Telescope', kind: 'telescope', x: 1140, y: 390, prompt: 'Look across the floes' },
     ],
     doors: [
@@ -583,6 +588,7 @@ export const ROOM_REGISTRY = {
   whisperpine: {
     id: 'whisperpine',
     title: 'Whisperpine Hollow',
+    outdoors: true,
     mapAsset: 'room-whisperpine',
     tile: 16, gridCols: 30, gridRows: 20,
     scale: 3,
@@ -596,7 +602,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'whisperpine-heart', label: 'The Listening Pines', kind: 'landmark', x: 720, y: 480 },
+      { id: 'whisperpine-heart', label: 'The Listening Pines', kind: 'landmark', x: 720, y: 480, lore: 'The pines hear the Echo: aurora light trapped in Hollowfrost crystals.' },
     ],
     doors: [
       { id: 'door-trail', label: 'Frostline Trail', x: 120, y: 540, targetRoom: 'trail', locked: false, targetSpawn: 'fromWhisperpine' },
@@ -673,6 +679,7 @@ export const ROOM_REGISTRY = {
   moonwell: {
     id: 'moonwell',
     title: 'Moonwell Clearing',
+    outdoors: true,
     mapAsset: 'room-moonwell',
     tile: 16, gridCols: 30, gridRows: 20,
     scale: 3,
@@ -683,7 +690,7 @@ export const ROOM_REGISTRY = {
     },
     camera: { leadY: -50 },
     hotspots: [
-      { id: 'moonwell-pool', label: 'The Still Pool', kind: 'landmark', x: 720, y: 450 },
+      { id: 'moonwell-pool', label: 'The Still Pool', kind: 'landmark', x: 720, y: 450, lore: 'Aurora light waits in the pool as if the Hollowfrost crystals were looking up.' },
       { id: 'moonwell-bench', label: null, kind: 'sit', x: 350, y: 650 },
     ],
     doors: [

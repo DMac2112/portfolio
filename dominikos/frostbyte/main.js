@@ -9,6 +9,8 @@ import { resolveMoveVector, resolveFacing, SPEED } from './engine/movement.js';
 import { computeCamPos, fitCamScale, clampCamPos, roomMapSize } from './engine/camera.js';
 import { syncFrame } from './engine/avatar-layers.js';
 import { load, persist } from './engine/save.js';
+import { storyOf } from './engine/story.js';
+import { nextBargeArrival } from './engine/barge-schedule.js';
 import { resumeTarget, snapshotPos, movedEnough } from './engine/resume.js';
 import { checkDailyLogin, earnCoins, spendCoins, greetNpc, collectPickup, unlockItem, equipItem } from './engine/economy.js';
 import { createDressUp } from './ui/dress-up.js';
@@ -47,7 +49,7 @@ import { addSnowfall, createWalkPuffs, fadeIn, fadeTo, showCoinSparkle, showMove
 import { resolveRoomCollision } from './world/room-collision.js';
 import { CURIO_REGISTRY } from './content/curios.js';
 import { claimIsleCompletionReward, curioById, discoverCurio } from './engine/curios.js';
-import { spawnClickables } from './world/clickable.js';
+import { reactionBurst, spawnClickables } from './world/clickable.js';
 import { ANCHOR_CHARACTERS, characterById } from './content/characters.js';
 import { loadAnchorSprites, spawnRoomAnchors } from './world/anchor-runtime.js';
 import { chooseDialogue, dailyLine, startDialogue } from './engine/dialogue-tree.js';
@@ -219,6 +221,11 @@ k.scene('room', (roomId, opts = {}) => {
   const auroraLayer = addAuroraAmbient(k, room, () => save.secrets?.auroraIntensified === true, reduceMotion);
   const echoCharacter = characterById('the-echo');
   const echoLayer = addEchoPresence(k, room, echoCharacter?.linePools?.song, reduceMotion);
+  if (roomId === 'caverns' && !storyOf(save).echoGreeted) {
+    echoLayer?.singNext(echoCharacter?.linePools?.greeting?.[0]);
+    storyOf(save).echoGreeted = true;
+    persist(save);
+  }
   addLighthouseSweep(k, room, reduceMotion);
   addDodgeWisps(k, room, reduceMotion);
   addSnowfall(k, room, reduceMotion);
@@ -313,7 +320,8 @@ k.scene('room', (roomId, opts = {}) => {
   // are skipped by the isActionable filter so they can't shadow a real action (H1 audit fix).
   const hotspotInteractables = (room.hotspots ?? []).map((h) => ({
     id: h.id, pos: { x: h.x, y: h.y }, kind: h.kind, label: h.label,
-    prompt: h.prompt, copy: h.copy, entryDirection: h.entryDirection,
+    prompt: h.prompt, copy: h.copy, lore: h.lore, entryDirection: h.entryDirection,
+    interactionRadius: h.kind === 'landmark' ? 300 : undefined,
   }));
   const doorInteractables = (room.doors ?? [])
     .filter((door) => !door.hidden)
@@ -330,7 +338,8 @@ k.scene('room', (roomId, opts = {}) => {
     if (hit.kind === 'minigame' && minigameForHotspot(hit.id)) return 'minigame';
     if (hit.kind === 'shop') return 'shop';
     if (hit.kind === 'venue') return 'venue';
-    if (hit.kind === 'newspaper') return 'newspaper';
+    if (hit.kind === 'newspaper' || hit.kind === 'noticeboard') return 'newspaper';
+    if (hit.kind === 'landmark') return 'landmark';
     if (hit.kind === 'trader') return 'trader';
     if (hit.kind === 'telescope') return 'telescope';
     if (hit.kind === 'logbook') return 'logbook';
@@ -402,6 +411,10 @@ k.scene('room', (roomId, opts = {}) => {
 
   // Walking into an occupied berth is Edda's evidence. The date-resolved room prevents this from
   // advancing on an away day or from seeing the undiscovered map pin.
+  if (roomId === 'docks' && !room.docksState?.inPort) {
+    const days = nextBargeArrival(todayISO)?.days;
+    if (days) showCoinToast(`The berth is empty. The Gull is due ${days === 1 ? 'tomorrow' : `in ${days} days`}.`);
+  }
   if (roomId === 'docks' && room.docksState?.inPort) {
     const bargeTip = favorById('edda-tip-barge-arrival');
     if (currentFavorStep(save, bargeTip)?.id === 'witness-barge-in-port') {
@@ -446,6 +459,11 @@ k.scene('room', (roomId, opts = {}) => {
   }
 
   function talkToCharacter(character) {
+    if (character.id === 'captain-salka' &&
+        currentFavorStep(save, WEATHER_BELL_FAVOR)?.id === 'recover-docks-clapper') {
+      openCharacterDialogue(character, 'clapper');
+      return;
+    }
     if (character.id === 'pat-hocket') {
       const step = currentFavorStep(save, WEATHER_BELL_FAVOR);
       if (step?.id === 'return-to-pat') {
@@ -530,6 +548,19 @@ k.scene('room', (roomId, opts = {}) => {
       openCharacterDialogue(character, character.dialogueTree?.start);
       return;
     }
+    if (!storyOf(save).eddaHired) {
+      storyOf(save).eddaHired = true;
+      persist(save);
+      openCharacterDialogue(character, 'first-meeting');
+      return;
+    }
+    if (Object.values(save.curios.found).filter(Boolean).length >= 4 &&
+        !save.secrets.vesperHints?.length && !storyOf(save).vesperPointerSeen) {
+      storyOf(save).vesperPointerSeen = true;
+      persist(save);
+      openCharacterDialogue(character, 'vesper-pointer');
+      return;
+    }
 
     const reportable = EDDA_STORY_TIP_FAVORS.find((definition) =>
       currentFavorStep(save, definition)?.id === 'report-to-edda');
@@ -574,6 +605,8 @@ k.scene('room', (roomId, opts = {}) => {
       enterVenue(nearest);
     } else if (action === 'newspaper') {
       newspaperUI.open();
+    } else if (action === 'landmark') {
+      reactionBurst(k, { x: nearest.pos.x, y: nearest.pos.y, line: nearest.lore }, reduceMotion);
     } else if (action === 'trader') {
       traderUI.open();
     } else if (action === 'telescope') {
@@ -771,6 +804,14 @@ k.scene('room', (roomId, opts = {}) => {
       k.scale(room.scale), k.z(p.y), 'pickup']);
     pickupObjs.push({ id: p.id, obj });
   }
+  const trailTip = favorById('edda-tip-trail-glint');
+  if (roomId === 'trail' && pickupObjs.length === 0 && room.pickups?.length &&
+      currentFavorStep(save, trailTip)?.id === 'witness-trail-glint') {
+    const spot = room.pickups[0];
+    const obj = k.add([k.sprite('pickup-glint'), k.pos(spot.x, spot.y), k.anchor('center'),
+      k.scale(room.scale), k.z(spot.y), 'pickup']);
+    pickupObjs.push({ id: 'story-trail-glint', obj, story: true });
+  }
 
   // Island-map travel (H1) — the ui singleton renders pins from content/map.js; the pure
   // engine/travel.js guard decides legality so the rules stay testable headless.
@@ -792,6 +833,7 @@ k.scene('room', (roomId, opts = {}) => {
     registry: CURIO_REGISTRY,
     getState: () => save.curios,
     getRoomLabel: (id) => ROOM_REGISTRY[id]?.title ?? id,
+    getSave: () => save,
   });
   const newspaperUI = createNewspaper({
     getIssue: () => chirperIssueForDate(todayISO),
@@ -833,6 +875,10 @@ k.scene('room', (roomId, opts = {}) => {
     editMode.isOpen() || catalogUI.isOpen();
   escapeLayers = [catalogUI, dialogueUI, chatUI, dressUp, traderUI, telescopeUI, newspaperUI, journalUI, mapUI,
     { isOpen: editMode.isOpen, close: exitEditMode }];
+  if (!storyOf(save).introSeen) journalUI.openIntro(() => {
+    storyOf(save).introSeen = true;
+    persist(save);
+  });
   const mapBtn = document.getElementById('map-btn');
   if (mapBtn) mapBtn.onclick = () => { if (mapUI.isOpen()) mapUI.close(); else if (!anyOverlayOpen()) mapUI.open(); };
   k.onKeyPress('m', () => { if (!anyOverlayOpen()) mapUI.open(); });
@@ -1026,6 +1072,13 @@ k.scene('room', (roomId, opts = {}) => {
       const pdx = player.pos.x - p.obj.pos.x;
       const pdy = player.pos.y - p.obj.pos.y;
       if (pdx * pdx + pdy * pdy < (40 + pad) ** 2) {
+        if (p.story) {
+          if (advanceTrackedFavor(trailTip, 'witness-trail-glint'))
+            showCoinToast('Story tip witnessed — report to Edda');
+          k.destroy(p.obj);
+          pickupObjs.splice(i, 1);
+          continue;
+        }
         if (collectPickup(save, p.id, todayISO, [])) {
           const trailTip = favorById('edda-tip-trail-glint');
           const witnessed = currentFavorStep(save, trailTip)?.id === 'witness-trail-glint'
@@ -1089,6 +1142,7 @@ k.scene('room', (roomId, opts = {}) => {
           action === 'shop' ? '👕 Dress Up' :
           action === 'venue' ? `🏪 ${nearest.prompt ?? `Visit ${nearest.label}`}` :
           action === 'newspaper' ? `📰 ${nearest.prompt ?? `Read ${nearest.label}`}` :
+          action === 'landmark' ? `Look at ${nearest.label}` :
           action === 'telescope' ? `🔭 ${nearest.prompt ?? 'Look through the telescope'}` :
           action === 'logbook' ? `📖 ${nearest.prompt ?? 'Read the logbook'}` :
           action === 'echo' ? `♪ ${nearest.prompt ?? 'Listen for The Echo'}` :

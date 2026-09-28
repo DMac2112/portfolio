@@ -23,6 +23,19 @@ export const EDDA_DIALOGUE_TREE = Object.freeze({
   id: 'edda-court',
   start: 'greeting',
   nodes: Object.freeze({
+    'first-meeting': Object.freeze({
+      pages: Object.freeze([
+        'I edit the Chirper. You have a blank Curio Log. That makes you my new stringer.',
+        'Fill its pages, then bring me the small things everyone else walks past.',
+      ]),
+      choices: Object.freeze([
+        Object.freeze({ id: 'ask-tip', label: 'Where should I start?', next: 'offer-trail' }),
+        Object.freeze({ id: 'leave', label: 'I’ll look around.', next: null }),
+      ]),
+    }),
+    'vesper-pointer': Object.freeze({
+      pages: Object.freeze(['A fox called Vesper trades secrets for Curios. Her den moves among the roots in Whisperpine Hollow.']),
+    }),
     greeting: Object.freeze({
       pages: Object.freeze([EDDA_DAILY_GREETING]),
       choices: Object.freeze([
@@ -251,6 +264,9 @@ export const SALKA_DIALOGUE_TREE = Object.freeze({
   id: 'salka-docks',
   start: 'greeting',
   nodes: Object.freeze({
+    clapper: Object.freeze({
+      pages: Object.freeze(['A brass clapper keeps rattling in a crate I loaded by mistake. It should be on the quay.']),
+    }),
     greeting: Object.freeze({
       pages: Object.freeze([SALKA_DAILY_GREETING]),
       choices: Object.freeze([
