@@ -33,6 +33,7 @@ describe('anchor runtime content binding', () => {
       'anchor-ilse',
       'anchor-tove',
       'anchor-brann',
+      'anchor-wren',
       'anchor-captain-salka',
       'anchor-old-maren',
       'anchor-vesper',
@@ -42,9 +43,10 @@ describe('anchor runtime content binding', () => {
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-ilse', './assets/characters/ilse.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-tove', './assets/characters/tove.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-brann', './assets/characters/brann.png');
+    expect(k.loadSprite).toHaveBeenCalledWith('anchor-wren', './assets/characters/wren.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-captain-salka', './assets/characters/captain-salka.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-old-maren', './assets/characters/old-maren.png');
     expect(k.loadSprite).toHaveBeenCalledWith('anchor-vesper', './assets/characters/vesper.png');
-    expect(k.loadSprite).toHaveBeenCalledTimes(8);
+    expect(k.loadSprite).toHaveBeenCalledTimes(9);
   });
 });

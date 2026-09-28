@@ -2683,6 +2683,58 @@ function buildBrannPortrait() {
   return save(path.join('portraits', 'brann.png'), img);
 }
 
+/* ----------------------------- ANCHOR: Snowtail Pet Shop --------------- */
+// Rockhopper crest and red eyes stay clear at sprite size; the scarf is in progress.
+function buildWrenSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  const moss = hex('#527048'), mossL = hex('#71935a'), gold = hex('#f3d34e');
+  const red = hex('#be3938'), beak = hex('#e88b42'), scarf = hex('#b94b5e');
+  oval(img, 12, 29, 8, 2, [...A.inkDeep, 70]);
+  oval(img, 12, 21, 8, 9, A.inkDeep); oval(img, 12, 12, 8, 8, A.inkDeep);
+  oval(img, 12, 22, 6, 7, A.snowL);
+  for (const [x, y] of [[2, 7], [3, 5], [5, 4], [7, 5], [17, 5], [19, 4], [21, 5], [22, 7]]) px(img, x, y, gold);
+  rect(img, 4, 7, 5, 2, gold); rect(img, 15, 7, 5, 2, gold);
+  px(img, 9, 11, red); px(img, 15, 11, red);
+  px(img, 9, 10, A.inkDeep); px(img, 15, 10, A.inkDeep);
+  oval(img, 12, 15, 3, 2, beak);
+  rrect(img, 5, 18, 14, 10, moss); rect(img, 11, 18, 2, 10, mossL);
+  rect(img, 5, 24, 5, 4, mossL); rect(img, 14, 24, 5, 4, mossL);
+  px(img, 8, 25, A.snowL); px(img, 16, 25, A.snowL);
+  rect(img, 5, 28, 4, 2, beak); rect(img, 15, 28, 4, 2, beak);
+  rect(img, 18, 20, 2, 10, A.wood); rect(img, 19, 22, 4, 2, scarf);
+  rect(img, 19, 25, 4, 2, scarf); px(img, 22, 28, scarf);
+  return save(path.join('characters', 'wren.png'), img);
+}
+
+function buildWrenPortrait() {
+  const img = Img(128, 128), A = ARCTIC_DUSK;
+  const moss = hex('#527048'), mossL = hex('#71935a'), gold = hex('#f3d34e');
+  const red = hex('#ba3638'), beak = hex('#e88b42'), scarf = hex('#b94b5e');
+  let noise = 0x57e1;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+  for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) {
+    const grain = (nextNoise() - 0.5) * 11;
+    const base = y < 108 ? hex('#dec7a2') : hex('#ab8258');
+    px(img, x, y, base.map((v) => Math.max(0, Math.min(255, v + grain))));
+  }
+  for (const x of [17, 112]) rect(img, x, 0, 5, 108, hex('#b89a75'));
+  for (const y of [24, 87]) rect(img, 0, y, 128, 3, hex('#c3aa84'));
+  oval(img, 64, 121, 48, 38, A.inkDeep); oval(img, 64, 118, 45, 35, moss);
+  oval(img, 64, 62, 40, 43, A.inkDeep); oval(img, 64, 80, 27, 20, A.snowL);
+  // Long yellow eyebrow plumes sweep out from the crown.
+  for (const [x, y, w] of [[13, 23, 26], [18, 18, 24], [24, 14, 21], [89, 14, 21], [91, 18, 24], [89, 23, 26]]) rect(img, x, y, w, 4, gold);
+  oval(img, 44, 55, 14, 6, gold); oval(img, 84, 55, 14, 6, gold);
+  disc(img, 47, 63, 5, red); disc(img, 81, 63, 5, red);
+  px(img, 46, 61, A.snowL); px(img, 80, 61, A.snowL);
+  oval(img, 64, 78, 13, 8, beak);
+  rect(img, 60, 89, 8, 35, mossL); rect(img, 27, 106, 18, 17, mossL);
+  rect(img, 83, 106, 18, 17, mossL); disc(img, 36, 112, 4, A.snowL); disc(img, 92, 112, 4, A.snowL);
+  oval(img, 23, 106, 11, 21, A.inkDeep); oval(img, 105, 105, 11, 21, A.inkDeep);
+  rect(img, 110, 55, 3, 59, A.wood); rect(img, 108, 87, 15, 5, scarf);
+  rect(img, 108, 96, 14, 5, scarf); rect(img, 112, 103, 8, 11, scarf);
+  return save(path.join('portraits', 'wren.png'), img);
+}
+
 /* ----------------------------- run -------------------------------------- */
 const made = [
   buildPenguinBody(),
@@ -2726,6 +2778,8 @@ const made = [
   buildTovePortrait(),
   buildBrannSprite(),
   buildBrannPortrait(),
+  buildWrenSprite(),
+  buildWrenPortrait(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

@@ -7,6 +7,7 @@ export const ANCHOR_SLOTS = Object.freeze([
   Object.freeze({ id: 'bluehour-barista', roomId: 'bluehour', role: 'barista' }),
   Object.freeze({ id: 'bluehour-regular', roomId: 'bluehour', role: 'regular' }),
   Object.freeze({ id: 'ladle-chef', roomId: 'ladle', role: 'chef' }),
+  Object.freeze({ id: 'petshop-keeper', roomId: 'petshop', role: 'keeper' }),
   Object.freeze({ id: 'docks-trader', roomId: 'docks', role: 'trader' }),
   Object.freeze({ id: 'lighthouse-keeper', roomId: 'lighthouse-rest', role: 'keeper' }),
   Object.freeze({ id: 'hollow-trickster', roomId: 'whisperpine', role: 'trickster' }),
@@ -481,6 +482,18 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     linePools: { greeting: [
       'Tonight’s special is ember-roasted root stew with iceleaf rolls.',
       'Short a pair of flippers tonight. Cocoa rounds, one minute a shift: ladle, topping, table.',
+    ] },
+    favorDefs: [],
+  },
+  {
+    id: 'wren', name: 'Wren', slotId: 'petshop-keeper', roomId: 'petshop',
+    subtitle: 'Keeper, Snowtail Pet Shop', species: 'rockhopper penguin',
+    portraitAsset: './assets/portraits/wren.png',
+    spriteAsset: './assets/characters/wren.png', spriteKey: 'anchor-wren',
+    palette: { body: '#26343c', accent: '#547446', warm: '#e7c454' },
+    linePools: { greeting: [
+      'The snowtails came in early on the Gull. They’re napping in the straw.',
+      'Every nest on that wall was knitted by someone in Chillmere.',
     ] },
     favorDefs: [],
   },

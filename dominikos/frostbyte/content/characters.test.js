@@ -52,13 +52,14 @@ describe('anchor character schema', () => {
 });
 
 describe('approved anchor contracts', () => {
-  it('includes the Bluehour regulars and Lantern Ladle chef in area order', () => {
+  it('includes the Bluehour regulars, Lantern Ladle chef, and Snowtail keeper in area order', () => {
     expect(ANCHOR_CHARACTERS.map((character) => character.name)).toEqual([
       'Edda Quill',
       'Pat Hocket',
       'Ilse',
       'Tove',
       'Brann',
+      'Wren',
       'Captain Salka',
       'Old Maren',
       'Vesper',

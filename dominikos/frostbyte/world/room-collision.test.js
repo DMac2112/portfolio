@@ -51,6 +51,12 @@ const BLOCKED_SAMPLES = {
     { label: 'patio brazier', x: 760, y: 825 },
     { label: 'southwest roof', x: 300, y: 850 },
   ],
+  petshop: [
+    { label: 'nest wall', x: 760, y: 290 },
+    { label: 'stove', x: 345, y: 405 },
+    { label: 'closed pen', x: 230, y: 655 },
+    { label: 'treat counter', x: 1300, y: 600 },
+  ],
   ladle: [
     { label: 'north wall', x: 720, y: 160 },
     { label: 'hearth', x: 715, y: 325 },
@@ -397,24 +403,25 @@ describe('painted-room collision coverage', () => {
 
 describe('Glasswind Court storefront collision', () => {
   const court = ROOM_REGISTRY.court;
-  const venues = court.hotspots.filter((hotspot) => hotspot.kind === 'venue');
+  const doors = ['door-bluehour', 'door-ladle', 'door-petshop']
+    .map((id) => court.doors.find((door) => door.id === id));
 
   it('keeps each painted threshold and its approach clear', () => {
-    for (const venue of venues) {
-      const approach = venue.entryDirection === 'up'
-        ? { x: venue.x, y: venue.y + 36 }
-        : { x: venue.x - 36, y: venue.y };
-      expect(stable(court, venue), venue.id).toBe(true);
-      expect(stable(court, approach), `${venue.id} approach`).toBe(true);
+    for (const door of doors) {
+      const approach = door.enterDir.y === -1
+        ? { x: door.x, y: door.y + 36 }
+        : { x: door.x - 36, y: door.y };
+      expect(stable(court, door), door.id).toBe(true);
+      expect(stable(court, approach), `${door.id} approach`).toBe(true);
     }
   });
 
   it('blocks the building behind every threshold', () => {
-    for (const venue of venues) {
-      const inside = venue.entryDirection === 'up'
-        ? { x: venue.x, y: venue.y - 120 }
-        : { x: venue.x + 120, y: venue.y };
-      expect(distanceMoved(court, inside), venue.id).toBeGreaterThan(1);
+    for (const door of doors) {
+      const inside = door.enterDir.y === -1
+        ? { x: door.x, y: door.y - 120 }
+        : { x: door.x + 120, y: door.y };
+      expect(distanceMoved(court, inside), door.id).toBeGreaterThan(1);
     }
   });
 });

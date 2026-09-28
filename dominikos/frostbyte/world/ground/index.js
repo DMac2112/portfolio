@@ -8,6 +8,7 @@ import * as ladle from './room-ladle.js';
 import * as lighthouseGallery from './room-lighthouse-gallery.js';
 import * as lighthouseRest from './room-lighthouse-rest.js';
 import * as moonwell from './room-moonwell.js';
+import * as petshop from './room-petshop.js';
 import * as plaza from './room-plaza.js';
 import * as trail from './room-trail.js';
 import * as whisperpine from './room-whisperpine.js';
@@ -22,6 +23,7 @@ export const TRACED_ART = {
   'room-lighthouse-gallery': lighthouseGallery,
   'room-lighthouse-rest': lighthouseRest,
   'room-moonwell': moonwell,
+  'room-petshop': petshop,
   'room-plaza': plaza,
   'room-trail': trail,
   'room-whisperpine': whisperpine,

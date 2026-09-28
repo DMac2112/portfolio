@@ -61,6 +61,7 @@ const PROFILES = {
   court: traced('room-court'),
   bluehour: traced('room-bluehour'),
   ladle: traced('room-ladle'),
+  petshop: traced('room-petshop'),
 
   workshop: {
     boundary: {

@@ -123,7 +123,7 @@ describe('room configs', () => {
   it('door graph: locked doors in the vignette point at real (future) ids, not typos', () => {
     const knownFutureIds = [
       'plaza', 'den', 'court', 'workshop', 'trail', 'docks',
-      'lighthouse-rest', 'lighthouse-gallery', 'whisperpine', 'moonwell', 'caverns', 'bluehour', 'ladle',
+      'lighthouse-rest', 'lighthouse-gallery', 'whisperpine', 'moonwell', 'caverns', 'bluehour', 'ladle', 'petshop',
     ];
     for (const room of Object.values(ROOM_REGISTRY)) {
       for (const d of room.doors) {
@@ -337,7 +337,7 @@ describe('room configs', () => {
     expect(Math.hypot(game.x - brann.x, game.y - brann.y)).toBeGreaterThanOrEqual(INTERACT_R);
   });
 
-  it('court: Bluehour Coffee and Lantern Ladle are real doors; only the pet shop is a venue', () => {
+  it('court: all three shop fronts are real doors, with no venue hotspots', () => {
     expect(ROOM_REGISTRY.court.doors.find(d => d.id === 'door-bluehour'))
       .toMatchObject({ targetRoom: 'bluehour', targetSpawn: 'fromCourt', locked: false });
     expect(ROOM_REGISTRY.bluehour.doors.find(d => d.id === 'door-back'))
@@ -346,27 +346,11 @@ describe('room configs', () => {
       .toMatchObject({ targetRoom: 'ladle', targetSpawn: 'fromCourt', locked: false, solidId: 'lantern-ladle', enterDir: { x: 1, y: 0 } });
     expect(ROOM_REGISTRY.ladle.doors.find(d => d.id === 'door-back'))
       .toMatchObject({ targetRoom: 'court', targetSpawn: 'fromLadle' });
-    const venues = ROOM_REGISTRY.court.hotspots.filter(h => h.kind === 'venue');
-    expect(venues.map(v => v.label)).toEqual([
-      'Snowtail Pet Shop',
-    ]);
-    for (const venue of venues) {
-      expect(venue.prompt.length).toBeGreaterThan(0);
-      expect(venue.copy.length).toBeGreaterThan(0);
-      const solid = ROOM_REGISTRY.court.solids.find(s => s.id === venue.solidId);
-      expect(solid).toBeDefined();
-      if (venue.entryDirection === 'up') {
-        expect(venue.x).toBeGreaterThanOrEqual(solid.x - solid.w / 2);
-        expect(venue.x).toBeLessThanOrEqual(solid.x + solid.w / 2);
-        expect(venue.y).toBeGreaterThan(solid.y + solid.h / 2);
-      } else if (venue.entryDirection === 'right') {
-        expect(venue.y).toBeGreaterThanOrEqual(solid.y - solid.h / 2);
-        expect(venue.y).toBeLessThanOrEqual(solid.y + solid.h / 2);
-        expect(venue.x).toBeLessThan(solid.x - solid.w / 2);
-      } else {
-        throw new Error(`Unsupported venue entry direction: ${venue.entryDirection}`);
-      }
-    }
+    expect(ROOM_REGISTRY.court.doors.find(d => d.id === 'door-petshop'))
+      .toMatchObject({ targetRoom: 'petshop', targetSpawn: 'fromCourt', locked: false, solidId: 'snowtail-petshop', enterDir: { x: 0, y: -1 } });
+    expect(ROOM_REGISTRY.petshop.doors.find(d => d.id === 'door-back'))
+      .toMatchObject({ targetRoom: 'court', targetSpawn: 'fromPetshop' });
+    expect(ROOM_REGISTRY.court.hotspots.filter(h => h.kind === 'venue')).toEqual([]);
   });
 
   it('court and ladle doors point to each other’s arrival spawns', () => {
@@ -376,6 +360,15 @@ describe('room configs', () => {
     expect(ROOM_REGISTRY.ladle.spawnPoints[courtDoor.targetSpawn]).toMatchObject({ facing: 'up' });
     expect(ladleDoor.targetRoom).toBe(ROOM_REGISTRY.court.id);
     expect(ROOM_REGISTRY.court.spawnPoints[ladleDoor.targetSpawn]).toMatchObject({ facing: 'left' });
+  });
+
+  it('court and petshop doors point to each other’s arrival spawns', () => {
+    const courtDoor = ROOM_REGISTRY.court.doors.find(d => d.id === 'door-petshop');
+    const shopDoor = ROOM_REGISTRY.petshop.doors.find(d => d.id === 'door-back');
+    expect(courtDoor.targetRoom).toBe(ROOM_REGISTRY.petshop.id);
+    expect(ROOM_REGISTRY.petshop.spawnPoints[courtDoor.targetSpawn]).toMatchObject({ facing: 'up' });
+    expect(shopDoor.targetRoom).toBe(ROOM_REGISTRY.court.id);
+    expect(ROOM_REGISTRY.court.spawnPoints[shopDoor.targetSpawn]).toMatchObject({ facing: 'down' });
   });
 
   it('court: breaks the top row with a side-facing restaurant and occupied lower plaza', () => {

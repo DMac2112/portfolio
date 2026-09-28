@@ -185,23 +185,22 @@ export const ROOM_REGISTRY = {
       fromDocks:  { x: 1290, y: 858, facing: 'up' },
       fromBluehour: { x: 840, y: 510, facing: 'down' },
       fromLadle: { x: 1125, y: 620, facing: 'left' },
+      fromPetshop: { x: 360, y: 420, facing: 'down' },
       fromMap:    { x: 720, y: 720, facing: 'up' },
     },
     camera: { leadY: -50 },
     hotspots: [
-      {
-        id: 'venue-snowtail-petshop', label: 'Snowtail Pet Shop', kind: 'venue', x: 360, y: 420,
-        solidId: 'snowtail-petshop',
-        entryDirection: 'up',
-        prompt: 'Visit the pet shop',
-        copy: 'Warm nests and tiny scarves fill the window, but the nests are empty. A card reads: ‘Snowtails arrive with the spring sailing.’',
-      },
       {
         id: 'noticeboard-chirper', label: 'The Chillmere Chirper', kind: 'newspaper', x: 190, y: 430,
         prompt: 'Read this week’s Chirper',
       },
     ],
     doors: [
+      {
+        id: 'door-petshop', label: 'Snowtail Pet Shop', x: 360, y: 420,
+        targetRoom: 'petshop', targetSpawn: 'fromCourt', locked: false,
+        solidId: 'snowtail-petshop', enterDir: { x: 0, y: -1 }, autoEnterRadius: 34,
+      },
       { id: 'door-back', label: 'Chillmere Plaza', x: 72, y: 480, targetRoom: 'plaza', locked: false, targetSpawn: 'fromCourt' },
       { id: 'door-docks', label: 'Driftgate Docks', x: 1290, y: 888, targetRoom: 'docks', locked: false, targetSpawn: 'fromCourt' },
       {
@@ -345,6 +344,39 @@ export const ROOM_REGISTRY = {
         line: 'Cocoa thick enough to stand a ladle in. Someone has.' },
       { id: 'family-lantern', x: 205, y: 320, w: 130, h: 190,
         line: 'Every fishing family hangs a lantern here. The empty hook is for whoever’s still at sea.' },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Snowtail Pet Shop opens from its north-facing door on Glasswind Court.
+  petshop: {
+    id: 'petshop',
+    avatarScale: 7.5,
+    title: 'Snowtail Pet Shop',
+    mapAsset: 'room-petshop',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 48, x1: 1410, y0: 40, y1: 936 },
+    spawnPoints: {
+      default: { x: 745, y: 810, facing: 'up' },
+      fromCourt: { x: 745, y: 850, facing: 'up' },
+      fromMap: { x: 765, y: 745, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [],
+    doors: [
+      { id: 'door-back', label: 'Glasswind Court', x: 745, y: 930,
+        targetRoom: 'court', targetSpawn: 'fromPetshop', locked: false },
+    ],
+    solids: [],
+    anchors: [
+      { characterId: 'wren', x: 1040, y: 565 },
+    ],
+    clickables: [
+      { id: 'snowtail-nests', x: 770, y: 360, w: 810, h: 100,
+        line: 'Every nest is knitted by someone in Chillmere. The berry-red ones are Edda’s.' },
+      { id: 'snowtail-scarves', x: 1050, y: 340, w: 200, h: 120,
+        line: 'Tiny scarves in every colour. Snowtails lose about one a week.' },
     ],
     npcSpawnAnchors: [],
   },

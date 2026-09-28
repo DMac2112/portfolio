@@ -181,6 +181,7 @@ k.loadSprite('room-court', './assets/room-court.jpg');
 k.loadSprite('room-workshop', './assets/room-workshop.jpg');
 k.loadSprite('room-bluehour', './assets/room-bluehour.jpg');
 k.loadSprite('room-ladle', './assets/room-ladle.jpg');
+k.loadSprite('room-petshop', './assets/room-petshop.jpg');
 k.loadSprite('room-docks-port', './assets/room-docks-port.jpg');
 k.loadSprite('room-docks-away', './assets/room-docks-away.jpg');
 k.loadSprite('room-lighthouse-rest', './assets/room-lighthouse-rest.jpg');

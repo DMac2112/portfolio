@@ -25,6 +25,7 @@ export const MAP_NODES = [
   { roomId: 'workshop',  label: 'Emberlight Workshop', x: 0.14, y: 0.46, unlocked: true },
   { roomId: 'bluehour', label: 'Bluehour Coffee', x: 0.83, y: 0.43, unlocked: true },
   { roomId: 'ladle', label: 'Lantern Ladle', x: 0.85, y: 0.54, unlocked: true },
+  { roomId: 'petshop', label: 'Snowtail Pet Shop', x: 0.76, y: 0.28, unlocked: true },
   { roomId: 'docks',     label: 'Driftgate Docks',      x: 0.88, y: 0.62, unlocked: true },
   { roomId: 'lighthouse-rest', label: 'Palefire Light',  x: 0.92, y: 0.48, unlocked: true },
   { roomId: 'whisperpine', label: 'Whisperpine Hollow', x: 0.62, y: 0.12, unlocked: true },
