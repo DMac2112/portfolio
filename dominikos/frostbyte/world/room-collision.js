@@ -60,6 +60,7 @@ const PROFILES = {
   trail: traced('room-trail'),
   court: traced('room-court'),
   bluehour: traced('room-bluehour'),
+  ladle: traced('room-ladle'),
 
   workshop: {
     boundary: {

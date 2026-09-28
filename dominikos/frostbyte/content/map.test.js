@@ -23,17 +23,17 @@ describe('MAP_NODES', () => {
     }
   });
 
-  it('has the Bluehour interior pin', () => {
+  it('has the Bluehour and Lantern Ladle interior pins', () => {
     const unlockedCount = MAP_NODES.filter(n => n.unlocked).length;
-    expect(unlockedCount).toBe(9);
+    expect(unlockedCount).toBe(10);
   });
 
   it('unlocked nodes include Palefire Light and discovery-gated Whisperpine', () => {
     const unlockedRoomIds = MAP_NODES.filter(n => n.unlocked).map(n => n.roomId);
     expect(unlockedRoomIds).toEqual(expect.arrayContaining([
-      'plaza', 'den', 'trail', 'court', 'workshop', 'bluehour', 'docks', 'lighthouse-rest', 'whisperpine',
+      'plaza', 'den', 'trail', 'court', 'workshop', 'bluehour', 'ladle', 'docks', 'lighthouse-rest', 'whisperpine',
     ]));
-    expect(unlockedRoomIds).toHaveLength(9);
+    expect(unlockedRoomIds).toHaveLength(10);
     expect(MAP_NODES.some((node) => node.roomId === 'moonwell')).toBe(false);
     expect(MAP_NODES.some((node) => node.roomId === 'caverns')).toBe(false);
   });

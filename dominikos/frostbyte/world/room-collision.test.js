@@ -51,6 +51,13 @@ const BLOCKED_SAMPLES = {
     { label: 'patio brazier', x: 760, y: 825 },
     { label: 'southwest roof', x: 300, y: 850 },
   ],
+  ladle: [
+    { label: 'north wall', x: 720, y: 160 },
+    { label: 'hearth', x: 715, y: 325 },
+    { label: 'serving counter', x: 1080, y: 430 },
+    { label: 'left table foot', x: 375, y: 815 },
+    { label: 'right table foot', x: 1100, y: 805 },
+  ],
   bluehour: [
     { label: 'window', x: 720, y: 180 },
     { label: 'counter', x: 150, y: 550 },

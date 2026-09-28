@@ -123,7 +123,7 @@ describe('room configs', () => {
   it('door graph: locked doors in the vignette point at real (future) ids, not typos', () => {
     const knownFutureIds = [
       'plaza', 'den', 'court', 'workshop', 'trail', 'docks',
-      'lighthouse-rest', 'lighthouse-gallery', 'whisperpine', 'moonwell', 'caverns', 'bluehour',
+      'lighthouse-rest', 'lighthouse-gallery', 'whisperpine', 'moonwell', 'caverns', 'bluehour', 'ladle',
     ];
     for (const room of Object.values(ROOM_REGISTRY)) {
       for (const d of room.doors) {
@@ -329,15 +329,18 @@ describe('room configs', () => {
     expect(Math.hypot(game.x - tove.x, game.y - tove.y)).toBeGreaterThanOrEqual(INTERACT_R);
   });
 
-  it('court: Bluehour Coffee is a real door; the pet shop and restaurant are still venues', () => {
+  it('court: Bluehour Coffee and Lantern Ladle are real doors; only the pet shop is a venue', () => {
     expect(ROOM_REGISTRY.court.doors.find(d => d.id === 'door-bluehour'))
       .toMatchObject({ targetRoom: 'bluehour', targetSpawn: 'fromCourt', locked: false });
     expect(ROOM_REGISTRY.bluehour.doors.find(d => d.id === 'door-back'))
       .toMatchObject({ targetRoom: 'court', targetSpawn: 'fromBluehour' });
+    expect(ROOM_REGISTRY.court.doors.find(d => d.id === 'door-ladle'))
+      .toMatchObject({ targetRoom: 'ladle', targetSpawn: 'fromCourt', locked: false, solidId: 'lantern-ladle', enterDir: { x: 1, y: 0 } });
+    expect(ROOM_REGISTRY.ladle.doors.find(d => d.id === 'door-back'))
+      .toMatchObject({ targetRoom: 'court', targetSpawn: 'fromLadle' });
     const venues = ROOM_REGISTRY.court.hotspots.filter(h => h.kind === 'venue');
     expect(venues.map(v => v.label)).toEqual([
       'Snowtail Pet Shop',
-      'Lantern Ladle Restaurant',
     ]);
     for (const venue of venues) {
       expect(venue.prompt.length).toBeGreaterThan(0);
@@ -358,10 +361,19 @@ describe('room configs', () => {
     }
   });
 
+  it('court and ladle doors point to each other’s arrival spawns', () => {
+    const courtDoor = ROOM_REGISTRY.court.doors.find(d => d.id === 'door-ladle');
+    const ladleDoor = ROOM_REGISTRY.ladle.doors.find(d => d.id === 'door-back');
+    expect(courtDoor.targetRoom).toBe(ROOM_REGISTRY.ladle.id);
+    expect(ROOM_REGISTRY.ladle.spawnPoints[courtDoor.targetSpawn]).toMatchObject({ facing: 'up' });
+    expect(ladleDoor.targetRoom).toBe(ROOM_REGISTRY.court.id);
+    expect(ROOM_REGISTRY.court.spawnPoints[ladleDoor.targetSpawn]).toMatchObject({ facing: 'left' });
+  });
+
   it('court: breaks the top row with a side-facing restaurant and occupied lower plaza', () => {
     const court = ROOM_REGISTRY.court;
-    const restaurant = court.hotspots.find(h => h.id === 'venue-lantern-ladle');
-    expect(restaurant.entryDirection).toBe('right');
+    const restaurant = court.doors.find(d => d.id === 'door-ladle');
+    expect(restaurant.enterDir).toEqual({ x: 1, y: 0 });
     expect(restaurant.y).toBeGreaterThan(500);
     expect(court.solids.filter(s => s.y > 700).map(s => s.id)).toEqual(expect.arrayContaining([
       'patio-table-a',

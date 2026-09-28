@@ -6,6 +6,7 @@ export const ANCHOR_SLOTS = Object.freeze([
   Object.freeze({ id: 'workshop-tinkerer', roomId: 'workshop', role: 'tinkerer' }),
   Object.freeze({ id: 'bluehour-barista', roomId: 'bluehour', role: 'barista' }),
   Object.freeze({ id: 'bluehour-regular', roomId: 'bluehour', role: 'regular' }),
+  Object.freeze({ id: 'ladle-chef', roomId: 'ladle', role: 'chef' }),
   Object.freeze({ id: 'docks-trader', roomId: 'docks', role: 'trader' }),
   Object.freeze({ id: 'lighthouse-keeper', roomId: 'lighthouse-rest', role: 'keeper' }),
   Object.freeze({ id: 'hollow-trickster', roomId: 'whisperpine', role: 'trickster' }),
@@ -469,6 +470,18 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     spriteAsset: './assets/characters/tove.png', spriteKey: 'anchor-tove',
     palette: { body: '#334a58', accent: '#a78bfa', warm: '#ffb45e' },
     linePools: { greeting: ['Fog’s thick on the glass tonight. Boxes? Loser buys the cloudberry buns.'] },
+    favorDefs: [],
+  },
+  {
+    id: 'brann', name: 'Brann', slotId: 'ladle-chef', roomId: 'ladle',
+    subtitle: 'Chef, Lantern Ladle', species: 'gentoo penguin',
+    portraitAsset: './assets/portraits/brann.png',
+    spriteAsset: './assets/characters/brann.png', spriteKey: 'anchor-brann',
+    palette: { body: '#26343c', accent: '#bd513c', warm: '#e88741' },
+    linePools: { greeting: [
+      'Tonight’s special is ember-roasted root stew with iceleaf rolls.',
+      'Short a pair of flippers tonight. If you can carry a mug, I’ll have work for you soon.',
+    ] },
     favorDefs: [],
   },
   {

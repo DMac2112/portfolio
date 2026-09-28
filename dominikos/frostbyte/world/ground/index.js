@@ -4,6 +4,7 @@ import * as caverns from './room-caverns.js';
 import * as court from './room-court.js';
 import * as docksAway from './room-docks-away.js';
 import * as docksPort from './room-docks-port.js';
+import * as ladle from './room-ladle.js';
 import * as lighthouseGallery from './room-lighthouse-gallery.js';
 import * as lighthouseRest from './room-lighthouse-rest.js';
 import * as moonwell from './room-moonwell.js';
@@ -17,6 +18,7 @@ export const TRACED_ART = {
   'room-court': court,
   'room-docks-away': docksAway,
   'room-docks-port': docksPort,
+  'room-ladle': ladle,
   'room-lighthouse-gallery': lighthouseGallery,
   'room-lighthouse-rest': lighthouseRest,
   'room-moonwell': moonwell,

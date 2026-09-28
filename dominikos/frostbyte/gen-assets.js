@@ -2626,6 +2626,63 @@ function buildTovePortrait() {
   return save(path.join('portraits', 'tove.png'), img);
 }
 
+/* ----------------------------- ANCHOR: Lantern Ladle ------------------ */
+// Gentoo eye patches, ember knit cap, chef whites, and a copper ladle.
+function buildBrannSprite() {
+  const img = Img(24, 32), A = ARCTIC_DUSK;
+  const ember = hex('#b94e39'), emberL = hex('#dc7050'), copper = hex('#b76b3c');
+  const beak = hex('#f37a38'), beakL = hex('#ff9b48');
+  oval(img, 12, 29, 8, 2, [...A.inkDeep, 70]);
+  oval(img, 12, 21, 8, 9, A.inkDeep); oval(img, 12, 12, 8, 8, A.inkDeep);
+  oval(img, 12, 22, 6, 7, A.snowL);
+  // White gentoo patches run above both eyes, separate from the white face.
+  oval(img, 8, 9, 3, 2, A.snowL); oval(img, 16, 9, 3, 2, A.snowL);
+  px(img, 9, 11, A.inkDeep); px(img, 15, 11, A.inkDeep);
+  oval(img, 12, 15, 4, 2, beak); rect(img, 11, 15, 3, 1, beakL);
+  oval(img, 12, 5, 8, 4, ember); rect(img, 5, 6, 14, 2, emberL);
+  for (const x of [8, 11, 14, 17]) px(img, x, 4, emberL);
+  rrect(img, 5, 18, 14, 11, A.inkDeep); rrect(img, 6, 18, 12, 10, A.snowL);
+  rect(img, 11, 18, 2, 10, A.snowD); px(img, 13, 22, A.wood); px(img, 13, 25, A.wood);
+  rect(img, 6, 27, 12, 2, ember); rect(img, 5, 28, 4, 2, beak); rect(img, 15, 28, 4, 2, beak);
+  // The copper bowl and long handle sit beyond his right flipper.
+  rect(img, 20, 12, 2, 14, copper); oval(img, 21, 11, 3, 2, copper);
+  oval(img, 20, 27, 3, 2, copper); px(img, 19, 27, beakL);
+  return save(path.join('characters', 'brann.png'), img);
+}
+
+function buildBrannPortrait() {
+  const img = Img(128, 128), A = ARCTIC_DUSK;
+  const ember = hex('#b94e39'), emberL = hex('#df7650'), copper = hex('#bc7042');
+  const beak = hex('#f37a38'), beakL = hex('#ffab53');
+  let noise = 0xb2a44e;
+  const nextNoise = () => { noise = (noise * 1664525 + 1013904223) >>> 0; return noise / 0xffffffff; };
+  for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) {
+    const t = y / 127, grain = (nextNoise() - 0.5) * 10;
+    const top = hex('#a95335'), bottom = hex('#462c31');
+    px(img, x, y, top.map((v, i) => Math.max(0, Math.min(255, v * (1 - t) + bottom[i] * t + grain))));
+  }
+  for (let r = 36; r > 2; r -= 3) disc(img, 103, 38, r, [...A.amber, Math.max(4, 32 - r / 2)]);
+  rect(img, 0, 107, 128, 21, A.wood);
+  oval(img, 64, 121, 48, 39, A.inkDeep); oval(img, 64, 116, 45, 34, A.snowL);
+  oval(img, 64, 63, 41, 44, A.inkDeep);
+  oval(img, 46, 55, 14, 9, A.snowL); oval(img, 82, 55, 14, 9, A.snowL);
+  disc(img, 49, 64, 4, A.inkDeep); disc(img, 79, 64, 4, A.inkDeep);
+  px(img, 48, 63, A.snowL); px(img, 78, 63, A.snowL);
+  oval(img, 64, 78, 14, 9, beak); rect(img, 57, 79, 15, 3, beakL);
+  oval(img, 64, 28, 38, 18, ember); rect(img, 29, 34, 71, 8, emberL);
+  for (const x of [39, 53, 67, 81]) rect(img, x, 17, 4, 10, emberL);
+  rect(img, 55, 87, 18, 35, A.snowD); rect(img, 62, 92, 4, 32, A.stone);
+  for (const y of [100, 111]) disc(img, 73, y, 2, A.wood);
+  oval(img, 25, 102, 12, 24, A.inkDeep); oval(img, 101, 101, 12, 24, A.inkDeep);
+  rect(img, 105, 49, 5, 63, copper); oval(img, 107, 47, 9, 5, copper);
+  oval(img, 107, 115, 17, 8, copper); oval(img, 107, 112, 14, 4, beakL);
+  for (let i = 0; i < 60; i++) {
+    const x = 18 + Math.floor(nextNoise() * 95), y = 24 + Math.floor(nextNoise() * 100);
+    px(img, x, y, [...A.amberL, 23]);
+  }
+  return save(path.join('portraits', 'brann.png'), img);
+}
+
 /* ----------------------------- run -------------------------------------- */
 const made = [
   buildPenguinBody(),
@@ -2667,6 +2724,8 @@ const made = [
   buildIlsePortrait(),
   buildToveSprite(),
   buildTovePortrait(),
+  buildBrannSprite(),
+  buildBrannPortrait(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
 try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }

@@ -184,6 +184,7 @@ export const ROOM_REGISTRY = {
       fromPlaza:  { x: 168, y: 525, facing: 'right' },
       fromDocks:  { x: 1290, y: 858, facing: 'up' },
       fromBluehour: { x: 840, y: 510, facing: 'down' },
+      fromLadle: { x: 1125, y: 620, facing: 'left' },
       fromMap:    { x: 720, y: 720, facing: 'up' },
     },
     camera: { leadY: -50 },
@@ -194,13 +195,6 @@ export const ROOM_REGISTRY = {
         entryDirection: 'up',
         prompt: 'Visit the pet shop',
         copy: 'Warm nests and tiny scarves fill the window, but the nests are empty. A card reads: ‘Snowtails arrive with the spring sailing.’',
-      },
-      {
-        id: 'venue-lantern-ladle', label: 'Lantern Ladle Restaurant', kind: 'venue', x: 1125, y: 620,
-        solidId: 'lantern-ladle',
-        entryDirection: 'right',
-        prompt: 'Visit the restaurant',
-        copy: 'Tonight\'s special is ember-roasted root stew with iceleaf rolls. A warm corner table is ready.',
       },
       {
         id: 'noticeboard-chirper', label: 'The Chillmere Chirper', kind: 'newspaper', x: 190, y: 430,
@@ -214,6 +208,11 @@ export const ROOM_REGISTRY = {
         id: 'door-bluehour', label: 'Bluehour Coffee', x: 840, y: 420,
         targetRoom: 'bluehour', targetSpawn: 'fromCourt', locked: false,
         solidId: 'bluehour-coffee', enterDir: { x: 0, y: -1 }, autoEnterRadius: 34,
+      },
+      {
+        id: 'door-ladle', label: 'Lantern Ladle', x: 1125, y: 620,
+        targetRoom: 'ladle', targetSpawn: 'fromCourt', locked: false,
+        solidId: 'lantern-ladle', enterDir: { x: 1, y: 0 }, autoEnterRadius: 34,
       },
     ],
     solids: [
@@ -311,6 +310,39 @@ export const ROOM_REGISTRY = {
         line: 'It hisses like it has opinions.' },
       { id: 'bluehour-window', x: 750, y: 300, w: 700, h: 350,
         line: 'The whole court, gone blue. Somebody’s lantern is walking home.' },
+    ],
+    npcSpawnAnchors: [],
+  },
+
+  // Lantern Ladle opens from the side-facing restaurant door on Glasswind Court.
+  ladle: {
+    id: 'ladle',
+    avatarScale: 7.5,
+    title: 'Lantern Ladle',
+    mapAsset: 'room-ladle',
+    tile: 16, gridCols: 30, gridRows: 20,
+    scale: 3,
+    bounds: { x0: 48, x1: 1392, y0: 64, y1: 936 }, // includes the hearth and low lantern hitboxes
+    spawnPoints: {
+      default: { x: 745, y: 830, facing: 'up' },
+      fromCourt: { x: 745, y: 850, facing: 'up' },
+      fromMap: { x: 760, y: 770, facing: 'up' },
+    },
+    camera: { leadY: -50 },
+    hotspots: [],
+    doors: [
+      { id: 'door-back', label: 'Glasswind Court', x: 745, y: 930,
+        targetRoom: 'court', targetSpawn: 'fromLadle', locked: false },
+    ],
+    solids: [],
+    anchors: [
+      { characterId: 'brann', x: 790, y: 465 },
+    ],
+    clickables: [
+      { id: 'cocoa-cauldron', x: 715, y: 320, w: 170, h: 165,
+        line: 'Cocoa thick enough to stand a ladle in. Someone has.' },
+      { id: 'family-lantern', x: 205, y: 320, w: 130, h: 190,
+        line: 'Every fishing family hangs a lantern here. The empty hook is for whoever’s still at sea.' },
     ],
     npcSpawnAnchors: [],
   },
