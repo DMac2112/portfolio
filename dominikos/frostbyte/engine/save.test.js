@@ -20,6 +20,7 @@ describe('DEFAULT_SAVE', () => {
     expect(s.ownedItems).toEqual(['classic-charcoal', 'powder-blue', 'blush-pink', 'mint']);
     expect(s.avatar.equipped).toEqual({ hat: null, eyewear: null, neck: null, held: null });
     expect(s.curios).toEqual({ found: {}, roomRewards: {}, isleRewardClaimed: false });
+    expect(s.pet).toBe(null);
     expect(s.favors).toEqual({});
     expect(s.secrets).toEqual({
       vesperHints: [], moonwellUnlocked: false, cavernsUnlocked: false, auroraIntensified: false,
@@ -33,6 +34,16 @@ describe('DEFAULT_SAVE', () => {
 });
 
 describe('migrateSave', () => {
+  it('keeps one valid snowtail and rejects invalid adoption data', () => {
+    const pet = { coat: 'fox', scarf: 'berry', name: 'Snow-Pip', adoptedOn: '2026-09-29T09:00:00.000Z' };
+    expect(migrateSave({ pet }).pet).toEqual(pet);
+    for (const bad of [
+      { ...pet, coat: 'unknown' }, { ...pet, scarf: 'unknown' },
+      { ...pet, name: '' }, { ...pet, name: '  Tuft' },
+      { ...pet, name: 'Pip123' }, { ...pet, name: 'Long Snowtail' },
+      { ...pet, adoptedOn: 'invalid' }, [], 'fox',
+    ]) expect(migrateSave({ pet: bad }).pet).toBe(null);
+  });
   it('upgrades a legacy object missing schemaVersion, filling defaults, without throwing', () => {
     const legacy = { coins: 999, avatar: { bodyColorId: 'mint' } };
     const s = migrateSave(legacy, '2026-07-12T00:00:00.000Z');

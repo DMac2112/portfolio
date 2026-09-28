@@ -492,8 +492,7 @@ export const ANCHOR_CHARACTERS = defineCharacters([
     spriteAsset: './assets/characters/wren.png', spriteKey: 'anchor-wren',
     palette: { body: '#26343c', accent: '#547446', warm: '#e7c454' },
     linePools: { greeting: [
-      'The snowtails came in early on the Gull. They’re napping in the straw.',
-      'Every nest on that wall was knitted by someone in Chillmere.',
+      'The snowtails came in early on the Gull. Pick one from the straw, if one picks you back.',
     ] },
     favorDefs: [],
   },

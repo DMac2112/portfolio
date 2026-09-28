@@ -363,7 +363,9 @@ export const ROOM_REGISTRY = {
       fromMap: { x: 765, y: 745, facing: 'up' },
     },
     camera: { leadY: -50 },
-    hotspots: [],
+    hotspots: [
+      { id: 'snowtail-pen', label: 'Meet the snowtails', kind: 'pet', x: 424, y: 745 },
+    ],
     doors: [
       { id: 'door-back', label: 'Glasswind Court', x: 745, y: 930,
         targetRoom: 'court', targetSpawn: 'fromPetshop', locked: false },

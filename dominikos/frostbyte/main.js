@@ -42,6 +42,8 @@ import { createEmotes, emoteSymbol } from './ui/emotes.js';
 import { createMap } from './ui/map.js';
 import { createJournal } from './ui/journal.js';
 import { createDialogue } from './ui/dialogue.js';
+import { createPetPanel } from './ui/pet-panel.js';
+import { followStep, sniff, PET_COATS, PET_SCARVES } from './engine/pet.js';
 import { createNewspaper } from './ui/newspaper.js';
 import { createTraderStall } from './ui/trader-stall.js';
 import { createTelescope } from './ui/telescope.js';
@@ -182,6 +184,9 @@ k.loadSprite('room-workshop', './assets/room-workshop.jpg');
 k.loadSprite('room-bluehour', './assets/room-bluehour.jpg');
 k.loadSprite('room-ladle', './assets/room-ladle.jpg');
 k.loadSprite('room-petshop', './assets/room-petshop.jpg');
+for (const layer of ['body', 'detail', 'scarf']) {
+  k.loadSprite(`snowtail-${layer}`, `./assets/snowtail-${layer}.png`, { sliceX: 6 });
+}
 k.loadSprite('room-docks-port', './assets/room-docks-port.jpg');
 k.loadSprite('room-docks-away', './assets/room-docks-away.jpg');
 k.loadSprite('room-lighthouse-rest', './assets/room-lighthouse-rest.jpg');
@@ -319,6 +324,43 @@ k.scene('room', (roomId, opts = {}) => {
   if (spawn !== opts.resumePos) spawn = { ...spawn, ...collidePlayer(spawn) };
   const avatar = makeAvatarActor(k, save.avatar, spawn, avatarScale);
   const player = avatar.root;
+  const petScale = avatarScale / 3;
+  const trail = [{ x: spawn.x - 45, y: spawn.y + 16 }, { x: spawn.x, y: spawn.y }];
+  const sniffedIds = new Set();
+  let petActor = null, penActors = [], petParts = [], petFacing = false;
+  let petFrame = -1, perkTime = 0, petAnim = 0, sniffTime = 0;
+  const roomCurios = (room.clickables ?? []).filter((prop) => prop.curioId);
+  const makePet = (pos, coat, scarf, frame = 0) => {
+    const root = k.add([k.pos(pos.x, pos.y), k.z(pos.y), 'snowtail']);
+    const parts = [
+      root.add([k.sprite('snowtail-body'), k.anchor('bot'), k.scale(petScale), k.color(k.Color.fromHex(PET_COATS[coat])), k.z(0)]),
+      root.add([k.sprite('snowtail-scarf'), k.anchor('bot'), k.scale(petScale), k.color(k.Color.fromHex(PET_SCARVES[scarf])), k.z(1)]),
+      root.add([k.sprite('snowtail-detail'), k.anchor('bot'), k.scale(petScale), k.z(2)]),
+    ];
+    syncFrame(parts, frame, false);
+    return { root, parts };
+  };
+  const syncPet = () => {
+    if (petActor) { k.destroy(petActor); petActor = null; }
+    if (!save.pet) return;
+    const actor = makePet(trail[0], save.pet.coat, save.pet.scarf);
+    petActor = actor.root;
+    petParts = actor.parts;
+    petFrame = 0;
+  };
+  const syncPen = () => {
+    for (const actor of penActors) k.destroy(actor.root);
+    penActors = [];
+    if (roomId !== 'petshop') return;
+    Object.keys(PET_COATS).forEach((coat, index) => {
+      if (save.pet?.coat === coat) return;
+      const pos = { x: 110 + index * 91, y: 698 + (index % 2) * 32 };
+      const actor = makePet(pos, coat, ['moss', 'sky', 'berry', 'mustard'][index]);
+      penActors.push(actor);
+    });
+  };
+  syncPet();
+  syncPen();
 
   // Story notes are one-time rewards, independent of the daily coin cap.
   const learned = grantMinigameResultNote(save, opts.result);
@@ -371,6 +413,7 @@ k.scene('room', (roomId, opts = {}) => {
     persist,
     onChange: (s) => { avatar.apply(s.avatar); refreshCoins(); },
   });
+  const petPanel = createPetPanel({ save, persist, onChange: () => { syncPet(); syncPen(); } });
   const dressBtn = document.getElementById('dressup-btn');
   if (dressBtn) dressBtn.onclick = () => (dressUp.isOpen() ? dressUp.close() : dressUp.open());
   refreshCoins();
@@ -403,6 +446,7 @@ k.scene('room', (roomId, opts = {}) => {
     const gameAction = minigameActionForHotspot(hit.id, save, hit.kind === 'minigame' ? null : hit.kind);
     if (gameAction === 'minigame' || gameAction === 'locked') return gameAction;
     if (hit.kind === 'shop') return 'shop';
+    if (hit.kind === 'pet') return 'pet';
     if (hit.kind === 'venue') return 'venue';
     if (hit.kind === 'newspaper' || hit.kind === 'noticeboard') return 'newspaper';
     if (hit.kind === 'landmark') return 'landmark';
@@ -538,6 +582,12 @@ k.scene('room', (roomId, opts = {}) => {
   }
 
   function talkToCharacter(character) {
+    if (character.id === 'wren') {
+      showDialogue(character.name, save.pet
+        ? `How’s ${save.pet.name} settling in? Snowtails have a nose for lost things.`
+        : character.linePools.greeting[0]);
+      return;
+    }
     if (character.linePools?.finale?.length && claimFinaleGreeting(save, character.id)) {
       persist(save);
       showDialogue(character.name, character.linePools.finale[0]);
@@ -685,6 +735,8 @@ k.scene('room', (roomId, opts = {}) => {
       changeScene(() => k.go(minigameForHotspot(target.id).sceneId, { from: roomId }));
     } else if (action === 'shop') {
       dressUp.open();
+    } else if (action === 'pet') {
+      petPanel.open();
     } else if (action === 'venue') {
       enterVenue(target);
     } else if (action === 'newspaper') {
@@ -970,9 +1022,9 @@ k.scene('room', (roomId, opts = {}) => {
   });
   const anyOverlayOpen = () =>
     transitioning || dressUp.isOpen() || chatUI.isOpen() || mapUI.isOpen() || journalUI.isOpen() ||
-    newspaperUI.isOpen() || dialogueUI.isOpen() || traderUI.isOpen() || telescopeUI.isOpen() ||
+    newspaperUI.isOpen() || dialogueUI.isOpen() || traderUI.isOpen() || telescopeUI.isOpen() || petPanel.isOpen() ||
     editMode.isOpen() || catalogUI.isOpen();
-  escapeLayers = [catalogUI, dialogueUI, chatUI, dressUp, traderUI, telescopeUI, newspaperUI, journalUI, mapUI,
+  escapeLayers = [catalogUI, dialogueUI, chatUI, dressUp, petPanel, traderUI, telescopeUI, newspaperUI, journalUI, mapUI,
     { isOpen: editMode.isOpen, close: exitEditMode }];
   if (!storyOf(save).introSeen) journalUI.openIntro(() => {
     storyOf(save).introSeen = true;
@@ -1225,6 +1277,50 @@ k.scene('room', (roomId, opts = {}) => {
     syncFrame(avatar.parts, ROW_BASE[dirGroup(facing)] + walkFrame, facing === 'left');
 
     player.z = player.pos.y; // y-sort, same as game1
+    petAnim += dt;
+    if (petActor) {
+      const last = trail[trail.length - 1];
+      if (Math.hypot(player.pos.x - last.x, player.pos.y - last.y) > 0.5)
+        trail.push({ x: player.pos.x, y: player.pos.y });
+      let trailLength = 0;
+      for (let i = trail.length - 1; i > 0; i--) {
+        trailLength += Math.hypot(trail[i].x - trail[i - 1].x, trail[i].y - trail[i - 1].y);
+        if (trailLength > 180) { trail.splice(0, i - 1); break; }
+      }
+      perkTime = Math.max(0, perkTime - dt);
+      sniffTime += dt;
+      if (!perkTime) {
+        const target = followStep(trail, 55);
+        const stepX = target.x - petActor.pos.x;
+        petFacing = Math.abs(stepX) > 0.5 ? stepX < 0 : petFacing;
+        petActor.pos.x = target.x;
+        petActor.pos.y = target.y;
+        if (sniffTime >= 0.3) {
+          sniffTime = 0;
+          const id = sniff(petActor.pos, roomCurios, save.curios.found, sniffedIds, 110 * bf);
+          if (id) {
+            sniffedIds.add(id);
+            const curio = roomCurios.find((prop) => prop.curioId === id);
+            petFacing = curio.x < petActor.pos.x;
+            perkTime = 1.2;
+            if (!reduceMotion) for (let i = 0; i < 4; i++) {
+              const side = petFacing ? -1 : 1;
+              const puff = k.add([k.rect(3, 3), k.pos(petActor.pos.x + side * (18 + i * 9),
+                petActor.pos.y - 25 - (i % 2) * 9), k.color(k.Color.fromHex('#f4f8fb')),
+                k.opacity(0.9), k.z(petActor.pos.y + 1)]);
+              k.wait(0.7, () => k.destroy(puff));
+            }
+          }
+        }
+      }
+      const frame = perkTime ? 3 : moving && !frozen ? 1 + Math.floor(petAnim * 6) % 2 : 0;
+      syncFrame(petParts, frame, petFacing);
+      petFrame = frame;
+      petActor.z = petActor.pos.y;
+    }
+    if (roomId === 'petshop' && !reduceMotion) for (const [index, actor] of penActors.entries()) {
+      syncFrame(actor.parts, Math.floor((petAnim + index * 0.7) / 1.6) % 2 ? 5 : 0, false);
+    }
     walkPuffs.tick(dt, moving && !frozen, player.pos);
 
     // Walk-over pickup collection (H4) — squared-distance check, ~one glint radius.

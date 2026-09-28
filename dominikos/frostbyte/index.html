@@ -70,15 +70,15 @@
     #dressup-btn:active { transform:translateY(1px); }
 
     /* ---- Customize (dress-up) overlay ---- */
-    #customize-overlay { position:fixed; inset:0; z-index:31; display:flex; align-items:center;
+    #customize-overlay, #pet-overlay { position:fixed; inset:0; z-index:31; display:flex; align-items:center;
       justify-content:center; padding:16px; background:#0009; }
-    #customize-overlay.hidden { display:none; }
-    #customize-panel { width:min(560px, 96vw); max-height:90vh; overflow:auto; background:#fbfbfe;
+    #customize-overlay.hidden, #pet-overlay.hidden { display:none; }
+    #customize-panel, #pet-panel { width:min(560px, 96vw); max-height:90vh; overflow:auto; background:#fbfbfe;
       color:#1a1a22; border-radius:16px; box-shadow:0 18px 50px #000a; border:3px solid #0d1c2b; padding:16px 18px; }
-    #customize-panel header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-    #customize-title { margin:0; font-size:20px; flex:1; }
+    #customize-panel header, #pet-panel header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    #customize-title, #pet-title { margin:0; font-size:20px; flex:1; }
     #customize-coins { font-weight:800; color:#0d1c2b; background:var(--accent); padding:4px 10px; border-radius:999px; font-size:13px; }
-    #customize-close { font:inherit; font-weight:700; border:2px solid #0d1c2b; background:#122a42; color:#fff;
+    #customize-close, #pet-close { font:inherit; font-weight:700; border:2px solid #0d1c2b; background:#122a42; color:#fff;
       border-radius:10px; padding:7px 12px; cursor:pointer; }
     #customize-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
     .cz-tab { font:inherit; font-weight:700; font-size:13px; border:2px solid #0d1c2b; background:#fff;
@@ -177,7 +177,7 @@
     }
     #back-link:focus-visible, #dressup-btn:focus-visible, #say-btn:focus-visible, #edit-btn:focus-visible,
     #map-btn:focus-visible, #journal-btn:focus-visible, #dev-speed-btn:focus-visible, #fullscreen-btn:focus-visible, .emote-btn:focus-visible, #dialogue-footer button:focus-visible,
-    #customize-close:focus-visible, .cz-tab:focus-visible, .cz-cell:focus-visible {
+    #customize-close:focus-visible, #pet-close:focus-visible, #pet-name:focus-visible, #pet-commit:focus-visible, .cz-tab:focus-visible, .cz-cell:focus-visible {
       outline:2px solid var(--accent); outline-offset:3px;
     }
     #dressup-btn, #say-btn, #edit-btn { color:var(--ink); background:linear-gradient(180deg, #245373ed, #122a42f2); }
@@ -186,8 +186,8 @@
     #coin-counter, #customize-coins { color:#091827; background:linear-gradient(135deg, #c8f4ff, #7fd6ff 58%, #65c6ef); border:1px solid #f7fbffaa; box-shadow:inset 0 1px 0 #fff, 0 5px 18px #02091499; }
     #coin-counter.bump { animation:coin-bump .38s cubic-bezier(.2,.9,.25,1.35); }
 
-    #dialogue-overlay, #customize-overlay { background:#020914b8; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
-    #customize-panel {
+    #dialogue-overlay, #customize-overlay, #pet-overlay { background:#020914b8; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+    #customize-panel, #pet-panel {
       color:var(--ink); background:linear-gradient(155deg, #193d59f2, #0d2238f7 52%, #091827fa);
       border:1px solid var(--rim); border-radius:18px;
       box-shadow:inset 0 1px 0 #ffffff20, 0 22px 70px var(--shadow), 0 0 0 1px #091827;
@@ -205,14 +205,21 @@
     :is(#customize-panel, #catalog-panel, #map-panel, #chat-panel, #edit-tray-strip)::-webkit-scrollbar { width:9px; height:8px; }
     :is(#customize-panel, #catalog-panel, #map-panel, #chat-panel, #edit-tray-strip)::-webkit-scrollbar-track { background:#091827; }
     :is(#customize-panel, #catalog-panel, #map-panel, #chat-panel, #edit-tray-strip)::-webkit-scrollbar-thumb { background:#3b8fb8; border:2px solid #091827; border-radius:999px; }
-    #dialogue-title, #customize-title { color:#f7fbff; letter-spacing:.25px; }
+    #dialogue-title, #customize-title, #pet-title { color:#f7fbff; letter-spacing:.25px; }
     #dialogue-subtitle { color:#cfe0f2; }
     #dialogue-page { color:#d6e5ef; }
     #dialogue-choices button { color:#f7fbff; border-color:#c79a6b; background:linear-gradient(#7c583d, #5b3e2d); }
     #dialogue-choices button:hover { border-color:#ffcf92; background:linear-gradient(#8b6042, #6b4a33); }
     #dialogue-footer button { border:1px solid var(--rim); }
     #dialogue-close { background:linear-gradient(180deg, #245373, #122a42) !important; color:var(--ink); }
-    #customize-close { border:1px solid var(--rim); }
+    #customize-close, #pet-close { border:1px solid var(--rim); }
+    #pet-panel fieldset { border:0; padding:0; margin:0 0 12px; }
+    #pet-panel legend, #pet-panel label { display:block; font-weight:700; margin-bottom:7px; }
+    #pet-coats, #pet-scarves { display:grid; grid-template-columns:repeat(auto-fit,minmax(85px,1fr)); gap:8px; }
+    #pet-coats canvas { width:48px; height:48px; image-rendering:pixelated; }
+    #pet-name { box-sizing:border-box; width:100%; padding:9px 12px; font:inherit; color:var(--ink); background:var(--panel); border:1px solid var(--rim); border-radius:10px; }
+    #pet-commit { margin-top:12px; }
+    #pet-error { color:var(--amber); min-height:1.2em; }
     .cz-tab { border:1px solid #7fd6ff3d; color:var(--muted); }
     .cz-tab.active { color:#091827; background:linear-gradient(135deg, #c8f4ff, #7fd6ff); border-color:#c8f4ff; }
     .cz-cell { color:var(--ink); border:1px solid #7fd6ff2f; background:linear-gradient(155deg, #193d59a6, #0d2238d9); box-shadow:inset 0 1px 0 #ffffff10; }
@@ -285,6 +292,18 @@
       </header>
       <div id="customize-tabs" role="tablist"></div>
       <div id="customize-grid"></div>
+    </div>
+  </div>
+
+  <!-- Snowtail adoption reuses the dress-up panel and its cells. -->
+  <div id="pet-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="pet-title">
+    <div id="pet-panel">
+      <header><h2 id="pet-title">Meet the snowtails</h2><button id="pet-close" class="cz-tab" type="button">Close ✕</button></header>
+      <fieldset><legend>Choose a coat</legend><div id="pet-coats"></div></fieldset>
+      <fieldset><legend>Choose a scarf</legend><div id="pet-scarves"></div></fieldset>
+      <label for="pet-name">Name</label><input id="pet-name" type="text" maxlength="12" autocomplete="off" />
+      <div id="pet-error" role="status" aria-live="polite"></div>
+      <button id="pet-commit" class="cz-tab" type="button">Take Tuft home</button>
     </div>
   </div>
 

@@ -2735,8 +2735,41 @@ function buildWrenPortrait() {
   return save(path.join('portraits', 'wren.png'), img);
 }
 
+/* ----------------------------- snowtail layers -------------------------- */
+// These sheets use no global rnd() calls, keeping every established asset byte-for-byte stable.
+function buildSnowtailSheets() {
+  const body = Img(24 * 6, 24), detail = Img(24 * 6, 24), scarf = Img(24 * 6, 24);
+  const base = [255, 255, 255], shade = [177, 177, 177], light = [225, 225, 225];
+  const ink = hex('#253444'), blush = hex('#a58489');
+  for (let frame = 0; frame < 6; frame++) {
+    const x = frame * 24, hop = frame === 1 ? -2 : frame === 2 ? -4 : 0;
+    const perk = frame === 3, front = frame === 4;
+    const b = (cx, cy, rx, ry, c) => oval(body, x + cx, cy + hop, rx, ry, c);
+    const d = (cx, cy, r, c) => disc(detail, x + cx, cy + hop, r, c);
+    const s = (cx, cy, rx, ry, c) => oval(scarf, x + cx, cy + hop, rx, ry, c);
+    // Curled plume sits behind the round body; perk lifts it clear of the back.
+    if (front) { b(12, 12, 7, 8, shade); b(12, 11, 7, 8, base); }
+    else if (perk) { b(5, 7, 2, 7, shade); b(5, 5, 3, 3, base); }
+    else { b(frame === 5 ? 4 : 5, frame === 5 ? 7 : 10, 4, 6, shade);
+      b(frame === 5 ? 4 : 5, frame === 5 ? 4 : 7, 4, 4, base);
+      b(frame === 5 ? 4 : 5, frame === 5 ? 2 : 5, 2, 2, light); }
+    b(12, 15, 8, 7, shade); b(12, 14, 8, 7, base);
+    b(front ? 7 : 13, perk ? 4 : 7, 3, perk ? 5 : 3, shade);
+    b(front ? 17 : 19, perk ? 4 : 7, 3, perk ? 5 : 3, shade);
+    b(front ? 7 : 13, perk ? 4 : 7, 2, perk ? 4 : 2, base);
+    b(front ? 17 : 19, perk ? 4 : 7, 2, perk ? 4 : 2, base);
+    b(8, 21, 3, 2, light); b(17, 21, 3, 2, light);
+    if (front) { d(7, perk ? 4 : 7, 1, blush); d(17, perk ? 4 : 7, 1, blush); d(9, 13, 1, ink); d(15, 13, 1, ink); d(12, 16, 1, ink); }
+    else { d(19, perk ? 4 : 7, 1, blush); d(17, 12, 1, ink); d(21, 15, 1, ink); }
+    s(12, 17, 6, 2, shade); s(12, 16, 6, 2, base);
+    rect(scarf, x + (front ? 13 : 8), 17 + hop, 3, 5, base);
+    rect(scarf, x + (front ? 13 : 8), 20 + hop, 3, 1, shade);
+  }
+  return [save('snowtail-body.png', body), save('snowtail-detail.png', detail), save('snowtail-scarf.png', scarf)];
+}
+
 /* ----------------------------- run -------------------------------------- */
-const made = [
+const made = process.argv.includes('--snowtail-only') ? buildSnowtailSheets() : [
   buildPenguinBody(),
   buildPenguinBelly(),
   buildEddaSprite(),
@@ -2780,7 +2813,10 @@ const made = [
   buildBrannPortrait(),
   buildWrenSprite(),
   buildWrenPortrait(),
+  ...buildSnowtailSheets(),
 ];
 // The single-sheet S1 penguin.png is superseded by the layered body/belly sheets.
-try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }
+if (!process.argv.includes('--snowtail-only')) {
+  try { fs.rmSync(path.join(OUT, 'penguin.png')); } catch { /* already gone */ }
+}
 console.log('Generated:\n  ' + made.join('\n  '));
