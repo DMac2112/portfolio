@@ -1,0 +1,22 @@
+---
+import PixelAvatar from './PixelAvatar.astro';
+---
+<dialog class="cw" aria-labelledby="cw-title">
+  <div class="cw-bar"><span id="cw-title">Message Dominik</span><button type="button" class="cw-close" aria-label="Close">×</button></div>
+  <div class="cw-body">
+    <div class="cw-status"><PixelAvatar size="40px" /><div><strong>Dominik Machowiak <span class="cw-dot" aria-label="Available"></span></strong><p>Probably coding. Leave a message!</p></div></div>
+    <div class="cw-links">
+      <a href="mailto:dominikmachowiak101@gmail.com">dominikmachowiak101@gmail.com</a>
+      <button type="button" class="cw-copy">Copy email</button>
+      <a href="https://www.linkedin.com/in/dominikmachowiak/">LinkedIn</a>
+      <a href="/os/assets/cv.pdf" download="Dominik-Machowiak-CV.pdf">Download CV</a>
+    </div>
+    <form class="cw-form">
+      <label>Name<input name="name" autocomplete="name" required /></label>
+      <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+      <label>Message<textarea name="message" rows="4" required></textarea></label>
+      <button type="submit">Send message</button>
+      <p class="cw-feedback" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</dialog>

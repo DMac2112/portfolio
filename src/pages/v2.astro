@@ -1,0 +1,27 @@
+---
+import slides from '../data/v2-work.json';
+import V2Layout from '../v2/V2Layout.astro';
+import Nav from '../v2/Nav.astro';
+import Landing from '../v2/Landing.astro';
+import WorkSlider from '../v2/WorkSlider.astro';
+import OsFinale from '../v2/OsFinale.astro';
+import ContactWindow from '../v2/ContactWindow.astro';
+import Footer from '../v2/Footer.astro';
+
+const assets = import.meta.glob('/src/assets/content/*', { eager: true, import: 'default' });
+const work = slides.map((slide) => {
+  const source = slide.image?.startsWith('/') ? slide.image : slide.image ? (assets[`/src/assets/content/${slide.image}`] as { src: string } | undefined)?.src ?? null : null;
+  return { ...slide, image: source };
+});
+---
+
+<V2Layout>
+  <Nav />
+  <main>
+    <Landing />
+    <WorkSlider slides={work} />
+    <OsFinale />
+  </main>
+  <Footer />
+  <ContactWindow />
+</V2Layout>

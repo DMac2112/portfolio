@@ -1,0 +1,41 @@
+---
+interface Props { size?: string }
+const { size = '80px' } = Astro.props;
+const palette: Record<string, string> = {
+  h: '#2B1D16', s: '#F1C3A0', d: '#D99E7C', w: '#FFFFFF',
+  f: '#9CC8F4', j: '#0E1A44', k: '#F2F5F9'
+};
+// Placeholder, to be replaced by a render from Frostbyte's character generator.
+const torso = [
+  '....hhhhhhhh....',
+  '...hhhhhhhhhh...',
+  '...hhsssssshh...',
+  '...hsssssssssh..',
+  '....ssjssjss....',
+  '.....ssssss.....',
+  '....ffffffff....',
+  '...fwwwwwwwwf...',
+  '..fwwwwwwwwwwf..',
+  '..swwwwwwwwwws..',
+  '..dwwwwwwwwwwd..',
+  '...wwwwwwwwww...',
+  '...wwwwwwwwww...',
+  '...fwwwwwwwwf...',
+  '....jjjjjjjj....',
+  '....jjjjjjjj....'
+];
+const legs = {
+  idle: ['....jjjjjjjj....', '....jjj..jjj....', '....jjj..jjj....', '....jjj..jjj....', '....jjj..jjj....', '....jjj..jjj....', '...kkkk..kkkk...', '...kkkk..kkkk...'],
+  'walk-a': ['....jjjjjjjj....', '....jjj..jjj....', '...jjj....jjj...', '..jjj......jjj..', '..jj........jj..', '.jj..........jj.', '.kk..........kk.', '.kk..........kk.'],
+  'walk-b': ['....jjjjjjjj....', '....jjj..jjj....', '.....jjjjjj.....', '......jjjj......', '.....jj..jj.....', '....jj....jj....', '...kk......kk...', '...kk......kk...']
+};
+const frames = Object.entries(legs).map(([name, rows]) => ({
+  name, pixels: [...torso, ...rows].flatMap((row, y) => [...row].flatMap((key, x) =>
+    key === '.' ? [] : [{ x, y, fill: palette[key] }]))
+}));
+---
+<svg class="pixel-avatar" style={`height: ${size}`} viewBox="0 0 16 24" shape-rendering="crispEdges" role="img" aria-label="Pixel-art Dominik" data-frame="idle">
+  {frames.map((frame) => <g class={`pixel-frame pixel-${frame.name}`}>{frame.pixels.map((pixel) => <rect x={pixel.x} y={pixel.y} width="1" height="1" fill={pixel.fill} />)}</g>)}
+  <rect class="pixel-lid" x="6" y="4" width="1" height="1" fill="#F1C3A0" />
+  <rect class="pixel-lid" x="9" y="4" width="1" height="1" fill="#F1C3A0" />
+</svg>

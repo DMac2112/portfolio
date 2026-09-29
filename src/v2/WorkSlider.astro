@@ -1,0 +1,60 @@
+---
+interface Slide {
+  id: string; years: string; title: string; role: string; summary: string; stack: string;
+  image: string | null; placeholder: string | null;
+  quote: { text: string; name: string; company: string } | null;
+  quotePlaceholder: string | null; link: { label: string; href: string } | null;
+}
+interface Props { slides: Slide[] }
+const { slides } = Astro.props;
+const first = slides[0];
+const emailBadge = '/src/assets/content/skill-mc-email-specialist.png';
+const trailBadge = '/src/assets/content/skill-trailhead-mountaineer.png';
+const badges = import.meta.glob('/src/assets/content/skill-*.png', { eager: true, import: 'default' });
+const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)?.src;
+---
+<section class="ws" id="work" aria-roledescription="carousel" aria-label="Selected work" tabindex="0">
+  <div class="ws-bg" aria-hidden="true">
+    <img class="ws-bg-image is-visible" src={first.image ?? undefined} alt="" hidden={!first.image} />
+    <img class="ws-bg-image" alt="" hidden />
+    <div class="ws-tint"></div>
+  </div>
+  <canvas class="ws-trail" aria-hidden="true"></canvas>
+  <div class="ws-content">
+    <div class="ws-meta"><span class="ws-years">{first.years}</span><span class="ws-count">1 of {slides.length}</span></div>
+    <h2 class="ws-title" aria-label={first.title}><span class="ws-title-line">{first.title}</span></h2>
+    <div class="ws-frame">
+      <img class="ws-image" src={first.image ?? undefined} alt={first.title + ' project preview'} hidden={!first.image} />
+      <div class="ws-placeholder" hidden={!!first.image}><strong>Placeholder</strong><span>{first.placeholder}</span></div>
+      <canvas class="ws-dissolve" aria-hidden="true"></canvas>
+    </div>
+    <div class="ws-details">
+      <p class="ws-role">{first.role}</p>
+      <p class="ws-summary">{first.summary}</p>
+      <p class="ws-stack">Built with {first.stack}</p>
+      <p class="ws-todo ws-image-todo" hidden={!first.image || !first.placeholder}>To replace: {first.placeholder}</p>
+      <blockquote class="ws-quote" hidden={!first.quote}>
+        <p>{first.quote && `“${first.quote.text}”`}</p>
+        <cite>{first.quote && `${first.quote.name}, ${first.quote.company}`}</cite>
+      </blockquote>
+      <p class="ws-todo ws-quote-todo" hidden={!first.quotePlaceholder}>{first.quotePlaceholder}</p>
+      <a class="ws-link v2-button" href={first.link?.href ?? '#work'} hidden={!first.link} data-boot={first.link?.href?.startsWith('/os/') ? '' : undefined}>{first.link?.label}</a>
+    </div>
+  </div>
+  <div class="ws-bottom">
+    <div class="ws-rail" role="group" aria-label="Choose project">
+      {slides.map((slide, i) => <button class="ws-thumb" type="button" data-index={i} aria-label={`Show ${slide.title}, slide ${i + 1} of ${slides.length}`} aria-current={i === 0 ? 'true' : undefined}>
+        {slide.image ? <img src={slide.image} alt="" loading="lazy" /> : <span class="ws-thumb-checker"></span>}
+      </button>)}
+    </div>
+    <div class="ws-track" aria-hidden="true"><span class="ws-progress" style={`width: ${100 / slides.length}%`}></span></div>
+    <div class="ws-creds">
+      <span>BSc Computing and IT, The Open University, 2018–2021</span>
+      <span><img src={badgeSrc(emailBadge)} alt="" />Salesforce Marketing Cloud Email Specialist</span>
+      <span><img src={badgeSrc(trailBadge)} alt="" />Trailhead Mountaineer</span>
+    </div>
+  </div>
+  <span class="v2-sr ws-live" aria-live="polite"></span>
+  <ol class="v2-sr">{slides.map((slide) => <li>{slide.years}. {slide.title}. {slide.role}. {slide.summary}. Built with {slide.stack}. {slide.placeholder} {slide.quote?.text} {slide.quote?.name} {slide.quote?.company} {slide.quotePlaceholder} {slide.link?.label}</li>)}</ol>
+  <script type="application/json" id="v2-slides" set:html={JSON.stringify(slides).replace(/</g, '\\u003c')}></script>
+</section>
