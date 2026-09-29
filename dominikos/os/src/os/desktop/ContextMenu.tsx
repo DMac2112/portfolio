@@ -1,5 +1,6 @@
 // Minimal XP-style context menu (§13 P2): desktop → Refresh/About; icon → Open.
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface CtxMenuItem {
   label: string;
@@ -38,7 +39,9 @@ export function ContextMenu({ menu, onClose }: { menu: CtxMenuState | null; onCl
   const x = Math.min(menu.x, window.innerWidth - 180);
   const y = Math.min(menu.y, window.innerHeight - menu.items.length * 28 - 16);
 
-  return (
+  // Portalled: `.win` has `contain: layout paint`, which would re-anchor and clip a fixed menu
+  // opened from inside a window (Recycle Bin, folders).
+  return createPortal(
     <div ref={ref} className="ctx-menu" role="menu" style={{ left: x, top: y }}>
       {menu.items.map((item, i) =>
         item.separator ? (
@@ -58,6 +61,7 @@ export function ContextMenu({ menu, onClose }: { menu: CtxMenuState | null; onCl
           </button>
         ),
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }

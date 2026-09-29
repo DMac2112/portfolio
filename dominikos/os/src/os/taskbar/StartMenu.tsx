@@ -2,10 +2,13 @@
 // right = My Documents (Résumé, Skills, Testimonials), My Projects, Games, Experience.
 // Footer: Log Off (→ login) / Turn Off Computer (→ shutdown FSM). Also carries the §11.5
 // escape hatches (classic accessible site, boot chooser).
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { byId } from '../registry';
 import { useOSStore } from '../store/osStore';
 import { storage } from '../storage';
+import { useTrash } from '../desktop/trashStore';
+import { ContextMenu, type CtxMenuState } from '../desktop/ContextMenu';
+import { isPinned, pin, unpin } from './quickLaunchStore';
 
 const RIGHT_DOC_IDS = ['resume', 'skills', 'testimonials'];
 const RIGHT_PLACE_IDS = ['my-projects', 'games', 'experience', 'my-computer'];
@@ -18,11 +21,13 @@ interface Props {
 
 export function StartMenu({ onClose, onLogOff, onShutDown }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const trash = useTrash();
+  const [menu, setMenu] = useState<CtxMenuState | null>(null);
 
   useEffect(() => {
     const away = (e: PointerEvent) => {
       const t = e.target as HTMLElement;
-      if (!ref.current?.contains(t) && !t.closest('.start-btn')) onClose();
+      if (!ref.current?.contains(t) && !t.closest('.start-btn, .ctx-menu')) onClose();
     };
     const key = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -50,9 +55,16 @@ export function StartMenu({ onClose, onLogOff, onShutDown }: Props) {
 
   const item = (id: string, subtitle?: string) => {
     const app = byId(id);
-    if (!app) return null;
+    if (!app || trash.includes(id)) return null;
     return (
-      <button key={id} type="button" className="start-menu__item" role="menuitem" onClick={launch(id)}>
+      <button key={id} type="button" className="start-menu__item" role="menuitem" onClick={launch(id)}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setMenu({ x: e.clientX, y: e.clientY, items: [
+            { label: 'Open', bold: true, onPick: () => useOSStore.getState().open(id) },
+            { label: isPinned(id) ? 'Remove from taskbar' : 'Add to taskbar', onPick: () => isPinned(id) ? unpin(id) : pin(id) },
+          ] });
+        }}>
         <img src={app.icon} alt="" draggable={false} />
         <span>
           {app.title}
@@ -112,6 +124,7 @@ export function StartMenu({ onClose, onLogOff, onShutDown }: Props) {
           {RIGHT_PLACE_IDS.map((id) => item(id))}
         </div>
       </div>
+      <ContextMenu menu={menu} onClose={() => setMenu(null)} />
       <div className="start-menu__footer">
         <button type="button" onClick={onLogOff}>
           <svg viewBox="0 0 18 18" aria-hidden="true">

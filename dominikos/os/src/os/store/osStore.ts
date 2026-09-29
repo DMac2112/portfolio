@@ -5,6 +5,7 @@ import { create } from 'zustand';
 import type { AppManifest, Rect, SnapZone, WindowDisplayState, WindowInstance } from '../types';
 import { byId } from '../registry';
 import { getWorkspace, isFreeFloat } from '../env';
+import { RELIC_ID } from '../desktop/trashStore';
 
 /** Desktop hard cap (§9.3): LRU-evicts the least-recently-focused non-game window. */
 export const WINDOW_CAP = 12;
@@ -15,13 +16,21 @@ export const MOBILE_WINDOW_CAP = 4;
 
 export interface OpenOptions {
   maximized?: boolean;
+  confirmed?: boolean;
   props?: unknown;
   trigger?: HTMLElement;
   /** internal: session rehydrate (§0.6) restores saved geometry */
   rect?: Rect;
 }
 
+export type SystemDialog =
+  | { kind: 'relic'; appId: string; opts?: OpenOptions }
+  | { kind: 'denied'; title: string; message: string };
+
 export interface OSStore {
+  dialog: SystemDialog | null;
+  showDialog: (dialog: SystemDialog) => void;
+  dismissDialog: () => void;
   windows: Record<string, WindowInstance>;
   order: string[];               // z-order, last = top-most
   focusedId: string | null;
@@ -51,8 +60,15 @@ export interface OSStore {
 let seq = 0;
 const uid = () => `win-${(++seq).toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
+/** Where focus returns when a system dialog closes (captured before it opens). */
+let dialogReturnFocus: HTMLElement | null = null;
+export const getDialogReturnFocus = (): HTMLElement | null => dialogReturnFocus;
+function rememberDialogFocus(): void {
+  dialogReturnFocus = typeof document === 'undefined' ? null : document.activeElement as HTMLElement | null;
+}
+
 /** Announce via the aria-live region (§11.1). No-op headless (unit tests). */
-function announce(msg: string): void {
+export function announce(msg: string): void {
   if (typeof document === 'undefined') return;
   const live = document.getElementById('os-announce');
   if (live) live.textContent = msg;
@@ -82,6 +98,12 @@ function cascadeRect(m: AppManifest, n: number): Rect {
 }
 
 export const useOSStore = create<OSStore>((set, get) => ({
+  dialog: null,
+  showDialog: (dialog) => {
+    rememberDialogFocus();
+    set({ dialog });
+  },
+  dismissDialog: () => set({ dialog: null }),
   windows: {},
   order: [],
   focusedId: null,
@@ -104,6 +126,13 @@ export const useOSStore = create<OSStore>((set, get) => ({
         get().focus(existing);
         return existing;
       }
+    }
+
+    if (appId === RELIC_ID && !opts?.confirmed) {
+      rememberDialogFocus();
+      set({ dialog: { kind: 'relic', appId, opts } });
+      announce('Dev District is an old, dusty relic. Boot it up anyway?');
+      return null;
     }
 
     const free = isFreeFloat();
@@ -307,6 +336,6 @@ export const useOSStore = create<OSStore>((set, get) => ({
   },
 
   closeAll: () => {
-    set({ windows: {}, order: [], focusedId: null });
+    set({ windows: {}, order: [], focusedId: null, dialog: null });
   },
 }));

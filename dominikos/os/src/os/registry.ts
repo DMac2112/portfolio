@@ -58,7 +58,7 @@ export const desktopIcons = (): AppManifest[] =>
 /** Add-a-game truth (§0.4): the Games folder AUTO-LISTS byCategory('games') via the
  *  'auto:games' sentinel. Static-content folders (Projects) keep explicit children. */
 export function folderChildren(m: AppManifest): AppManifest[] {
-  if (m.children === 'auto:games') return byCategory('games');
+  if (m.children === 'auto:games') return byCategory('games').filter((a) => a.id !== 'game1');
   return (m.children ?? []).map(byId).filter((a): a is AppManifest => !!a);
 }
 

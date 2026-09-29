@@ -1,5 +1,6 @@
 import { useSystem } from '../context/SystemContext';
 import { Clock } from './Clock';
+import { FullscreenTray } from './FullscreenTray';
 
 /** Tray: sound toggle + decorative network glyph + live clock (§5.5). */
 export function SystemTray() {
@@ -7,6 +8,7 @@ export function SystemTray() {
   const muted = prefs.muted;
   return (
     <div className="tray">
+      <FullscreenTray />
       <button
         type="button"
         aria-pressed={muted}

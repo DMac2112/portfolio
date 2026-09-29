@@ -15,6 +15,7 @@ import { MobileDock } from '../taskbar/MobileDock';
 import { MobileStartLauncher } from '../taskbar/MobileStartLauncher';
 import { backStack } from './backStack';
 import { useStartMenuState } from '../taskbar/Taskbar';
+import { SystemDialog } from '../shell/SystemDialog';
 
 interface Props {
   onLogOff: () => void;
@@ -137,6 +138,7 @@ export default function MobileShell({ onLogOff, onShutDown }: Props) {
         <MobileStartLauncher onClose={() => setLauncherOpen(false)} onLogOff={onLogOff} onShutDown={onShutDown} />
       )}
       {resourceAlert && <ResourceAlert onClose={() => useOSStore.getState().dismissResourceAlert()} />}
+      <SystemDialog />
       <div id="os-announce" className="sr-only" aria-live="polite" />
     </div>
   );

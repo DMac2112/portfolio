@@ -11,6 +11,9 @@ import { WindowLayer } from '../window/WindowLayer';
 import { SnapPreview } from '../window/SnapPreview';
 import { Taskbar, useStartMenuState } from '../taskbar/Taskbar';
 import type { AppManifest } from '../types';
+import { SystemDialog } from './SystemDialog';
+import { sendToBin, deny } from '../desktop/binActions';
+import { isPinned, pin, unpin } from '../taskbar/quickLaunchStore';
 
 interface Props {
   onLogOff: () => void;
@@ -48,8 +51,17 @@ export function Desktop({ onLogOff, onShutDown }: Props) {
     setMenu({
       x: e.clientX,
       y: e.clientY,
-      items: [
+      items: app.id === 'recycle-bin' ? [
         { label: 'Open', bold: true, onPick: () => useOSStore.getState().open(app.id) },
+        { label: 'Empty Recycle Bin', onPick: () => deny('Empty Recycle Bin', 'Cannot empty the Recycle Bin: You need administrator privileges to do this.') },
+        { separator: true, label: '' },
+        { label: 'About DominikOS', onPick: () => useOSStore.getState().open('about') },
+      ] : [
+        { label: 'Open', bold: true, onPick: () => useOSStore.getState().open(app.id) },
+        { separator: true, label: '' },
+        { label: isPinned(app.id) ? 'Remove from taskbar' : 'Add to taskbar', onPick: () => isPinned(app.id) ? unpin(app.id) : pin(app.id) },
+        { separator: true, label: '' },
+        { label: 'Delete', onPick: () => sendToBin([app.id]) },
         { separator: true, label: '' },
         { label: 'About DominikOS', onPick: () => useOSStore.getState().open('about') },
       ],
@@ -60,6 +72,7 @@ export function Desktop({ onLogOff, onShutDown }: Props) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const s = useOSStore.getState();
+      if (s.dialog) return;
       // Alt+Tab switcher
       if (e.altKey && e.key === 'Tab') {
         e.preventDefault();
@@ -137,6 +150,7 @@ export function Desktop({ onLogOff, onShutDown }: Props) {
       </main>
       <Taskbar onLogOff={onLogOff} onShutDown={onShutDown} startOpen={startOpen} setStartOpen={setStartOpen} />
       <ContextMenu menu={menu} onClose={() => setMenu(null)} />
+      <SystemDialog />
       <AltTabSwitcher state={altTab} />
       <div id="os-announce" className="sr-only" aria-live="polite" />
     </div>

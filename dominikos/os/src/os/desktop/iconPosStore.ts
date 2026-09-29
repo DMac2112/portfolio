@@ -19,6 +19,15 @@ export function setPos(id: string, cell: CellPos): void {
   for (const fn of subs) fn();
 }
 
+export function clearPos(id: string): void {
+  if (!(id in layout)) return;
+  const next = { ...layout };
+  delete next[id];
+  layout = next;
+  sessionWrite(KEY, layout);
+  for (const fn of subs) fn();
+}
+
 export function subscribe(fn: () => void): () => void {
   subs.add(fn);
   return () => subs.delete(fn);

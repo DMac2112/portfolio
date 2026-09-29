@@ -2,6 +2,8 @@
 import { AppRegistry } from '../registry';
 import { useOSStore } from '../store/osStore';
 import { storage } from '../storage';
+import { useTrash } from '../desktop/trashStore';
+import { fullscreenElement, requestOSFullscreen, useFullscreen } from '../hooks/useFullscreen';
 
 interface Props {
   onClose: () => void;
@@ -10,8 +12,11 @@ interface Props {
 }
 
 export function MobileStartLauncher({ onClose, onLogOff, onShutDown }: Props) {
+  const trash = useTrash();
+  const { isFullscreen } = useFullscreen();
+  const supported = document.fullscreenEnabled || !!(document as Document & { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled;
   const apps = Object.values(AppRegistry)
-    .filter((a) => a.startMenu?.show || a.desktop?.show)
+    .filter((a) => (a.startMenu?.show || a.desktop?.show) && a.id !== 'game1' && !trash.includes(a.id))
     .sort((a, b) => (a.desktop?.order ?? 50) - (b.desktop?.order ?? 50));
 
   return (
@@ -37,6 +42,11 @@ export function MobileStartLauncher({ onClose, onLogOff, onShutDown }: Props) {
         ))}
       </div>
       <footer className="mlauncher__foot">
+        {supported && <button type="button" onClick={() => {
+          if (isFullscreen || fullscreenElement()) document.exitFullscreen?.();
+          else requestOSFullscreen();
+          onClose();
+        }}>{isFullscreen ? 'Exit full screen' : 'Full screen'}</button>}
         <button type="button" onClick={onLogOff}>Log Off</button>
         <button type="button" onClick={onShutDown}>Shut Down</button>
         <a href="/">Exit to classic site</a>

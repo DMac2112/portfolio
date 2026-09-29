@@ -4,6 +4,7 @@ import type { AppManifest } from '../types';
 interface Props {
   app: AppManifest;
   selected: boolean;
+  dropTarget: boolean;
   tabbable: boolean;
   touch: boolean;
   onSelect: (additive: boolean) => void;
@@ -15,14 +16,14 @@ interface Props {
 /** One desktop icon. Desktop: single-click selects, double-click opens (§10.2);
  *  touch: single tap opens. Roving tabindex — only the active icon is tabbable. */
 export const DesktopIconView = forwardRef<HTMLButtonElement, Props>(function DesktopIconView(
-  { app, selected, tabbable, touch, onSelect, onFocus, onOpen, onIconContextMenu },
+  { app, selected, dropTarget, tabbable, touch, onSelect, onFocus, onOpen, onIconContextMenu },
   ref,
 ) {
   return (
     <button
       ref={ref}
       type="button"
-      className="desk-icon"
+      className={dropTarget ? 'desk-icon desk-icon--drop' : 'desk-icon'}
       role="option"
       aria-selected={selected}
       tabIndex={tabbable ? 0 : -1}

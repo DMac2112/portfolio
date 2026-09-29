@@ -22,6 +22,8 @@ import {
   type Rect,
 } from './iconLayout';
 import { getLayout, setPos, subscribe } from './iconPosStore';
+import { useTrash } from './trashStore';
+import { sendToBin } from './binActions';
 import type { AppManifest } from '../types';
 
 const ICON_CELL = 88; // keep in sync with --icon-cell
@@ -52,7 +54,8 @@ interface MarqueeState {
 type Ghosts = Record<string, { x: number; y: number }>;
 
 export function IconGrid({ onIconContextMenu }: Props) {
-  const icons = useMemo(() => desktopIcons(), []);
+  const trash = useTrash();
+  const icons = useMemo(() => desktopIcons().filter((a) => !trash.includes(a.id)), [trash]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const selectedIdsRef = useRef(selectedIds);
   selectedIdsRef.current = selectedIds;
@@ -156,6 +159,12 @@ export function IconGrid({ onIconContextMenu }: Props) {
   const pendingClickRef = useRef<{ id: string; selectionBefore: Set<string> } | null>(null);
   const suppressClickRef = useRef<string | null>(null);
   const [ghosts, setGhosts] = useState<Ghosts | null>(null);
+  const [binHot, setBinHot] = useState(false);
+  const overBin = (x: number, y: number, ids: string[]) => {
+    if (ids.includes('recycle-bin')) return false;
+    const box = btnRefs.current.get('recycle-bin')?.getBoundingClientRect();
+    return !!box && x >= box.left - 6 && x <= box.right + 6 && y >= box.top - 6 && y <= box.bottom + 6;
+  };
   const ghostsRef = useRef(ghosts);
   ghostsRef.current = ghosts;
 
@@ -206,12 +215,14 @@ export function IconGrid({ onIconContextMenu }: Props) {
     );
     ghostsRef.current = next;
     setGhosts(next);
+    setBinHot(overBin(e.clientX, e.clientY, d.ids));
   };
 
   const endDrag = () => {
     dragRef.current = null;
     ghostsRef.current = null;
     setGhosts(null);
+    setBinHot(false);
   };
 
   const onCellUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -220,6 +231,15 @@ export function IconGrid({ onIconContextMenu }: Props) {
     const currentGhosts = ghostsRef.current;
     if (!currentGhosts || !cells) {
       pendingClickRef.current = { id: d.id, selectionBefore: d.selectionBefore };
+      endDrag();
+      return;
+    }
+
+    if (overBin(e.clientX, e.clientY, d.ids)) {
+      const trashed = sendToBin(d.ids);
+      applySelection(d.ids.filter((id) => !trashed.includes(id)), null);
+      pendingClickRef.current = null;
+      suppressClickRef.current = d.id;
       endDrag();
       return;
     }
@@ -269,7 +289,7 @@ export function IconGrid({ onIconContextMenu }: Props) {
   };
 
   /* ---- keyboard nav (manifest order — unchanged) ---- */
-  const tabbableId = activeId ?? icons[0]?.id;
+  const tabbableId = icons.some((a) => a.id === activeId) ? activeId : icons[0]?.id;
 
   const moveSelection = (delta: number) => {
     const idx = Math.max(0, icons.findIndex((a) => a.id === tabbableId));
@@ -291,6 +311,13 @@ export function IconGrid({ onIconContextMenu }: Props) {
       e.preventDefault();
       const ids = icons.map((app) => app.id);
       applySelection(ids, activeId ?? ids[0] ?? null);
+      return;
+    }
+    if (e.key === 'Delete') {
+      e.preventDefault();
+      const ids = [...selectedIdsRef.current].filter((id) => icons.some((app) => app.id === id));
+      const trashed = sendToBin(ids);
+      applySelection(ids.filter((id) => !trashed.includes(id)), null);
       return;
     }
     const rows = rowsPerColumn();
@@ -336,6 +363,7 @@ export function IconGrid({ onIconContextMenu }: Props) {
             }}
             app={app}
             selected={selectedIds.has(app.id)}
+            dropTarget={binHot && app.id === 'recycle-bin'}
             tabbable={tabbableId === app.id}
             touch={touch}
             onSelect={(additive) => onIconSelect(app.id, additive)}

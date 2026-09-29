@@ -6,10 +6,18 @@ import { useOSStore, WINDOW_CAP } from './osStore';
 const S = () => useOSStore.getState();
 
 beforeEach(() => {
-  useOSStore.setState({ windows: {}, order: [], focusedId: null, nextZ: 1, windowCount: 0 });
+  useOSStore.setState({ windows: {}, order: [], focusedId: null, nextZ: 1, windowCount: 0, dialog: null });
 });
 
 describe('open', () => {
+  it('asks before booting Dev District and accepts confirmed launch', () => {
+    expect(S().open('game1')).toBeNull();
+    expect(S().order).toHaveLength(0);
+    expect(S().dialog).toMatchObject({ kind: 'relic', appId: 'game1' });
+    S().dismissDialog();
+    expect(S().open('game1', { confirmed: true })).toBeTruthy();
+    expect(S().dialog).toBeNull();
+  });
   it('opens a window, focuses it, and registers z-order', () => {
     const id = S().open('notepad');
     expect(id).toBeTruthy();
@@ -33,7 +41,7 @@ describe('open', () => {
   });
 
   it('singleton apps focus the existing instance instead of opening a second', () => {
-    const a = S().open('game1')!;
+    const a = S().open('game1', { confirmed: true })!;
     S().open('notepad');
     const again = S().open('game1');
     expect(again).toBe(a);
@@ -43,7 +51,7 @@ describe('open', () => {
   });
 
   it('un-minimizes a minimized singleton on re-open', () => {
-    const a = S().open('game1')!;
+    const a = S().open('game1', { confirmed: true })!;
     S().setState(a, 'minimized');
     expect(S().windows[a].state).toBe('minimized');
     S().open('game1');
@@ -134,7 +142,7 @@ describe('min / max / restore / snap', () => {
 describe('window cap (§9.3, desktop LRU)', () => {
   it('evicts the least-recently-focused non-game window at the cap', () => {
     const first = S().open('notepad')!;
-    const game = S().open('game1')!;
+    const game = S().open('game1', { confirmed: true })!;
     for (let i = 2; i < WINDOW_CAP; i++) S().open('notepad');
     expect(S().order).toHaveLength(WINDOW_CAP);
     S().focus(game); // game becomes most-recent; `first` is now LRU non-game after it
