@@ -44,10 +44,10 @@ export function createTrailer(root: HTMLElement): { play(): void; pause(): void 
     .to(q('[data-icon="folder-games"] .tr-selection'), { opacity: 1, duration: .08 }, 4.94)
     .to(desktop, { opacity: 0, duration: .18 }, 5.32)
     .to(games, { opacity: 1, duration: .18 }, 5.4)
-    .to(q('.tr-rays'), { rotation: 28, duration: 5.8, ease: 'none' }, 5.4)
+    .to(q('.tr-rays'), { rotation: 28, duration: 4.15, ease: 'none' }, 5.4)
     .to(q('.tr-games-title span'), { y: 0, opacity: 1, duration: .5, stagger: .05, ease: 'bounce.out', rotation: (i) => i % 2 ? 4 : -4 }, 5.47);
 
-  const starts = [6, 7.65, 9.3];
+  const starts = [6, 7.65];
   cards.forEach((card, i) => {
     const start = starts[i];
     timeline.fromTo(card, { opacity: 0, scale: 0, rotation: -8, x: i ? '60cqw' : 0 },
@@ -59,14 +59,14 @@ export function createTrailer(root: HTMLElement): { play(): void; pause(): void 
   q('.tr-sparkle').forEach((sparkle, i) => {
     timeline.fromTo(sparkle, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .16, yoyo: true, repeat: 1 }, 6.35 + i * .23);
   });
-  timeline.to(q('.tr-classics'), { opacity: 1, duration: .16 }, 10.55)
-    .to(q('.tr-classic-icons img'), { scale: 1, duration: .3, stagger: .06, ease: 'back.out(2.5)' }, 10.57)
-    .to(games, { opacity: 0, duration: .18 }, 11.12)
-    .to(outro, { opacity: 1, duration: .18 }, 11.2)
-    .to(q('.tr-outro strong'), { scale: 1, duration: .4, ease: 'back.out(2)' }, 11.28)
-    .fromTo(q('.tr-outro-ring'), { opacity: .8, scale: .7 }, { opacity: 0, scale: 1.4, duration: .65 }, 11.48)
-    .to(outro, { opacity: 0, duration: .2 }, 12.2)
-    .set(boot, { opacity: 1 }, 12.4);
+  timeline.to(q('.tr-classics'), { opacity: 1, duration: .16 }, 8.9)
+    .to(q('.tr-classic-icons img'), { scale: 1, duration: .3, stagger: .06, ease: 'back.out(2.5)' }, 8.92)
+    .to(games, { opacity: 0, duration: .18 }, 9.47)
+    .to(outro, { opacity: 1, duration: .18 }, 9.55)
+    .to(q('.tr-outro strong'), { scale: 1, duration: .4, ease: 'back.out(2)' }, 9.63)
+    .fromTo(q('.tr-outro-ring'), { opacity: .8, scale: .7 }, { opacity: 0, scale: 1.4, duration: .65 }, 9.83)
+    .to(outro, { opacity: 0, duration: .2 }, 10.55)
+    .set(boot, { opacity: 1 }, 10.75);
 
   return {
     play() { timeline.play(); },

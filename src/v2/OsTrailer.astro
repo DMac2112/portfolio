@@ -7,7 +7,7 @@ const icons = [
 ];
 const classics = ['flappy', 'bubble', 'mines', 'pasjans', 'pajak', 'kierki', 'freecell'];
 ---
-<div class="tr" role="img" aria-label="Animated preview: DominikOS boots to its desktop, then shows its games: Frostbyte, Space Pinball, my CV as a game, and seven classics." hidden={hidden}>
+<div class="tr" role="img" aria-label="Animated preview: DominikOS boots to its desktop, then shows its games: Frostbyte, Space Pinball and seven classics." hidden={hidden}>
   <div class="tr-boot tr-scene" aria-hidden="true">
     <div class="tr-boot-centre">
       <img src="/os/ui/start-flag.svg" loading="lazy" decoding="async" alt="" />
@@ -36,10 +36,6 @@ const classics = ['flappy', 'bubble', 'mines', 'pasjans', 'pajak', 'kierki', 'fr
     <div class="tr-card" data-game="pinball">
       <div class="tr-art"><img src="/os/games/pinball/table-bg.jpg" loading="lazy" decoding="async" alt="" /><i class="tr-shine"></i></div>
       <strong class="tr-sticker">Space Pinball</strong><span class="tr-caption">Warps, beacons and a reactor bumper.</span>
-    </div>
-    <div class="tr-card" data-game="game1">
-      <div class="tr-art tr-pixel"><img src="/os/icons/game1.svg" loading="lazy" decoding="async" alt="" /><i class="tr-shine"></i></div>
-      <strong class="tr-sticker">My CV, as a game</strong><span class="tr-caption">Walk through my jobs in pixel form.</span>
     </div>
     <div class="tr-classics"><div class="tr-classic-icons">{classics.map((icon) => <img src={`/os/icons/${icon}.svg`} loading="lazy" decoding="async" alt="" />)}</div><strong>+ 7 classics, from Minesweeper to Spider Solitaire</strong></div>
     {Array.from({ length: 6 }, (_, i) => <i class="tr-sparkle" style={`--i:${i}`}></i>)}
@@ -85,8 +81,6 @@ const classics = ['flappy', 'bubble', 'mines', 'pasjans', 'pajak', 'kierki', 'fr
   .tr-card { position: absolute; top: 29cqh; left: 27cqw; width: 46cqw; height: 56cqh; text-align: center; opacity: 0; transform-origin: center; }
   .tr-art { position: relative; width: 46cqw; height: 30cqw; overflow: hidden; border: .8cqw solid white; border-radius: 3cqw; box-shadow: 0 0 0 .45cqw #0E1A44, 0 1.6cqw 0 #0E1A44; }
   .tr-art > img { width: 100%; height: 100%; object-fit: cover; }
-  .tr-art.tr-pixel { display: flex; align-items: center; justify-content: center; background: #9CC8F4; }
-  .tr-pixel > img { width: 16cqw; height: 16cqw; object-fit: contain; image-rendering: pixelated; }
   .tr-shine { position: absolute; inset: 0 0 55%; background: #ffffff47; border-radius: 2cqw 2cqw 50% 50%; }
   .tr-sticker { position: relative; display: inline-block; margin-top: 2.2cqh; padding: .6cqh 2cqw; background: #3AA53A; color: white; border: .35cqw solid #0E1A44; border-radius: .8cqw; font-size: 3.5cqw; font-weight: 700; transform: rotate(-3deg); white-space: nowrap; }
   .tr-caption { display: block; margin-top: 1.2cqh; font-size: 2.2cqw; font-weight: 600; white-space: nowrap; text-shadow: 1px 2px #0E1A44; }

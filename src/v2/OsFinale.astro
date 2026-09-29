@@ -1,7 +1,30 @@
-<section class="v2-finale" id="dominikos">
-  <div class="v2-finale-content">
-    <h2>My portfolio also runs as a desktop.</h2>
-    <p>DominikOS is a Windows-style desktop in your browser, with apps, a messenger and Frostbyte, the 2D game I built. Open anything, it all works.</p>
-    <a class="v2-start" href="/os/?boot=chooser" data-boot>Boot DominikOS</a>
+<section class="v2-finale" id="dominikos" aria-labelledby="finale-title">
+  <div class="fin-desktop">
+    <ul class="fin-icons">
+      <li><a href="/os/assets/cv.pdf" download="Dominik-Machowiak-CV.pdf"><img src="/os/icons/resume.svg" alt="" width="48" height="48" /><span>My CV</span></a></li>
+      <li><a href="https://www.linkedin.com/in/dominikmachowiak/"><img src="/os/icons/explorer.svg" alt="" width="48" height="48" /><span>LinkedIn</span></a></li>
+      <li><button type="button" data-contact-open><img src="/os/icons/email.svg" alt="" width="48" height="48" /><span>Message me</span></button></li>
+    </ul>
+    <div class="fin-win">
+      <div class="fin-titlebar">
+        <span class="fin-title"><img src="/os/icons/about.svg" alt="" width="16" height="16" />About DominikOS</span>
+        <span class="fin-controls" aria-hidden="true"><i class="fin-min"></i><i class="fin-max"></i><i class="fin-close"></i></span>
+      </div>
+      <div class="fin-body">
+        <h2 id="finale-title">My portfolio also runs as a desktop.</h2>
+        <p>DominikOS is a Windows-style desktop in your browser, with apps, a messenger and Frostbyte, the 2D game I built. Open anything, it all works.</p>
+      </div>
+      <div class="fin-status"><span>Runs in your browser</span><span>Desktop and phone</span></div>
+    </div>
+  </div>
+  <div class="fin-taskbar">
+    <a class="fin-start" href="/os/?boot=chooser" data-boot><img src="/os/ui/start-flag.svg" alt="" width="20" height="20" />Boot DominikOS</a>
+    <div class="fin-tray"><time class="fin-clock" aria-hidden="true"></time></div>
   </div>
 </section>
+<script>
+  const clock = document.querySelector<HTMLElement>('.fin-clock')!;
+  const updateClock = () => { clock.textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); };
+  updateClock();
+  setInterval(updateClock, 30000);
+</script>

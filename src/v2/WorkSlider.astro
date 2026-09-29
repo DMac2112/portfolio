@@ -1,5 +1,6 @@
 ---
 import OsTrailer from './OsTrailer.astro';
+import jobs from '../data/v2-experience.json';
 
 interface Slide {
   id: string; years: string; title: string; role: string; summary: string; stack: string;
@@ -41,7 +42,10 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
         <cite>{first.quote && `${first.quote.name}, ${first.quote.company}`}</cite>
       </blockquote>
       <p class="ws-todo ws-quote-todo" hidden={!first.quotePlaceholder}>{first.quotePlaceholder}</p>
-      <a class="ws-link v2-button" href={first.link?.href ?? '#work'} hidden={!first.link} data-boot={first.link?.href?.startsWith('/os/') ? '' : undefined}>{first.link?.label}</a>
+      <div class="ws-actions">
+        <a class:list={['ws-link', first.link?.href?.startsWith('/os/') ? 'v2-start' : 'v2-button']} href={first.link?.href ?? '#work'} hidden={!first.link} data-boot={first.link?.href?.startsWith('/os/') ? '' : undefined}>{first.link?.label}</a>
+        <button type="button" class="ws-ask" data-contact-open hidden={!first.quote}>Message me about a website</button>
+      </div>
     </div>
   </div>
   <div class="ws-bottom">
@@ -51,6 +55,16 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
       </button>)}
     </div>
     <div class="ws-track" aria-hidden="true"><span class="ws-progress" style={`width: ${100 / slides.length}%`}></span></div>
+    <div class="ws-cv">
+      <div class="ws-jobs">
+        <h3>Experience</h3>
+        <ul>{jobs.map((job) => <li><span class="ws-job-years">{job.years}</span><strong>{job.org}</strong><span>{job.role}</span></li>)}</ul>
+      </div>
+      <div class="ws-cv-links">
+        <a class="v2-button" href="/os/assets/cv.pdf" download="Dominik-Machowiak-CV.pdf">Download CV</a>
+        <a class="v2-button" href="https://www.linkedin.com/in/dominikmachowiak/">LinkedIn</a>
+      </div>
+    </div>
     <div class="ws-creds">
       <span>BSc Computing and IT, The Open University, 2018–2021</span>
       <span><img src={badgeSrc(emailBadge)} alt="" />Salesforce Marketing Cloud Email Specialist</span>
@@ -58,6 +72,6 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
     </div>
   </div>
   <span class="v2-sr ws-live" aria-live="polite"></span>
-  <ol class="v2-sr">{slides.map((slide) => <li>{slide.years}. {slide.title}. {slide.role}. {slide.summary}. Built with {slide.stack}. {slide.placeholder} {slide.quote?.text} {slide.quote?.name} {slide.quote?.company} {slide.quotePlaceholder} {slide.link?.label}</li>)}</ol>
+  <ol class="v2-sr">{slides.map((slide) => <li>{slide.years}. {slide.title}. {slide.role}. {slide.summary}. Built with {slide.stack}. {slide.quote?.text} {slide.quote?.name} {slide.quote?.company} {slide.link?.label}</li>)}</ol>
   <script type="application/json" id="v2-slides" set:html={JSON.stringify(slides).replace(/</g, '\\u003c')}></script>
 </section>

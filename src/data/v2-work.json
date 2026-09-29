@@ -1,25 +1,12 @@
 [
   {
-    "id": "deloitte",
-    "years": "2024–now",
-    "title": "Deloitte",
-    "role": "Salesforce Marketing Cloud developer",
-    "summary": "Led marketing automation for a Polish automotive client and built around 300 email and SMS messages for several car brands.",
-    "stack": "AMPscript, HTML email, CSS, JavaScript",
-    "image": null,
-    "placeholder": "NDA-safe mockup: rebuild one email for a made-up car brand in the same technique and show it on two phones.",
-    "quote": null,
-    "quotePlaceholder": "Ask a Deloitte manager or teammate for a one-line LinkedIn recommendation.",
-    "link": null
-  },
-  {
     "id": "dominikos",
     "years": "2025–now",
     "title": "DominikOS",
-    "role": "Personal project: a desktop OS in the browser",
-    "summary": "A Windows-style desktop with its own apps, a messenger and Frostbyte, a 2D snow-town game with pets and curios to find.",
+    "role": "Personal project",
+    "summary": "A Windows-style desktop in the browser, with its own apps, a messenger and Frostbyte, a 2D snow-town game.",
     "stack": "TypeScript, React, Canvas",
-    "image": "/frostbyte/assets/room-plaza.jpg",
+    "image": "/v2-media/dominikos.webp",
     "media": "os-trailer",
     "placeholder": null,
     "quote": null,
@@ -31,10 +18,10 @@
     "years": "2023–2024",
     "title": "Welcom-Inn",
     "role": "Web developer",
-    "summary": "Designed and built the website a property management company uses to advertise its homes and services.",
+    "summary": "Designed and built the site a property management company uses to advertise its homes and services.",
     "stack": "HTML, CSS, JavaScript",
-    "image": "work-welcom-inn.jpg",
-    "placeholder": "Replace with a 1600px desktop capture and a phone capture of welcom-inn.co.uk.",
+    "image": "/v2-media/welcom-inn.webp",
+    "placeholder": null,
     "quote": {
       "text": "Despite my limited knowledge of websites, he guided us patiently.",
       "name": "Agnieszka",
@@ -48,10 +35,10 @@
     "years": "2022–2023",
     "title": "Rubicall",
     "role": "Front-end web developer",
-    "summary": "Designed and built a cleaning company's website, then came back to extend it when they moved into Airbnb management.",
+    "summary": "Designed and built a cleaning company's site, then extended it when they moved into Airbnb management.",
     "stack": "HTML, CSS, JavaScript",
-    "image": "work-rubicall.png",
-    "placeholder": "Replace the logo with a 1600px desktop capture and a phone capture of rubicall.co.uk.",
+    "image": "/v2-media/rubicall.webp",
+    "placeholder": null,
     "quote": {
       "text": "I'm not very tech-savvy, but Dominik was patient and understood our needs.",
       "name": "Barbara",
@@ -59,22 +46,5 @@
     },
     "quotePlaceholder": null,
     "link": { "label": "Visit rubicall.co.uk", "href": "https://www.rubicall.co.uk/" }
-  },
-  {
-    "id": "hawthorne",
-    "years": "2021",
-    "title": "Hawthorne",
-    "role": "Intern front-end developer",
-    "summary": "Reworked pages of a small electronics company's website to improve how it looks and works.",
-    "stack": "HTML, CSS, JavaScript",
-    "image": null,
-    "placeholder": "Find the 2021 site on the Wayback Machine and capture it, or keep this slide text-only.",
-    "quote": {
-      "text": "His expertise and dedication brought a fresh appeal and functionality to the site.",
-      "name": "Norbert",
-      "company": "Hawthorne Electronics"
-    },
-    "quotePlaceholder": null,
-    "link": null
   }
 ]

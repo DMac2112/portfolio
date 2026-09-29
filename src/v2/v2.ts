@@ -37,49 +37,60 @@ const avatar = landing.querySelector<SVGSVGElement>('.pixel-avatar')!;
 const nav = document.querySelector<HTMLElement>('.v2-nav')!;
 if (desktopMotion) {
   gsap.set(brand, { opacity: 0 });
-  const measure = () => {
-    gsap.set(name, { clearProps: 'transform' });
-    return name.getBoundingClientRect();
-  };
-  const inset = () => {
-    const rect = measure();
-    const scale = Math.min(1, (innerWidth * .72 * .86) / rect.width);
-    return {
-      scale,
-      x: innerWidth * .17 - rect.left,
-      y: innerHeight * .77 - rect.top - rect.height * scale
-    };
-  };
-  const dock = () => {
-    const rect = measure();
-    const target = brand.getBoundingClientRect();
-    const scale = parseFloat(getComputedStyle(brand).fontSize) / parseFloat(getComputedStyle(name).fontSize);
-    return { scale, x: target.left - rect.left, y: target.top - rect.top };
+  const dimension = () => {
+    const a = name.getBoundingClientRect();
+    const b = brand.getBoundingClientRect();
+    const nameSize = parseFloat(getComputedStyle(name).fontSize);
+    const brandSize = parseFloat(getComputedStyle(brand).fontSize);
+    const scale = brandSize / nameSize;
+    return { scale, x: b.left - a.left, y: b.top - a.top };
   };
   const timeline = gsap.timeline({
     scrollTrigger: {
-      trigger: landing, start: 'top top', end: '+=75%', pin: true,
-      scrub: .5, invalidateOnRefresh: true,
+      trigger: landing, start: 'top top', end: '+=120%', pin: true,
+      scrub: .6, invalidateOnRefresh: true,
       onUpdate: (self) => {
-        avatar.dataset.frame = self.progress === 0 || self.progress === 1 ? 'idle' : Math.floor(self.progress * 25) % 2 ? 'walk-a' : 'walk-b';
-        nav.classList.toggle('is-solid', self.progress >= .6);
+        avatar.dataset.frame = self.progress === 0 ? 'idle' : Math.floor(self.progress * 25) % 2 ? 'walk-a' : 'walk-b';
       }
     }
   });
-  timeline.to('.v2-intro, .v2-landing-boot', { opacity: 0, duration: .25 }, 0)
-    .to('.v2-flood', { clipPath: 'inset(18% 14% 18% 14% round 10px)', duration: .6 }, 0)
-    .to(name, { scale: () => inset().scale, x: () => inset().x, y: () => inset().y, transformOrigin: 'top left', duration: .6 }, 0)
-    .to(name, { scale: () => dock().scale, x: () => dock().x, y: () => dock().y, color: '#0E1A44', ease: 'power2.inOut', duration: .25 }, .6)
-    .to(name, { opacity: 0, duration: .06 }, .84)
-    .to(brand, { opacity: 1, duration: .06 }, .84)
-    .set({}, {}, 1);
+  timeline.to('.v2-intro, .v2-landing-boot', { opacity: 0, duration: .3 }, 0)
+    .to('.v2-flood', { clipPath: 'inset(18% 14% 18% 14% round 10px)', duration: 1 }, 0)
+    .to(name, { scale: () => dimension().scale, x: () => dimension().x, y: () => dimension().y, transformOrigin: 'top left', duration: 1 }, 0)
+    .to(avatar, { x: () => window.innerWidth * 1.1, duration: 1 }, 0)
+    .to(name, { opacity: 0, duration: .12 }, .88)
+    .to(brand, { opacity: 1, duration: .12 }, .88);
 } else {
   brand.style.opacity = '1';
-  ScrollTrigger.create({
-    trigger: '#work', start: 'top top', endTrigger: 'body', end: 'bottom bottom',
-    toggleClass: { targets: nav, className: 'is-solid' }
-  });
 }
+ScrollTrigger.create({
+  trigger: '#work', start: 'top top', endTrigger: 'body', end: 'bottom bottom',
+  toggleClass: { targets: nav, className: 'is-solid' }
+});
+
+const landingBoot = landing.querySelector<HTMLElement>('.v2-landing-boot')!;
+function placeLandingBoot() {
+  if (scrollY >= 10) return;
+  landingBoot.classList.remove('is-tucked');
+  const boot = landingBoot.getBoundingClientRect();
+  const overlaps = [...name.querySelectorAll<HTMLSpanElement>(':scope > span')].some((span) => {
+    // Width from the text itself; height from the line box (line-height .8), since the text's own box
+    // includes the font's ascent and always reaches into the line above.
+    const range = document.createRange();
+    range.selectNodeContents(span);
+    const ink = range.getBoundingClientRect();
+    const line = span.getBoundingClientRect();
+    return boot.left < ink.right + 16 && boot.right > ink.left - 16 &&
+      boot.top < line.bottom && boot.bottom > line.top;
+  });
+  landingBoot.classList.toggle('is-tucked', overlaps);
+}
+placeLandingBoot();
+let landingBootResize: ReturnType<typeof setTimeout>;
+addEventListener('resize', () => {
+  clearTimeout(landingBootResize);
+  landingBootResize = setTimeout(placeLandingBoot, 150);
+});
 
 const slides = JSON.parse(document.querySelector<HTMLScriptElement>('#v2-slides')!.textContent!) as Slide[];
 const work = document.querySelector<HTMLElement>('#work')!;
@@ -202,6 +213,7 @@ function swapContent(slide: Slide, next: number) {
   placeholder.querySelector('span')!.textContent = slide.placeholder ?? '';
   show('.ws-image-todo', !!slide.image && !!slide.placeholder);
   setText('.ws-image-todo', `To replace: ${slide.placeholder ?? ''}`);
+  show('.ws-ask', !!slide.quote);
   show('.ws-quote', !!slide.quote);
   setText('.ws-quote p', slide.quote ? `“${slide.quote.text}”` : '');
   setText('.ws-quote cite', slide.quote ? `${slide.quote.name}, ${slide.quote.company}` : '');
