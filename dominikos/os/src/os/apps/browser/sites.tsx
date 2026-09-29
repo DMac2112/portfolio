@@ -12,6 +12,7 @@ import type { AppManifest } from '../../types';
 import { ExternalFrame } from '../../window/IframeHost';
 import { HOME } from './history';
 import FitStage from './FitStage';
+import { toggleGameFullscreen } from '../../hooks/useFullscreen';
 
 const FlappyApp = lazy(() => import('../../games/flappy/FlappyApp'));
 const BubbleApp = lazy(() => import('../../games/bubble/BubbleApp'));
@@ -52,20 +53,28 @@ const BUBBLE_STUB = stub('bubble', 'Bubble Shooter', '/os/icons/bubble.svg', 440
 function GamePage({ ctx, name, blurb, w, h, fluid = false, children }: {
   ctx: SiteCtx; name: string; blurb: string; w: number; h: number; fluid?: boolean; children: JSX.Element;
 }) {
+  const stageRef = useRef<HTMLDivElement>(null);
   const game = <Suspense fallback={<p className="arcade__loading">Loading game…</p>}>{children}</Suspense>;
 
   return (
-    <div className="webpage arcade">
+    <div className={fluid ? 'webpage arcade' : 'webpage arcade arcade--fit'}>
       <div className="arcade__banner">
         <strong>DominikNet Arcade</strong>
         <span>no install, plays right in your browser!</span>
       </div>
-      <h1>{name}</h1>
+      {fluid ? <h1>{name}</h1> : (
+        <div className="arcade__titlerow">
+          <h1>{name}</h1>
+          <button type="button" className="arcade__fsbtn" onClick={() => {
+            if (stageRef.current) toggleGameFullscreen(stageRef.current);
+          }}>Full screen</button>
+        </div>
+      )}
       <p className="arcade__blurb">{blurb}</p>
       {fluid ? (
         <div className="arcade__stage arcade__stage--fluid" style={{ width: w, height: h }}>{game}</div>
       ) : (
-        <FitStage width={w} height={h}>{game}</FitStage>
+        <FitStage ref={stageRef} width={w} height={h}>{game}</FitStage>
       )}
       <p className="arcade__foot">
         More free games on the <button type="button" className="weblink" onClick={() => ctx.go(HOME)}>DominikNet portal</button>.

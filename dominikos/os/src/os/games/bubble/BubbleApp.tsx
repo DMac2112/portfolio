@@ -8,6 +8,7 @@ import type { AppProps } from '../../types';
 import { useOSStore } from '../../store/osStore';
 import { usePageVisible } from '../../hooks/usePageVisible';
 import { useGameLoop } from '../../hooks/useGameLoop';
+import { canvasDpr } from '../../hooks/canvasDpr';
 import { useSystem } from '../../context/SystemContext';
 import { tone } from '../../sound';
 import {
@@ -329,7 +330,7 @@ export default function BubbleApp({ windowId, focused }: AppProps) {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = canvasDpr(canvas);
     const cw = canvas.clientWidth, ch = canvas.clientHeight;
     if (canvas.width !== Math.round(cw * dpr) || canvas.height !== Math.round(ch * dpr)) {
       canvas.width = Math.round(cw * dpr);

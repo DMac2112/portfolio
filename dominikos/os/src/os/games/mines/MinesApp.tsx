@@ -146,6 +146,7 @@ export default function MinesApp({ windowId, focused }: AppProps) {
   const [live, setLive] = useState('');
 
   const frameRef = useRef<HTMLDivElement>(null);
+  const hudRef = useRef<HTMLDivElement>(null);
   const menuWrapRef = useRef<HTMLDivElement>(null);
   // Touch flagging: on a phone there is no right-click, so a press held past LONG_MS flags the cell.
   // A mouse keeps the classic left-reveal / right-flag / middle-chord, so desktop play is unchanged.
@@ -225,25 +226,22 @@ export default function MinesApp({ windowId, focused }: AppProps) {
     return () => clearInterval(id);
   }, [active, status]);
 
-  // responsive tile size. Desktop: fit the board width, 16..26px (unchanged). Mobile (≤520px): size
-  // from WIDTH only so the board is ~85% of the page width with natural (auto) height, min 20px so
-  // taps stay usable; the 0.85 factor self-limits the width, so no upper cap.
+  // Use both frame dimensions so the HUD and every row stay visible.
   useEffect(() => {
     const el = frameRef.current;
     if (!el) return;
     const measure = () => {
-      const mobile = window.matchMedia('(max-width: 520px)').matches;
-      if (mobile) {
-        setTile(Math.max(20, Math.floor((0.85 * (el.clientWidth - 8)) / s.w)));
-      } else {
-        setTile(Math.max(16, Math.min(26, Math.floor((el.clientWidth - 12) / s.w))));
-      }
+      const hudH = hudRef.current?.getBoundingClientRect().height || 46;
+      const floor = window.matchMedia('(pointer: coarse)').matches ? 22 : 16;
+      // 18 = frame padding, 8 = HUD gap, 6 = the board's bevel border
+      const fit = Math.floor(Math.min((el.clientWidth - 18 - 6) / s.w, (el.clientHeight - 18 - hudH - 8 - 6) / s.h));
+      setTile(Math.max(floor, Math.min(56, fit)));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [s.w]);
+  }, [s.w, s.h]);
 
   // window-level keys: F2 new game; also close the menu on Esc / outside click
   useEffect(() => {
@@ -377,7 +375,7 @@ export default function MinesApp({ windowId, focused }: AppProps) {
       </div>
 
       <div className="mines__frame" ref={frameRef}>
-        <div className="mines__hud" style={{ width: s.w * tile + 6 }}>
+        <div className="mines__hud" ref={hudRef} style={{ width: s.w * tile + 6 }}>
           <span className="mines__led" aria-hidden="true">{led(remaining(s))}</span>
           <button type="button" className="mines__face" data-face={face} onClick={newGameNow} aria-label="New game (smiley reset)"><Face face={face} /></button>
           <span className="mines__led" aria-hidden="true">{led(time)}</span>

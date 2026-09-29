@@ -8,6 +8,12 @@
       "port": 5183
     },
     {
+      "name": "os-dev",
+      "runtimeExecutable": "npm.cmd",
+      "runtimeArgs": ["--prefix", "dominikos/os", "run", "dev"],
+      "port": 4183
+    },
+    {
       "name": "site-preview",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["astro", "preview", "--port", "4321"],

@@ -6,7 +6,7 @@
 // ../pasjans/cards — this file is presentation + input only, cloned from
 // ../pasjans/SolitaireApp.tsx's shell (see also ../freecell/FreeCellApp.tsx, a sibling clone).
 import {
-  useCallback, useEffect, useRef, useState,
+  useCallback, useEffect, useLayoutEffect, useRef, useState,
   type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import type { AppProps } from '../../types';
@@ -27,17 +27,33 @@ const STOCK_FAN = 0.06;    // stock pile's own tiny "deck of blocks" offset
 
 /* -------------------------------- layout ------------------------------- */
 
-interface Metrics { cardW: number; cardH: number; gap: number; y0: number; colX: (i: number) => number; stockX: number; stockY: number }
+interface Metrics { cardW: number; cardH: number; gap: number; y0: number; boardH: number; colX: (i: number) => number; stockX: number; stockY: number }
 
 /** Column geometry from the board width — 10 tableau columns; the stock sits in the same top
  *  row, one card-width to the right of the last column (pasjans-style metrics idiom). */
-function metrics(boardW: number): Metrics {
+function metrics(boardW: number, boardH: number): Metrics {
   const gap = Math.max(2, Math.round((boardW / 11) * 0.16));
-  const cardW = Math.min(100, Math.max(20, Math.floor((boardW - 12 * gap) / 11)));
+  const widthBased = Math.min(150, Math.max(20, Math.floor((boardW - 12 * gap) / 11)));
+  const heightBased = boardH > 0 ? Math.max(20, Math.floor((boardH - TOP_Y - 34 - 8) / 3.4 / CARD_RATIO)) : widthBased;
+  const cardW = Math.min(widthBased, heightBased);
   const cardH = cardW * CARD_RATIO;
-  const colX = (i: number) => gap + i * (cardW + gap);
+  const usedW = 11 * cardW + 10 * gap;
+  const startX = boardW > 0 ? Math.max(gap, (boardW - usedW) / 2) : gap;
+  const colX = (i: number) => startX + i * (cardW + gap);
   const stockY = TOP_Y + 4 * cardH * STOCK_FAN;
-  return { cardW, cardH, gap, y0: cardH + 34, colX, stockX: colX(10), stockY };
+  return { cardW, cardH, gap, y0: cardH + 34, boardH, colX, stockX: colX(10), stockY };
+}
+
+function pileScale(pile: Card[], m: Metrics): number {
+  const natural = pile.slice(0, -1).reduce((sum, card) => sum + (card.faceUp ? FAN : 0.16) * m.cardH, 0);
+  return m.boardH > 0 && natural > 0
+    ? Math.max(0.3, Math.min(1, (m.boardH - 6 - m.y0 - m.cardH) / natural))
+    : 1;
+}
+
+function pileHeight(pile: Card[], m: Metrics): number {
+  const steps = pile.slice(0, -1).reduce((sum, card) => sum + (card.faceUp ? FAN : 0.16) * m.cardH, 0);
+  return m.cardH + steps * pileScale(pile, m);
 }
 
 interface Entry { card: Card; x: number; y: number; z: number; from: PileRef | null; index: number }
@@ -59,9 +75,10 @@ function buildLayout(s: GameState, m: Metrics): Entry[] {
   });
   s.tableau.forEach((pile, t) => {
     let y = m.y0;
+    const scale = pileScale(pile, m);
     pile.forEach((card, i) => {
       entries.push({ card, x: m.colX(t), y, z: i + 1, from: { pile: 'tableau', index: t }, index: i });
-      y += (card.faceUp ? FAN : 0.16) * m.cardH;
+      y += (card.faceUp ? FAN : 0.16) * m.cardH * scale;
     });
   });
   return entries.sort((a, b) => a.card.id - b.card.id); // stable DOM order; z-index does the stacking
@@ -76,8 +93,7 @@ function pickDrop(s: GameState, m: Metrics, cx: number, cy: number): PileRef | n
   interface DropRect { ref: PileRef; x: number; y: number; w: number; h: number }
   const rects: DropRect[] = [];
   for (let t = 0; t < 10; t++) {
-    let h = m.cardH;
-    for (let i = 0; i < s.tableau[t].length - 1; i++) h += (s.tableau[t][i].faceUp ? FAN : 0.16) * m.cardH;
+    const h = pileHeight(s.tableau[t], m);
     rects.push({ ref: { pile: 'tableau', index: t }, x: m.colX(t), y: m.y0, w: m.cardW, h });
   }
   let best: PileRef | null = null;
@@ -122,7 +138,7 @@ export default function SpiderApp({ windowId, focused }: AppProps) {
   const menuWrapRef = useRef<HTMLDivElement>(null);
   const cardEls = useRef(new Map<number, HTMLDivElement>());
   const positionsRef = useRef(new Map<number, { x: number; y: number }>());
-  const metricsRef = useRef<Metrics>(metrics(0));
+  const metricsRef = useRef<Metrics>(metrics(0, 0));
   const dragRef = useRef<Drag | null>(null);
 
   const visible = usePageVisible();
@@ -161,9 +177,10 @@ export default function SpiderApp({ windowId, focused }: AppProps) {
   );
 
   // board metrics track the window body via ResizeObserver
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = boardRef.current;
     if (!el) return;
+    setBoardSize({ w: el.clientWidth, h: el.clientHeight }); // first paint at full size, before the observer's first tick
     const ro = new ResizeObserver((es) => {
       const r = es[0]?.contentRect;
       if (r) setBoardSize({ w: r.width, h: r.height });
@@ -390,7 +407,7 @@ export default function SpiderApp({ windowId, focused }: AppProps) {
     sfx('win');
   }, [won, sfx]);
 
-  const m = metrics(boardSize.w);
+  const m = metrics(boardSize.w, boardSize.h);
   metricsRef.current = m;
   const entries = buildLayout(s, m);
   const posMap = new Map<number, { x: number; y: number }>();
@@ -417,8 +434,7 @@ export default function SpiderApp({ windowId, focused }: AppProps) {
       const ref: PileRef = { pile: 'tableau', index: t };
       const runLen = movableRunLength(s, t);
       const faceDown = pile.reduce((n, c) => n + (c.faceUp ? 0 : 1), 0);
-      let h = m.cardH;
-      for (let i = 0; i < pile.length - 1; i++) h += (pile[i].faceUp ? FAN : 0.16) * m.cardH;
+      const h = pileHeight(pile, m);
       return {
         key: `t${t}`, ref, x: m.colX(t), y: m.y0, w: m.cardW, h,
         pick: pile.length ? pile.length - Math.max(1, runLen) : null,

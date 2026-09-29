@@ -1,5 +1,5 @@
 import {
-  useCallback, useEffect, useRef, useState,
+  useCallback, useEffect, useLayoutEffect, useRef, useState,
   type CSSProperties,
 } from 'react';
 import type { AppProps } from '../../types';
@@ -54,19 +54,19 @@ interface BoardMetrics {
 }
 
 function boardMetrics(width: number, height: number, humanCards: number, opponentCards: number): BoardMetrics {
-  const humanW = Math.max(28, Math.min(72, width / 9.5, height / 5.5));
+  const humanW = Math.max(28, Math.min(118, width / 9.5, height / 5.5));
   const humanH = humanW * CARD_RATIO;
   const usable = Math.max(humanW, width - 32);
   const humanStep = humanCards <= 1
     ? 0
     : Math.min(humanW * 0.7, Math.max(8, (usable - humanW) / (humanCards - 1)));
   const humanWidth = humanW + humanStep * Math.max(0, humanCards - 1);
-  const opponentW = Math.max(21, Math.min(44, humanW * 0.68));
+  const opponentW = Math.max(21, Math.min(70, humanW * 0.68));
   const opponentH = opponentW * CARD_RATIO;
   const opponentStep = opponentCards <= 1 ? 0 : Math.min(10, opponentW * 0.24);
   const topWidth = opponentW + opponentStep * Math.max(0, opponentCards - 1);
   const sideHeight = opponentH + opponentStep * Math.max(0, opponentCards - 1);
-  const trickW = Math.max(30, Math.min(56, width / 10, height / 7));
+  const trickW = Math.max(30, Math.min(92, width / 10, height / 7));
   return {
     humanW,
     humanH,
@@ -114,7 +114,7 @@ export default function HeartsApp({ windowId, focused }: AppProps) {
 
   const [version, setVersion] = useState(0);
   const bump = useCallback(() => setVersion((value) => value + 1), []);
-  const [boardSize, setBoardSize] = useState({ w: 720, h: 560 });
+  const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
   const [announce, setAnnounce] = useState('');
   const [heldTrick, setHeldTrick] = useState<TrickPlay[] | null>(null);
@@ -142,9 +142,10 @@ export default function HeartsApp({ windowId, focused }: AppProps) {
     trickTimerRef.current = null;
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const board = boardRef.current;
     if (!board) return;
+    setBoardSize({ w: board.clientWidth, h: board.clientHeight }); // first paint at full size, before the observer's first tick
     const observer = new ResizeObserver((entries) => {
       const rect = entries[0]?.contentRect;
       if (rect) setBoardSize({ w: rect.width, h: rect.height });

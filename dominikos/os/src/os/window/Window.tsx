@@ -7,10 +7,11 @@ import { useOSStore } from '../store/osStore';
 import { byId } from '../registry';
 import { isFreeFloat } from '../env';
 import { useWindowDrag } from '../hooks/useWindowDrag';
-import { toggleElementFullscreen } from '../hooks/useFullscreen';
+import { toggleGameFullscreen, useElementFullscreen } from '../hooks/useFullscreen';
 import { TitleBar } from './TitleBar';
 import { ResizeHandles } from './ResizeHandles';
 import { AppHost } from './AppHost';
+import { FullscreenExit } from './FullscreenExit';
 
 function motionMs(): number {
   if (typeof document === 'undefined') return 0;
@@ -32,6 +33,7 @@ export const Window = memo(function Window({ instanceId }: { instanceId: string 
   const win = useOSStore((s) => s.windows[instanceId]);
   const focused = useOSStore((s) => s.focusedId === instanceId);
   const winRef = useRef<HTMLDivElement>(null);
+  const fs = useElementFullscreen(winRef);
   const prevState = useRef(win?.state);
   const dragHandlers = useWindowDrag(winRef, instanceId);
 
@@ -69,7 +71,7 @@ export const Window = memo(function Window({ instanceId }: { instanceId: string 
   }, [instanceId]);
 
   const fullscreen = useCallback(() => {
-    if (winRef.current) toggleElementFullscreen(winRef.current);
+    if (winRef.current) toggleGameFullscreen(winRef.current);
   }, []);
 
   // open animation on mount; un-minimize animation on restore
@@ -126,6 +128,7 @@ export const Window = memo(function Window({ instanceId }: { instanceId: string 
       tabIndex={-1}
       data-state={focused ? 'active' : 'inactive'}
       data-display={win.state}
+      data-fullscreen={fs || undefined}
       style={style}
       onPointerDownCapture={() => {
         if (!focused) useOSStore.getState().focus(instanceId);
@@ -143,7 +146,8 @@ export const Window = memo(function Window({ instanceId }: { instanceId: string 
       <div className={`win__body win-body${manifest.kind === 'iframe' ? ' win__body--stage' : ''}`}>
         <AppHost manifest={manifest} windowId={instanceId} focused={focused} />
       </div>
-      {resizable && <ResizeHandles winRef={winRef} instanceId={instanceId} manifest={manifest} />}
+      {resizable && !fs && <ResizeHandles winRef={winRef} instanceId={instanceId} manifest={manifest} />}
+      {isGame && <FullscreenExit targetRef={winRef} variant="bar" />}
     </div>
   );
 });

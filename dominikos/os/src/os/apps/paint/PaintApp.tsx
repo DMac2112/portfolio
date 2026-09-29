@@ -3,7 +3,7 @@
 // — event-driven strokes. The only timer is the airbrush spray, gated on §8.4 active booleans.
 // Rules/pixel helpers live in ./canvas (locked, unit-tested). Every glyph is a crispEdges pixel icon
 // and every surface is hard-beveled — XP through and through.
-import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { AppProps } from '../../types';
 import { useOSStore } from '../../store/osStore';
 import { usePageVisible } from '../../hooks/usePageVisible';
@@ -97,6 +97,7 @@ export default function PaintApp({ focused, windowId }: AppProps) {
   const artCtx = useRef<CanvasRenderingContext2D | null>(null);
   const prevCtx = useRef<CanvasRenderingContext2D | null>(null);
   const statusRef = useRef<HTMLSpanElement>(null);
+  const canvasAreaRef = useRef<HTMLDivElement>(null);
   const undo = useRef<Snap[]>([]);
   const redo = useRef<Snap[]>([]);
   const sprayTimer = useRef<number | null>(null);
@@ -123,13 +124,18 @@ export default function PaintApp({ focused, windowId }: AppProps) {
   const [textEdit, setTextEdit] = useState<{ x: number; y: number; value: string } | null>(null);
   const toolRef = useRef(tool); toolRef.current = tool;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const art = artRef.current!, prev = previewRef.current!;
-    art.width = DEFAULT_W; art.height = DEFAULT_H; prev.width = DEFAULT_W; prev.height = DEFAULT_H;
+    const area = canvasAreaRef.current!;
+    const w = area.clientWidth ? Math.max(120, Math.min(DEFAULT_W, area.clientWidth - 16 - 6)) : DEFAULT_W;
+    const h = area.clientHeight ? Math.max(120, Math.min(DEFAULT_H, area.clientHeight - 16 - 6)) : DEFAULT_H;
+    art.width = w; art.height = h; prev.width = w; prev.height = h;
     const a = art.getContext('2d')!, p = prev.getContext('2d')!;
     a.imageSmoothingEnabled = false; p.imageSmoothingEnabled = false;
-    a.fillStyle = '#ffffff'; a.fillRect(0, 0, DEFAULT_W, DEFAULT_H);
+    a.fillStyle = '#ffffff'; a.fillRect(0, 0, w, h);
     artCtx.current = a; prevCtx.current = p;
+    pendSize.current = { w, h };
+    setSize({ w, h });
   }, []);
 
   const dimsW = (): number => artRef.current!.width;
@@ -396,7 +402,7 @@ export default function PaintApp({ focused, windowId }: AppProps) {
           </div>
         </div>
 
-        <div className="paint__canvasarea" onContextMenu={(e) => e.preventDefault()}>
+        <div ref={canvasAreaRef} className="paint__canvasarea" onContextMenu={(e) => e.preventDefault()}>
           <div className="paint__stage" style={{ width: size.w, height: size.h }}>
             <canvas ref={artRef} className="paint__art" />
             <canvas

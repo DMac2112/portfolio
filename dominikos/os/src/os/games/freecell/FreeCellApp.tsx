@@ -4,7 +4,7 @@
 // the card art is the UNMODIFIED pasjans renderer imported from ../pasjans/cards — this file is
 // presentation + input only, cloned from ../pasjans/SolitaireApp.tsx's shell.
 import {
-  useCallback, useEffect, useRef, useState,
+  useCallback, useEffect, useLayoutEffect, useRef, useState,
   type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import type { AppProps } from '../../types';
@@ -24,15 +24,27 @@ const FAN = 0.28;          // tableau stack offset, in card heights — every ca
 
 /* -------------------------------- layout ------------------------------- */
 
-interface Metrics { cardW: number; cardH: number; gap: number; y0: number; colX: (i: number) => number }
+interface Metrics { cardW: number; cardH: number; gap: number; y0: number; boardH: number; colX: (i: number) => number }
 
 /** Column geometry from the board width — 8 slots wide (4 free cells + 4 foundations on top,
  *  8 tableau columns below), same idiom as pasjans' metrics(). */
-function metrics(boardW: number): Metrics {
+function metrics(boardW: number, boardH: number): Metrics {
   const gap = Math.round((boardW / 8) * 0.16);
-  const cardW = Math.min(110, Math.max(36, Math.floor((boardW - 8 * gap) / 8))); // fit the 360px mobile floor
+  const widthBased = Math.min(170, Math.max(36, Math.floor((boardW - 8 * gap) / 8)));
+  const heightBased = boardH > 0 ? Math.max(36, Math.floor((boardH - TOP_Y - 34 - 8) / 3.6 / CARD_RATIO)) : widthBased;
+  const cardW = Math.min(widthBased, heightBased);
   const cardH = cardW * CARD_RATIO;
-  return { cardW, cardH, gap, y0: cardH + 34, colX: (i) => gap + i * (cardW + gap) };
+  const usedW = 8 * cardW + 7 * gap;
+  const startX = boardW > 0 ? Math.max(gap, (boardW - usedW) / 2) : gap;
+  return { cardW, cardH, gap, y0: cardH + 34, boardH, colX: (i) => startX + i * (cardW + gap) };
+}
+
+function pileHeight(pile: Card[], m: Metrics): number {
+  const natural = Math.max(0, pile.length - 1) * FAN * m.cardH;
+  const scale = m.boardH > 0 && natural > 0
+    ? Math.max(0.3, Math.min(1, (m.boardH - 6 - m.y0 - m.cardH) / natural))
+    : 1;
+  return m.cardH + natural * scale;
 }
 
 interface Entry { card: Card; x: number; y: number; z: number; from: PileRef | null; index: number }
@@ -50,9 +62,10 @@ function buildLayout(s: GameState, m: Metrics): Entry[] {
   });
   s.tableau.forEach((pile, t) => {
     let y = m.y0;
+    const step = pile.length > 1 ? (pileHeight(pile, m) - m.cardH) / (pile.length - 1) : 0;
     pile.forEach((card, i) => {
       entries.push({ card, x: m.colX(t), y, z: i + 1, from: { pile: 'tableau', index: t }, index: i });
-      y += FAN * m.cardH;
+      y += step;
     });
   });
   return entries.sort((a, b) => a.card.id - b.card.id); // stable DOM order; z-index does the stacking
@@ -85,8 +98,7 @@ function pickDrop(s: GameState, m: Metrics, cx: number, cy: number): PileRef | n
     rects.push({ ref: { pile: 'foundation', index: f }, x: m.colX(4 + f), y: TOP_Y, w: m.cardW, h: m.cardH });
   }
   for (let t = 0; t < 8; t++) {
-    let h = m.cardH;
-    for (let i = 0; i < s.tableau[t].length - 1; i++) h += FAN * m.cardH;
+    const h = pileHeight(s.tableau[t], m);
     rects.push({ ref: { pile: 'tableau', index: t }, x: m.colX(t), y: m.y0, w: m.cardW, h });
   }
   let best: PileRef | null = null;
@@ -128,7 +140,7 @@ export default function FreeCellApp({ windowId, focused }: AppProps) {
   const menuWrapRef = useRef<HTMLDivElement>(null);
   const cardEls = useRef(new Map<number, HTMLDivElement>());
   const positionsRef = useRef(new Map<number, { x: number; y: number }>());
-  const metricsRef = useRef<Metrics>(metrics(0));
+  const metricsRef = useRef<Metrics>(metrics(0, 0));
   const dragRef = useRef<Drag | null>(null);
 
   const visible = usePageVisible();
@@ -164,9 +176,10 @@ export default function FreeCellApp({ windowId, focused }: AppProps) {
   );
 
   // board metrics track the window body via ResizeObserver
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = boardRef.current;
     if (!el) return;
+    setBoardSize({ w: el.clientWidth, h: el.clientHeight }); // first paint at full size, before the observer's first tick
     const ro = new ResizeObserver((es) => {
       const r = es[0]?.contentRect;
       if (r) setBoardSize({ w: r.width, h: r.height });
@@ -392,7 +405,7 @@ export default function FreeCellApp({ windowId, focused }: AppProps) {
     sfx('win');
   }, [won, sfx]);
 
-  const m = metrics(boardSize.w);
+  const m = metrics(boardSize.w, boardSize.h);
   metricsRef.current = m;
   const entries = buildLayout(s, m);
   const posMap = new Map<number, { x: number; y: number }>();
@@ -430,8 +443,7 @@ export default function FreeCellApp({ windowId, focused }: AppProps) {
     ...s.tableau.map((pile, t): Hotspot => {
       const ref: PileRef = { pile: 'tableau', index: t };
       const runLen = movableRunLength(s, t);
-      let h = m.cardH;
-      for (let i = 0; i < pile.length - 1; i++) h += FAN * m.cardH;
+      const h = pileHeight(pile, m);
       return {
         key: `t${t}`, ref, x: m.colX(t), y: m.y0, w: m.cardW, h,
         pick: pile.length ? pile.length - runLen : null,

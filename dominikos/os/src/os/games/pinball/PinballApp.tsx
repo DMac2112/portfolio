@@ -14,6 +14,7 @@ import type { AppProps } from '../../types';
 import { useOSStore } from '../../store/osStore';
 import { usePageVisible } from '../../hooks/usePageVisible';
 import { useGameLoop } from '../../hooks/useGameLoop';
+import { toggleGameFullscreen } from '../../hooks/useFullscreen';
 import { useSystem } from '../../context/SystemContext';
 import { tone } from '../../sound';
 import {
@@ -682,6 +683,16 @@ export default function PinballApp({ windowId, focused }: AppProps) {
           swallows the ball — brace for the ejection<br />
           touch: tap left/right half of the table
         </p>
+        <button
+          type="button"
+          className="pinball__fs"
+          onClick={(e) => {
+            const host = e.currentTarget.closest('.win, .mwin') as HTMLElement | null;
+            if (host) toggleGameFullscreen(host);
+          }}
+        >
+          Full screen
+        </button>
       </aside>
     </div>
   );

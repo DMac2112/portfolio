@@ -3,12 +3,14 @@
 // auto-maximized; "Home" minimizes (windows stay mounted for state preservation, §9.3 —
 // minimization also fires the game pause contract). This module is the phone half of the
 // §10.6 tree split: it never imports the drag/resize/snap window manager.
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useOSStore } from '../store/osStore';
 import { byId } from '../registry';
 import { Wallpaper } from '../shell/Wallpaper';
 import { IconGrid } from '../desktop/IconGrid';
 import { AppHost } from '../window/AppHost';
+import { FullscreenExit } from '../window/FullscreenExit';
+import { exitGameFullscreen, toggleGameFullscreen, useElementFullscreen } from '../hooks/useFullscreen';
 import { MobileDock } from '../taskbar/MobileDock';
 import { MobileStartLauncher } from '../taskbar/MobileStartLauncher';
 import { backStack } from './backStack';
@@ -22,17 +24,30 @@ interface Props {
 function MobileWindow({ instanceId, visible }: { instanceId: string; visible: boolean }) {
   const win = useOSStore((s) => s.windows[instanceId]);
   const manifest = win ? byId(win.appId) : undefined;
+  const ref = useRef<HTMLDivElement>(null);
+  const fs = useElementFullscreen(ref);
+  useEffect(() => {
+    if (!visible && fs) exitGameFullscreen();
+  }, [visible, fs]);
   if (!win || !manifest) return null;
   // §10.5: only immersive games (canvas/iframe with their own HUD) open chromeless full-viewport,
   // closed via Back / Home. Everything else — windowed games like the card games and Minesweeper
   // included — gets the standard titlebar with the red close ✕, so it can always be shut.
   const chromeless = manifest.window.immersive === true;
   return (
-    <div className="mwin" data-visible={visible} role="dialog" aria-modal="false" aria-label={win.title}>
+    <div ref={ref} className="mwin" data-visible={visible} data-fullscreen={fs || undefined} role="dialog" aria-modal="false" aria-label={win.title}>
       {!chromeless && (
         <div className="mwin__titlebar">
           <img src={win.icon} alt="" />
           <span>{win.title}</span>
+          {manifest.category === 'games' && (
+            <button
+              type="button"
+              className="mwin__full"
+              aria-label="Full screen"
+              onClick={() => ref.current && toggleGameFullscreen(ref.current)}
+            />
+          )}
           <button
             type="button"
             aria-label="Close"
@@ -48,6 +63,7 @@ function MobileWindow({ instanceId, visible }: { instanceId: string; visible: bo
       <div className={`mwin__body win-body${manifest.kind === 'iframe' ? ' win__body--stage' : ''}`}>
         <AppHost manifest={manifest} windowId={instanceId} focused={visible} />
       </div>
+      {manifest.category === 'games' && <FullscreenExit targetRef={ref} variant="bar" />}
     </div>
   );
 }

@@ -5,7 +5,7 @@
 // win cascade painted (never cleared) onto a canvas overlay. Rules live in ./engine and the
 // card art in ./cards — both locked contracts; everything here is presentation + input.
 import {
-  useCallback, useEffect, useRef, useState,
+  useCallback, useEffect, useLayoutEffect, useRef, useState,
   type PointerEvent as ReactPointerEvent, type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import type { AppProps } from '../../types';
@@ -43,14 +43,30 @@ function fmtTime(sec: number): string {
 
 /* -------------------------------- layout ------------------------------- */
 
-interface Metrics { cardW: number; cardH: number; gap: number; y0: number; colX: (i: number) => number }
+interface Metrics { cardW: number; cardH: number; gap: number; y0: number; boardH: number; colX: (i: number) => number }
 
 /** Column geometry from the board width; the gap comes from a provisional boardW/8 card. */
-function metrics(boardW: number): Metrics {
+function metrics(boardW: number, boardH: number): Metrics {
   const gap = Math.round((boardW / 8) * 0.16);
-  const cardW = Math.min(110, Math.max(36, Math.floor((boardW - 8 * gap) / 7))); // fit the 360px mobile floor
+  const widthBased = Math.min(170, Math.max(36, Math.floor((boardW - 8 * gap) / 7)));
+  const heightBased = boardH > 0 ? Math.max(36, Math.floor((boardH - TOP_Y - 34 - 8) / 3.4 / CARD_RATIO)) : widthBased;
+  const cardW = Math.min(widthBased, heightBased);
   const cardH = cardW * CARD_RATIO;
-  return { cardW, cardH, gap, y0: cardH + 34, colX: (i) => gap + i * (cardW + gap) };
+  const usedW = 7 * cardW + 6 * gap;
+  const startX = boardW > 0 ? Math.max(gap, (boardW - usedW) / 2) : gap;
+  return { cardW, cardH, gap, y0: cardH + 34, boardH, colX: (i) => startX + i * (cardW + gap) };
+}
+
+function pileScale(pile: Card[], m: Metrics): number {
+  const natural = pile.slice(0, -1).reduce((sum, card) => sum + (card.faceUp ? FAN : 0.16) * m.cardH, 0);
+  return m.boardH > 0 && natural > 0
+    ? Math.max(0.3, Math.min(1, (m.boardH - 6 - m.y0 - m.cardH) / natural))
+    : 1;
+}
+
+function pileHeight(pile: Card[], m: Metrics): number {
+  const steps = pile.slice(0, -1).reduce((sum, card) => sum + (card.faceUp ? FAN : 0.16) * m.cardH, 0);
+  return m.cardH + steps * pileScale(pile, m);
 }
 
 interface Entry { card: Card; x: number; y: number; z: number; from: PileRef | null; index: number }
@@ -73,9 +89,10 @@ function buildLayout(s: GameState, m: Metrics): Entry[] {
   });
   s.tableau.forEach((pile, t) => {
     let y = m.y0;
+    const scale = pileScale(pile, m);
     pile.forEach((card, i) => {
       entries.push({ card, x: m.colX(t), y, z: i + 1, from: { pile: 'tableau', index: t }, index: i });
-      y += (card.faceUp ? FAN : 0.16) * m.cardH;
+      y += (card.faceUp ? FAN : 0.16) * m.cardH * scale;
     });
   });
   return entries.sort((a, b) => a.card.id - b.card.id); // stable DOM order; z-index does the stacking
@@ -100,8 +117,7 @@ function pickDrop(s: GameState, m: Metrics, cx: number, cy: number): PileRef | n
     rects.push({ ref: { pile: 'foundation', index: f }, x: m.colX(3 + f), y: TOP_Y, w: m.cardW, h: m.cardH });
   }
   for (let t = 0; t < 7; t++) {
-    let h = m.cardH;
-    for (let i = 0; i < s.tableau[t].length - 1; i++) h += (s.tableau[t][i].faceUp ? FAN : 0.16) * m.cardH;
+    const h = pileHeight(s.tableau[t], m);
     rects.push({ ref: { pile: 'tableau', index: t }, x: m.colX(t), y: m.y0, w: m.cardW, h });
   }
   let best: PileRef | null = null;
@@ -167,7 +183,7 @@ export default function SolitaireApp({ windowId, focused }: AppProps) {
   const cascadeCanvasRef = useRef<HTMLCanvasElement>(null);
   const cardEls = useRef(new Map<number, HTMLDivElement>());
   const positionsRef = useRef(new Map<number, { x: number; y: number }>());
-  const metricsRef = useRef<Metrics>(metrics(0));
+  const metricsRef = useRef<Metrics>(metrics(0, 0));
   const dragRef = useRef<Drag | null>(null);
   const cascadeRef = useRef<Cascade | null>(null);
   const winHandled = useRef(false);
@@ -213,9 +229,10 @@ export default function SolitaireApp({ windowId, focused }: AppProps) {
   );
 
   // board metrics track the window body via ResizeObserver
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = boardRef.current;
     if (!el) return;
+    setBoardSize({ w: el.clientWidth, h: el.clientHeight }); // first paint at full size, before the observer's first tick
     const ro = new ResizeObserver((es) => {
       const r = es[0]?.contentRect;
       if (r) setBoardSize({ w: r.width, h: r.height });
@@ -555,7 +572,7 @@ export default function SolitaireApp({ windowId, focused }: AppProps) {
     active && cascading,
   );
 
-  const m = metrics(boardSize.w);
+  const m = metrics(boardSize.w, boardSize.h);
   metricsRef.current = m;
   const entries = buildLayout(s, m);
   const posMap = new Map<number, { x: number; y: number }>();
@@ -597,8 +614,7 @@ export default function SolitaireApp({ windowId, focused }: AppProps) {
       let lead = pile.length;
       for (let i = 0; i < pile.length; i++) if (pile[i].faceUp) { lead = i; break; }
       const faceDown = pile.reduce((n, c) => n + (c.faceUp ? 0 : 1), 0);
-      let h = m.cardH;
-      for (let i = 0; i < pile.length - 1; i++) h += (pile[i].faceUp ? FAN : 0.16) * m.cardH;
+      const h = pileHeight(pile, m);
       return {
         key: `t${t}`, ref, x: m.colX(t), y: m.y0, w: m.cardW, h,
         pick: lead < pile.length ? lead : null,

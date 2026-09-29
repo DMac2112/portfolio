@@ -814,7 +814,7 @@ body {
 .mwin__titlebar {
   flex: none; height: 44px;
   display: flex; align-items: center; gap: 8px;
-  padding: 0 6px 0 10px;
+  padding: 0 max(6px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));
   background: linear-gradient(180deg, var(--luna-blue-2) 0%, var(--luna-blue-1) 14%, var(--luna-blue-3) 72%, var(--luna-blue-4) 100%);
   color: var(--ink-on-blue);
   font: bold 14px var(--font-ui);
@@ -835,7 +835,7 @@ body {
   flex: none;
   min-height: 56px;
   display: flex; align-items: center; gap: 8px;
-  padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+  padding: 6px max(10px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left));
   background: linear-gradient(180deg, var(--taskbar-2) 0%, var(--taskbar-1) 10%, var(--taskbar-3) 100%);
   box-shadow: inset 0 1px 0 #4f97ff;
 }
@@ -999,6 +999,13 @@ body {
 .pinball__panel dd { margin: 0; text-align: right; color: #eef2fb; }
 .pinball__msg { margin: 2px 0; min-height: 42px; font-size: 12px; line-height: 1.45; color: #ffd88f; }
 .pinball__keys { margin: auto 0 0; font-size: 10.5px; line-height: 1.6; color: #8291b4; }
+@media (max-height: 500px) {
+  .pinball__keys { display: none; }
+  .pinball__panel { padding: 6px 8px; gap: 4px; }
+  .pinball__panel h3 { font-size: 11px; letter-spacing: 1px; }
+  .pinball__score { padding: 2px 6px; font-size: 20px; }
+  .pinball__msg { margin: 0; min-height: 0; line-height: 1.2; }
+}
 .pinball__keys b { color: #cfe0fb; }
 @media (max-width: 520px) {
   .pinball { flex-direction: column; }
@@ -2027,6 +2034,24 @@ body {
 .arcade h1 { font-size: 19px; margin: 12px 0 2px; }
 .arcade__blurb { margin: 0 0 10px; color: var(--ink-subtle); font-size: 12px; }
 .arcade__stage { margin: 0 auto; border: 2px solid #444; background: #000; }
+.arcade--fit { height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; container-type: size; }
+.arcade--fit > *:not(.fit-stage) { flex: none; }
+.arcade--fit .fit-stage { flex: 1 1 0; min-height: 0; width: 100%; margin: 0; border: 0; background: transparent; position: relative; display: flex; align-items: flex-start; justify-content: center; overflow: hidden; }
+.fit-stage__frame { flex: none; border: 2px solid #444; background: #000; overflow: hidden; }
+.fit-stage[data-fullscreen] { background: #000; align-items: center; }
+.fit-stage[data-fullscreen] .fit-stage__frame { border: 0; }
+.fit-stage:fullscreen::backdrop { background: #000; }
+.fit-stage[data-pseudo-fs] { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 2147483001; }
+.arcade__titlerow { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 12px 0 6px; }
+.arcade__titlerow h1 { margin: 0; }
+.arcade__fsbtn { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 7px; border: 2px solid; border-color: #ffe9a8 #b3542e #b3542e #ffe9a8; background: linear-gradient(180deg, #ffe58a, #f2a33c); color: #4a2a0a; font: bold 11px var(--font-ui); cursor: pointer; }
+.arcade__fsbtn::before { content: ''; width: 12px; height: 12px; background: #4a2a0a; -webkit-mask: url("/os/chrome/xp/full.svg") center/contain no-repeat; mask: url("/os/chrome/xp/full.svg") center/contain no-repeat; }
+.arcade__fsbtn:active { border-color: #b3542e #ffe9a8 #ffe9a8 #b3542e; }
+.arcade__fsbtn:focus-visible { outline: 1px dotted #4a2a0a; outline-offset: 2px; }
+@media (pointer: coarse) { .arcade__fsbtn { min-height: 36px; } }
+@container (max-height: 520px) { .arcade__blurb, .arcade__foot { display: none; } .arcade__titlerow { margin: 3px 0 4px; } }
+@container (max-height: 420px) { .arcade__banner { display: none; } }
+@media (max-height: 500px) { .browser__favbar, .browser__status { display: none; } }
 /* Fluid embeds (Frostbyte) must fill the stage's inline height on desktop too. The flex rule
    previously lived only inside @media (max-width:520px), so on desktop .iframe-stage's flex:1
    was inert, the height:100% iframe collapsed to its 150px default, and the stage's black
@@ -2081,15 +2106,9 @@ body {
     font-size: 10px; line-height: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .arcade__foot { display: none; }
+  .arcade__titlerow { margin: 2px 0; }
+  .arcade__titlerow h1 { margin: 0; }
 
-  .fit-stage {
-    flex: 1; min-height: 0; width: 100% !important; height: auto !important;
-    box-sizing: border-box;
-  }
-  .fit-stage__surface {
-    width: var(--fit-stage-width) !important;
-    height: var(--fit-stage-height) !important;
-  }
   .arcade__stage--fluid {
     flex: 1; min-height: 420px; width: 100% !important; height: auto !important;
     box-sizing: border-box; display: flex; overflow: hidden;
@@ -2112,3 +2131,104 @@ body {
 
 /* aria-live region */
 #os-announce { position: absolute; }
+
+/* Game full screen: real API + iPhone pseudo fallback */
+:root[data-pseudo-fs] { overflow: hidden; }
+.win[data-pseudo-fs], .mwin[data-pseudo-fs] {
+  position: fixed !important; inset: 0 !important;
+  width: auto !important; height: auto !important;
+  max-width: none !important; max-height: none !important;
+  margin: 0 !important; transform: none !important;
+  border-radius: 0 !important; z-index: 2147483000 !important;
+}
+.win:has([data-pseudo-fs]), .win[data-pseudo-fs] {
+  contain: none !important; transform: none !important; z-index: 2147483000 !important;
+}
+.win[data-fullscreen], .mwin[data-fullscreen] {
+  display: flex; border-radius: 0; box-shadow: none;
+}
+.win[data-fullscreen] > .win__titlebar,
+.mwin[data-fullscreen] > .mwin__titlebar { display: none; }
+.win:fullscreen, .mwin:fullscreen,
+.win:-webkit-full-screen, .mwin:-webkit-full-screen {
+  width: 100% !important; height: 100% !important;
+  transform: none !important; contain: none !important;
+}
+.win:fullscreen::backdrop { background: #000; }
+
+.fs-exit {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  z-index: 30;
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px 4px 7px;
+  border: 1px solid rgba(255,255,255,.6);
+  border-radius: var(--btn-radius);
+  background: linear-gradient(180deg, #9dbdf0 0%, #4a7fdc 28%, #2a5bbf 70%, #1f4aa6 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+  color: #fff; font: bold 11px var(--font-ui);
+  opacity: .6; cursor: pointer;
+}
+.fs-exit__glyph {
+  width: 12px; height: 12px; flex: none;
+  background: url("/os/chrome/xp/restore.svg") center / contain no-repeat;
+}
+.fs-exit:hover, .fs-exit:focus-visible { opacity: 1; }
+.fs-exit:focus-visible { outline: 1px dotted #fff; outline-offset: 2px; }
+@media (pointer: coarse) {
+  .fs-exit { min-height: 40px; }
+}
+
+.mwin__titlebar button.mwin__full {
+  width: 38px; height: 32px;
+  background:
+    url("/os/chrome/xp/full.svg") center / 14px 14px no-repeat,
+    linear-gradient(180deg, #9dbdf0 0%, #4a7fdc 28%, #2a5bbf 70%, #1f4aa6 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+  cursor: pointer;
+}
+
+.pinball__fs {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 8px;
+  border: 1px solid #7896d0;
+  border-bottom-color: #142653; border-right-color: #142653;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #4b68a8, #233f7d);
+  color: #fff; font: bold 11px var(--font-ui);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
+  cursor: pointer;
+}
+.pinball__fs::before {
+  content: ""; width: 12px; height: 12px;
+  background: url("/os/chrome/xp/full.svg") center / contain no-repeat;
+}
+[data-fullscreen] .pinball__fs { display: none; }
+
+.fs-bar {
+  order: -1; flex: none; height: 24px; display: flex; align-items: center; gap: 8px;
+  padding: 0 max(4px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+  padding-top: env(safe-area-inset-top); box-sizing: content-box;
+  background: linear-gradient(180deg, var(--luna-blue-2) 0%, var(--luna-blue-1) 14%, var(--luna-blue-3) 72%, var(--luna-blue-4) 100%);
+  color: var(--ink-on-blue); font: 11px var(--font-ui); text-shadow: 1px 1px 1px rgba(10,40,100,.9);
+}
+.fs-bar__hint { flex: 1; opacity: .85; }
+.fs-exit--bar { position: static; opacity: 1; height: 19px; padding: 0 8px 0 5px; }
+@media (pointer: coarse) {
+  .fs-bar { height: 34px; justify-content: flex-end; }
+  .fs-bar__hint { display: none; }
+  .fs-exit--bar { height: 28px; min-height: 0; }
+}
+@media (max-height: 500px) {
+  .mwin__titlebar { height: 34px; font-size: 13px; }
+  .mwin__titlebar button, .mwin__titlebar button.mwin__full { width: 34px; height: 26px; }
+  .mdock { min-height: 42px; padding: 3px max(10px, env(safe-area-inset-right)) calc(3px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left)); }
+  .mdock__start { min-height: 30px; padding: 0 12px 0 8px; font-size: 14px; }
+  .mdock__start img { width: 17px; height: 17px; }
+  .mdock__home, .mdock__chip { min-width: 30px; min-height: 30px; }
+  .mdock__home { font-size: 16px; }
+  .mdock__chip { padding: 3px; }
+  .mdock__chip img { width: 20px; height: 20px; }
+}

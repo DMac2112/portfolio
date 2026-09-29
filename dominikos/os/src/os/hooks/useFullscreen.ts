@@ -1,8 +1,15 @@
-// Two DISTINCT fullscreen features (DOMINIKOS-PLAN §4.3):
-//   1. OS-fullscreen — documentElement, requested on the BootChooser gesture.
-//   2. Game-fullscreen — the .win node, via the ⛶ titlebar button (games only).
-// iOS Safari has no element Fullscreen API → all calls no-op safely; layout uses 100dvh instead.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type RefObject } from 'react';
+
+type WebkitDocument = Document & {
+  webkitFullscreenElement?: Element | null;
+  webkitFullscreenEnabled?: boolean;
+  webkitExitFullscreen?: () => Promise<void> | void;
+};
+type WebkitElement = HTMLElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+
+let pseudoEl: HTMLElement | null = null;
 
 export function requestOSFullscreen(): void {
   try {
@@ -10,20 +17,106 @@ export function requestOSFullscreen(): void {
     const p = el.requestFullscreen?.({ navigationUI: 'hide' });
     p?.catch(() => {});
   } catch {
-    /* iOS / denied — 100dvh shell is the fallback */
+    /* iOS / denied: the shell uses viewport sizing. */
+  }
+}
+
+export function fullscreenElement(): Element | null {
+  const doc = document as WebkitDocument;
+  return document.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
+}
+
+export function canElementFullscreen(el: HTMLElement): boolean {
+  const doc = document as WebkitDocument;
+  return (typeof el.requestFullscreen === 'function' ||
+    typeof (el as WebkitElement).webkitRequestFullscreen === 'function') &&
+    (document.fullscreenEnabled ?? doc.webkitFullscreenEnabled) !== false;
+}
+
+function onPseudoKeydown(e: KeyboardEvent): void {
+  if (e.key !== 'Escape') return;
+  e.preventDefault();
+  e.stopPropagation();
+  exitPseudoFullscreen();
+}
+
+function exitPseudoFullscreen(): void {
+  if (!pseudoEl) return;
+  pseudoEl.removeAttribute('data-pseudo-fs');
+  document.documentElement.removeAttribute('data-pseudo-fs');
+  pseudoEl = null;
+  window.removeEventListener('keydown', onPseudoKeydown, true);
+  document.dispatchEvent(new Event('dominikos:pseudofs'));
+}
+
+function enterPseudoFullscreen(el: HTMLElement): void {
+  exitPseudoFullscreen();
+  pseudoEl = el;
+  el.setAttribute('data-pseudo-fs', '');
+  document.documentElement.setAttribute('data-pseudo-fs', '');
+  window.addEventListener('keydown', onPseudoKeydown, true);
+  document.dispatchEvent(new Event('dominikos:pseudofs'));
+}
+
+export function toggleGameFullscreen(el: HTMLElement): void {
+  if (fullscreenElement() === el || pseudoEl === el) {
+    exitGameFullscreen();
+    return;
+  }
+  if (!el.hasAttribute('tabindex')) el.tabIndex = -1;
+  el.focus({ preventScroll: true });
+  if (!canElementFullscreen(el)) {
+    enterPseudoFullscreen(el);
+    return;
+  }
+  try {
+    const request = el.requestFullscreen ?? (el as WebkitElement).webkitRequestFullscreen;
+    if (!request) {
+      enterPseudoFullscreen(el);
+      return;
+    }
+    Promise.resolve(request.call(el)).catch(() => enterPseudoFullscreen(el));
+  } catch {
+    enterPseudoFullscreen(el);
   }
 }
 
 export function toggleElementFullscreen(el: HTMLElement): void {
-  try {
-    if (document.fullscreenElement === el) {
-      void document.exitFullscreen().catch(() => {});
-    } else {
-      el.requestFullscreen?.()?.catch(() => {});
-    }
-  } catch {
-    /* unsupported — pseudo-fullscreen CSS is the iPhone fallback (§8.3) */
+  toggleGameFullscreen(el);
+}
+
+export function exitGameFullscreen(): void {
+  if (pseudoEl) {
+    exitPseudoFullscreen();
+    return;
   }
+  if (!fullscreenElement()) return;
+  try {
+    const doc = document as WebkitDocument;
+    const exit = document.exitFullscreen ?? doc.webkitExitFullscreen;
+    if (exit) Promise.resolve(exit.call(document)).catch(() => {});
+  } catch {
+    /* Fullscreen may already have ended. */
+  }
+}
+
+export function useElementFullscreen(ref: RefObject<HTMLElement>): boolean {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    const sync = () => setActive(!!el && (fullscreenElement() === el || pseudoEl === el));
+    sync();
+    document.addEventListener('fullscreenchange', sync);
+    document.addEventListener('webkitfullscreenchange', sync);
+    document.addEventListener('dominikos:pseudofs', sync);
+    return () => {
+      document.removeEventListener('fullscreenchange', sync);
+      document.removeEventListener('webkitfullscreenchange', sync);
+      document.removeEventListener('dominikos:pseudofs', sync);
+      if (pseudoEl === el) exitPseudoFullscreen();
+    };
+  }, [ref]);
+  return active;
 }
 
 export function useFullscreen(): { isFullscreen: boolean } {
