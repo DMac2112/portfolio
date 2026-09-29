@@ -1,7 +1,9 @@
 ---
+import OsTrailer from './OsTrailer.astro';
+
 interface Slide {
   id: string; years: string; title: string; role: string; summary: string; stack: string;
-  image: string | null; placeholder: string | null;
+  image: string | null; placeholder: string | null; media?: string;
   quote: { text: string; name: string; company: string } | null;
   quotePlaceholder: string | null; link: { label: string; href: string } | null;
 }
@@ -24,8 +26,9 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
     <div class="ws-meta"><span class="ws-years">{first.years}</span><span class="ws-count">1 of {slides.length}</span></div>
     <h2 class="ws-title" aria-label={first.title}><span class="ws-title-line">{first.title}</span></h2>
     <div class="ws-frame">
-      <img class="ws-image" src={first.image ?? undefined} alt={first.title + ' project preview'} hidden={!first.image} />
-      <div class="ws-placeholder" hidden={!!first.image}><strong>Placeholder</strong><span>{first.placeholder}</span></div>
+      <img class="ws-image" src={first.image ?? undefined} alt={first.title + ' project preview'} hidden={!first.image || first.media === 'os-trailer'} />
+      <div class="ws-placeholder" hidden={!!first.image || first.media === 'os-trailer'}><strong>Placeholder</strong><span>{first.placeholder}</span></div>
+      <OsTrailer hidden={first.media !== 'os-trailer'} />
       <canvas class="ws-dissolve" aria-hidden="true"></canvas>
     </div>
     <div class="ws-details">

@@ -1,10 +1,11 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
+import { createTrailer } from './trailer';
 
 type Slide = {
   id: string; years: string; title: string; role: string; summary: string; stack: string;
-  image: string | null; placeholder: string | null;
+  image: string | null; placeholder: string | null; media?: string;
   quote: { text: string; name: string; company: string } | null;
   quotePlaceholder: string | null; link: { label: string; href: string } | null;
 };
@@ -36,36 +37,49 @@ const avatar = landing.querySelector<SVGSVGElement>('.pixel-avatar')!;
 const nav = document.querySelector<HTMLElement>('.v2-nav')!;
 if (desktopMotion) {
   gsap.set(brand, { opacity: 0 });
-  const dimension = () => {
-    const a = name.getBoundingClientRect();
-    const b = brand.getBoundingClientRect();
-    const nameSize = parseFloat(getComputedStyle(name).fontSize);
-    const brandSize = parseFloat(getComputedStyle(brand).fontSize);
-    const scale = brandSize / nameSize;
-    return { scale, x: b.left - a.left, y: b.top - a.top };
+  const measure = () => {
+    gsap.set(name, { clearProps: 'transform' });
+    return name.getBoundingClientRect();
+  };
+  const inset = () => {
+    const rect = measure();
+    const scale = Math.min(1, (innerWidth * .72 * .86) / rect.width);
+    return {
+      scale,
+      x: innerWidth * .17 - rect.left,
+      y: innerHeight * .77 - rect.top - rect.height * scale
+    };
+  };
+  const dock = () => {
+    const rect = measure();
+    const target = brand.getBoundingClientRect();
+    const scale = parseFloat(getComputedStyle(brand).fontSize) / parseFloat(getComputedStyle(name).fontSize);
+    return { scale, x: target.left - rect.left, y: target.top - rect.top };
   };
   const timeline = gsap.timeline({
     scrollTrigger: {
-      trigger: landing, start: 'top top', end: '+=120%', pin: true,
-      scrub: .6, invalidateOnRefresh: true,
+      trigger: landing, start: 'top top', end: '+=75%', pin: true,
+      scrub: .5, invalidateOnRefresh: true,
       onUpdate: (self) => {
-        avatar.dataset.frame = self.progress === 0 ? 'idle' : Math.floor(self.progress * 25) % 2 ? 'walk-a' : 'walk-b';
+        avatar.dataset.frame = self.progress === 0 || self.progress === 1 ? 'idle' : Math.floor(self.progress * 25) % 2 ? 'walk-a' : 'walk-b';
+        nav.classList.toggle('is-solid', self.progress >= .6);
       }
     }
   });
-  timeline.to('.v2-intro, .v2-landing-boot', { opacity: 0, duration: .3 }, 0)
-    .to('.v2-flood', { clipPath: 'inset(18% 14% 18% 14% round 10px)', duration: 1 }, 0)
-    .to(name, { scale: () => dimension().scale, x: () => dimension().x, y: () => dimension().y, transformOrigin: 'top left', duration: 1 }, 0)
-    .to(avatar, { x: () => window.innerWidth * 1.1, duration: 1 }, 0)
-    .to(name, { opacity: 0, duration: .12 }, .88)
-    .to(brand, { opacity: 1, duration: .12 }, .88);
+  timeline.to('.v2-intro, .v2-landing-boot', { opacity: 0, duration: .25 }, 0)
+    .to('.v2-flood', { clipPath: 'inset(18% 14% 18% 14% round 10px)', duration: .6 }, 0)
+    .to(name, { scale: () => inset().scale, x: () => inset().x, y: () => inset().y, transformOrigin: 'top left', duration: .6 }, 0)
+    .to(name, { scale: () => dock().scale, x: () => dock().x, y: () => dock().y, color: '#0E1A44', ease: 'power2.inOut', duration: .25 }, .6)
+    .to(name, { opacity: 0, duration: .06 }, .84)
+    .to(brand, { opacity: 1, duration: .06 }, .84)
+    .set({}, {}, 1);
 } else {
   brand.style.opacity = '1';
+  ScrollTrigger.create({
+    trigger: '#work', start: 'top top', endTrigger: 'body', end: 'bottom bottom',
+    toggleClass: { targets: nav, className: 'is-solid' }
+  });
 }
-ScrollTrigger.create({
-  trigger: '#work', start: 'top top', endTrigger: 'body', end: 'bottom bottom',
-  toggleClass: { targets: nav, className: 'is-solid' }
-});
 
 const slides = JSON.parse(document.querySelector<HTMLScriptElement>('#v2-slides')!.textContent!) as Slide[];
 const work = document.querySelector<HTMLElement>('#work')!;
@@ -75,10 +89,31 @@ const frame = work.querySelector<HTMLElement>('.ws-frame')!;
 const dissolve = work.querySelector<HTMLCanvasElement>('.ws-dissolve')!;
 const frameImage = work.querySelector<HTMLImageElement>('.ws-image')!;
 const placeholder = work.querySelector<HTMLElement>('.ws-placeholder')!;
+const trailerRoot = work.querySelector<HTMLElement>('.tr')!;
+const trailer = createTrailer(trailerRoot);
+let workVisible = false;
+let userPaused = false;
+const trailerToggle = trailerRoot.querySelector<HTMLButtonElement>('.tr-toggle')!;
+function syncTrailer() {
+  const playing = !reduced && !userPaused && workVisible && slides[index].media === 'os-trailer';
+  if (playing) trailer.play();
+  else trailer.pause();
+  trailerToggle.textContent = userPaused ? 'Play preview' : 'Pause preview';
+  trailerToggle.setAttribute('aria-label', trailerToggle.textContent);
+}
+trailerToggle.addEventListener('click', () => {
+  userPaused = !userPaused;
+  syncTrailer();
+});
+new IntersectionObserver(([entry]) => {
+  workVisible = entry.isIntersecting;
+  syncTrailer();
+}, { threshold: .25 }).observe(work);
 const bgImages = [...work.querySelectorAll<HTMLImageElement>('.ws-bg-image')];
 const trail = work.querySelector<HTMLCanvasElement>('.ws-trail')!;
 const live = work.querySelector<HTMLElement>('.ws-live')!;
 let index = 0;
+syncTrailer();
 let swapping = false;
 let bgIndex = 0;
 let activeImage: HTMLImageElement | null = null;
@@ -156,8 +191,10 @@ function swapContent(slide: Slide, next: number) {
   setText('.ws-role', slide.role);
   setText('.ws-summary', slide.summary);
   setText('.ws-stack', `Built with ${slide.stack}`);
-  frameImage.hidden = !slide.image;
-  placeholder.hidden = !!slide.image;
+  const hasTrailer = slide.media === 'os-trailer';
+  trailerRoot.hidden = !hasTrailer;
+  frameImage.hidden = hasTrailer || !slide.image;
+  placeholder.hidden = hasTrailer || !!slide.image;
   if (slide.image) {
     frameImage.src = slide.image;
     frameImage.alt = `${slide.title} project preview`;
@@ -210,6 +247,7 @@ async function goTo(next: number) {
     await animateCells(order, false);
   } else swapContent(slides[next], next);
   index = next;
+  syncTrailer();
   swapping = false;
 }
 let dragged = false;

@@ -20,7 +20,8 @@
     "summary": "A Windows-style desktop with its own apps, a messenger and Frostbyte, a 2D snow-town game with pets and curios to find.",
     "stack": "TypeScript, React, Canvas",
     "image": "/frostbyte/assets/room-plaza.jpg",
-    "placeholder": "Add a screenshot of the DominikOS desktop with Frostbyte open in a window.",
+    "media": "os-trailer",
+    "placeholder": null,
     "quote": null,
     "quotePlaceholder": null,
     "link": { "label": "Boot DominikOS", "href": "/os/?boot=chooser" }
