@@ -940,3 +940,1298 @@ html[data-style='studio'] .exp-work:focus-within {
 html[data-style='studio'] .os-features li {
   border-radius: 14px;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Cupertino: opaque grouped content, glass controls, and a collapsing title. */
+/* -------------------------------------------------------------------------- */
+
+html[data-style='cupertino'] {
+  --cu-font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue',
+    'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-base: var(--cu-font);
+  --font-display: var(--cu-font);
+  --font-mono: var(--cu-font);
+  --tracking-caps: 0;
+  --tracking-mono: 0;
+  --cu-label: var(--text-color);
+  --cu-label-2: color-mix(in srgb, var(--text-color) 62%, transparent);
+  --cu-label-3: color-mix(in srgb, var(--text-color) 32%, transparent);
+  --cu-separator: color-mix(in srgb, var(--text-color) 16%, transparent);
+  --cu-fill: color-mix(in srgb, var(--text-color) 8%, transparent);
+  --cu-group: var(--surface-color);
+  --cu-tint: var(--secondary-color);
+  --cu-glass: color-mix(in srgb, var(--surface-color) 62%, transparent);
+  --cu-rim: color-mix(in srgb, color-mix(in srgb, var(--surface-color), white 45%) 70%, transparent);
+  --cu-r-group: 26px;
+  --cu-r-list: 22px;
+  --cu-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --cu-spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.723 12.9%, 0.938 16.7%, 1.017 19.4%,
+    1.067, 1.089 24.3%, 1.093 26.2%, 1.084 28.4%, 1.034 34.3%, 1.004 39.3%, 0.991 44.1%,
+    0.992 51.6%, 1 64.1%, 1);
+}
+
+html[data-style='cupertino'] body {
+  font-family: var(--cu-font);
+  font-size: 1.0625rem;
+  line-height: 1.47;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-style='cupertino'] :focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--cu-tint) 55%, transparent);
+  outline-offset: 2px;
+}
+
+html[data-style='cupertino'] .section {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+  text-align: start;
+}
+
+html[data-style='cupertino'] .section.bg-white,
+html[data-style='cupertino'] .section.bg-primary,
+html[data-style='cupertino'] .hero.bg-dark {
+  background-color: var(--page-bg) !important;
+}
+
+html[data-style='cupertino'] .head-text {
+  width: 100%;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0;
+  font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-align: start;
+  text-transform: none;
+}
+
+html[data-style='cupertino'] .head-text span {
+  color: inherit;
+}
+
+html[data-style='cupertino'] .head-text::after {
+  content: none;
+}
+
+html.js[data-style='cupertino'] .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* Glass belongs to the controls, not the content. */
+html[data-style='cupertino'] .navbar {
+  top: 10px;
+  left: 50%;
+  translate: -50% 0;
+  width: min(100% - 20px, 76rem);
+  padding: 6px 6px 6px 18px;
+  border-radius: 999px;
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-style='cupertino'] .navbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--cu-glass);
+  background-image: linear-gradient(180deg, color-mix(in srgb, white 12%, transparent), transparent 60%);
+  backdrop-filter: blur(14px) saturate(190%);
+  -webkit-backdrop-filter: blur(14px) saturate(190%);
+  box-shadow: inset 0 1px 0 var(--cu-rim), inset 0 0 0 0.5px var(--cu-separator),
+    0 10px 30px -10px var(--shadow-color);
+}
+
+html[data-style='cupertino'] .navbar-title {
+  display: none;
+  margin-right: 0.5rem;
+  color: var(--cu-label);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+html[data-style='cupertino'] .navbar-links {
+  justify-content: flex-start;
+}
+
+html[data-style='cupertino'] .navbar-links a,
+html[data-style='cupertino'] .navbar-panel a {
+  color: var(--cu-label);
+  font-family: var(--cu-font);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+html[data-style='cupertino'] .navbar-links a {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+}
+
+html[data-style='cupertino'] .navbar-links a:hover,
+html[data-style='cupertino'] .navbar-links a:focus-visible {
+  background: var(--cu-fill) !important;
+  color: var(--cu-label) !important;
+}
+
+html[data-style='cupertino'] .navbar-controls {
+  gap: 0;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--cu-fill);
+}
+
+html[data-style='cupertino'] .nav-option-toggle {
+  position: relative;
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cu-label);
+  font-family: var(--cu-font);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+html[data-style='cupertino'] .nav-option-toggle + .nav-option-toggle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  width: 1px;
+  height: 50%;
+  background: var(--cu-separator);
+}
+
+html[data-style='cupertino'] .nav-option-toggle:hover,
+html[data-style='cupertino'] .nav-option-toggle:focus-visible {
+  background: var(--cu-fill) !important;
+  color: var(--cu-label) !important;
+}
+
+html[data-style='cupertino'] .palette-swatch {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  background: var(--accent-color);
+  box-shadow: 0 0 0 0.5px var(--cu-separator);
+}
+
+html[data-style='cupertino'] .navbar-toggle {
+  width: 40px;
+  height: 40px;
+  background: var(--cu-fill);
+  color: var(--cu-label);
+  box-shadow: none;
+}
+
+html[data-style='cupertino'] .navbar-panel {
+  top: auto;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  width: auto;
+  height: auto;
+  max-height: calc(100svh - 80px);
+  align-items: stretch;
+  padding: 10px 8px 12px;
+  border-radius: 34px;
+  background: var(--cu-group) !important;
+  box-shadow: 0 -10px 40px var(--shadow-color);
+}
+
+/* The translated navbar is the fixed panel's containing block. */
+@media (max-width: 900px) {
+  html[data-style='cupertino'] .navbar-panel {
+    bottom: calc(100% - 100svh + 18px);
+    left: -2px;
+    right: -2px;
+  }
+}
+
+@media (max-width: 560px) {
+  html[data-style='cupertino'] .navbar-panel {
+    bottom: calc(100% - 100svh + 14px);
+    left: 2px;
+    right: 2px;
+  }
+}
+
+html[data-style='cupertino'] .navbar-panel::before {
+  content: '';
+  align-self: center;
+  width: 36px;
+  height: 5px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  background: var(--cu-label-3);
+}
+
+html[data-style='cupertino'] .navbar-panel:not([hidden]) {
+  transition: translate 0.5s var(--cu-ease), opacity 0.2s var(--cu-ease);
+  transition: translate 0.5s var(--cu-spring), opacity 0.2s var(--cu-spring);
+}
+
+@starting-style {
+  html[data-style='cupertino'] .navbar-panel:not([hidden]) {
+    translate: 0 100%;
+    opacity: 0;
+  }
+}
+
+html[data-style='cupertino'] .navbar-panel ul {
+  gap: 0;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--cu-r-list);
+  background: var(--cu-fill);
+}
+
+html[data-style='cupertino'] .navbar-panel li + li {
+  border-top: 1px solid var(--cu-separator);
+  margin-left: 16px;
+  padding-left: 0;
+}
+
+html[data-style='cupertino'] .navbar-panel a {
+  display: block;
+  min-height: 44px;
+  padding: 13px 16px;
+  font-size: 1.0625rem;
+}
+
+html[data-style='cupertino'] .navbar-panel li + li a {
+  margin-left: -16px;
+}
+
+html[data-style='cupertino'] .navbar-panel a:hover,
+html[data-style='cupertino'] .navbar-panel a:focus-visible {
+  color: var(--cu-tint);
+}
+
+html[data-style='cupertino'] .navbar-close {
+  align-self: flex-end;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin: 0 6px 8px 0;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--cu-fill);
+  color: var(--cu-label-2);
+}
+
+html[data-style='cupertino'] .navbar-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 560px) {
+  html[data-style='cupertino'] .navbar {
+    top: 6px;
+    width: calc(100% - 12px);
+  }
+}
+
+/* Large title and app icons. */
+html[data-style='cupertino'] .hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: 14px;
+  row-gap: 14px;
+  justify-items: start;
+  min-height: auto;
+  padding-block: 8rem 3rem;
+  text-align: start;
+}
+
+html[data-style='cupertino'] .hero-info {
+  grid-area: info;
+  align-items: flex-start;
+  max-width: 46rem;
+  padding: 0;
+  text-align: start;
+}
+
+html[data-style='cupertino'] .hero-greeting {
+  color: var(--cu-label-2) !important;
+  font-family: var(--cu-font);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+html[data-style='cupertino'] .hero-greeting::before {
+  content: none;
+}
+
+html[data-style='cupertino'] .hero-h1,
+html[data-style='cupertino'] .hero-name {
+  color: var(--cu-label) !important;
+}
+
+html[data-style='cupertino'] .hero-h1 {
+  display: block;
+  margin-top: 0.5rem;
+  text-wrap: wrap;
+}
+
+html[data-style='cupertino'] .hero-name {
+  display: block;
+  font-size: clamp(2.75rem, 1.5rem + 5.5vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  transform-origin: 0 100%;
+}
+
+html[data-style='cupertino'] .hero-role {
+  display: block;
+  margin-top: 0.35em;
+  color: var(--cu-label);
+  font-family: var(--cu-font);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+html[data-style='cupertino'] .hero-sub {
+  max-width: 36em;
+  color: var(--cu-label-2) !important;
+  font-size: 1.0625rem;
+  line-height: 1.47;
+}
+
+html[data-style='cupertino'] .hero-ctas {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+html[data-style='cupertino'] .hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid transparent !important;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cu-tint) 14%, transparent) !important;
+  color: var(--cu-tint) !important;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+html[data-style='cupertino'] .hero-btn:hover,
+html[data-style='cupertino'] .hero-btn:focus-visible {
+  background: color-mix(in srgb, var(--cu-tint) 20%, transparent) !important;
+  color: var(--cu-tint) !important;
+}
+
+html[data-style='cupertino'] .hero-btn-primary,
+html[data-style='cupertino'] .hero-btn-primary:hover,
+html[data-style='cupertino'] .hero-btn-primary:focus-visible {
+  background: var(--accent-color) !important;
+  color: var(--on-accent) !important;
+  border-color: transparent !important;
+}
+
+html[data-style='cupertino'] .hero-circles-left,
+html[data-style='cupertino'] .hero-circles-right {
+  position: static;
+  display: flex;
+  flex-direction: row;
+  align-self: auto;
+  justify-content: flex-start;
+  gap: 14px;
+  margin-top: 2rem;
+  transform: none;
+  animation: none;
+}
+
+html[data-style='cupertino'] .hero-circles-left {
+  grid-area: left;
+}
+
+html[data-style='cupertino'] .hero-circles-right {
+  grid-area: right;
+}
+
+html[data-style='cupertino'] .hero-circles-left .circle,
+html[data-style='cupertino'] .hero-circles-right .circle {
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  align-self: auto;
+  border-radius: 22.5%;
+  background: var(--cu-group);
+  box-shadow: inset 0 1px 0 var(--cu-rim), 0 0 0 0.5px var(--cu-separator);
+  backdrop-filter: none;
+}
+
+html[data-style='cupertino'] .circle img {
+  width: 60%;
+  height: 60%;
+}
+
+@media (max-width: 560px) {
+
+  html[data-style='cupertino'] .hero-circles-left,
+  html[data-style='cupertino'] .hero-circles-right {
+    display: flex !important;
+    gap: 8px;
+  }
+
+  html[data-style='cupertino'] .hero-circles-left .circle,
+  html[data-style='cupertino'] .hero-circles-right .circle {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Opaque grouped cards and inset lists. */
+html[data-style='cupertino'] .profiles,
+html[data-style='cupertino'] .profile,
+html[data-style='cupertino'] .work-card,
+html[data-style='cupertino'] .t-card,
+html[data-style='cupertino'] .contact-cards {
+  text-align: start;
+}
+
+html[data-style='cupertino'] .profile,
+html[data-style='cupertino'] .work-card,
+html[data-style='cupertino'] .t-card {
+  padding: 10px;
+  border: 0;
+  border-radius: var(--cu-r-group);
+  background: var(--cu-group);
+  box-shadow: none !important;
+  transform: none;
+  transition: none;
+}
+
+html[data-style='cupertino'] .profile:hover,
+html[data-style='cupertino'] .work-card:hover {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+html[data-style='cupertino'] .profile img,
+html[data-style='cupertino'] .work-img {
+  display: block;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+html[data-style='cupertino'] .profile img {
+  width: 100%;
+  object-fit: cover;
+}
+
+html[data-style='cupertino'] .profile h3,
+html[data-style='cupertino'] .profile p {
+  padding-inline: 8px;
+}
+
+html[data-style='cupertino'] .profile h3 {
+  padding-top: 6px;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+html[data-style='cupertino'] .profile p {
+  padding-bottom: 10px;
+  color: var(--cu-label-2);
+  font-size: 0.9375rem;
+}
+
+html[data-style='cupertino'] .work-card,
+html[data-style='cupertino'] .t-card {
+  border-color: transparent !important;
+}
+
+html[data-style='cupertino'] .work-img {
+  position: relative;
+}
+
+html[data-style='cupertino'] .work-img > img {
+  border-radius: 16px;
+}
+
+html[data-style='cupertino'] .work-links {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+}
+
+html[data-style='cupertino'] .work-links a,
+html[data-style='cupertino'] .work-links a:hover,
+html[data-style='cupertino'] .work-links a:focus-visible {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--cu-glass) !important;
+  background-image: linear-gradient(180deg, color-mix(in srgb, white 12%, transparent), transparent 60%);
+  color: var(--cu-label) !important;
+  backdrop-filter: blur(14px) saturate(190%);
+  -webkit-backdrop-filter: blur(14px) saturate(190%);
+  box-shadow: inset 0 1px 0 var(--cu-rim), inset 0 0 0 0.5px var(--cu-separator);
+}
+
+html[data-style='cupertino'] .work-tag {
+  margin-top: 0.75rem;
+  padding: 0;
+  background: transparent !important;
+  color: var(--cu-tint);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+html[data-style='cupertino'] .work-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+html[data-style='cupertino'] .work-card .p-text {
+  color: var(--cu-label-2);
+  font-size: 0.9375rem;
+}
+
+html[data-style='cupertino'] .work-filter {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  position: relative;
+  min-width: min(100%, 22rem);
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--cu-fill);
+}
+
+html[data-style='cupertino'] .work-filter::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc((100% - 4px) / var(--cu-seg, 3));
+  border-radius: 999px;
+  background: var(--cu-group);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .12), inset 0 0 0 0.5px var(--cu-separator);
+  transform: translateX(calc(100% * var(--cu-seg-i, 0)));
+  transition: transform 0.45s var(--cu-ease);
+  transition: transform 0.45s var(--cu-spring);
+}
+
+html[data-style='cupertino'] .work-filter:has(> :nth-child(2):last-child) { --cu-seg: 2; }
+html[data-style='cupertino'] .work-filter:has(> :nth-child(3):last-child) { --cu-seg: 3; }
+html[data-style='cupertino'] .work-filter:has(> :nth-child(4):last-child) { --cu-seg: 4; }
+html[data-style='cupertino'] .work-filter:has(> :nth-child(1)[aria-pressed='true']) { --cu-seg-i: 0; }
+html[data-style='cupertino'] .work-filter:has(> :nth-child(2)[aria-pressed='true']) { --cu-seg-i: 1; }
+html[data-style='cupertino'] .work-filter:has(> :nth-child(3)[aria-pressed='true']) { --cu-seg-i: 2; }
+html[data-style='cupertino'] .work-filter:has(> :nth-child(4)[aria-pressed='true']) { --cu-seg-i: 3; }
+
+html[data-style='cupertino'] .work-filter-btn,
+html[data-style='cupertino'] .work-filter-btn:hover,
+html[data-style='cupertino'] .work-filter-btn[aria-pressed='true'] {
+  position: relative;
+  z-index: 1;
+  min-height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--cu-label) !important;
+  font-family: var(--cu-font);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+html[data-style='cupertino'] .work-filter-btn[aria-pressed='true'] {
+  font-weight: 600;
+}
+
+html[data-style='cupertino'] .exp-type {
+  min-width: 0;
+  padding: 0 16px 6px;
+  color: var(--cu-label-2);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+html[data-style='cupertino'] .exp-works {
+  overflow: hidden;
+  border-radius: var(--cu-r-list);
+  background: var(--cu-group);
+}
+
+html[data-style='cupertino'] .exp-work {
+  position: relative;
+  min-height: 44px;
+  padding: 11px 16px;
+  border: 0;
+}
+
+html[data-style='cupertino'] .exp-work + .exp-work::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 16px;
+  height: 1px;
+  background: var(--cu-separator);
+}
+
+html[data-style='cupertino'] .exp-work h3 {
+  color: var(--cu-label);
+  font-size: 1.0625rem;
+  font-weight: 400;
+}
+
+html[data-style='cupertino'] .exp-work .p-text {
+  color: var(--cu-label-2);
+  font-size: 0.9375rem;
+}
+
+html[data-style='cupertino'] .exp-year {
+  float: right;
+  text-align: right;
+}
+
+html[data-style='cupertino'] .exp-tooltip {
+  border: 0 !important;
+  border-radius: 14px;
+  background: var(--cu-group) !important;
+  box-shadow: 0 12px 40px var(--shadow-color), inset 0 0 0 0.5px var(--cu-separator);
+}
+
+html[data-style='cupertino'] .skills-list {
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 18px 10px;
+}
+
+html[data-style='cupertino'] .skill-bubble,
+html[data-style='cupertino'] .skill:hover .skill-bubble {
+  width: 64px;
+  height: 64px;
+  border: 0;
+  border-radius: 22.5%;
+  background: var(--cu-group) !important;
+  box-shadow: inset 0 1px 0 var(--cu-rim), 0 0 0 0.5px var(--cu-separator);
+  transform: none;
+}
+
+html[data-style='cupertino'] .skill .p-text {
+  color: var(--cu-label);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+html[data-style='cupertino'] .t-card img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+}
+
+html[data-style='cupertino'] .t-quote {
+  color: var(--cu-label);
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+html[data-style='cupertino'] .t-quote::before,
+html[data-style='cupertino'] .t-quote::after {
+  content: none;
+}
+
+html[data-style='cupertino'] .t-name {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+html[data-style='cupertino'] .t-company {
+  color: var(--cu-label-2);
+  font-size: 0.9375rem;
+}
+
+html[data-style='cupertino'] .t-btns button {
+  width: 44px;
+  height: 44px;
+  border: 0 !important;
+  border-radius: 50%;
+  background: var(--cu-fill) !important;
+  color: var(--cu-tint) !important;
+}
+
+html[data-style='cupertino'] .t-btns button:hover,
+html[data-style='cupertino'] .t-btns button:focus-visible {
+  background: color-mix(in srgb, var(--cu-tint) 16%, transparent) !important;
+  color: var(--cu-tint) !important;
+}
+
+/* The OS tile is the single dark content surface. */
+html[data-style='cupertino'] .os-showcase {
+  width: auto;
+  min-height: 0;
+  margin-inline: max(var(--space-gutter), calc((100% - var(--container)) / 2 - 2rem));
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  border-radius: 32px;
+  background-color: var(--hero-bg) !important;
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--on-hero) 14%, transparent);
+}
+
+html[data-style='cupertino'] .os-showcase .head-text,
+html[data-style='cupertino'] .os-head,
+html[data-style='cupertino'] .os-lede,
+html[data-style='cupertino'] .os-feature-title,
+html[data-style='cupertino'] .os-feature-desc,
+html[data-style='cupertino'] .os-deep {
+  color: var(--on-hero) !important;
+}
+
+html[data-style='cupertino'] .os-features li {
+  border-color: transparent !important;
+  border-radius: 18px;
+  background-color: color-mix(in srgb, var(--on-hero) 7%, transparent) !important;
+}
+
+html[data-style='cupertino'] .os-boot-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 22px;
+  border-radius: 999px;
+  background: var(--accent-color) !important;
+  color: var(--on-accent) !important;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+/* Contact rows and the grouped form. */
+html[data-style='cupertino'] .contact-cards {
+  gap: 0;
+  overflow: hidden;
+  border-radius: var(--cu-r-list);
+  background: var(--cu-group);
+}
+
+html[data-style='cupertino'] .contact-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+}
+
+html[data-style='cupertino'] .contact-card + .contact-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 0;
+  height: 1px;
+  background: var(--cu-separator);
+}
+
+html[data-style='cupertino'] .contact-card img {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  border-radius: 22.5%;
+  background: var(--cu-fill);
+  object-fit: contain;
+}
+
+html[data-style='cupertino'] .contact-card .p-text {
+  color: var(--cu-label);
+  font-size: 1.0625rem;
+}
+
+html[data-style='cupertino'] .contact-card::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-top: 2px solid var(--cu-label-3);
+  border-right: 2px solid var(--cu-label-3);
+  rotate: 45deg;
+}
+
+html[data-style='cupertino'] .contact-form > div {
+  position: relative;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--cu-group) !important;
+}
+
+html[data-style='cupertino'] .contact-form > div:first-of-type {
+  border-radius: var(--cu-r-list) var(--cu-r-list) 0 0;
+}
+
+html[data-style='cupertino'] .contact-form > div:last-of-type {
+  border-radius: 0 0 var(--cu-r-list) var(--cu-r-list);
+}
+
+html[data-style='cupertino'] .contact-form > div + div::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 0;
+  height: 1px;
+  background: var(--cu-separator);
+}
+
+html[data-style='cupertino'] .contact-form input,
+html[data-style='cupertino'] .contact-form textarea {
+  width: 100%;
+  border: 0;
+  background: transparent !important;
+  padding: 12px 16px;
+  font: inherit;
+  font-size: 1.0625rem;
+}
+
+html[data-style='cupertino'] .contact-form textarea {
+  min-height: 7rem;
+}
+
+html[data-style='cupertino'] .contact-submit {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent-color) !important;
+  color: var(--on-accent) !important;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+html[data-style='cupertino'] .footer-bottom {
+  border: 0;
+  color: var(--cu-label-2);
+  font-size: 0.8125rem;
+}
+
+html[data-style='cupertino'] .footer-copy {
+  color: var(--cu-label-2);
+  font-size: 0.8125rem;
+  text-align: start;
+}
+
+html[data-style='cupertino'] .footer-os-link {
+  color: var(--cu-tint);
+}
+
+html[data-style='cupertino'] .rail-social a,
+html[data-style='cupertino'] .rail-social a:hover,
+html[data-style='cupertino'] .rail-social a:focus-visible {
+  width: 40px;
+  height: 40px;
+  border-color: transparent !important;
+  border-radius: 50%;
+  background-color: var(--cu-fill) !important;
+  color: var(--cu-label);
+}
+
+html[data-style='cupertino'] .rail-social a:hover,
+html[data-style='cupertino'] .rail-social a:focus-visible {
+  color: var(--cu-tint) !important;
+}
+
+html[data-style='cupertino'] .rail-dots a {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--cu-label-3);
+  transition: height 0.35s var(--cu-ease);
+  transition: height 0.35s var(--cu-spring);
+}
+
+html[data-style='cupertino'] .rail-dots a.active {
+  height: 18px;
+  background: var(--cu-label);
+}
+
+/* Scoped component rules need explicit overrides for the Cupertino presentation. */
+html[data-style='cupertino'] .navbar-links a,
+html[data-style='cupertino'] .navbar-panel a {
+  font-family: var(--cu-font) !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+html[data-style='cupertino'] .toggle-prefix {
+  margin-inline-end: 0.3em;
+}
+
+html[data-style='cupertino'] .toggle-detail {
+  margin-inline-start: 0.3em;
+}
+
+@media (max-width: 560px) {
+  html[data-style='cupertino'] .toggle-detail {
+    display: none !important;
+  }
+}
+
+html[data-style='cupertino'] .hero-info {
+  min-width: 0;
+}
+
+html[data-style='cupertino'] .hero-circles,
+html[data-style='cupertino'] .hero-circles-left,
+html[data-style='cupertino'] .hero-circles-right {
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  align-items: center !important;
+}
+
+@media (min-width: 1000px) {
+  html[data-style='cupertino'] .hero-info {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    column-gap: 4rem;
+    align-items: start !important;
+    width: 100%;
+    max-width: none !important;
+  }
+
+  html[data-style='cupertino'] .hero-greeting,
+  html[data-style='cupertino'] .hero-h1,
+  html[data-style='cupertino'] .hero-sub,
+  html[data-style='cupertino'] .hero-ctas {
+    grid-column: 1;
+  }
+
+  html[data-style='cupertino'] .osl-wrap {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: center;
+    width: 100% !important;
+    max-width: 24rem;
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 999px) {
+  html[data-style='cupertino'] .hero-info {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-style='cupertino'] .osl-wrap {
+    margin-inline: 0 !important;
+  }
+}
+
+html[data-style='cupertino'] .work-links {
+  inset: auto 8px 8px auto !important;
+  width: auto !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  background: none !important;
+  backdrop-filter: none !important;
+  opacity: 1 !important;
+}
+
+html[data-style='cupertino'] .work-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  justify-content: start !important;
+  margin-inline: 0 !important;
+  width: 100%;
+}
+
+html[data-style='cupertino'] .work-content {
+  text-align: start !important;
+  align-items: flex-start !important;
+}
+
+html[data-style='cupertino'] .work-content > .p-text:last-child {
+  text-align: start !important;
+}
+
+html[data-style='cupertino'] .skills-container {
+  width: 100% !important;
+  margin-inline: 0 !important;
+  align-items: start !important;
+}
+
+html[data-style='cupertino'] .os-showcase,
+html[data-style='cupertino'] .os-lede,
+html[data-style='cupertino'] .os-feature-title,
+html[data-style='cupertino'] .os-feature-desc,
+html[data-style='cupertino'] .os-deep,
+html[data-style='cupertino'] .os-actions {
+  text-align: start !important;
+}
+
+html[data-style='cupertino'] .os-actions {
+  justify-content: flex-start !important;
+}
+
+html[data-style='cupertino'] .os-head span {
+  color: inherit !important;
+}
+
+html[data-style='cupertino'] .exp-group {
+  display: block !important;
+}
+
+html[data-style='cupertino'] .skills-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  justify-items: center !important;
+  justify-content: start !important;
+  align-content: start !important;
+  gap: 18px 10px !important;
+}
+
+html[data-style='cupertino'] .skill {
+  width: auto !important;
+  margin: 0 !important;
+}
+
+html[data-style='cupertino'] .contact-intro,
+html[data-style='cupertino'] .contact-cards,
+html[data-style='cupertino'] .contact-form,
+html[data-style='cupertino'] .contact-submit,
+html[data-style='cupertino'] .contact-status {
+  width: min(36rem, 100%) !important;
+  max-width: 36rem;
+  margin-inline: 0 !important;
+  text-align: start !important;
+}
+
+html[data-style='cupertino'] .contact-cards {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+  gap: 0 !important;
+}
+
+html[data-style='cupertino'] .contact-form {
+  gap: 0 !important;
+  row-gap: 0 !important;
+}
+
+html[data-style='cupertino'] .contact-form > div {
+  margin: 0 !important;
+}
+
+html[data-style='cupertino'] .contact-submit {
+  justify-content: center !important;
+  margin-top: 1rem !important;
+  text-align: center;
+}
+
+/* Remove uppercase from the source components without changing other styles. */
+html[data-style='cupertino'] .navbar-links a,
+html[data-style='cupertino'] .navbar-panel a,
+html[data-style='cupertino'] .exp-type,
+html[data-style='cupertino'] .work-filter-btn,
+html[data-style='cupertino'] .work-tag,
+html[data-style='cupertino'] .os-feature-title,
+html[data-style='cupertino'] .footer-copy {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+html[data-style='cupertino'] .hero-btn,
+html[data-style='cupertino'] .os-boot-btn,
+html[data-style='cupertino'] .contact-submit,
+html[data-style='cupertino'] .t-btns button,
+html[data-style='cupertino'] .work-links a,
+html[data-style='cupertino'] .work-filter-btn,
+html[data-style='cupertino'] .nav-option-toggle,
+html[data-style='cupertino'] .navbar-toggle {
+  transition: transform 0.35s var(--cu-ease);
+  transition: transform 0.35s var(--cu-spring);
+}
+
+html[data-style='cupertino'] .hero-btn:active,
+html[data-style='cupertino'] .os-boot-btn:active,
+html[data-style='cupertino'] .contact-submit:active,
+html[data-style='cupertino'] .t-btns button:active,
+html[data-style='cupertino'] .work-links a:active,
+html[data-style='cupertino'] .work-filter-btn:active,
+html[data-style='cupertino'] .nav-option-toggle:active,
+html[data-style='cupertino'] .navbar-toggle:active {
+  transform: scale(0.97);
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-style='cupertino'] .navbar::before {
+      animation: cu-material-in linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 120px;
+    }
+
+    html[data-style='cupertino'] .navbar-title {
+      display: block;
+      animation: cu-title-in linear both;
+      animation-timeline: scroll(root);
+      animation-range: 90px 170px;
+    }
+
+    html[data-style='cupertino'] .hero-name {
+      animation: cu-title-out linear both;
+      animation-timeline: scroll(root);
+      animation-range: 30px 190px;
+    }
+  }
+}
+
+@keyframes cu-material-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cu-title-in { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+@keyframes cu-title-out { to { opacity: 0; scale: 0.92; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-style='cupertino'] .hero-btn:active,
+  html[data-style='cupertino'] .os-boot-btn:active,
+  html[data-style='cupertino'] .contact-submit:active,
+  html[data-style='cupertino'] .t-btns button:active,
+  html[data-style='cupertino'] .work-links a:active,
+  html[data-style='cupertino'] .work-filter-btn:active,
+  html[data-style='cupertino'] .nav-option-toggle:active,
+  html[data-style='cupertino'] .navbar-toggle:active {
+    transform: none;
+  }
+
+  html[data-style='cupertino'] .navbar-panel:not([hidden]),
+  html[data-style='cupertino'] .work-filter::before,
+  html[data-style='cupertino'] .rail-dots a {
+    transition: none;
+  }
+}
+
+/* Resolve scoped component sizing and alignment in the Cupertino presentation. */
+html[data-style='cupertino'] .hero {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: flex-start !important;
+  column-gap: 14px;
+  row-gap: 14px;
+}
+
+html[data-style='cupertino'] .hero-info {
+  flex: 0 0 100%;
+  order: 0;
+  min-width: 0;
+}
+
+html[data-style='cupertino'] .hero-circles-left {
+  order: 1;
+}
+
+html[data-style='cupertino'] .hero-circles-right {
+  order: 2;
+}
+
+html[data-style='cupertino'] .hero-circles-left,
+html[data-style='cupertino'] .hero-circles-right {
+  flex: 0 0 auto !important;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+html[data-style='cupertino'] .hero .circle {
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
+  flex-basis: 56px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+html[data-style='cupertino'] .hero .circle img {
+  width: 60% !important;
+  height: 60% !important;
+  margin: auto !important;
+}
+
+@media (max-width: 430px) {
+  html[data-style='cupertino'] .hero .circle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    flex-basis: 44px !important;
+  }
+}
+
+@media (max-width: 999px) {
+  html[data-style='cupertino'] .osl-wrap {
+    max-width: 100%;
+  }
+}
+
+html[data-style='cupertino'] .work-grid {
+  gap: 20px !important;
+}
+
+html[data-style='cupertino'] .contact-submit {
+  text-align: center !important;
+}
+
+html[data-style='cupertino'] .navbar-links a,
+html[data-style='cupertino'] .navbar-panel a {
+  text-transform: capitalize !important;
+}
+
+html[data-style='cupertino'] .profiles {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 20px !important;
+  justify-content: start !important;
+  width: 100% !important;
+  margin-inline: 0 !important;
+}
+
+html[data-style='cupertino'] .t-stage {
+  margin-inline: 0 !important;
+  width: 100% !important;
+}
+
+html[data-style='cupertino'] .t-card {
+  max-width: 48rem !important;
+  margin-inline: 0 !important;
+}
+
+html[data-style='cupertino'] .t-btns {
+  justify-content: flex-start !important;
+}

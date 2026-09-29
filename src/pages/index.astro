@@ -118,7 +118,7 @@ const description = site.meta.description;
   });
 
   // Structural style switch
-  type StyleOption = 'studio' | 'classic' | 'editorial' | 'glass' | 'terminal';
+  type StyleOption = 'studio' | 'classic' | 'editorial' | 'glass' | 'terminal' | 'cupertino';
   const styleStorageKey = 'portfolio-style';
   const styleOptions: { id: StyleOption; label: string }[] = [
     { id: 'studio', label: 'Studio' },
@@ -126,6 +126,7 @@ const description = site.meta.description;
     { id: 'editorial', label: 'Editorial' },
     { id: 'glass', label: 'Glass' },
     { id: 'terminal', label: 'Terminal' },
+    { id: 'cupertino', label: 'Cupertino' },
   ];
   const styleToggle = document.querySelector<HTMLButtonElement>('[data-style-toggle]');
   const styleToggleLabel = styleToggle?.querySelector<HTMLElement>('[data-style-toggle-label]');
