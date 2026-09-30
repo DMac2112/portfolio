@@ -4,7 +4,7 @@ import jobs from '../data/v2-experience.json';
 
 interface Slide {
   id: string; years: string; title: string; role: string; summary: string; stack: string;
-  image: string | null; placeholder: string | null; media?: string;
+  image: string | null; placeholder: string | null; media?: string; accent?: string;
   quote: { text: string; name: string; company: string } | null;
   quotePlaceholder: string | null; link: { label: string; href: string } | null;
 }
@@ -16,7 +16,7 @@ const trailBadge = '/src/assets/content/skill-trailhead-mountaineer.png';
 const badges = import.meta.glob('/src/assets/content/skill-*.png', { eager: true, import: 'default' });
 const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)?.src;
 ---
-<section class="ws" id="work" aria-roledescription="carousel" aria-label="Selected work" tabindex="0">
+<section class="ws" id="work" style={`--accent: ${first.accent}`} aria-roledescription="carousel" aria-label="Selected work" tabindex="0">
   <div class="ws-bg" aria-hidden="true">
     <img class="ws-bg-image is-visible" src={first.image ?? undefined} alt="" hidden={!first.image} />
     <img class="ws-bg-image" alt="" hidden />

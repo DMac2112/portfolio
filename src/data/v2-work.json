@@ -8,6 +8,7 @@
     "stack": "TypeScript, React, Canvas",
     "image": "/v2-media/dominikos.webp",
     "media": "os-trailer",
+    "accent": "#3AA53A",
     "placeholder": null,
     "quote": null,
     "quotePlaceholder": null,
@@ -21,6 +22,7 @@
     "summary": "Designed and built the site a property management company uses to advertise its homes and services.",
     "stack": "HTML, CSS, JavaScript",
     "image": "/v2-media/welcom-inn.webp",
+    "accent": "#7A1B4E",
     "placeholder": null,
     "quote": {
       "text": "Despite my limited knowledge of websites, he guided us patiently.",
@@ -38,6 +40,7 @@
     "summary": "Designed and built a cleaning company's site, then extended it when they moved into Airbnb management.",
     "stack": "HTML, CSS, JavaScript",
     "image": "/v2-media/rubicall.webp",
+    "accent": "#00813C",
     "placeholder": null,
     "quote": {
       "text": "I'm not very tech-savvy, but Dominik was patient and understood our needs.",

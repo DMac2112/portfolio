@@ -1,0 +1,35 @@
+---
+import { palette, stand, run, sit } from './sprites';
+
+interface Props {
+  sprite: 'stand' | 'run' | 'sit';
+  size: string;
+  frame?: string;
+  class?: string;
+  label?: string;
+}
+
+const { sprite, size, frame, class: className, label } = Astro.props;
+const art = { stand, run, sit }[sprite];
+const colors: Record<string, string> = palette;
+const frames = Object.entries(art.frames).map(([name, rows]) => {
+  const pixels: { x: number; y: number; width: number; fill: string }[] = [];
+  rows.forEach((row, y) => {
+    for (let x = 0; x < row.length;) {
+      const key = row[x];
+      if (key === '.') { x++; continue; }
+      let width = 1;
+      while (row[x + width] === key) width++;
+      pixels.push({ x, y, width, fill: colors[key] });
+      x += width;
+    }
+  });
+  return { name, pixels };
+});
+const initialFrame = frame ?? frames[0].name;
+const eyes = 'eyes' in art ? art.eyes : undefined;
+---
+<svg class={`pixel-sprite pixel-${sprite} ${className ?? ''}`} viewBox={`0 0 ${art.width} ${art.height}`} shape-rendering="crispEdges" style={`height: ${size}; width: auto`} data-frame={initialFrame} role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'}>
+  {frames.map(({ name, pixels }) => <g class="pixel-frame" data-name={name}>{pixels.map((pixel) => <rect x={pixel.x} y={pixel.y} width={pixel.width} height="1" fill={pixel.fill} />)}</g>)}
+  {eyes?.map(([x, y]) => <rect class="pixel-lid" x={x} y={y} width="1" height="1" fill={palette.s} />)}
+</svg>

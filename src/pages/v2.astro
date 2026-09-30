@@ -2,6 +2,7 @@
 import slides from '../data/v2-work.json';
 import V2Layout from '../v2/V2Layout.astro';
 import Nav from '../v2/Nav.astro';
+import PixelSprite from '../v2/PixelSprite.astro';
 import Landing from '../v2/Landing.astro';
 import WorkSlider from '../v2/WorkSlider.astro';
 import OsFinale from '../v2/OsFinale.astro';
@@ -17,6 +18,7 @@ const work = slides.map((slide) => {
 
 <V2Layout>
   <Nav />
+  <div class="v2-runner" aria-hidden="true"><PixelSprite sprite="run" size="100%" frame="run-1" /></div>
   <main>
     <Landing />
     <WorkSlider slides={work} />

@@ -5,7 +5,7 @@ import { createTrailer } from './trailer';
 
 type Slide = {
   id: string; years: string; title: string; role: string; summary: string; stack: string;
-  image: string | null; placeholder: string | null; media?: string;
+  image: string | null; placeholder: string | null; media?: string; accent?: string;
   quote: { text: string; name: string; company: string } | null;
   quotePlaceholder: string | null; link: { label: string; href: string } | null;
 };
@@ -33,63 +33,71 @@ if (desktopMotion) {
 const landing = document.querySelector<HTMLElement>('#top')!;
 const name = document.querySelector<HTMLElement>('.v2-name')!;
 const brand = document.querySelector<HTMLElement>('.v2-brand')!;
-const avatar = landing.querySelector<SVGSVGElement>('.pixel-avatar')!;
+const avatar = landing.querySelector<SVGSVGElement>('.v2-name .pixel-stand')!;
 const nav = document.querySelector<HTMLElement>('.v2-nav')!;
+const runner = document.querySelector<HTMLElement>('.v2-runner')!;
+const runnerSprite = runner.querySelector<SVGSVGElement>('.pixel-run')!;
+const coder = nav.querySelector<HTMLElement>('.v2-coder')!;
 if (desktopMotion) {
   gsap.set(brand, { opacity: 0 });
+  const untransformed = <T>(fn: () => T): T => {
+    const transform = name.style.transform;
+    name.style.transform = 'none';
+    try { return fn(); }
+    finally { name.style.transform = transform; }
+  };
   const dimension = () => {
-    const a = name.getBoundingClientRect();
+    const a = untransformed(() => name.getBoundingClientRect());
     const b = brand.getBoundingClientRect();
     const nameSize = parseFloat(getComputedStyle(name).fontSize);
     const brandSize = parseFloat(getComputedStyle(brand).fontSize);
-    const scale = brandSize / nameSize;
-    return { scale, x: b.left - a.left, y: b.top - a.top };
+    return { scale: brandSize / nameSize, x: b.left - a.left, y: b.top - a.top };
   };
+  const runFrom = () => untransformed(() => {
+    const rect = avatar.getBoundingClientRect();
+    return { x: rect.left, y: rect.top - landing.getBoundingClientRect().top, h: rect.height };
+  });
+  const runTo = () => {
+    const c = coder.getBoundingClientRect();
+    const px = c.height / 18;
+    return {
+      x: c.left + c.width / 2 - 8 * px,
+      y: c.bottom - 24 * px,
+      scale: 24 * px / runFrom().h
+    };
+  };
+  const sizeRunner = () => { runner.style.height = `${runFrom().h}px`; };
+  sizeRunner();
+  ScrollTrigger.addEventListener('refreshInit', sizeRunner);
   const timeline = gsap.timeline({
     scrollTrigger: {
-      trigger: landing, start: 'top top', end: '+=120%', pin: true,
-      scrub: .6, invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        avatar.dataset.frame = self.progress === 0 ? 'idle' : Math.floor(self.progress * 25) % 2 ? 'walk-a' : 'walk-b';
-      }
+      trigger: landing, start: 'top top', end: '+=80%', pin: true,
+      scrub: .6, invalidateOnRefresh: true
+    },
+    // Frames follow the scrubbed timeline, not raw scroll, so his legs keep going while he catches up.
+    onUpdate: () => {
+      const t = timeline.time();
+      runnerSprite.dataset.frame = t > .04 && t < .66 ? `run-${Math.floor(t * 56) % 4 + 1}` : 'run-1';
     }
   });
-  timeline.to('.v2-intro, .v2-landing-boot', { opacity: 0, duration: .3 }, 0)
-    .to('.v2-flood', { clipPath: 'inset(18% 14% 18% 14% round 10px)', duration: 1 }, 0)
-    .to(name, { scale: () => dimension().scale, x: () => dimension().x, y: () => dimension().y, transformOrigin: 'top left', duration: 1 }, 0)
-    .to(avatar, { x: () => window.innerWidth * 1.1, duration: 1 }, 0)
-    .to(name, { opacity: 0, duration: .12 }, .88)
-    .to(brand, { opacity: 1, duration: .12 }, .88);
+  timeline.to('.v2-intro', { opacity: 0, duration: .12 }, 0)
+    .to(name, { scale: () => dimension().scale, x: () => dimension().x, y: () => dimension().y, transformOrigin: 'top left', ease: 'power2.inOut', duration: .5 }, 0)
+    .to(name, { opacity: 0, duration: .04 }, .5)
+    .to(brand, { opacity: 1, duration: .04 }, .5)
+    .set(avatar, { visibility: 'hidden' }, .04)
+    .set(runner, { visibility: 'visible' }, .04)
+    .fromTo(runner, { x: () => runFrom().x, y: () => runFrom().y, scale: 1 }, { x: () => runTo().x, y: () => runTo().y, scale: () => runTo().scale, ease: 'none', duration: .62 }, .04)
+    .fromTo(runnerSprite, { yPercent: 0 }, { yPercent: -12, duration: .03, ease: 'none' }, .60)
+    .to(runnerSprite, { yPercent: 0, duration: .03, ease: 'none' }, .63)
+    .set(runner, { visibility: 'hidden' }, .66)
+    .set(coder, { opacity: 1 }, .66)
+    .set({}, {}, .72);
 } else {
   brand.style.opacity = '1';
 }
 ScrollTrigger.create({
-  trigger: '#work', start: 'top top', endTrigger: 'body', end: 'bottom bottom',
+  trigger: '#work', start: 'top 56px', endTrigger: 'body', end: 'bottom bottom',
   toggleClass: { targets: nav, className: 'is-solid' }
-});
-
-const landingBoot = landing.querySelector<HTMLElement>('.v2-landing-boot')!;
-function placeLandingBoot() {
-  if (scrollY >= 10) return;
-  landingBoot.classList.remove('is-tucked');
-  const boot = landingBoot.getBoundingClientRect();
-  const overlaps = [...name.querySelectorAll<HTMLSpanElement>(':scope > span')].some((span) => {
-    // Width from the text itself; height from the line box (line-height .8), since the text's own box
-    // includes the font's ascent and always reaches into the line above.
-    const range = document.createRange();
-    range.selectNodeContents(span);
-    const ink = range.getBoundingClientRect();
-    const line = span.getBoundingClientRect();
-    return boot.left < ink.right + 16 && boot.right > ink.left - 16 &&
-      boot.top < line.bottom && boot.bottom > line.top;
-  });
-  landingBoot.classList.toggle('is-tucked', overlaps);
-}
-placeLandingBoot();
-let landingBootResize: ReturnType<typeof setTimeout>;
-addEventListener('resize', () => {
-  clearTimeout(landingBootResize);
-  landingBootResize = setTimeout(placeLandingBoot, 150);
 });
 
 const slides = JSON.parse(document.querySelector<HTMLScriptElement>('#v2-slides')!.textContent!) as Slide[];
@@ -193,6 +201,7 @@ function rollTitle(title: string) {
   gsap.fromTo(line.querySelectorAll('.ws-char'), { yPercent: 110 }, { yPercent: 0, duration: .5, stagger: .018, ease: 'power3.out' });
 }
 function swapContent(slide: Slide, next: number) {
+  work.style.setProperty('--accent', slide.accent ?? '#0E1A44');
   setText('.ws-years', slide.years);
   setText('.ws-count', `${next + 1} of ${slides.length}`);
   if (reduced) {
@@ -360,17 +369,27 @@ dialog.querySelector<HTMLFormElement>('form')!.addEventListener('submit', async 
   if (!form.reportValidity()) return;
   const fields = new FormData(form);
   const feedback = dialog.querySelector<HTMLElement>('.cw-feedback')!;
+  const submit = form.querySelector<HTMLButtonElement>('[type="submit"]')!;
   feedback.textContent = 'Sending...';
+  submit.disabled = true;
   try {
-    const response = await fetch('/.netlify/functions/contact', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: fields.get('name'), email: fields.get('email'), message: fields.get('message') })
+    const response = await fetch('https://formsubmit.co/ajax/dominikmachowiak101@gmail.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        name: fields.get('name'), email: fields.get('email'), message: fields.get('message'),
+        _subject: `Portfolio message from ${fields.get('name')}`, _template: 'table', _captcha: 'false',
+        _honey: fields.get('_honey') ?? ''
+      })
     });
-    if (!response.ok) throw new Error('Send failed');
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || String(data.success) !== 'true') throw new Error(data.message ?? 'Send failed');
     feedback.textContent = "Sent. I'll reply within a couple of days.";
     form.reset();
   } catch {
     feedback.textContent = "That didn't send. Email me at dominikmachowiak101@gmail.com instead.";
+  } finally {
+    submit.disabled = false;
   }
 });
 
