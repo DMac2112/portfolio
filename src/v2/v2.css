@@ -25,7 +25,8 @@ a { color: inherit; }
 .v2-nav .v2-nav-links .v2-nav-boot { padding: 7px 14px 7px 9px; gap: 7px; font-size: .9rem; }
 .v2-nav-boot-short { display: none; }
 /* Opacity, not visibility: the typing keyframes set visibility on the frames, which would override a hidden parent. */
-.v2-coder { align-self: flex-end; margin-bottom: 4px; display: inline-flex; opacity: 0; }
+.v2-coder { align-self: flex-end; margin-bottom: 4px; display: inline-flex; opacity: 1; }
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) { .v2-coder { opacity: 0; } }
 .v2-runner { position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; visibility: hidden; transform-origin: 0 0; aspect-ratio: 16 / 24; }
 .v2-start, .v2-button { display: inline-flex; align-items: center; justify-content: center; width: fit-content; text-decoration: none; font-weight: 600; padding: .8em 1.4em; }
 .v2-start { gap: 10px; border: 0; border-radius: 4px 22px 22px 4px; background: var(--start); color: var(--white); }
