@@ -4,7 +4,6 @@
 import { Image } from 'astro:assets';
 import CopyText from '../components/CopyText.astro';
 import OsLaunch from '../components/OsLaunch.astro';
-import type { HumanContent, RevisedContent } from '../lib/content';
 
 import htmlIcon from '../assets/html.png';
 import jsIcon from '../assets/javascript.png';
@@ -16,14 +15,6 @@ import reactIcon from '../assets/react.png';
 const leftCircles = [htmlIcon, jsIcon, cssIcon];
 const rightCircles = [pythonIcon, csharpIcon, reactIcon];
 
-interface Props {
-  revised: RevisedContent['hero'];
-  revisedOsLaunch: RevisedContent['osLaunch'];
-  human: HumanContent['hero'];
-  humanOsLaunch: HumanContent['osLaunch'];
-}
-
-const { revised, revisedOsLaunch, human, humanOsLaunch } = Astro.props;
 ---
 
 <header id="home" class="section bg-dark hero">
@@ -37,34 +28,30 @@ const { revised, revisedOsLaunch, human, humanOsLaunch } = Astro.props;
 
   <div class="hero-info">
     <p class="hero-greeting">
-      <CopyText current="Hello! My name is" revised={revised.greeting} human={human.greeting} />
+      <CopyText current="Hello! My name is" />
     </p>
     <h1 class="hero-h1">
       <span class="hero-name">Dominik Machowiak</span>
       <span class="hero-role">
         <CopyText
           current="Salesforce Marketing Cloud & Front-End Developer"
-          revised={revised.role}
-          human={human.role}
         />
       </span>
     </h1>
     <p class="hero-sub">
       <CopyText
         current="I build fast, polished web experiences — from React front-ends to large-scale marketing automation at Deloitte."
-        revised={revised.tagline}
-        human={human.tagline}
       />
     </p>
     <div class="hero-ctas">
       <a class="hero-btn hero-btn-primary" href="#work">
-        <CopyText current="View my work" revised={revised.primaryCta.label} human={human.primaryCta.label} />
+        <CopyText current="View my work" />
       </a>
       <a class="hero-btn" href="#contact">
-        <CopyText current="Contact me" revised={revised.secondaryCta.label} human={human.secondaryCta.label} />
+        <CopyText current="Contact me" />
       </a>
     </div>
-    <OsLaunch revised={revisedOsLaunch} human={humanOsLaunch} />
+    <OsLaunch />
   </div>
 
   <div class="hero-circles hero-circles-right" aria-hidden="true">

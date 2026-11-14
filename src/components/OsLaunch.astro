@@ -3,14 +3,7 @@
 // thing. Ported 1:1 from the CRA version (src/components/OsLaunch) — plain
 // crawlable <a>, no framework, prefetch-on-intent via the small script below.
 import CopyText from './CopyText.astro';
-import type { HumanContent, RevisedContent } from '../lib/content';
 
-interface Props {
-  revised: RevisedContent['osLaunch'];
-  human: HumanContent['osLaunch'];
-}
-
-const { revised, human } = Astro.props;
 ---
 
 <div class="osl-wrap">
@@ -31,18 +24,16 @@ const { revised, human } = Astro.props;
 
   <span class="osl-body">
     <span class="osl-headline">
-      <CopyText current="My portfolio is an operating system." revised={revised.headline} human={human.headline} />
+      <CopyText current="My portfolio is an operating system." />
     </span>
     <span class="osl-sub">
       <CopyText
         current="Boot a full desktop — open my projects and CV, play pinball, or walk my career as a 2D game."
-        revised={revised.description}
-        human={human.description}
       />
     </span>
     <span class="osl-boot">
       <span class="osl-power" aria-hidden="true">&#x23FB;</span>
-      <CopyText current="Boot it up" revised={revised.buttonLabel} human={human.buttonLabel} />
+      <CopyText current="Boot it up" />
     </span>
   </span>
 
@@ -53,8 +44,6 @@ const { revised, human } = Astro.props;
         <span>
           <CopyText
             current={label}
-            revised={revised.taskbarLabels[index] || label}
-            human={human.taskbarLabels[index] || label}
           />
         </span>
       ))}

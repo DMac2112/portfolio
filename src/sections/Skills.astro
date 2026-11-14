@@ -5,36 +5,23 @@ import { Image } from 'astro:assets';
 import {
   contentImage,
   type ExperienceGroup,
-  type HumanContent,
-  type RevisedContent,
   type Skill,
 } from '../lib/content';
 
 interface Props {
   experiences: ExperienceGroup[];
   skills: Skill[];
-  revised: RevisedContent['experienceAndSkills'];
-  human: HumanContent['experienceAndSkills'];
 }
 
-const { experiences, skills, revised, human } = Astro.props;
+const { experiences, skills } = Astro.props;
 const variants = [
   { version: 'current', groups: experiences, skills },
-  { version: 'revised', groups: revised.groups, skills: revised.skills },
-  { version: 'human', groups: human.groups, skills: human.skills },
 ];
-const humanHeadingWords = human.heading.split(' ');
-const humanHeadingAccent = humanHeadingWords.pop() || '';
-const humanHeadingLead = humanHeadingWords.join(' ');
 ---
 
 <section id="skills" class="section bg-white" aria-labelledby="skills-heading">
   <h2 id="skills-heading" class="head-text">
     <span class="copy-heading" data-copy-version="current">My Experience &amp; <span>Skills</span></span>
-    <span class="copy-heading" data-copy-version="revised">Experience, Education &amp; <span>Skills</span></span>
-    <span class="copy-heading" data-copy-version="human">
-      {humanHeadingLead}{' '}<span>{humanHeadingAccent}</span>
-    </span>
   </h2>
 
   {variants.map(({ version, groups, skills: variantSkills }) => (

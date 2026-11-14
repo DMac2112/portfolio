@@ -3,15 +3,13 @@
 // script; cards carry data-tags). All cards are server-rendered — crawlers
 // always see every project.
 import { Image } from 'astro:assets';
-import { contentImage, type HumanContent, type RevisedContent, type WorkItem } from '../lib/content';
+import { contentImage, type WorkItem } from '../lib/content';
 
 interface Props {
   works: WorkItem[];
-  revised: RevisedContent['work'];
-  human: HumanContent['work'];
 }
 
-const { works, revised, human } = Astro.props;
+const { works } = Astro.props;
 const filters = ['Web App', 'React JS', 'All'];
 const variants = [
   {
@@ -22,38 +20,13 @@ const variants = [
     imageAltPrefix: 'Screenshot of',
     linkLabelPrefix: 'Visit',
   },
-  {
-    version: 'revised',
-    items: revised.items,
-    filters: revised.filters,
-    filterAriaLabel: revised.filterAriaLabel,
-    imageAltPrefix: revised.projectImageAltPrefix,
-    linkLabelPrefix: revised.projectLinkLabelPrefix,
-  },
-  {
-    version: 'human',
-    items: human.items,
-    filters: human.filters,
-    filterAriaLabel: human.filterAriaLabel,
-    imageAltPrefix: human.projectImageAltPrefix,
-    linkLabelPrefix: human.projectLinkLabelPrefix,
-  },
 ];
-const humanHeadingWords = human.heading.split(' ');
-const humanHeadingAccent = humanHeadingWords.pop() || '';
-const humanHeadingLead = humanHeadingWords.join(' ');
 ---
 
 <section id="work" class="section bg-primary" aria-labelledby="work-heading">
   <h2 id="work-heading" class="head-text">
     <span class="copy-heading" data-copy-version="current">
       My Current Development <span>Portfolio</span>
-    </span>
-    <span class="copy-heading" data-copy-version="revised">
-      Selected <span>Work</span>
-    </span>
-    <span class="copy-heading" data-copy-version="human">
-      {humanHeadingLead}{' '}<span>{humanHeadingAccent}</span>
     </span>
   </h2>
 

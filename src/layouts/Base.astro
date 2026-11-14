@@ -10,20 +10,12 @@ import '../styles/style-options.css';
 interface Props {
   title: string;
   description: string;
-  revisedTitle: string;
-  revisedDescription: string;
-  humanTitle: string;
-  humanDescription: string;
   ogImage?: string;
 }
 
 const {
   title,
   description,
-  revisedTitle,
-  revisedDescription,
-  humanTitle,
-  humanDescription,
   ogImage = '/dominik.png',
 } = Astro.props;
 
@@ -91,16 +83,13 @@ const speculationRules = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title data-copy-current={title} data-copy-revised={revisedTitle} data-copy-human={humanTitle}>{title}</title>
+    <title>{title}</title>
     <meta
       name="description"
       content={description}
-      data-copy-current={description}
-      data-copy-revised={revisedDescription}
-      data-copy-human={humanDescription}
     />
     <link rel="canonical" href={canonical} />
-    <meta name="theme-color" content="#151320" />
+    <meta name="theme-color" content="#151414" />
     <link rel="icon" href="/dominik.png" />
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -122,48 +111,8 @@ const speculationRules = {
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <script type="speculationrules" set:html={JSON.stringify(speculationRules)} />
 
-    <!-- Apply saved display choices before first paint; defaults remain usable without JS. -->
     <script is:inline>
-      (() => {
-        let copyVersion = 'current';
-        let style = 'edge';
-        let palette = 'carbon';
-        const styles = ['edge', 'studio', 'classic', 'editorial', 'glass', 'terminal', 'cupertino'];
-        const palettes = [
-          'carbon',
-          'chalk',
-          'cobalt',
-          'frost',
-          'cloud',
-          'paper',
-          'mint',
-          'rose',
-          'sky',
-          'sand',
-          'midnight',
-          'oled',
-          'forest',
-          'aubergine',
-          'ember',
-          'slate',
-        ];
-
-        try {
-          const savedVersion = localStorage.getItem('portfolio-copy-version');
-          const savedStyle = localStorage.getItem('portfolio-style');
-          const savedPalette = localStorage.getItem('portfolio-palette');
-          if (savedVersion === 'revised' || savedVersion === 'human') copyVersion = savedVersion;
-          if (savedStyle && styles.includes(savedStyle)) style = savedStyle;
-          if (savedPalette && palettes.includes(savedPalette)) palette = savedPalette;
-        } catch {
-          // Storage may be disabled; all switches still work for this visit.
-        }
-
-        document.documentElement.dataset.copyVersion = copyVersion;
-        document.documentElement.dataset.style = style;
-        document.documentElement.dataset.palette = palette;
-        document.documentElement.classList.add('js');
-      })();
+      document.documentElement.classList.add('js');
     </script>
 
     <slot name="head" />

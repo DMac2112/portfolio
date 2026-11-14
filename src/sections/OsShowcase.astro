@@ -2,17 +2,7 @@
 // Mid-page DominikOS showcase: the recruiter-friendly "here's what it is"
 // surface. Crawlable links, restrained copy, zero heavy assets.
 import CopyText from '../components/CopyText.astro';
-import type { HumanContent, RevisedContent } from '../lib/content';
 
-interface Props {
-  revised: RevisedContent['osShowcase'];
-  human: HumanContent['osShowcase'];
-}
-
-const { revised, human } = Astro.props;
-const humanHeadingWords = human.heading.split(' ');
-const humanHeadingAccent = humanHeadingWords.pop() || '';
-const humanHeadingLead = humanHeadingWords.join(' ');
 const currentFeatures = [
   { title: 'Desktop', description: 'Draggable windows, Start menu, my projects & CV as apps' },
   { title: '2D game', description: 'Walk my career timeline as an explorable pixel-art town' },
@@ -25,19 +15,11 @@ const currentFeatures = [
     <span class="copy-heading" data-copy-version="current">
       Prefer to explore? <span>Boot DominikOS</span>
     </span>
-    <span class="copy-heading" data-copy-version="revised">
-      Explore <span>DominikOS</span>
-    </span>
-    <span class="copy-heading" data-copy-version="human">
-      {humanHeadingLead}{' '}<span>{humanHeadingAccent}</span>
-    </span>
   </h2>
 
   <p class="os-lede">
     <CopyText
       current="I rebuilt my portfolio as a retro desktop operating system — windows, taskbar, boot screen and all. Everything on this page lives in there too, plus a few things that don't fit on a web page."
-      revised={revised.lede}
-      human={human.lede}
     />
   </p>
 
@@ -47,15 +29,11 @@ const currentFeatures = [
         <span class="os-feature-title">
           <CopyText
             current={feature.title}
-            revised={revised.features[index]?.title || feature.title}
-            human={human.features[index]?.title || feature.title}
           />
         </span>
         <span class="os-feature-desc">
           <CopyText
             current={feature.description}
-            revised={revised.features[index]?.description || feature.description}
-            human={human.features[index]?.description || feature.description}
           />
         </span>
       </li>
@@ -65,13 +43,11 @@ const currentFeatures = [
   <div class="os-actions">
     <a class="os-boot-btn" href="/os/?boot=chooser">
       <span aria-hidden="true">&#x23FB;</span>
-      <CopyText current="Boot DominikOS" revised={revised.primaryCta.label} human={human.primaryCta.label} />
+      <CopyText current="Boot DominikOS" />
     </a>
     <span class="os-deep p-text">
       <CopyText
         current="or jump straight to the"
-        revised={revised.deepLinkPrefix}
-        human={human.deepLinkPrefix}
       />
       {' '}
       <a href="/os/?boot=desktop">desktop</a> ·

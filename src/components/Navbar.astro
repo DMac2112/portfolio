@@ -1,17 +1,8 @@
 ---
 // Fixed top navbar. Desktop: inline links. Mobile: accessible slide-in panel
 // driven by ~15 lines of vanilla JS in site script (no framework).
-import type { HumanContent, RevisedContent } from '../lib/content';
 
-interface Props {
-  revised: RevisedContent['navigation'];
-  human: HumanContent['navigation'];
-}
-
-const { revised, human } = Astro.props;
 const links = ['home', 'about', 'work', 'skills', 'dominikos', 'contact'];
-const revisedLabel = (id: string) => revised.links.find((link) => link.id === id)?.label || id;
-const humanLabel = (id: string) => human.links.find((link) => link.id === id)?.label || id;
 ---
 
 <nav class="navbar" aria-label="Main">
@@ -21,49 +12,11 @@ const humanLabel = (id: string) => human.links.find((link) => link.id === id)?.l
       <li>
         <a href={`#${item}`}>
           <span data-copy-version="current">{item === 'dominikos' ? 'DominikOS' : item}</span>
-          <span data-copy-version="revised">{revisedLabel(item)}</span>
-          <span data-copy-version="human">{humanLabel(item)}</span>
+
         </a>
       </li>
     ))}
   </ul>
-
-  <div class="navbar-controls" role="group" aria-label="Portfolio display options">
-    <button
-      class="nav-option-toggle copy-toggle"
-      type="button"
-      aria-label="Copy version: Original. Activate formal version."
-      data-copy-active="current"
-      data-copy-toggle
-    >
-      <span class="toggle-prefix">Voice: </span><span data-copy-toggle-label>Original</span>
-      <span class="sr-only" data-copy-toggle-action>. Activate formal version.</span>
-    </button>
-
-    <button
-      class="nav-option-toggle style-toggle"
-      type="button"
-      aria-label="Style: Edge. Activate studio style."
-      data-style-active="edge"
-      data-style-toggle
-    >
-      <span class="toggle-prefix">Style: </span><span data-style-toggle-label>Edge</span>
-      <span class="sr-only" data-style-toggle-action>. Activate studio style.</span>
-    </button>
-
-    <button
-      class="nav-option-toggle palette-toggle"
-      type="button"
-      aria-label="Colour palette: Carbon, dark mode. Activate Chalk, light mode."
-      data-palette-active="carbon"
-      data-palette-toggle
-    >
-      <span class="palette-swatch" aria-hidden="true"></span>
-      <span class="toggle-prefix">Colour: </span><span data-palette-toggle-label>Carbon</span>
-      <span class="toggle-detail" data-palette-toggle-mode> · Dark</span>
-      <span class="sr-only" data-palette-toggle-action>. Activate Chalk, light mode.</span>
-    </button>
-  </div>
 
   <button
     class="navbar-toggle"
@@ -90,8 +43,7 @@ const humanLabel = (id: string) => human.links.find((link) => link.id === id)?.l
         <li>
           <a href={`#${item}`} data-nav-link>
             <span data-copy-version="current">{item === 'dominikos' ? 'DominikOS' : item}</span>
-            <span data-copy-version="revised">{revisedLabel(item)}</span>
-            <span data-copy-version="human">{humanLabel(item)}</span>
+
           </a>
         </li>
       ))}
@@ -150,93 +102,15 @@ const humanLabel = (id: string) => human.links.find((link) => link.id === id)?.l
     background-color: var(--accent-color, var(--secondary-color));
   }
 
-  .navbar-controls {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .nav-option-toggle {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 34px;
-    border: 1px solid var(--border-color, var(--secondary-color));
-    border-radius: 999px;
-    padding: 0.45rem 0.7rem;
-    background: var(--surface-color, var(--white-color));
-    color: var(--text-color, var(--secondary-color));
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: var(--tracking-mono);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-  }
-
-  .nav-option-toggle:hover,
-  .nav-option-toggle:focus-visible {
-    border-color: var(--accent-color, var(--secondary-color));
-    background-color: var(--accent-color, var(--secondary-color));
-    color: var(--on-accent, var(--white-color));
-  }
-
-  .palette-swatch {
-    width: 0.55rem;
-    height: 0.55rem;
-    margin-right: 0.35rem;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-    background: var(--accent-color, var(--secondary-color));
-  }
-
-  @media screen and (max-width: 1180px) {
-    .toggle-prefix {
-      display: none;
-    }
-  }
-
   @media screen and (max-width: 900px) {
     .navbar-links {
       display: none;
-    }
-
-    .navbar-controls {
-      margin-left: auto;
     }
   }
 
   @media screen and (max-width: 560px) {
     .navbar {
       padding-inline: 0.65rem;
-    }
-
-    .navbar-controls {
-      gap: 0.25rem;
-    }
-
-    .nav-option-toggle {
-      min-height: 32px;
-      padding-inline: 0.5rem;
-      font-size: 0.63rem;
-    }
-
-    .toggle-detail {
-      display: none;
-    }
-
-    .palette-swatch {
-      margin-right: 0.25rem;
-    }
-  }
-
-  @media screen and (max-width: 390px) {
-    .palette-swatch {
-      display: none;
     }
   }
 

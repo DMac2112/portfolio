@@ -5,28 +5,16 @@
 // server-side in Netlify env vars, never in this bundle.
 import { Image } from 'astro:assets';
 import CopyText from '../components/CopyText.astro';
-import type { HumanContent, RevisedContent } from '../lib/content';
 import emailIcon from '../assets/email.png';
 import linkedinIcon from '../assets/linkedin.png';
 
-interface Props {
-  revised: RevisedContent['contact'];
-  revisedFooter: RevisedContent['footer'];
-  human: HumanContent['contact'];
-  humanFooter: HumanContent['footer'];
-}
-
-const { revised, revisedFooter, human, humanFooter } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
 <footer id="contact" class="section bg-white" aria-labelledby="contact-heading">
   <h2 id="contact-heading" class="head-text">
-    <CopyText current="Contact me" revised={revised.heading} human={human.heading} />
+    <CopyText current="Contact me" />
   </h2>
-
-  <p class="contact-intro p-text" data-copy-version="revised">{revised.intro}</p>
-  <p class="contact-intro p-text" data-copy-version="human">{human.intro}</p>
 
   <div class="contact-cards">
     <a class="contact-card" href="mailto:dominikmachowiak101@gmail.com">
@@ -34,8 +22,6 @@ const year = new Date().getFullYear();
       <span class="p-text">
         <CopyText
           current="dominikmachowiak101@gmail.com"
-          revised={revised.email.label}
-          human={human.email.label}
         />
       </span>
     </a>
@@ -47,7 +33,7 @@ const year = new Date().getFullYear();
     >
       <Image src={linkedinIcon} alt="" width={40} loading="lazy" />
       <span class="p-text">
-        <CopyText current="Dominik Machowiak" revised={revised.linkedin.label} human={human.linkedin.label} />
+        <CopyText current="Dominik Machowiak" />
       </span>
     </a>
   </div>
@@ -56,14 +42,8 @@ const year = new Date().getFullYear();
     class="contact-form"
     data-contact-form
     data-validation-current="Please fill in all fields."
-    data-validation-revised={revised.form.validationMessage}
-    data-validation-human={human.form.validationMessage}
     data-success-current="Thank you for getting in touch! I will get back to you soon."
-    data-success-revised={revised.form.successMessage}
-    data-success-human={human.form.successMessage}
     data-error-current="Something went wrong — please email me directly instead."
-    data-error-revised={revised.form.errorMessage}
-    data-error-human={human.form.errorMessage}
     novalidate
   >
     <div>
@@ -83,11 +63,7 @@ const year = new Date().getFullYear();
       class="p-text contact-submit"
       data-contact-submit
       data-label-current="Send Message"
-      data-label-revised={revised.form.submitLabel}
-      data-label-human={human.form.submitLabel}
       data-sending-current="Sending..."
-      data-sending-revised={revised.form.sendingLabel}
-      data-sending-human={human.form.sendingLabel}
     >
       Send Message
     </button>
@@ -98,8 +74,6 @@ const year = new Date().getFullYear();
     <a class="footer-os-link" href="/os/?boot=chooser">
       <CopyText
         current="Boot DominikOS — my portfolio as an interactive desktop →"
-        revised={revisedFooter.osLinkLabel}
-        human={humanFooter.osLinkLabel}
       />
     </a>
     <p class="p-text footer-copy">&copy; {year} Dominik Machowiak · All rights reserved</p>
