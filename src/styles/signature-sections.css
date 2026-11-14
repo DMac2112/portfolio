@@ -103,3 +103,18 @@ html[data-style='edge'] .os-actions { align-items: flex-start; }
 @media (min-width: 700px) {
   html[data-style='edge'] .profiles { grid-template-rows: repeat(2, 1fr); }
 }
+
+/* About photos: real photographs (Unsplash licence: Florian Olivo, Joshua Aragon, Vladyslav Bahara, Lautaro Andreani) shown as proper frames, not 72px strips. */
+html[data-style='edge'] .profile img { width: 100%; height: auto; max-height: none; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); }
+
+/* Phone fixes */
+@media (max-width: 699px) {
+  html[data-style='edge'] .navbar { background: #151414 !important; }
+  .hero-fact + .hero-fact::before { display: none; }
+  html[data-style='edge'] .exp-work { grid-template-columns: 4.75rem minmax(0, 1fr); column-gap: .75rem; row-gap: .25rem; padding: 1.1rem 0; }
+  html[data-style='edge'] .exp-work > :is(h3, p) { overflow-wrap: normal; }
+  html[data-style='edge'] .exp-year { grid-row: 1 / span 2; }
+  html[data-style='edge'] .exp-work > p:not(.exp-year) { grid-column: 2; grid-row: 2; }
+  html[data-style='edge'] .contact-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; width: 100%; margin-left: 0; margin-right: 0; }
+  html[data-style='edge'] .contact-card { width: 100%; margin: 0; justify-content: flex-start; }
+}
