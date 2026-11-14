@@ -21,6 +21,7 @@ const variants = [
 
   {variants.map(({ version, items }) => (
     <div class="profiles" data-copy-version={version}>
+      <div class="panel-corners" aria-hidden="true"><i></i><i></i><i></i><i></i><i class="grid-junction"></i></div>
       {items.map((about) => (
         <article class="profile reveal">
           <Image

@@ -133,8 +133,8 @@ body {
 html[data-palette='carbon'] {
   color-scheme: dark;
   --primary-color: #151414;
-  --secondary-color: #7f9bff;
-  --accent-color: #2f5bff;
+  --secondary-color: #5ee27a;
+  --accent-color: #1f8a3b;
   --black-color: #fffbf5;
   --gray-color: #9a9390;
   --white-color: #fffbf5;
@@ -149,8 +149,9 @@ html[data-palette='carbon'] {
   --hero-bg: #151414;
   --on-hero: #fffbf5;
   --on-accent: #fffbf5;
+  --hero-cta-ink: #1f1f1f;
   --shadow-color: rgba(0,0,0,0.5);
-  --selection-color: #2f5bff;
-  --accent-tint: rgba(47,91,255,0.1);
-  --accent-line: rgba(47,91,255,0.3);
+  --selection-color: #1f8a3b;
+  --accent-tint: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  --accent-line: color-mix(in srgb, var(--accent-color) 30%, transparent);
 }

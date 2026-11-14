@@ -1,0 +1,141 @@
+<script>
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  // Each section owns its clock; hidden sections and background tabs do no timer work.
+  function sectionClock(element: HTMLElement, tick: (delta: number) => void, reset: () => void = () => {}) {
+    let visible = false;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    let last = 0;
+    const sync = () => {
+      if (timer !== undefined) clearInterval(timer);
+      timer = undefined;
+      const active = visible && !document.hidden && !reduced.matches;
+      element.dataset.motionActive = String(active);
+      if (reduced.matches) reset();
+      if (active) {
+        last = performance.now();
+        timer = setInterval(() => {
+          const now = performance.now();
+          tick(Math.min(now - last, 100));
+          last = now;
+        }, 50);
+      }
+    };
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, { threshold: 0 }).observe(element);
+    document.addEventListener('visibilitychange', sync);
+    reduced.addEventListener('change', sync);
+    sync();
+  }
+
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const grid = hero?.querySelector<HTMLElement>('.hero-grid');
+  const role = hero?.querySelector<HTMLElement>('.hero-role');
+  if (hero && grid && role) {
+    const text = role.textContent?.trim() || '';
+    const typed = document.createElement('span');
+    typed.className = 'typed-role';
+    typed.setAttribute('aria-hidden', 'true');
+    let typedTime = 0;
+    let typingDone = reduced.matches;
+    if (!typingDone) { role.classList.add('is-typing'); role.append(typed); }
+    const finish = () => { typingDone = true; role.classList.remove('is-typing'); typed.remove(); grid.replaceChildren(); };
+    const cells: { node: HTMLElement; elapsed: number; duration: number }[] = [];
+    const place = (cell: HTMLElement) => {
+      cell.style.left = `${Math.floor(Math.random() * Math.ceil(grid.clientWidth / 56)) * 56 + 1}px`;
+      cell.style.top = `${Math.floor(Math.random() * Math.ceil(grid.clientHeight / 56)) * 56 + 1}px`;
+    };
+    sectionClock(hero, delta => {
+      if (!typingDone) {
+        typedTime += delta;
+        typed.textContent = text.slice(0, Math.floor(typedTime / 35));
+        if (typedTime > text.length * 35 + 900) { typingDone = true; role.classList.remove('is-typing'); typed.remove(); }
+      }
+      if (!grid.children.length) {
+        cells.length = 0;
+        for (let i = 0; i < 14; i++) {
+          const node = document.createElement('i');
+          node.className = 'hero-cell';
+          const duration = 1500 + Math.random() * 1500;
+          const elapsed = Math.random() * duration;
+          node.style.setProperty('--cell-time', `${duration}ms`);
+          node.style.animationDelay = `-${elapsed}ms`;
+          place(node); grid.append(node); cells.push({ node, duration, elapsed });
+        }
+      }
+      cells.forEach(cell => { cell.elapsed += delta; if (cell.elapsed >= cell.duration) { cell.elapsed %= cell.duration; place(cell.node); } });
+    }, finish);
+  }
+
+  const work = document.querySelector<HTMLElement>('.project-showcase');
+  if (work) {
+    const controls = work.querySelector<HTMLElement>('.project-controls')!;
+    const tabs = Array.from(work.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const panels = Array.from(work.querySelectorAll<HTMLElement>('.project-panel'));
+    const pause = work.querySelector<HTMLButtonElement>('.project-pause')!;
+    let current = 0, elapsed = 0;
+    let stopped = reduced.matches;
+    const markPause = () => {
+      pause.setAttribute('aria-pressed', String(stopped));
+      pause.setAttribute('aria-label', stopped ? 'Play automatic project rotation' : 'Pause automatic project rotation');
+      pause.firstElementChild!.textContent = stopped ? '▷' : 'Ⅱ';
+      pause.disabled = reduced.matches;
+    };
+    const select = (index: number) => {
+      current = index; elapsed = 0;
+      work.style.setProperty('--project-progress', '0');
+      tabs.forEach((tab, i) => { tab.setAttribute('aria-selected', String(i === index)); tab.tabIndex = i === index ? 0 : -1; });
+      panels.forEach((panel, i) => { panel.hidden = i !== index; panel.setAttribute('role', 'tabpanel'); panel.setAttribute('aria-labelledby', tabs[i].id); panel.tabIndex = 0; });
+    };
+    const manual = (index: number) => { stopped = true; select(index); markPause(); };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => manual(i));
+      tab.addEventListener('keydown', event => {
+        let next = i;
+        if (event.key === 'ArrowRight') next = (i + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (i + tabs.length - 1) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault(); manual(next); tabs[next].focus();
+      });
+    });
+    pause.addEventListener('click', () => { stopped = !stopped; markPause(); });
+    controls.hidden = false; select(0); markPause();
+    sectionClock(work, delta => {
+      if (stopped || work.matches(':hover') || work.contains(document.activeElement)) return;
+      elapsed += delta;
+      if (elapsed >= 6000) select((current + 1) % tabs.length);
+      work.style.setProperty('--project-progress', String(elapsed / 6000));
+    }, () => { stopped = true; elapsed = 0; markPause(); work.style.setProperty('--project-progress', '0'); });
+    reduced.addEventListener('change', markPause);
+  }
+
+  const strip = document.querySelector<HTMLElement>('.skill-strip');
+  if (strip) {
+    const run = strip.querySelector<HTMLElement>('.skill-run')!;
+    const fit = () => {
+      strip.classList.remove('is-static');
+      const fits = run.children.length < 6 && run.scrollWidth <= strip.clientWidth;
+      strip.classList.toggle('is-static', reduced.matches || fits);
+    };
+    new ResizeObserver(fit).observe(strip);
+    reduced.addEventListener('change', fit);
+    fit();
+    sectionClock(strip, () => {});
+  }
+
+  const os = document.querySelector<HTMLElement>('.os-showcase');
+  if (os) {
+    const lines = Array.from(os.querySelectorAll<HTMLElement>('.boot-terminal p'));
+    const button = os.querySelector<HTMLElement>('.os-boot-btn')!;
+    let elapsed = 0, shown = 0, done = reduced.matches;
+    if (!done) lines.forEach(line => line.classList.add('boot-pending'));
+    sectionClock(os, delta => {
+      if (done) return;
+      elapsed += delta;
+      if (elapsed >= 350) {
+        elapsed -= 350; lines[shown++]?.classList.remove('boot-pending');
+        if (shown === lines.length) { done = true; button.classList.add('boot-pulse'); }
+      }
+    }, () => { done = true; lines.forEach(line => line.classList.remove('boot-pending')); button.classList.remove('boot-pulse'); });
+  }
+</script>

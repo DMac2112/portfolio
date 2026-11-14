@@ -11,6 +11,7 @@ const currentFeatures = [
 ---
 
 <section id="dominikos" class="section bg-dark os-showcase" aria-labelledby="dominikos-heading">
+  <div class="os-intro">
   <h2 id="dominikos-heading" class="head-text os-head">
     <span class="copy-heading" data-copy-version="current">
       Prefer to explore? <span>Boot DominikOS</span>
@@ -23,7 +24,8 @@ const currentFeatures = [
     />
   </p>
 
-  <ul class="os-features">
+  </div>
+  <ul class="os-features sr-only">
     {currentFeatures.map((feature, index) => (
       <li>
         <span class="os-feature-title">
@@ -40,6 +42,12 @@ const currentFeatures = [
     ))}
   </ul>
 
+  <div class="os-console">
+    <div class="boot-terminal" aria-hidden="true">
+      <p>DominikOS — power on</p>
+      {currentFeatures.map(feature => <p><span>[ ok ]</span> {feature.title}: {feature.description}</p>)}
+      <p class="boot-ready">ready. press boot</p>
+    </div>
   <div class="os-actions">
     <a class="os-boot-btn" href="/os/?boot=chooser">
       <span aria-hidden="true">&#x23FB;</span>
@@ -53,6 +61,7 @@ const currentFeatures = [
       <a href="/os/?boot=desktop">desktop</a> ·
       <a href="/os/?boot=game">game</a>
     </span>
+  </div>
   </div>
 </section>
 

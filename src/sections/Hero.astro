@@ -3,6 +3,8 @@
 // single H1 was "Hello!") and the DominikOS boot card as signature CTA.
 import { Image } from 'astro:assets';
 import CopyText from '../components/CopyText.astro';
+import experience from '../data/experience.json';
+import skills from '../data/skills.json';
 import OsLaunch from '../components/OsLaunch.astro';
 
 import htmlIcon from '../assets/html.png';
@@ -11,6 +13,10 @@ import cssIcon from '../assets/css.png';
 import pythonIcon from '../assets/python.png';
 import csharpIcon from '../assets/csharp.png';
 import reactIcon from '../assets/react.png';
+
+const employment = experience.find(group => group.type === 'Employment')!.works[0];
+const education = experience.find(group => group.type === 'Education')!.works[0];
+const certifications = skills.filter(skill => skill.name === 'Marketing Cloud Email Specialist' || skill.name === 'Trailhead Mountaineer');
 
 const leftCircles = [htmlIcon, jsIcon, cssIcon];
 const rightCircles = [pythonIcon, csharpIcon, reactIcon];
@@ -26,6 +32,8 @@ const rightCircles = [pythonIcon, csharpIcon, reactIcon];
     ))}
   </div>
 
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="panel-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="hero-info">
     <p class="hero-greeting">
       <CopyText current="Hello! My name is" />
@@ -62,6 +70,10 @@ const rightCircles = [pythonIcon, csharpIcon, reactIcon];
     ))}
   </div>
 </header>
+<div class="hero-facts">
+  {[employment, education].map(item => <div class="hero-fact"><p>{item.name}</p><p>{item.company} · {item.year}</p></div>)}
+  <div class="hero-fact"><p>{certifications[0].name}</p><p>{certifications[1].name}</p></div>
+</div>
 
 <style>
   .hero {

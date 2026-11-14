@@ -4,6 +4,7 @@
 
 const links = ['home', 'about', 'work', 'skills', 'dominikos', 'contact'];
 const accents = [
+  ['boot', 'Start green', '#1f8a3b'],
   ['blue', 'Electric blue', '#2f5bff'],
   ['cyan', 'Neon cyan', '#00e5ff'],
   ['matrix', 'Hacker green', '#00ff41'],
@@ -213,7 +214,7 @@ const accents = [
     const root = document.documentElement;
     const buttons = document.querySelectorAll('[data-accent-pick]');
     const mark = () => {
-      const current = root.dataset.accent || 'blue';
+      const current = root.dataset.accent || 'boot';
       buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.accentPick === current)));
     };
     buttons.forEach((b) =>

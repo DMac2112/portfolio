@@ -2,6 +2,8 @@
 import Base from '../layouts/Base.astro';
 import Navbar from '../components/Navbar.astro';
 import Rails from '../components/Rails.astro';
+import SignatureMotion from '../components/SignatureMotion.astro';
+import '../styles/signature-sections.css';
 import Hero from '../sections/Hero.astro';
 import About from '../sections/About.astro';
 import Work from '../sections/Work.astro';
@@ -39,6 +41,8 @@ const description = site.meta.description;
   <Rails />
 </Base>
 
+<SignatureMotion />
+
 <script>
   // ---- All page interactivity: vanilla JS, no framework.
 
@@ -63,33 +67,6 @@ const description = site.meta.description;
       toggle?.focus();
     }
   });
-
-  // 2) Work filter
-  const filterBtns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-  const cards = document.querySelectorAll<HTMLElement>(
-    '[data-copy-version="current"] [data-work-grid] [data-tags]'
-  );
-
-  filterBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const filter = btn.dataset.filter || 'All';
-      filterBtns.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      cards.forEach((card) => {
-        const tags: string[] = JSON.parse(card.dataset.tags || '[]');
-        card.hidden = filter !== 'All' && !tags.includes(filter);
-      });
-    });
-  });
-
-  // 3) Testimonial carousel
-  const slides = Array.from(document.querySelectorAll<HTMLElement>('[data-slide]'));
-  let current = 0;
-  const show = (i: number) => {
-    current = (i + slides.length) % slides.length;
-    slides.forEach((s, idx) => (s.hidden = idx !== current));
-  };
-  document.querySelector('[data-carousel-prev]')?.addEventListener('click', () => show(current - 1));
-  document.querySelector('[data-carousel-next]')?.addEventListener('click', () => show(current + 1));
 
   // 4) Contact form -> Netlify Function (token stays server-side)
   const form = document.querySelector<HTMLFormElement>('[data-contact-form]');

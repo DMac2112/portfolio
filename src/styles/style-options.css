@@ -401,6 +401,9 @@ html[data-style='edge'] .navbar-menu a {
   text-transform: capitalize !important;
 }
 
+html[data-accent='boot'] { --accent-color: #1f8a3b; --on-accent: #fffbf5; --hero-cta-ink: #1f1f1f; --secondary-color: #5ee27a; }
+html[data-accent='blue'] { --accent-color: #2f5bff; --on-accent: #fffbf5; --hero-cta-ink: #1f1f1f; --secondary-color: #7f9bff; }
+
 /* Accent picker: the dark base never changes, only the accent family does. */
 html[data-accent='lime']    { --accent-color: #c6ff00; --on-accent: #11140a; --hero-cta-ink: #c6ff00; --secondary-color: #c6ff00; }
 html[data-accent='yellow']  { --accent-color: #fff01f; --on-accent: #17150a; --hero-cta-ink: #fff01f; --secondary-color: #fff01f; }
