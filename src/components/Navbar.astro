@@ -3,6 +3,17 @@
 // driven by ~15 lines of vanilla JS in site script (no framework).
 
 const links = ['home', 'about', 'work', 'skills', 'dominikos', 'contact'];
+const accents = [
+  ['blue', 'Electric blue', '#2f5bff'],
+  ['cyan', 'Neon cyan', '#00e5ff'],
+  ['matrix', 'Hacker green', '#00ff41'],
+  ['lime', 'Neon lime', '#c6ff00'],
+  ['yellow', 'Neon yellow', '#fff01f'],
+  ['pink', 'Hot pink', '#ff2d95'],
+  ['purple', 'Neon purple', '#9d2bff'],
+  ['crimson', 'Crimson', '#dc143c'],
+  ['blood', 'Blood red', '#8a0303'],
+];
 ---
 
 <nav class="navbar" aria-label="Main">
@@ -17,6 +28,12 @@ const links = ['home', 'about', 'work', 'skills', 'dominikos', 'contact'];
       </li>
     ))}
   </ul>
+
+  <div class="accent-picker" role="group" aria-label="Accent colour">
+    {accents.map(([id, label, hex]) => (
+      <button type="button" data-accent-pick={id} aria-label={label} title={label} aria-pressed="false" style={`--swatch:${hex}`} />
+    ))}
+  </div>
 
   <button
     class="navbar-toggle"
@@ -190,3 +207,22 @@ const links = ['home', 'about', 'work', 'skills', 'dominikos', 'contact'];
     color: var(--secondary-color);
   }
 </style>
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    const buttons = document.querySelectorAll('[data-accent-pick]');
+    const mark = () => {
+      const current = root.dataset.accent || 'blue';
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.accentPick === current)));
+    };
+    buttons.forEach((b) =>
+      b.addEventListener('click', () => {
+        root.dataset.accent = b.dataset.accentPick;
+        try { localStorage.setItem('portfolio-accent', b.dataset.accentPick); } catch {}
+        mark();
+      })
+    );
+    mark();
+  })();
+</script>

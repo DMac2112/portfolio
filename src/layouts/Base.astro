@@ -113,6 +113,10 @@ const speculationRules = {
 
     <script is:inline>
       document.documentElement.classList.add('js');
+      try {
+        const accent = localStorage.getItem('portfolio-accent');
+        if (accent && /^[a-z]+$/.test(accent)) document.documentElement.dataset.accent = accent;
+      } catch {}
     </script>
 
     <slot name="head" />

@@ -336,17 +336,17 @@ html[data-style='edge'] .hero :is(.hero-h1, .hero-name) {
   color: var(--on-accent) !important;
 }
 html[data-style='edge'] .hero :is(.hero-greeting, .hero-role, .hero-sub) {
-  color: rgba(255,251,245,0.8) !important;
+  color: color-mix(in srgb, var(--on-accent) 80%, transparent) !important;
 }
 html[data-style='edge'] .hero .hero-btn {
   background: transparent !important;
-  border-color: rgba(255,251,245,0.5) !important;
+  border-color: color-mix(in srgb, var(--on-accent) 50%, transparent) !important;
   color: var(--on-accent) !important;
 }
 html[data-style='edge'] .hero .hero-btn-primary {
-  background: #fffbf5 !important;
-  border-color: #fffbf5 !important;
-  color: #1f1f1f !important;
+  background: var(--on-accent) !important;
+  border-color: var(--on-accent) !important;
+  color: var(--hero-cta-ink, #1f1f1f) !important;
 }
 html[data-style='edge'] .section:not(.hero) :is(.p-text, .os-feature-desc) {
   color: var(--text-color) !important;
@@ -399,4 +399,47 @@ html[data-style='edge'] .navbar-menu a {
   font-family: 'Host Grotesk Variable', system-ui, sans-serif !important;
   letter-spacing: normal !important;
   text-transform: capitalize !important;
+}
+
+/* Accent picker: the dark base never changes, only the accent family does. */
+html[data-accent='lime']    { --accent-color: #c6ff00; --on-accent: #11140a; --hero-cta-ink: #c6ff00; --secondary-color: #c6ff00; }
+html[data-accent='yellow']  { --accent-color: #fff01f; --on-accent: #17150a; --hero-cta-ink: #fff01f; --secondary-color: #fff01f; }
+html[data-accent='cyan']    { --accent-color: #00e5ff; --on-accent: #04161a; --hero-cta-ink: #00e5ff; --secondary-color: #00e5ff; }
+html[data-accent='matrix']  { --accent-color: #00ff41; --on-accent: #021a08; --hero-cta-ink: #00ff41; --secondary-color: #00ff41; }
+html[data-accent='pink']    { --accent-color: #ff2d95; --on-accent: #16060e; --hero-cta-ink: #ff5fae; --secondary-color: #ff5fae; }
+html[data-accent='purple']  { --accent-color: #9d2bff; --on-accent: #fffbf5; --hero-cta-ink: #1f1f1f; --secondary-color: #c58bff; }
+html[data-accent='crimson'] { --accent-color: #dc143c; --on-accent: #fffbf5; --hero-cta-ink: #1f1f1f; --secondary-color: #ff5a73; }
+html[data-accent='blood']   { --accent-color: #8a0303; --on-accent: #fffbf5; --hero-cta-ink: #1f1f1f; --secondary-color: #e5484d; }
+html[data-accent] {
+  --selection-color: var(--accent-color);
+  --accent-tint: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  --accent-line: color-mix(in srgb, var(--accent-color) 30%, transparent);
+}
+.accent-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 0.75rem;
+}
+.accent-picker button {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 227, 222, 0.25);
+  background: var(--swatch);
+  cursor: pointer;
+}
+.accent-picker button[aria-pressed='true'] {
+  outline: 2px solid #fffbf5;
+  outline-offset: 2px;
+}
+.accent-picker button:focus-visible {
+  outline: 2px solid #fffbf5;
+  outline-offset: 2px;
+}
+@media (max-width: 420px) {
+  .accent-picker { gap: 4px; }
+  .accent-picker button { width: 13px; height: 13px; }
 }
