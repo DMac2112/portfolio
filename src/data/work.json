@@ -4,7 +4,7 @@
     "description": "A modern and responsive website for a property management company used to advertise their properties and services.",
     "projectLink": "https://welcom-inn.co.uk/",
     "tags": ["Web App"],
-    "image": "work-welcom-inn.jpg"
+    "image": "work-welcom-inn-site.jpg"
   },
   {
     "title": "MERN Project",
@@ -17,6 +17,6 @@
     "description": "A modern and responsive website designed & developed for a cleaning company to advertise their cleaning services.",
     "projectLink": "https://www.rubicall.co.uk/",
     "tags": ["Web App"],
-    "image": "work-rubicall.png"
+    "image": "work-rubicall-site.jpg"
   }
 ]

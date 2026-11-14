@@ -85,7 +85,8 @@
       tabs.forEach((tab, i) => { tab.setAttribute('aria-selected', String(i === index)); tab.tabIndex = i === index ? 0 : -1; });
       panels.forEach((panel, i) => { panel.hidden = i !== index; panel.setAttribute('role', 'tabpanel'); panel.setAttribute('aria-labelledby', tabs[i].id); panel.tabIndex = 0; });
     };
-    const manual = (index: number) => { stopped = true; select(index); markPause(); };
+    // Picking a tab restarts its 6s run; only the pause button stops the rotation.
+    const manual = (index: number) => select(index);
     tabs.forEach((tab, i) => {
       tab.addEventListener('click', () => manual(i));
       tab.addEventListener('keydown', event => {
@@ -101,7 +102,7 @@
     pause.addEventListener('click', () => { stopped = !stopped; markPause(); });
     controls.hidden = false; select(0); markPause();
     sectionClock(work, delta => {
-      if (stopped || work.matches(':hover') || work.contains(document.activeElement)) return;
+      if (stopped || panels[current].matches(':hover') || work.querySelector(':focus-visible')) return;
       elapsed += delta;
       if (elapsed >= 6000) select((current + 1) % tabs.length);
       work.style.setProperty('--project-progress', String(elapsed / 6000));
