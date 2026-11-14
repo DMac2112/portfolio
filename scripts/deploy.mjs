@@ -19,19 +19,21 @@ const DIST = path.join(ROOT, 'dist');
 const DEPLOY = path.join(ROOT, '.ghio-deploy');
 const OS_APP = path.join(ROOT, 'dominikos', 'os');
 const REPO = 'https://github.com/DMac2112/DMac2112.github.io.git';
+// npm20.cmd is the Windows portable-Node wrapper; on macOS/Linux use the npm on PATH.
+const NPM = process.platform === 'win32' ? `"${path.join(ROOT, 'npm20.cmd')}"` : 'npm';
 const run = (cmd, cwd = ROOT) => execSync(cmd, { cwd, stdio: 'inherit', shell: true });
 
 // --skip-os is an escape hatch for site-only changes; the default always rebuilds.
 if (!process.argv.includes('--skip-os') && fs.existsSync(path.join(OS_APP, 'package.json'))) {
   console.log('\n[1/5] Rebuilding DominikOS + re-vendoring into public/...');
-  run(`"${path.join(ROOT, 'npm20.cmd')}" --prefix "${OS_APP}" run build`);
+  run(`${NPM} --prefix "${OS_APP}" run build`);
   run(`node "${path.join(OS_APP, 'scripts', 'deploy-rework.mjs')}"`);
 } else {
   console.log('\n[1/5] Skipping the OS rebuild — publishing whatever is vendored in public/.');
 }
 
 console.log('\n[2/5] Building the site (Node 20)...');
-run(`"${path.join(ROOT, 'npm20.cmd')}" run build`);
+run(`${NPM} run build`);
 if (!fs.existsSync(path.join(DIST, 'index.html'))) {
   console.error('x build produced no dist/index.html - aborting.');
   process.exit(1);

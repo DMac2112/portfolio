@@ -1,5 +1,6 @@
 ---
 import '@fontsource-variable/dm-sans';
+import '@fontsource-variable/host-grotesk';
 import '@fontsource-variable/space-grotesk';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
@@ -84,8 +85,8 @@ const speculationRules = {
 <html
   lang="en"
   data-copy-version="current"
-  data-style="studio"
-  data-palette="cobalt"
+  data-style="edge"
+  data-palette="carbon"
 >
   <head>
     <meta charset="utf-8" />
@@ -125,10 +126,12 @@ const speculationRules = {
     <script is:inline>
       (() => {
         let copyVersion = 'current';
-        let style = 'studio';
-        let palette = 'cobalt';
-        const styles = ['studio', 'classic', 'editorial', 'glass', 'terminal', 'cupertino'];
+        let style = 'edge';
+        let palette = 'carbon';
+        const styles = ['edge', 'studio', 'classic', 'editorial', 'glass', 'terminal', 'cupertino'];
         const palettes = [
+          'carbon',
+          'chalk',
           'cobalt',
           'frost',
           'cloud',

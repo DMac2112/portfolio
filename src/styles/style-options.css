@@ -2235,3 +2235,336 @@ html[data-style='cupertino'] .t-card {
 html[data-style='cupertino'] .t-btns {
   justify-content: flex-start !important;
 }
+
+/* Edge keeps the portfolio quiet around the working retro OS preview. */
+html[data-style='edge'] {
+  --font-base: 'Host Grotesk Variable', system-ui, sans-serif;
+  --font-display: 'Host Grotesk Variable', system-ui, sans-serif;
+  --text-base: 1rem;
+  --leading-body: 1.5;
+}
+
+/* Preserve the OS window and CV viewer's own chrome. */
+html[data-style='edge'] :where(body *):not(:where(.os-launch *, .cv-dlg, .cv-dlg *)) {
+  text-transform: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-style='edge'] :is(h1, h2, h3, .head-text, .bold-text, .hero-name) {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+html[data-style='edge'] :is(.hero-h1, .hero-name) {
+  font-size: clamp(2.75rem, 6vw, 4rem);
+  line-height: 1.05;
+}
+html[data-style='edge'] .head-text {
+  font-size: clamp(2rem, 4vw, 3rem);
+  text-align: left;
+}
+html[data-style='edge'] .head-text span {
+  color: inherit;
+}
+html[data-style='edge'] :is(.head-text, .hero-greeting)::before,
+html[data-style='edge'] :is(.head-text, .hero-greeting)::after {
+  content: none;
+}
+html[data-style='edge'] :is(.navbar a, .nav-option-toggle, .work-tag, .work-filter-btn, .os-feature-title, .exp-type, .footer-copy) {
+  font-family: var(--font-base);
+  letter-spacing: normal;
+}
+html[data-style='edge'] .section {
+  border-top: 1px solid var(--border-color);
+  background: var(--page-bg) !important;
+  align-items: flex-start;
+  min-height: auto;
+}
+html[data-style='edge'] .hero {
+  min-height: 85vh;
+  padding-top: max(7rem, var(--space-section));
+}
+html[data-style='edge'] .hero-circles {
+  display: none;
+}
+html[data-style='edge'] .hero-info {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  text-align: left;
+  align-items: start;
+  padding: 0;
+}
+html[data-style='edge'] .hero-info > :is(p, h1, .hero-ctas) {
+  max-width: 34rem;
+  min-width: 0;
+}
+html[data-style='edge'] .hero-name {
+  overflow-wrap: anywhere;
+}
+html[data-style='edge'] :is(.hero-role, .hero-greeting, .hero-sub, .os-lede) {
+  color: var(--text-muted-color) !important;
+  font-family: var(--font-base);
+  letter-spacing: normal;
+}
+html[data-style='edge'] .hero-role {
+  display: block;
+  margin-top: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+html[data-style='edge'] :is(.hero-sub, .os-lede, .contact-intro) {
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+html[data-style='edge'] .hero-ctas {
+  justify-content: flex-start;
+}
+html[data-style='edge'] .osl-wrap {
+  margin: 2.5rem 0 0;
+  min-width: 0;
+}
+@media (min-width: 900px) {
+  html[data-style='edge'] .hero-info {
+    grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+    column-gap: clamp(2rem, 5vw, 5rem);
+  }
+  html[data-style='edge'] .hero-info > :is(p, h1, .hero-ctas) {
+    grid-column: 1;
+  }
+  html[data-style='edge'] .osl-wrap {
+    grid-column: 2;
+    grid-row: 1 / 5;
+    align-self: center;
+    justify-self: end;
+    margin: 0;
+  }
+}
+
+html[data-style='edge'] :is(.profiles, .work-grid, .skills-list, .os-features) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 0;
+  margin: 2rem 0 0;
+}
+html[data-style='edge'] .skills-list {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+}
+/* Inset cell outlines share a single hairline with adjacent cells and the frame. */
+html[data-style='edge'] :is(.profile, .work-card, .skill, .os-features li) {
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  padding: 1.5rem;
+  border: 0;
+  outline: 1px solid var(--border-color);
+  outline-offset: 0;
+  border-radius: 0;
+  background: transparent !important;
+}
+html[data-style='edge'] :is(.work-card:has(a):hover, .profile:has(a):hover, .skill:has(a):hover, .os-features li:has(a):hover) {
+  background: var(--surface-color) !important;
+}
+html[data-style='edge'] :is(.profile, .work-card, .work-img img, .work-links a, .skill-bubble, .contact-card, .os-launch, .os-boot-btn, .work-filter-btn):is(:hover, :focus-visible),
+html[data-style='edge'] .skill:hover .skill-bubble {
+  transform: none;
+}
+html[data-style='edge'] .skill-bubble {
+  background: transparent !important;
+  width: 4rem;
+  height: 4rem;
+}
+html[data-style='edge'] .work-tag {
+  background: transparent !important;
+  padding-inline: 0;
+  border-radius: 0;
+}
+html[data-style='edge'] :is(.work-version, .exp-col, .skills-container, .contact-card) {
+  min-width: 0;
+  max-width: 100%;
+}
+html[data-style='edge'] .work-version {
+  width: 100%;
+}
+html[data-style='edge'] .contact-card span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+html[data-style='edge'] .contact-card img {
+  flex-shrink: 0;
+}
+html[data-style='edge'] .skills-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+html[data-style='edge'] .exp-group {
+  display: block;
+}
+html[data-style='edge'] .exp-type {
+  margin-bottom: 1rem;
+}
+html[data-style='edge'] .exp-works {
+  gap: 0;
+}
+html[data-style='edge'] .exp-work {
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.7fr) minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border-color);
+  border-radius: 0;
+  align-items: baseline;
+}
+html[data-style='edge'] .exp-work > :is(h3, p) {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+html[data-style='edge'] .exp-work h3 {
+  grid-column: 2;
+  grid-row: 1;
+}
+html[data-style='edge'] .exp-year {
+  grid-column: 1;
+  grid-row: 1;
+  color: var(--text-muted-color);
+  font-variant-numeric: tabular-nums;
+}
+html[data-style='edge'] .exp-work > p:not(.exp-year) {
+  grid-column: 3;
+  grid-row: 1;
+}
+html[data-style='edge'] .t-stage {
+  align-items: flex-start;
+}
+html[data-style='edge'] .t-card {
+  width: 100%;
+  max-width: 44rem;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+html[data-style='edge'] .t-content {
+  padding: 0;
+  text-align: left;
+}
+html[data-style='edge'] .t-quote {
+  font-size: clamp(1.5rem, 2.5vw, 1.75rem);
+  font-weight: 400;
+  color: var(--text-color);
+  max-width: 44rem;
+}
+html[data-style='edge'] :is(.t-name, .t-company) {
+  color: var(--text-muted-color);
+  font-weight: 400;
+}
+
+html[data-style='edge'] :is(.hero-btn, .contact-submit, .work-filter-btn, .t-btns button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 999px;
+  font-family: var(--font-base);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  background: transparent !important;
+  color: var(--text-color) !important;
+}
+html[data-style='edge'] :is(.hero-btn-primary, .contact-submit, .work-filter-btn[aria-pressed='true']) {
+  background: var(--text-color) !important;
+  border-color: var(--text-color) !important;
+  color: var(--page-bg) !important;
+}
+html[data-style='edge'] .os-boot-btn {
+  background: var(--accent-color);
+  color: var(--on-accent);
+}
+html[data-style='edge'] .navbar {
+  background: var(--nav-bg) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+html[data-style='edge'] .navbar-links a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0;
+  background: transparent !important;
+  color: var(--text-color) !important;
+}
+html[data-style='edge'] .nav-option-toggle {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-weight: 500;
+  background: transparent !important;
+  color: var(--text-color) !important;
+}
+html[data-style='edge'] :is(.nav-option-toggle:hover, .work-links a:hover) {
+  border-color: var(--secondary-color);
+  background: var(--surface-color) !important;
+  color: var(--secondary-color) !important;
+}
+html[data-style='edge'] .navbar-links a:hover {
+  color: var(--secondary-color) !important;
+}
+html[data-style='edge'] .palette-swatch {
+  background: var(--secondary-color);
+}
+html[data-style='edge'] :focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-style='edge'] { scroll-behavior: auto; }
+  html[data-style='edge'] *,
+  html[data-style='edge'] *::before,
+  html[data-style='edge'] *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Edge fixes: nav uses the grotesk, the CV card keeps its retro-OS face, four about cells sit 2x2. */
+html[data-style='edge'] .navbar-links a,
+html[data-style='edge'] .nav-option-toggle {
+  font-family: 'Host Grotesk Variable', system-ui, sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+html[data-style='edge'] .osl-cv {
+  background: linear-gradient(180deg, #fdfdfb, #e7e4d9) !important;
+  color: #101a33 !important;
+  border-radius: 7px;
+}
+html[data-style='edge'] .osl-cv * {
+  color: inherit;
+}
+@media (min-width: 700px) {
+  html[data-style='edge'] .profiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

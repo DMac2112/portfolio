@@ -43,25 +43,25 @@ const humanLabel = (id: string) => human.links.find((link) => link.id === id)?.l
     <button
       class="nav-option-toggle style-toggle"
       type="button"
-      aria-label="Style: Classic. Activate editorial style."
-      data-style-active="classic"
+      aria-label="Style: Edge. Activate studio style."
+      data-style-active="edge"
       data-style-toggle
     >
-      <span class="toggle-prefix">Style: </span><span data-style-toggle-label>Classic</span>
-      <span class="sr-only" data-style-toggle-action>. Activate editorial style.</span>
+      <span class="toggle-prefix">Style: </span><span data-style-toggle-label>Edge</span>
+      <span class="sr-only" data-style-toggle-action>. Activate studio style.</span>
     </button>
 
     <button
       class="nav-option-toggle palette-toggle"
       type="button"
-      aria-label="Colour palette: Cloud, light mode. Activate Paper, light mode."
-      data-palette-active="cloud"
+      aria-label="Colour palette: Carbon, dark mode. Activate Chalk, light mode."
+      data-palette-active="carbon"
       data-palette-toggle
     >
       <span class="palette-swatch" aria-hidden="true"></span>
-      <span class="toggle-prefix">Colour: </span><span data-palette-toggle-label>Cloud</span>
-      <span class="toggle-detail" data-palette-toggle-mode> · Light</span>
-      <span class="sr-only" data-palette-toggle-action>. Activate Paper, light mode.</span>
+      <span class="toggle-prefix">Colour: </span><span data-palette-toggle-label>Carbon</span>
+      <span class="toggle-detail" data-palette-toggle-mode> · Dark</span>
+      <span class="sr-only" data-palette-toggle-action>. Activate Chalk, light mode.</span>
     </button>
   </div>
 
