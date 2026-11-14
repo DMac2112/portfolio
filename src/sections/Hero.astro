@@ -12,14 +12,13 @@ import jsIcon from '../assets/javascript.png';
 import cssIcon from '../assets/css.png';
 import pythonIcon from '../assets/python.png';
 import csharpIcon from '../assets/csharp.png';
-import reactIcon from '../assets/react.png';
 
 const employment = experience.find(group => group.type === 'Employment')!.works[0];
 const education = experience.find(group => group.type === 'Education')!.works[0];
 const certifications = skills.filter(skill => skill.name === 'Marketing Cloud Email Specialist' || skill.name === 'Trailhead Mountaineer');
 
 const leftCircles = [htmlIcon, jsIcon, cssIcon];
-const rightCircles = [pythonIcon, csharpIcon, reactIcon];
+const rightCircles = [pythonIcon, csharpIcon];
 
 ---
 
@@ -48,7 +47,7 @@ const rightCircles = [pythonIcon, csharpIcon, reactIcon];
     </h1>
     <p class="hero-sub">
       <CopyText
-        current="I build fast, polished web experiences — from React front-ends to large-scale marketing automation at Deloitte."
+        current="I build fast, polished web experiences — from custom front-ends to large-scale marketing automation at Deloitte."
       />
     </p>
     <div class="hero-ctas">

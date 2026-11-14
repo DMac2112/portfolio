@@ -1,22 +1,22 @@
 [
   {
     "title": "Frontend Developer",
-    "description": "I am a passionate frontend developer who has the desire to design and develop great-looking web applications which are satisfying & engaging to use! The tools I have used thus far to achieve this are HTML5, CSS3, Javascript and various APIs.",
+    "description": "I design and build custom user interfaces that look great and are satisfying to use. Some of that work sits inside Salesforce and Marketing Cloud, where I have built custom applications with a variety of libraries and extensions. I care about the details people feel without naming them: speed, spacing, motion and how a screen behaves on a phone.",
     "image": "about-frontend-photo.jpg"
   },
   {
-    "title": "Open-minded Programmer",
-    "description": "Throughout my education and work experience I have had the opportunity to gain experience in various programming languages and technologies. This has led me to always look for new challenges where I can showcase my skills and hopefully learn even more!",
+    "title": "Marketing Automation Developer",
+    "description": "My day-to-day at Deloitte is Marketing Cloud: email campaigns, segmentation, automation, triggered communication and custom Journey Builder activities. One recent project was a custom content centre that keeps email, SMS and push in one place, alongside things Marketing Cloud does not offer out of the box, such as stories, web banners and redirections into apps. It saves and pushes to Data Cloud and Salesforce Core at the same time, so everything stays in sync.",
     "image": "about-programmer-photo.jpg"
   },
   {
     "title": "Avid Learner",
-    "description": "What I enjoy most is acquiring knowledge and learning ways in which I can improve my work and myself. Therefore I am always on the look out for new technologies which I can put to good use to improve my projects! This allows me to adapt and be agile in my approach to work.",
+    "description": "Learning is what I enjoy most, and AI has made me much faster at it. I can get into a new tool, platform or subject in days, then prove I understand it by building something real with it. That keeps me adaptable and quick to change my approach.",
     "image": "about-learner-photo.jpg"
   },
   {
-    "title": "Aspiring React Developer",
-    "description": "I am well-versed in HTML, CSS and Javascript. However, I am always looking to improve and gain knowledge! This is why I have spent time learning the React JS library on top of my existing Frontend experience. This also does not stop me from learning any other Frameworks in the future!",
-    "image": "about-react-photo.jpg"
+    "title": "AI-driven Developer",
+    "description": "AI is how I build, not something I reach for now and then. I run agents in parallel, split work between models by what each is good at, and treat context as the real engineering: briefs, instruction files, skills and memory that make the output repeatable instead of lucky. I know how LLMs work well enough to predict where they fail, so I plan, review and own the result while the agents do the typing.",
+    "image": "about-ai-photo.jpg"
   }
 ]
