@@ -12,6 +12,7 @@ type Slide = {
 
 gsap.registerPlugin(ScrollTrigger);
 const desktopMotion = matchMedia('(min-width: 900px) and (prefers-reduced-motion: no-preference)').matches;
+const navOffset = () => innerWidth < 900 && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 92 : 56;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let lenis: Lenis | undefined;
 
@@ -25,7 +26,7 @@ if (desktopMotion) {
       const target = document.querySelector(anchor.getAttribute('href')!);
       if (!target) return;
       event.preventDefault();
-      lenis!.scrollTo(target);
+      lenis!.scrollTo(target, { offset: target.id === 'top' ? 0 : -navOffset() });
     });
   });
 }
@@ -38,7 +39,14 @@ const nav = document.querySelector<HTMLElement>('.v2-nav')!;
 const runner = document.querySelector<HTMLElement>('.v2-runner')!;
 const runnerSprite = runner.querySelector<SVGSVGElement>('.pixel-run')!;
 const coder = nav.querySelector<HTMLElement>('.v2-coder')!;
-if (desktopMotion) {
+gsap.matchMedia().add('(prefers-reduced-motion: reduce)', () => {
+  const strip = nav.querySelector<HTMLElement>('.sk-wrap')!;
+  const group = strip.querySelector<HTMLElement>('.sk')!;
+  strip.classList.add('v2-sr');
+  group.tabIndex = -1;
+  return () => { strip.classList.remove('v2-sr'); group.tabIndex = 0; };
+});
+gsap.matchMedia().add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
   gsap.set(brand, { opacity: 0 });
   const untransformed = <T>(fn: () => T): T => {
     const transform = name.style.transform;
@@ -71,7 +79,7 @@ if (desktopMotion) {
   ScrollTrigger.addEventListener('refreshInit', sizeRunner);
   const timeline = gsap.timeline({
     scrollTrigger: {
-      trigger: landing, start: 'top top', end: '+=80%', pin: true,
+      trigger: landing, start: 'top top', end: () => `+=${landing.offsetHeight - 56}`, pin: true, pinSpacing: false,
       scrub: .6, invalidateOnRefresh: true
     },
     // Frames follow the scrubbed timeline, not raw scroll, so his legs keep going while he catches up.
@@ -92,11 +100,10 @@ if (desktopMotion) {
     .set(runner, { visibility: 'hidden' }, .66)
     .set(coder, { opacity: 1 }, .66)
     .set({}, {}, .72);
-} else {
-  brand.style.opacity = '1';
-}
+  return () => ScrollTrigger.removeEventListener('refreshInit', sizeRunner);
+});
 ScrollTrigger.create({
-  trigger: '#work', start: 'top 56px', endTrigger: 'body', end: 'bottom bottom',
+  trigger: '#work', start: () => `top ${navOffset()}px`, invalidateOnRefresh: true, endTrigger: 'body', end: 'bottom bottom',
   toggleClass: { targets: nav, className: 'is-solid' }
 });
 
@@ -300,7 +307,7 @@ work.addEventListener('keydown', (event) => {
   void goTo(index + (event.key === 'ArrowRight' ? 1 : -1));
 });
 
-if (!reduced && matchMedia('(pointer: fine)').matches) {
+if (!reduced && matchMedia('(pointer: fine)').matches && getComputedStyle(trail).display !== 'none') {
   type Cell = { x: number; y: number; born: number };
   const points: Cell[] = [];
   const context = trail.getContext('2d')!;

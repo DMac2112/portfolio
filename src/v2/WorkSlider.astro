@@ -1,6 +1,5 @@
 ---
 import OsTrailer from './OsTrailer.astro';
-import SkillStrip from './SkillStrip.astro';
 import jobs from '../data/v2-experience.json';
 
 interface Slide {
@@ -56,7 +55,13 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
       </button>)}
     </div>
     <div class="ws-track" aria-hidden="true"><span class="ws-progress" style={`width: ${100 / slides.length}%`}></span></div>
-    <SkillStrip />
+  </div>
+  <span class="v2-sr ws-live" aria-live="polite"></span>
+  <ol class="v2-sr">{slides.map((slide) => <li>{slide.years}. {slide.title}. {slide.role}. {slide.summary}. Built with {slide.stack}. {slide.quote?.text} {slide.quote?.name} {slide.quote?.company} {slide.link?.label}</li>)}</ol>
+  <script type="application/json" id="v2-slides" set:html={JSON.stringify(slides).replace(/</g, '\\u003c')}></script>
+</section>
+
+<section id="experience" class="ws-experience" aria-label="Experience and credentials">
     <div class="ws-cv">
       <div class="ws-jobs">
         <h3>Experience</h3>
@@ -72,8 +77,4 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
       <span><img src={badgeSrc(emailBadge)} alt="" />Salesforce Marketing Cloud Email Specialist</span>
       <span><img src={badgeSrc(trailBadge)} alt="" />Trailhead Mountaineer</span>
     </div>
-  </div>
-  <span class="v2-sr ws-live" aria-live="polite"></span>
-  <ol class="v2-sr">{slides.map((slide) => <li>{slide.years}. {slide.title}. {slide.role}. {slide.summary}. Built with {slide.stack}. {slide.quote?.text} {slide.quote?.name} {slide.quote?.company} {slide.link?.label}</li>)}</ol>
-  <script type="application/json" id="v2-slides" set:html={JSON.stringify(slides).replace(/</g, '\\u003c')}></script>
 </section>
