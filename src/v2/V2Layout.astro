@@ -3,12 +3,14 @@ import '@fontsource-variable/host-grotesk';
 import './v2.css';
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="carbon">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#1740C9" />
+    <!-- Carbon (dark) is the trial default; /v2/?theme=light shows the original light look for comparison. -->
+    <script is:inline>if (new URLSearchParams(location.search).get("theme") === "light") document.documentElement.removeAttribute("data-theme");</script>
     <title>Dominik Machowiak (v2 preview)</title>
   </head>
   <body>

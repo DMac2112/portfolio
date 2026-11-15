@@ -1,5 +1,6 @@
 ---
 import OsTrailer from './OsTrailer.astro';
+import SkillStrip from './SkillStrip.astro';
 import jobs from '../data/v2-experience.json';
 
 interface Slide {
@@ -55,6 +56,7 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
       </button>)}
     </div>
     <div class="ws-track" aria-hidden="true"><span class="ws-progress" style={`width: ${100 / slides.length}%`}></span></div>
+    <SkillStrip />
     <div class="ws-cv">
       <div class="ws-jobs">
         <h3>Experience</h3>

@@ -1,0 +1,25 @@
+---
+// Moving skills strip, brought over from the main page. Icons: simple-icons (CC0),
+// devicon (MIT), lucide (ISC), lobehub icons (MIT). Certifications stay in the credentials row.
+import skills from '../data/skills.json';
+const icons = import.meta.glob('/src/assets/content/skill-*', { eager: true, import: 'default' });
+const src = (name: string) => (icons[`/src/assets/content/${name}`] as { src: string } | undefined)?.src;
+const certs = ['Marketing Cloud Email Specialist', 'Trailhead Mountaineer'];
+// Light-filled marks that need inverting on the light theme.
+const mono = ['skill-cursor.svg', 'skill-github-copilot.svg', 'skill-ai-chats.svg', 'skill-sql.svg', 'skill-code.svg', 'skill-ssjs.svg'];
+const items = skills.filter((skill) => !certs.includes(skill.name));
+---
+<div class="sk-wrap">
+  <h3>Skills and tools</h3>
+  <div class="sk" tabindex="0" role="group" aria-label="Skills and tools">
+    <div class="sk-track">
+      {[false, true].map((copy) => (
+        <ul class="sk-run" aria-hidden={copy ? 'true' : undefined}>
+          {items.map((skill) => (
+            <li><img class:list={{ 'sk-mono': mono.includes(skill.image) }} src={src(skill.image)} alt="" width="28" height="28" loading="lazy" />{skill.name}</li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </div>
+</div>
