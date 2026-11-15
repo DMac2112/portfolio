@@ -47,7 +47,6 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
         <button type="button" class="ws-ask" data-contact-open hidden={!first.quote}>Message me about a website</button>
       </div>
     </div>
-  </div>
   <div class="ws-bottom">
     <div class="ws-rail" role="group" aria-label="Choose project">
       {slides.map((slide, i) => <button class="ws-thumb" type="button" data-index={i} aria-label={`Show ${slide.title}, slide ${i + 1} of ${slides.length}`} aria-current={i === 0 ? 'true' : undefined}>
@@ -55,6 +54,7 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
       </button>)}
     </div>
     <div class="ws-track" aria-hidden="true"><span class="ws-progress" style={`width: ${100 / slides.length}%`}></span></div>
+  </div>
   </div>
   <span class="v2-sr ws-live" aria-live="polite"></span>
   <ol class="v2-sr">{slides.map((slide) => <li>{slide.years}. {slide.title}. {slide.role}. {slide.summary}. Built with {slide.stack}. {slide.quote?.text} {slide.quote?.name} {slide.quote?.company} {slide.link?.label}</li>)}</ol>

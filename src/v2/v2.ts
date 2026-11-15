@@ -21,14 +21,7 @@ if (desktopMotion) {
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis!.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
-  document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener('click', (event) => {
-      const target = document.querySelector(anchor.getAttribute('href')!);
-      if (!target) return;
-      event.preventDefault();
-      lenis!.scrollTo(target, { offset: target.id === 'top' ? 0 : -navOffset() });
-    });
-  });
+
 }
 
 const landing = document.querySelector<HTMLElement>('#top')!;
@@ -46,66 +39,147 @@ gsap.matchMedia().add('(prefers-reduced-motion: reduce)', () => {
   group.tabIndex = -1;
   return () => { strip.classList.remove('v2-sr'); group.tabIndex = 0; };
 });
-gsap.matchMedia().add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
-  gsap.set(brand, { opacity: 0 });
-  const untransformed = <T>(fn: () => T): T => {
-    const transform = name.style.transform;
-    name.style.transform = 'none';
-    try { return fn(); }
-    finally { name.style.transform = transform; }
-  };
-  const dimension = () => {
-    const a = untransformed(() => name.getBoundingClientRect());
-    const b = brand.getBoundingClientRect();
-    const nameSize = parseFloat(getComputedStyle(name).fontSize);
-    const brandSize = parseFloat(getComputedStyle(brand).fontSize);
-    return { scale: brandSize / nameSize, x: b.left - a.left, y: b.top - a.top };
-  };
-  const runFrom = () => untransformed(() => {
-    const rect = avatar.getBoundingClientRect();
-    return { x: rect.left, y: rect.top - landing.getBoundingClientRect().top, h: rect.height };
+// Keep the actual heading above every section throughout the hand-off.
+const nameSlot = document.createElement('div');
+nameSlot.className = 'v2-name-slot';
+name.before(nameSlot);
+const measureName = () => {
+  name.removeAttribute('style');
+  nameSlot.replaceWith(name);
+  const rect = name.getBoundingClientRect();
+  const sprite = avatar.getBoundingClientRect();
+  name.before(nameSlot);
+  nameSlot.style.height = `${rect.height}px`;
+  document.body.append(name);
+  Object.assign(name.style, {
+    position: 'fixed', left: `${rect.left}px`, top: `${rect.top + scrollY}px`,
+    width: `${rect.width}px`, margin: '0', zIndex: '60', pointerEvents: 'none',
+    transformOrigin: 'top left'
   });
-  const runTo = () => {
-    const c = coder.getBoundingClientRect();
-    const px = c.height / 18;
-    return {
-      x: c.left + c.width / 2 - 8 * px,
-      y: c.bottom - 24 * px,
-      scale: 24 * px / runFrom().h
-    };
-  };
-  const sizeRunner = () => { runner.style.height = `${runFrom().h}px`; };
-  sizeRunner();
-  ScrollTrigger.addEventListener('refreshInit', sizeRunner);
-  const timeline = gsap.timeline({
-    scrollTrigger: {
-      trigger: landing, start: 'top top', end: () => `+=${landing.offsetHeight - 56}`, pin: true, pinSpacing: false,
-      scrub: .6, invalidateOnRefresh: true
-    },
-    // Frames follow the scrubbed timeline, not raw scroll, so his legs keep going while he catches up.
-    onUpdate: () => {
-      const t = timeline.time();
-      runnerSprite.dataset.frame = t > .04 && t < .66 ? `run-${Math.floor(t * 56) % 4 + 1}` : 'run-1';
-    }
+  return { left: rect.left, top: rect.top + scrollY, spriteX: sprite.left, spriteY: sprite.top + scrollY, spriteHeight: sprite.height };
+};
+let origin = measureName();
+brand.style.color = 'transparent';
+let docked = scrollY > 2;
+let transitioning = false;
+const dockState = { progress: docked ? 1 : 0 };
+const workTop = () => document.querySelector<HTMLElement>('#work')!.getBoundingClientRect().top + scrollY;
+const setScroll = (y: number) => {
+  if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+  else window.scrollTo({ top: y, behavior: 'instant' });
+};
+const positionStrip = () => {
+  const strip = nav.querySelector<HTMLElement>('.sk-wrap')!;
+  if (innerWidth < 900 || reduced) {
+    strip.style.removeProperty('left');
+    strip.style.removeProperty('width');
+    return;
+  }
+  const left = brand.getBoundingClientRect().right;
+  const gap = coder.getBoundingClientRect().left - left;
+  strip.style.left = `${left + gap * .15}px`;
+  strip.style.width = `${gap * .7}px`;
+};
+const renderDock = () => {
+  const p = dockState.progress;
+  const target = brand.getBoundingClientRect();
+  const scale = parseFloat(getComputedStyle(brand).fontSize) / parseFloat(getComputedStyle(name).fontSize);
+  gsap.set(name, {
+    x: (target.left - origin.left) * p, y: (target.top - origin.top) * p,
+    scale: 1 + (scale - 1) * p,
+    color: p === 1 ? 'var(--ink)' : 'var(--white)'
   });
-  timeline.to('.v2-intro', { opacity: 0, duration: .12 }, 0)
-    .to(name, { scale: () => dimension().scale, x: () => dimension().x, y: () => dimension().y, transformOrigin: 'top left', ease: 'power2.inOut', duration: .5 }, 0)
-    .to(name, { opacity: 0, duration: .04 }, .5)
-    .to(brand, { opacity: 1, duration: .04 }, .5)
-    .set(avatar, { visibility: 'hidden' }, .04)
-    .set(runner, { visibility: 'visible' }, .04)
-    .fromTo(runner, { x: () => runFrom().x, y: () => runFrom().y, scale: 1 }, { x: () => runTo().x, y: () => runTo().y, scale: () => runTo().scale, ease: 'none', duration: .62 }, .04)
-    .fromTo(runnerSprite, { yPercent: 0 }, { yPercent: -12, duration: .03, ease: 'none' }, .60)
-    .to(runnerSprite, { yPercent: 0, duration: .03, ease: 'none' }, .63)
-    .set(runner, { visibility: 'hidden' }, .66)
-    .set(coder, { opacity: 1 }, .66)
-    .set({}, {}, .72);
-  return () => ScrollTrigger.removeEventListener('refreshInit', sizeRunner);
+  avatar.style.visibility = p === 0 ? 'visible' : 'hidden';
+  coder.style.opacity = p === 1 ? '1' : '0';
+  runner.style.visibility = p > 0 && p < 1 && !reduced ? 'visible' : 'hidden';
+  if (p > 0 && p < 1) {
+    const destination = coder.getBoundingClientRect();
+    const targetHeight = destination.height * 24 / 18;
+    runner.style.height = `${origin.spriteHeight}px`;
+    gsap.set(runner, {
+      x: origin.spriteX * (1 - p) + destination.left * p,
+      y: origin.spriteY * (1 - p) + (destination.bottom - targetHeight) * p,
+      scale: 1 + (targetHeight / origin.spriteHeight - 1) * p
+    });
+    runnerSprite.dataset.frame = `run-${Math.floor(performance.now() / 75) % 4 + 1}`;
+  }
+  gsap.set('.v2-intro', { opacity: 1 - p });
+  nav.classList.toggle('is-solid', p === 1);
+};
+const dock = (forward: boolean, destination = workTop() - navOffset()) => {
+  if (transitioning) return;
+  docked = forward;
+  if (reduced) {
+    dockState.progress = forward ? 1 : 0;
+    setScroll(forward ? destination : 0);
+    renderDock();
+    return;
+  }
+  transitioning = true;
+  lenis?.stop();
+  const scroll = { y: scrollY };
+  gsap.timeline({
+    defaults: { duration: .82, ease: 'power2.inOut' },
+    onUpdate: () => { setScroll(scroll.y); renderDock(); },
+    onComplete: () => { transitioning = false; lenis?.start(); renderDock(); }
+  }).to(dockState, { progress: forward ? 1 : 0 }, 0)
+    .to(scroll, { y: forward ? destination : 0 }, 0);
+};
+const scrollIntent = (event: Event, forward: boolean) => {
+  if ((event.target as Element | null)?.closest?.('dialog')) return;
+  if (transitioning) { if (event.cancelable) event.preventDefault(); return; }
+  if (forward ? !docked && scrollY <= 2 : docked && scrollY <= workTop() - navOffset() + 4) {
+    if (event.cancelable) event.preventDefault();
+    dock(forward);
+  }
+};
+addEventListener('wheel', (event) => {
+  if (event.deltaY !== 0) scrollIntent(event, event.deltaY > 0);
+}, { passive: false });
+let touchY = 0;
+addEventListener('touchstart', (event) => { touchY = event.touches[0].clientY; }, { passive: true });
+addEventListener('touchmove', (event) => {
+  const delta = touchY - event.touches[0].clientY;
+  if (Math.abs(delta) > 6 || transitioning) {
+    scrollIntent(event, delta > 0);
+    touchY = event.touches[0].clientY;
+  }
+}, { passive: false });
+addEventListener('keydown', (event) => {
+  if ((event.target as HTMLElement).closest('a, dialog, input, textarea, select, button, [contenteditable]')) return;
+  if (['ArrowDown', 'PageDown', ' '].includes(event.key) && !event.shiftKey) scrollIntent(event, true);
+  else if (['ArrowUp', 'PageUp', 'Home'].includes(event.key) || (event.key === ' ' && event.shiftKey)) scrollIntent(event, false);
 });
-ScrollTrigger.create({
-  trigger: '#work', start: () => `top ${navOffset()}px`, invalidateOnRefresh: true, endTrigger: 'body', end: 'bottom bottom',
-  toggleClass: { targets: nav, className: 'is-solid' }
+document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((anchor) => {
+  anchor.addEventListener('click', (event) => {
+    const id = anchor.getAttribute('href')!.slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    event.preventDefault();
+    const destination = id === 'top' ? 0 : target.getBoundingClientRect().top + scrollY - navOffset();
+    if (id === 'top' && docked) dock(false);
+    else if (!docked && id !== 'top') dock(true, destination);
+    else if (lenis) lenis.scrollTo(destination);
+    else window.scrollTo({ top: destination, behavior: reduced ? 'instant' : 'smooth' });
+  });
 });
+addEventListener('scroll', () => {
+  if (transitioning) return;
+  if (scrollY < workTop() - navOffset() - 2 && docked) dock(false);
+  else if (scrollY > 2 && !docked) {
+    if (scrollY < workTop() - navOffset()) dock(true);
+    else { docked = true; dockState.progress = 1; renderDock(); }
+  }
+}, { passive: true });
+const refreshDock = () => {
+  origin = measureName();
+  positionStrip();
+  renderDock();
+};
+addEventListener('resize', refreshDock);
+document.fonts.ready.then(refreshDock);
+positionStrip();
+renderDock();
 
 const slides = JSON.parse(document.querySelector<HTMLScriptElement>('#v2-slides')!.textContent!) as Slide[];
 const work = document.querySelector<HTMLElement>('#work')!;
