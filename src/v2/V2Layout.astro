@@ -8,17 +8,18 @@ import './v2.css';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="theme-color" content="#1740C9" />
+    <meta name="theme-color" content="#3D22A8" />
     <!-- Carbon (dark) is the trial default; /v2/?theme=light shows the original light look for comparison. -->
     <script is:inline>
       const params = new URLSearchParams(location.search);
       if (params.get('theme') === 'light') document.documentElement.removeAttribute('data-theme');
       // TEMP: remove once Dominik picks a colour
-      const blues = { xp: '#1740C9', indigo: '#2B3BD4', blueviolet: '#3A32D0', violet: '#4B2FCC', deep: '#3D22A8' };
+      const blues = { deep: '#3D22A8', deep2: '#381E9C', deep3: '#33198F', deep4: '#2D1582', deep5: '#261072' };
       let savedBlue;
       try { savedBlue = localStorage.getItem('v2-boot'); } catch {}
-      const blue = [params.get('blue'), savedBlue].find(name => Object.hasOwn(blues, name)) || 'xp';
-      document.documentElement.style.setProperty('--boot', blues[blue]);
+      const requestedBlue = params.get('blue') ?? savedBlue;
+      const blue = Object.hasOwn(blues, requestedBlue) ? requestedBlue : 'deep';
+      document.documentElement.style.setProperty('--landing', blues[blue]);
       document.documentElement.dataset.blue = blue;
       document.querySelector('meta[name="theme-color"]').content = blues[blue];
       if (params.get('blue') === blue) { try { localStorage.setItem('v2-boot', blue); } catch {} }

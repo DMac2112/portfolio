@@ -1,7 +1,7 @@
 [
   {
     "id": "dominikos",
-    "years": "2025–now",
+    "year": "2026",
     "title": "DominikOS",
     "role": "Personal project",
     "summary": "A Windows-style desktop in the browser, with its own apps, a messenger and Frostbyte, a 2D snow-town game.",
@@ -16,7 +16,7 @@
   },
   {
     "id": "welcom-inn",
-    "years": "2023–2024",
+    "year": "2024",
     "title": "Welcom-Inn",
     "role": "Web developer",
     "summary": "Designed and built the site a property management company uses to advertise its homes and services.",
@@ -35,7 +35,7 @@
   },
   {
     "id": "rubicall",
-    "years": "2022–2023",
+    "year": "2023",
     "title": "Rubicall",
     "role": "Front-end web developer",
     "summary": "Designed and built a cleaning company's site, then extended it when they moved into Airbnb management.",

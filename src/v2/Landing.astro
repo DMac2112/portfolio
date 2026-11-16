@@ -7,7 +7,7 @@ import PixelSprite from './PixelSprite.astro';
   <!-- TEMP: remove once Dominik picks a colour -->
   <div class="v2-colour-test" role="radiogroup" aria-label="Test: landing colour">
     <span>Test: landing colour</span>
-    {Object.entries({ xp: '#1740C9', indigo: '#2B3BD4', blueviolet: '#3A32D0', violet: '#4B2FCC', deep: '#3D22A8' }).map(([name, colour]) => <button type="button" role="radio" aria-label={name} aria-checked={name === 'xp' ? 'true' : 'false'} tabindex={name === 'xp' ? 0 : -1} data-blue={name} data-colour={colour} style={`--swatch: ${colour}`}></button>)}
+    {Object.entries({ deep: '#3D22A8', deep2: '#381E9C', deep3: '#33198F', deep4: '#2D1582', deep5: '#261072' }).map(([name, colour]) => <button type="button" role="radio" aria-label={name} aria-checked={name === 'deep' ? 'true' : 'false'} tabindex={name === 'deep' ? 0 : -1} data-blue={name} data-colour={colour} style={`--swatch: ${colour}`}></button>)}
   </div>
   <h1 class="v2-name" aria-label="Dominik Machowiak"><span class="v2-first">DOMINIK<PixelSprite sprite="stand" size="0.72em" label="Pixel-art Dominik" /></span><span>MACHOWIAK</span></h1>
 </section>

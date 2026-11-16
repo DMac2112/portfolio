@@ -1,5 +1,6 @@
 :root {
   --boot: #1740C9;
+  --landing: #3D22A8;
   --nav-offset: 56px;
   --secondary: #0E1A44;
   --snow: #F2F5F9;
@@ -42,7 +43,7 @@ a { color: inherit; }
 .v2-start { gap: 10px; border: 0; border-radius: 4px 22px 22px 4px; background: var(--start); color: var(--white); }
 .v2-button { border: 1.5px solid currentColor; border-radius: 4px; background: transparent; }
 .v2-landing { position: relative; min-height: 100svh; padding: calc(56px + 5vh) clamp(16px, 4vw, 40px) 4vh; color: var(--white); display: flex; flex-direction: column; justify-content: space-between; isolation: isolate; }
-.v2-flood { position: absolute; inset: 0; z-index: -1; background: var(--boot); }
+.v2-flood { position: absolute; inset: 0; z-index: -1; background: var(--landing); }
 .v2-intro { max-width: 34ch; margin: 0; font-size: 1.125rem; }
 .v2-name { margin: auto 0 0; font-size: clamp(3.5rem, 15.5vw, 17rem); font-weight: 750; line-height: .8; letter-spacing: -.045em; white-space: nowrap; }
 .v2-name > span { display: block; }
@@ -207,7 +208,7 @@ html[data-theme='carbon'] .cw::backdrop { background: #000A; }
   .ws-content { padding-top: calc(var(--nav-offset) + 24px); }
 }
 html[data-theme='carbon'] .v2-start { background: var(--snow); color: var(--ink); box-shadow: inset 0 0 0 2px var(--start); }
-html[data-theme='carbon'] .fin-start { background: var(--snow); color: var(--ink); border-left: 6px solid var(--start); text-shadow: none; }
+html[data-theme='carbon'] .fin-start { background: var(--snow); color: var(--ink); border-left: 0; text-shadow: none; }
 html[data-theme='carbon'] .fin-tray, html[data-theme='carbon'] .fin-titlebar { background: #1740C9; }
 html[data-theme='carbon'] .tr-start, html[data-theme='carbon'] .tr-sticker, html[data-theme='carbon'] .tr-outro strong { background: var(--snow); color: var(--ink); }
 @media (max-width: 700px) {
@@ -270,12 +271,83 @@ html[data-theme='carbon'] .ws-browser-bar { color: var(--secondary); }
 .ws-page { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 .ws-page img { display: block; width: 100%; height: auto; will-change: transform; }
 html[data-theme='carbon'] .ws-bg { display: none; }
-@property --fill { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy) { color: #FFFBF5; background: transparent; transition: background-color .45s, border-color .45s; }
-html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy):is(:hover, :focus-visible) { background-color: #2A852A; border-color: #2A852A; }
+/* Fire wheel: a ring of flame grows from the button's centre while its tongues spin, leaving the fill colour behind. */
+@property --burn { syntax: '<percentage>'; inherits: true; initial-value: 0%; }
+@property --spin { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
+html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start) {
+  --fire-end: #2A852A;
+  color: #FFFBF5;
+  transition: background-color .35s, border-color .3s, color .2s;
+}
+html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy) { background: transparent; }
+html[data-theme='carbon'] :is(.v2-nav-boot, .fin-start) { --fire-end: var(--start); }
+html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start):is(:hover, :focus-visible) {
+  background-color: var(--fire-end);
+  border-color: var(--fire-end);
+  color: #FFFBF5;
+  text-shadow: 0 1px 2px #000A;
+}
+html[data-theme='carbon'] :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visible) {
+  font-style: italic;
+  font-weight: 700;
+  box-shadow: inset 0 2px 2px #FFFFFF55, inset 0 -2px 3px #0003;
+}
 @supports (background: conic-gradient(from 0deg, #2A852A 0deg, transparent 0)) {
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy) { --fill: 0deg; background: conic-gradient(from 0deg, #2A852A var(--fill), transparent 0); transition: --fill .45s cubic-bezier(.3,.7,.2,1), border-color 0s .45s; }
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy):is(:hover, :focus-visible) { --fill: 360deg; border-color: #2A852A; }
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start) {
+    --burn: 0%;
+    --spin: 0deg;
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+    background-image: radial-gradient(circle farthest-corner at 50% 50%,
+      var(--fire-end, #2A852A) 0 calc(var(--burn) - 14%),
+      #F25C05 calc(var(--burn) - 6%),
+      #FFB81C calc(var(--burn) - 2%),
+      #FFF1B8 var(--burn), transparent 0);
+    transition: --burn .35s ease-in, --spin .35s ease-in, border-color .3s, color .2s;
+  }
+  /* Sharp spinning tongues on the ring, then a wider counter-turning glow that licks outside the button. */
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::before,
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::before {
+    inset: -12px;
+    filter: blur(1.5px);
+    background: radial-gradient(circle farthest-corner at 50% 50%,
+      transparent 0 calc(var(--burn) - 28%),
+      #B3261A calc(var(--burn) - 20%),
+      #F25C05 calc(var(--burn) - 11%),
+      #FFB81C calc(var(--burn) - 4%),
+      #FFF1B8 var(--burn), transparent calc(var(--burn) + 1%));
+    -webkit-mask-image: repeating-conic-gradient(from var(--spin) at 50% 50%, transparent 0deg 10deg, #000 60deg), radial-gradient(ellipse closest-side at 50% 50%, #000 70%, transparent 100%);
+    mask-image: repeating-conic-gradient(from var(--spin) at 50% 50%, transparent 0deg 10deg, #000 60deg), radial-gradient(ellipse closest-side at 50% 50%, #000 70%, transparent 100%);
+  }
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::after {
+    inset: -20px;
+    filter: blur(7px);
+    opacity: .8;
+    background: radial-gradient(circle farthest-corner at 50% 50%,
+      transparent 0 calc(var(--burn) - 34%),
+      #B3261A calc(var(--burn) - 22%),
+      #F25C05 calc(var(--burn) - 8%),
+      #FFB81C var(--burn), transparent calc(var(--burn) + 4%));
+    -webkit-mask-image: repeating-conic-gradient(from calc(var(--spin) * -.6) at 50% 50%, transparent 0deg 8deg, #000 45deg), radial-gradient(ellipse closest-side at 50% 50%, #000 62%, transparent 100%);
+    mask-image: repeating-conic-gradient(from calc(var(--spin) * -.6) at 50% 50%, transparent 0deg 8deg, #000 45deg), radial-gradient(ellipse closest-side at 50% 50%, #000 62%, transparent 100%);
+  }
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start):is(:hover, :focus-visible) {
+    --burn: 160%;
+    --spin: 540deg;
+    background-color: transparent;
+    transition-duration: .9s, .9s, .3s, .2s;
+    transition-timing-function: cubic-bezier(.4,0,.55,1), cubic-bezier(.15,.6,.3,1), ease, ease;
+  }
+  html[data-theme='carbon'].v2-sweep :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visible) { background-color: var(--snow); }
 }
 /* TEMP: remove once Dominik picks a colour */
 .v2-colour-test { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px; font-size: .8rem; }
@@ -283,6 +355,9 @@ html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy):is(:hover, 
 .v2-colour-test button[aria-checked='true'] { box-shadow: 0 0 0 2px white; }
 .v2-colour-test button:focus-visible { outline: 2px solid white; outline-offset: 5px; }
 @media (prefers-reduced-motion: reduce) {
-  html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy) { transition: none !important; }
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start) { --spin: 0deg; background-image: none; transition: none !important; }
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start):is(:hover, :focus-visible) { --spin: 0deg; background-color: var(--fire-end); }
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::before,
+  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::after { display: none; }
   .ws-page img { will-change: auto; }
 }

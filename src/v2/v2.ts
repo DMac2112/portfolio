@@ -4,7 +4,7 @@ import Lenis from 'lenis';
 import { createTrailer } from './trailer';
 
 type Slide = {
-  id: string; years: string; title: string; role: string; summary: string; stack: string;
+  id: string; year: string; title: string; role: string; summary: string; stack: string;
   image: string | null; placeholder: string | null; media?: string; accent?: string; scroll?: string;
   quote: { text: string; name: string; company: string } | null;
   quotePlaceholder: string | null; link: { label: string; href: string } | null;
@@ -27,7 +27,7 @@ if (desktopMotion) {
 // TEMP: remove once Dominik picks a colour
 const colourButtons = [...document.querySelectorAll<HTMLButtonElement>('button[data-blue]')];
 function selectBlue(button: HTMLButtonElement, save = true) {
-  document.documentElement.style.setProperty('--boot', button.dataset.colour!);
+  document.documentElement.style.setProperty('--landing', button.dataset.colour!);
   document.documentElement.dataset.blue = button.dataset.blue;
   document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!.content = button.dataset.colour!;
   colourButtons.forEach(item => {
@@ -373,7 +373,6 @@ function rollTitle(title: string) {
   gsap.fromTo(line.querySelectorAll('.ws-char'), { yPercent: 110 }, { yPercent: 0, duration: .5, stagger: .018, ease: 'power3.out' });
 }
 function swapContent(slide: Slide, next: number) {
-  setText('.ws-years', slide.years);
   setText('.ws-count', `${next + 1} of ${slides.length}`);
   if (reduced) {
     setText('.ws-title-line', slide.title);

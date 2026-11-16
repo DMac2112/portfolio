@@ -3,7 +3,7 @@ import OsTrailer from './OsTrailer.astro';
 import jobs from '../data/v2-experience.json';
 
 interface Slide {
-  id: string; years: string; title: string; role: string; summary: string; stack: string;
+  id: string; year: string; title: string; role: string; summary: string; stack: string;
   image: string | null; placeholder: string | null; media?: string; accent?: string; scroll?: string;
   quote: { text: string; name: string; company: string } | null;
   quotePlaceholder: string | null; link: { label: string; href: string } | null;
@@ -24,7 +24,7 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
   </div>
   <canvas class="ws-trail" aria-hidden="true"></canvas>
   <div class="ws-content">
-    <div class="ws-meta"><span class="ws-years">{first.years}</span><span class="ws-count">1 of {slides.length}</span></div>
+    <div class="ws-meta"><span class="ws-count">1 of {slides.length}</span></div>
     <h2 class="ws-title" aria-label={first.title}><span class="ws-title-line">{first.title}</span></h2>
     <div class="ws-frame">
       <img class="ws-image" src={first.image ?? undefined} alt={first.title + ' project preview'} hidden={!first.image || first.media === 'os-trailer'} />
@@ -54,14 +54,14 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
   <div class="ws-bottom">
     <div class="ws-rail" role="group" aria-label="Choose project">
       {slides.map((slide, i) => <button class="ws-thumb" type="button" data-index={i} aria-label={`Show ${slide.title}, slide ${i + 1} of ${slides.length}`} aria-current={i === 0 ? 'true' : undefined}>
-        <strong>{slide.title}</strong><span>{slide.years}</span>
+        <strong>{slide.title}</strong><span>{slide.year}</span>
       </button>)}
     </div>
     <div class="ws-track" aria-hidden="true"><span class="ws-progress" style={`width: ${100 / slides.length}%`}></span></div>
   </div>
   </div>
   <span class="v2-sr ws-live" aria-live="polite"></span>
-  <ol class="v2-sr">{slides.map((slide) => <li>{slide.years}. {slide.title}. {slide.role}. {slide.summary}. Built with {slide.stack}. {slide.quote?.text} {slide.quote?.name} {slide.quote?.company} {slide.link?.label}</li>)}</ol>
+  <ol class="v2-sr">{slides.map((slide) => <li>{slide.year}. {slide.title}. {slide.role}. {slide.summary}. Built with {slide.stack}. {slide.quote?.text} {slide.quote?.name} {slide.quote?.company} {slide.link?.label}</li>)}</ol>
   <script type="application/json" id="v2-slides" set:html={JSON.stringify(slides).replace(/</g, '\\u003c')}></script>
 </section>
 
