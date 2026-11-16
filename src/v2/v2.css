@@ -422,7 +422,8 @@ html:not(.v2-sweep) .v2-nav-links :is(a[href='#work'], .v2-nav-contact):is(:hove
   html:not([data-theme='carbon']) #work .ws-track { background: var(--secondary); }
   html[data-layout='a'] #work .ws-content { grid-template-areas: 'meta meta' 'title title' 'frame details' 'rail .'; }
   html[data-layout='c'] #work .ws-content {
-    --avail-h: var(--band);
+    --avail-h: calc(var(--band) * .86);
+    --text-min: 400px;
     height: calc(var(--stage-height) + 20px);
     margin-top: calc((var(--band) - var(--stage-height)) / 2);
     grid-template-areas: 'frame meta' 'frame title' 'frame details' 'frame rail';
