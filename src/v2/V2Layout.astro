@@ -17,7 +17,7 @@ import './v2.css';
       let savedLayout;
       try { savedLayout = localStorage.getItem('v2-layout'); } catch {}
       const layout = params.get('layout') ?? savedLayout;
-      document.documentElement.dataset.layout = ['a', 'b', 'c', 'd'].includes(layout) ? layout : 'b';
+      document.documentElement.dataset.layout = ['a', 'c'].includes(layout) ? layout : 'a';
       if ('registerProperty' in CSS) document.documentElement.classList.add('v2-sweep');
     </script>
     <title>Dominik Machowiak (v2 preview)</title>

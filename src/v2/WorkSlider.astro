@@ -27,7 +27,7 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
     <!-- TEMP: remove once Dominik picks a layout -->
     <div class="ws-layout-test" role="radiogroup" aria-label="Test: layout">
       <span>Test: layout</span>
-      {['a', 'b', 'c', 'd'].map(layout => <button type="button" role="radio" data-layout-choice={layout} aria-checked={layout === 'b' ? 'true' : 'false'} tabindex={layout === 'b' ? 0 : -1}>{layout.toUpperCase()}</button>)}
+      {['a', 'c'].map(layout => <button type="button" role="radio" data-layout-choice={layout} aria-checked={layout === 'a' ? 'true' : 'false'} tabindex={layout === 'a' ? 0 : -1}>{layout.toUpperCase()}</button>)}
     </div>
     <div class="ws-meta"><span class="ws-count">1 of {slides.length}</span></div>
     <h2 class="ws-title" aria-label={first.title}><span class="ws-title-line">{first.title}</span></h2>

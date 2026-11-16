@@ -382,63 +382,59 @@ html:not(.v2-sweep) .v2-nav-links :is(a[href='#work'], .v2-nav-contact):is(:hove
 @media (min-width: 1000px) {
   #work { display: flex; flex-direction: column; height: auto; min-height: 100svh; justify-content: flex-start; padding-top: 0; }
   #work .ws-content {
-    /* Work ends at 90% of the screen height: the block is centred in the band between the nav and that line. */
-    --stage-height: min(calc(81svh - 108px), calc((min(100vw, 1680px) - 104px) * .64 / 1.6));
+    /* The block runs from 20px under the nav to 90% of the screen height. The frame is sized from that height first,
+       then from the width left beside the text; when width runs out it may grow taller than 16:10 (down to 1.3:1). */
+    --band: calc(90svh - 76px);
+    --title-h: clamp(3rem, 7svh, 7rem);
+    --text-min: 360px;
+    --avail-h: calc(var(--band) - var(--title-h) - 106px);
+    --avail-w: calc(100vw - 104px - var(--text-min));
+    --stage-w: min(calc(var(--avail-h) * 1.6), var(--avail-w));
+    --stage-height: min(var(--avail-h), calc(var(--stage-w) / 1.3));
     flex: none;
     width: 100%;
-    max-width: 1680px;
+    max-width: none;
     height: calc(90svh - 56px);
-    padding-block: 0;
-    grid-template-columns: minmax(0, 64fr) minmax(0, 36fr);
+    padding-block: 20px 0;
+    grid-template-columns: var(--stage-w) minmax(0, clamp(320px, 30vw, 560px));
     grid-template-rows: 24px auto auto auto;
     gap: 8px 24px;
+    justify-content: center;
     align-content: center;
   }
-  .ws-layout-test { position: absolute; top: 0; right: 40px; display: flex; align-items: center; gap: 5px; font-size: .8rem; }
+  .ws-layout-test { position: absolute; top: 20px; right: 40px; display: flex; align-items: center; gap: 5px; font-size: .8rem; }
   .ws-layout-test button { width: 24px; height: 24px; padding: 0; border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--secondary); }
   .ws-layout-test button[aria-checked='true'] { background: var(--ink); color: var(--snow); border-color: var(--ink); }
   #work .ws-meta { grid-area: meta; min-height: 24px; padding-right: 190px; align-items: center; }
-  #work .ws-title { grid-area: title; margin: 0; font-size: clamp(3rem, 7svh, 5rem); }
-  #work .ws-frame { grid-area: frame; align-self: center; justify-self: center; height: var(--stage-height); width: auto; max-width: 100%; aspect-ratio: 16 / 10; }
-  #work .ws-details { grid-area: details; padding: 0; gap: 8px; font-size: clamp(.875rem, 1.65svh, 1rem); line-height: 1.35; }
+  #work .ws-title { grid-area: title; margin: 0; font-size: var(--title-h); }
+  #work .ws-frame { grid-area: frame; align-self: start; justify-self: start; width: var(--stage-w); height: var(--stage-height); max-width: none; aspect-ratio: auto; }
+  #work .ws-details { grid-area: details; padding: 0; gap: 8px; font-size: clamp(.875rem, 1.65svh, 1.25rem); line-height: 1.35; }
   #work .ws-role { font-size: 1em; }
   #work .ws-stack { font-size: .9em; }
-  #work .ws-quote { font-size: clamp(1rem, 1.9svh, 1.25rem); line-height: 1.2; }
-  #work .ws-quote cite { margin-top: 6px; font-size: .8rem; line-height: 1.35; }
+  #work .ws-quote { font-size: clamp(1rem, 1.9svh, 1.5rem); line-height: 1.2; }
+  #work .ws-quote cite { margin-top: 6px; font-size: .8em; line-height: 1.35; }
   #work .ws-actions { gap: 6px 12px; }
   #work .ws-link { padding: 8px 12px; }
-  #work .ws-ask { min-height: 24px; font-size: .875rem; text-align: left; }
+  #work .ws-ask { min-height: 24px; font-size: .875em; text-align: left; }
   #work .ws-bottom { grid-area: rail; position: relative; align-self: end; margin: 0; padding: 0; min-width: 0; }
   #work .ws-track { transition: none; }
   #work .ws-progress { background: #FFFBF5; transition: none; }
   html:not([data-theme='carbon']) #work .ws-track { background: var(--secondary); }
-  html[data-layout='a'] #work .ws-content { --stage-height: min(calc(81svh - 172px), calc((min(100vw, 1680px) - 104px) * .64 / 1.6)); grid-template-areas: 'meta meta' 'title title' 'frame details' 'rail .'; }
-  html[data-layout='b'] #work .ws-content { grid-template-areas: 'meta meta' 'title title' 'frame details' 'frame rail'; grid-template-rows: 24px auto auto 120px; }
-  html:is([data-layout='b'], [data-layout='c']) #work .ws-details { align-self: start; }
+  html[data-layout='a'] #work .ws-content { grid-template-areas: 'meta meta' 'title title' 'frame details' 'rail .'; }
   html[data-layout='c'] #work .ws-content {
-    --stage-height: min(calc(88svh - 56px), calc((min(100vw, 1680px) - 104px) * .64 / 1.6));
+    --avail-h: var(--band);
+    height: calc(var(--stage-height) + 20px);
+    margin-top: calc((var(--band) - var(--stage-height)) / 2);
     grid-template-areas: 'frame meta' 'frame title' 'frame details' 'frame rail';
-    grid-template-rows: 24px auto auto 120px;
+    grid-template-rows: 24px auto minmax(0, 1fr) 120px;
+    align-content: stretch;
   }
-  html[data-layout='c'] #work .ws-title { font-size: clamp(2rem, 3.4vw, 3.75rem); white-space: nowrap; }
-  html:is([data-layout='b'], [data-layout='c'], [data-layout='d']) #work .ws-rail { flex-direction: column; width: 100%; overflow: visible; }
-  html:is([data-layout='b'], [data-layout='c'], [data-layout='d']) #work .ws-thumb { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; max-width: none; height: 40px; min-height: 40px; padding: 4px 0; border-bottom: 1px solid var(--line); opacity: .7; }
-  html:is([data-layout='b'], [data-layout='c'], [data-layout='d']) #work .ws-thumb[aria-current='true'] { opacity: 1; }
-  html:is([data-layout='b'], [data-layout='c'], [data-layout='d']) #work .ws-track { position: absolute; left: 0; width: 100%; pointer-events: none; background: transparent; }
-  html[data-layout='d'] #work .ws-content {
-    --stage-height: 41svh;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-areas: 'meta meta meta' 'title title title' 'frame frame frame' 'details details rail';
-    grid-template-rows: 24px auto auto auto;
-    row-gap: 6px;
-  }
-  html[data-layout='d'] #work .ws-title { font-size: 4.5svh; }
-  html[data-layout='d'] #work .ws-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: 'description feedback'; gap: 24px; }
-  html[data-layout='d'] #work .ws-description { grid-area: description; }
-  html[data-layout='d'] #work .ws-feedback { grid-area: feedback; }
-  html[data-layout='d'] #work :is(.ws-description, .ws-feedback) { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; font-size: .875rem; line-height: 1.35; }
-  html[data-layout='d'] #work .ws-quote { font-size: 1rem; }
-  html[data-layout='d'] #work .ws-bottom { align-self: start; }
+  html[data-layout='c'] #work .ws-title { font-size: clamp(2rem, 3.4vw, 4.5rem); white-space: nowrap; }
+  html[data-layout='c'] #work .ws-details { align-self: start; }
+  html[data-layout='c'] #work .ws-rail { flex-direction: column; width: 100%; overflow: visible; }
+  html[data-layout='c'] #work .ws-thumb { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; max-width: none; height: 40px; min-height: 40px; padding: 4px 0; border-bottom: 1px solid var(--line); opacity: .7; }
+  html[data-layout='c'] #work .ws-thumb[aria-current='true'] { opacity: 1; }
+  html[data-layout='c'] #work .ws-track { position: absolute; left: 0; width: 100%; pointer-events: none; background: transparent; }
 }
 @media (prefers-reduced-motion: reduce) {
   html .v2-nav-links :is(a[href='#work'], .v2-nav-contact),

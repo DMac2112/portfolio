@@ -285,7 +285,7 @@ layoutButtons.forEach((button, i) => {
     layoutButtons[next].focus();
   });
 });
-selectLayout(layoutButtons.find(button => button.dataset.layoutChoice === document.documentElement.dataset.layout) ?? layoutButtons[1], false);
+selectLayout(layoutButtons.find(button => button.dataset.layoutChoice === document.documentElement.dataset.layout) ?? layoutButtons[0], false);
 
 const trailerRoot = work.querySelector<HTMLElement>('.tr')!;
 const trailer = createTrailer(trailerRoot);
