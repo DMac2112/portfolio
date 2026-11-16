@@ -182,17 +182,6 @@ html[data-theme='carbon'] .cw-form input, html[data-theme='carbon'] .cw-form tex
 html[data-theme='carbon'] .cw-form button { background: var(--boot); }
 html[data-theme='carbon'] .cw::backdrop { background: #000A; }
 @media (min-width: 900px) {
-  .ws { height: calc(100svh - var(--nav-offset)); min-height: 0; display: flex; flex-direction: column; }
-  .ws-content { width: 100%; max-width: 1600px; flex: 1; min-height: 0; padding-top: 12px; padding-bottom: 16px; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 0 24px; }
-  .ws-title { margin: 12px 0 16px; font-size: clamp(3rem, 8svh, 6rem); }
-  .ws-bottom { grid-column: 1 / -1; width: 100%; max-width: none; padding: 12px 0 0; }
-  .ws-track { margin: 0; }
-  .ws-details { gap: clamp(8px, 1.4svh, 16px); font-size: clamp(.875rem, 1.8svh, 1.0625rem); }
-  .ws-role { font-size: clamp(1rem, 2.1svh, 1.25rem); }
-  .ws-quote { font-size: clamp(1.1rem, 2.5svh, 1.5rem); }
-  .ws-meta, .ws-title { grid-column: 1 / -1; }
-  .ws-frame { grid-column: 1 / 9; grid-row: 3; width: 100%; height: 100%; min-height: 0; aspect-ratio: auto; }
-  .ws-details { grid-column: 9 / -1; grid-row: 3; padding-top: 0; }
   .ws-experience { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); column-gap: 48px; }
   .ws-cv { display: contents; }
   .ws-jobs { grid-column: 1; grid-row: 1 / 3; }
@@ -246,7 +235,7 @@ html[data-theme='carbon'] .tr-start, html[data-theme='carbon'] .tr-sticker, html
 @media (min-width: 900px) {
   .v2-nav .sk-wrap:not(.v2-sr) { position: absolute; }
 }
-@media (max-width: 899px) {
+@media (max-width: 999px) {
   .ws { min-height: calc(100svh - var(--nav-offset)); }
   .ws-content { padding-top: 16px; padding-bottom: 24px; }
   .ws-meta { grid-row: 1; }
@@ -274,26 +263,26 @@ html[data-theme='carbon'] .ws-bg { display: none; }
 /* Fire wheel: a ring of flame grows from the button's centre while its tongues spin, leaving the fill colour behind. */
 @property --burn { syntax: '<percentage>'; inherits: true; initial-value: 0%; }
 @property --spin { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
-html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start) {
+html :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos']) {
   --fire-end: #2A852A;
   color: #FFFBF5;
   transition: background-color .35s, border-color .3s, color .2s;
 }
-html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy) { background: transparent; }
-html[data-theme='carbon'] :is(.v2-nav-boot, .fin-start) { --fire-end: var(--start); }
-html[data-theme='carbon'] :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start):is(:hover, :focus-visible) {
+html :is(.v2-nav-boot, .fin-start) { --fire-end: var(--start); }
+html .ws-link[data-project='dominikos'] { color: var(--ink); }
+html :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos']):is(:hover, :focus-visible) {
   background-color: var(--fire-end);
   border-color: var(--fire-end);
   color: #FFFBF5;
   text-shadow: 0 1px 2px #000A;
 }
-html[data-theme='carbon'] :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visible) {
+html :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visible) {
   font-style: italic;
   font-weight: 700;
   box-shadow: inset 0 2px 2px #FFFFFF55, inset 0 -2px 3px #0003;
 }
 @supports (background: conic-gradient(from 0deg, #2A852A 0deg, transparent 0)) {
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start) {
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos']) {
     --burn: 0%;
     --spin: 0deg;
     position: relative;
@@ -307,8 +296,8 @@ html[data-theme='carbon'] :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visibl
     transition: --burn .35s ease-in, --spin .35s ease-in, border-color .3s, color .2s;
   }
   /* Sharp spinning tongues on the ring, then a wider counter-turning glow that licks outside the button. */
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::before,
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::after {
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos'])::before,
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos'])::after {
     content: '';
     position: absolute;
     pointer-events: none;
@@ -316,7 +305,7 @@ html[data-theme='carbon'] :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visibl
     -webkit-mask-composite: source-in;
     mask-composite: intersect;
   }
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::before {
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos'])::before {
     inset: -12px;
     filter: blur(1.5px);
     background: radial-gradient(circle farthest-corner at 50% 50%,
@@ -328,7 +317,7 @@ html[data-theme='carbon'] :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visibl
     -webkit-mask-image: repeating-conic-gradient(from var(--spin) at 50% 50%, transparent 0deg 10deg, #000 60deg), radial-gradient(ellipse closest-side at 50% 50%, #000 70%, transparent 100%);
     mask-image: repeating-conic-gradient(from var(--spin) at 50% 50%, transparent 0deg 10deg, #000 60deg), radial-gradient(ellipse closest-side at 50% 50%, #000 70%, transparent 100%);
   }
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::after {
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos'])::after {
     inset: -20px;
     filter: blur(7px);
     opacity: .8;
@@ -340,24 +329,118 @@ html[data-theme='carbon'] :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visibl
     -webkit-mask-image: repeating-conic-gradient(from calc(var(--spin) * -.6) at 50% 50%, transparent 0deg 8deg, #000 45deg), radial-gradient(ellipse closest-side at 50% 50%, #000 62%, transparent 100%);
     mask-image: repeating-conic-gradient(from calc(var(--spin) * -.6) at 50% 50%, transparent 0deg 8deg, #000 45deg), radial-gradient(ellipse closest-side at 50% 50%, #000 62%, transparent 100%);
   }
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start):is(:hover, :focus-visible) {
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos']):is(:hover, :focus-visible) {
     --burn: 160%;
     --spin: 540deg;
     background-color: transparent;
     transition-duration: .9s, .9s, .3s, .2s;
     transition-timing-function: cubic-bezier(.4,0,.55,1), cubic-bezier(.15,.6,.3,1), ease, ease;
   }
-  html[data-theme='carbon'].v2-sweep :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visible) { background-color: var(--snow); }
+  html.v2-sweep :is(.v2-nav-boot, .fin-start):is(:hover, :focus-visible) { background-color: var(--snow); }
 }
-/* TEMP: remove once Dominik picks a colour */
-.v2-colour-test { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px; font-size: .8rem; }
-.v2-colour-test button { width: 20px; height: 20px; flex: 0 0 20px; padding: 0; border: 0; border-radius: 50%; background: var(--swatch); }
-.v2-colour-test button[aria-checked='true'] { box-shadow: 0 0 0 2px white; }
-.v2-colour-test button:focus-visible { outline: 2px solid white; outline-offset: 5px; }
 @media (prefers-reduced-motion: reduce) {
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start) { --spin: 0deg; background-image: none; transition: none !important; }
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start):is(:hover, :focus-visible) { --spin: 0deg; background-color: var(--fire-end); }
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::before,
-  html[data-theme='carbon'].v2-sweep :is(.v2-button, .v2-nav-contact, .cw-copy, .v2-nav-boot, .fin-start)::after { display: none; }
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos']) { --spin: 0deg; background-image: none; transition: none !important; }
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos']):is(:hover, :focus-visible) { --spin: 0deg; background-color: var(--fire-end); }
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos'])::before,
+  html.v2-sweep :is(.v2-nav-boot, .fin-start, .ws-link[data-project='dominikos'])::after { display: none; }
   .ws-page img { will-change: auto; }
+}
+
+.ws-description, .ws-feedback { display: contents; }
+
+/* Neutral outlines share a fade; project motion describes the client's work. */
+:is(.v2-button, .cw-copy):focus-visible { outline-color: var(--ink); }
+.v2-nav.is-solid .v2-nav-links :focus-visible { outline-color: var(--ink); }
+:is(.v2-button, .cw-copy) { transition: background-color .2s, color .2s; }
+:is(.v2-button, .cw-copy):is(:hover, :focus-visible) { background-color: #FFFBF5; color: #151414; }
+.v2-nav-links a[href='#work'] { padding: 6px 10px; margin-inline: -10px; border-radius: 4px; }
+.v2-nav-links :is(a[href='#work'], .v2-nav-contact) {
+  background-image: linear-gradient(var(--landing) 0 0);
+  background-position: left;
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  transition: background-size .25s, color .2s;
+}
+.v2-nav-links :is(a[href='#work'], .v2-nav-contact):is(:hover, :focus-visible) { background-size: 100% 100%; color: #FFFBF5; }
+html.v2-sweep .ws-link[data-project='welcom-inn'] {
+  background: linear-gradient(#FFFBF5 0 0) center / 0% 100% no-repeat;
+  transition: background-size .45s cubic-bezier(.2,.7,.2,1), color .2s;
+}
+html.v2-sweep .ws-link[data-project='welcom-inn']:is(:hover, :focus-visible) { background-size: 100% 100%; color: #151414; }
+@property --wipe { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+html.v2-sweep .ws-link[data-project='rubicall'] {
+  --wipe: 0%;
+  background: linear-gradient(105deg, #FFFBF5 calc(var(--wipe) - 24%), #FFFFFF calc(var(--wipe) - 24%) calc(var(--wipe) - 20%), transparent calc(var(--wipe) - 20%));
+  transition: --wipe .5s, color .2s;
+}
+html.v2-sweep .ws-link[data-project='rubicall']:is(:hover, :focus-visible) { --wipe: 125%; color: #151414; }
+html:not(.v2-sweep) .v2-nav-links :is(a[href='#work'], .v2-nav-contact) { background-image: none; transition: background-color .2s, color .2s; }
+html:not(.v2-sweep) .v2-nav-links :is(a[href='#work'], .v2-nav-contact):is(:hover, :focus-visible) { background-color: var(--landing); }
+
+/* TEMP: remove once Dominik picks a layout */
+.ws-layout-test { display: none; }
+@media (min-width: 1000px) {
+  #work { display: flex; flex-direction: column; height: auto; min-height: 100svh; justify-content: flex-start; padding-top: 0; }
+  #work .ws-content {
+    /* Work ends at 90% of the screen height: the block is centred in the band between the nav and that line. */
+    --stage-height: min(calc(81svh - 108px), calc((min(100vw, 1680px) - 104px) * .64 / 1.6));
+    flex: none;
+    width: 100%;
+    max-width: 1680px;
+    height: calc(90svh - 56px);
+    padding-block: 0;
+    grid-template-columns: minmax(0, 64fr) minmax(0, 36fr);
+    grid-template-rows: 24px auto auto auto;
+    gap: 8px 24px;
+    align-content: center;
+  }
+  .ws-layout-test { position: absolute; top: 0; right: 40px; display: flex; align-items: center; gap: 5px; font-size: .8rem; }
+  .ws-layout-test button { width: 24px; height: 24px; padding: 0; border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--secondary); }
+  .ws-layout-test button[aria-checked='true'] { background: var(--ink); color: var(--snow); border-color: var(--ink); }
+  #work .ws-meta { grid-area: meta; min-height: 24px; padding-right: 190px; align-items: center; }
+  #work .ws-title { grid-area: title; margin: 0; font-size: clamp(3rem, 7svh, 5rem); }
+  #work .ws-frame { grid-area: frame; align-self: center; justify-self: center; height: var(--stage-height); width: auto; max-width: 100%; aspect-ratio: 16 / 10; }
+  #work .ws-details { grid-area: details; padding: 0; gap: 8px; font-size: clamp(.875rem, 1.65svh, 1rem); line-height: 1.35; }
+  #work .ws-role { font-size: 1em; }
+  #work .ws-stack { font-size: .9em; }
+  #work .ws-quote { font-size: clamp(1rem, 1.9svh, 1.25rem); line-height: 1.2; }
+  #work .ws-quote cite { margin-top: 6px; font-size: .8rem; line-height: 1.35; }
+  #work .ws-actions { gap: 6px 12px; }
+  #work .ws-link { padding: 8px 12px; }
+  #work .ws-ask { min-height: 24px; font-size: .875rem; text-align: left; }
+  #work .ws-bottom { grid-area: rail; position: relative; align-self: end; margin: 0; padding: 0; min-width: 0; }
+  #work .ws-track { transition: none; }
+  #work .ws-progress { background: #FFFBF5; transition: none; }
+  html:not([data-theme='carbon']) #work .ws-track { background: var(--secondary); }
+  html[data-layout='a'] #work .ws-content { --stage-height: min(calc(81svh - 172px), calc((min(100vw, 1680px) - 104px) * .64 / 1.6)); grid-template-areas: 'meta meta' 'title title' 'frame details' 'rail .'; }
+  html[data-layout='b'] #work .ws-content { grid-template-areas: 'meta meta' 'title title' 'frame details' 'frame rail'; grid-template-rows: 24px auto auto 120px; }
+  html:is([data-layout='b'], [data-layout='c']) #work .ws-details { align-self: start; }
+  html[data-layout='c'] #work .ws-content {
+    --stage-height: min(calc(88svh - 56px), calc((min(100vw, 1680px) - 104px) * .64 / 1.6));
+    grid-template-areas: 'frame meta' 'frame title' 'frame details' 'frame rail';
+    grid-template-rows: 24px auto auto 120px;
+  }
+  html[data-layout='c'] #work .ws-title { font-size: clamp(2rem, 3.4vw, 3.75rem); white-space: nowrap; }
+  html:is([data-layout='b'], [data-layout='c'], [data-layout='d']) #work .ws-rail { flex-direction: column; width: 100%; overflow: visible; }
+  html:is([data-layout='b'], [data-layout='c'], [data-layout='d']) #work .ws-thumb { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; max-width: none; height: 40px; min-height: 40px; padding: 4px 0; border-bottom: 1px solid var(--line); opacity: .7; }
+  html:is([data-layout='b'], [data-layout='c'], [data-layout='d']) #work .ws-thumb[aria-current='true'] { opacity: 1; }
+  html:is([data-layout='b'], [data-layout='c'], [data-layout='d']) #work .ws-track { position: absolute; left: 0; width: 100%; pointer-events: none; background: transparent; }
+  html[data-layout='d'] #work .ws-content {
+    --stage-height: 41svh;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: 'meta meta meta' 'title title title' 'frame frame frame' 'details details rail';
+    grid-template-rows: 24px auto auto auto;
+    row-gap: 6px;
+  }
+  html[data-layout='d'] #work .ws-title { font-size: 4.5svh; }
+  html[data-layout='d'] #work .ws-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: 'description feedback'; gap: 24px; }
+  html[data-layout='d'] #work .ws-description { grid-area: description; }
+  html[data-layout='d'] #work .ws-feedback { grid-area: feedback; }
+  html[data-layout='d'] #work :is(.ws-description, .ws-feedback) { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; font-size: .875rem; line-height: 1.35; }
+  html[data-layout='d'] #work .ws-quote { font-size: 1rem; }
+  html[data-layout='d'] #work .ws-bottom { align-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html .v2-nav-links :is(a[href='#work'], .v2-nav-contact),
+  html :is(.v2-button, .cw-copy) { transition: none !important; }
 }

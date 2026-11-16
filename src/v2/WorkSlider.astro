@@ -24,6 +24,11 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
   </div>
   <canvas class="ws-trail" aria-hidden="true"></canvas>
   <div class="ws-content">
+    <!-- TEMP: remove once Dominik picks a layout -->
+    <div class="ws-layout-test" role="radiogroup" aria-label="Test: layout">
+      <span>Test: layout</span>
+      {['a', 'b', 'c', 'd'].map(layout => <button type="button" role="radio" data-layout-choice={layout} aria-checked={layout === 'b' ? 'true' : 'false'} tabindex={layout === 'b' ? 0 : -1}>{layout.toUpperCase()}</button>)}
+    </div>
     <div class="ws-meta"><span class="ws-count">1 of {slides.length}</span></div>
     <h2 class="ws-title" aria-label={first.title}><span class="ws-title-line">{first.title}</span></h2>
     <div class="ws-frame">
@@ -37,18 +42,22 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
       <canvas class="ws-dissolve" aria-hidden="true"></canvas>
     </div>
     <div class="ws-details">
+      <div class="ws-description">
       <p class="ws-role">{first.role}</p>
       <p class="ws-summary">{first.summary}</p>
       <p class="ws-stack">Built with {first.stack}</p>
       <p class="ws-todo ws-image-todo" hidden={!first.image || !first.placeholder}>To replace: {first.placeholder}</p>
+      </div>
+      <div class="ws-feedback">
       <blockquote class="ws-quote" hidden={!first.quote}>
         <p>{first.quote && `“${first.quote.text}”`}</p>
         <cite>{first.quote && `${first.quote.name}, ${first.quote.company}`}</cite>
       </blockquote>
       <p class="ws-todo ws-quote-todo" hidden={!first.quotePlaceholder}>{first.quotePlaceholder}</p>
       <div class="ws-actions">
-        <a class:list={['ws-link', 'v2-button']} href={first.link?.href ?? '#work'} hidden={!first.link} data-boot={first.link?.href?.startsWith('/os/') ? '' : undefined}>{first.link?.label}</a>
+        <a class:list={['ws-link', 'v2-button']} data-project={first.id} href={first.link?.href ?? '#work'} hidden={!first.link} data-boot={first.link?.href?.startsWith('/os/') ? '' : undefined}>{first.link?.label}</a>
         <button type="button" class="ws-ask" data-contact-open hidden={!first.quote}>Message me about a website</button>
+      </div>
       </div>
     </div>
   <div class="ws-bottom">

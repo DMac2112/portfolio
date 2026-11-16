@@ -13,16 +13,11 @@ import './v2.css';
     <script is:inline>
       const params = new URLSearchParams(location.search);
       if (params.get('theme') === 'light') document.documentElement.removeAttribute('data-theme');
-      // TEMP: remove once Dominik picks a colour
-      const blues = { deep: '#3D22A8', deep2: '#381E9C', deep3: '#33198F', deep4: '#2D1582', deep5: '#261072' };
-      let savedBlue;
-      try { savedBlue = localStorage.getItem('v2-boot'); } catch {}
-      const requestedBlue = params.get('blue') ?? savedBlue;
-      const blue = Object.hasOwn(blues, requestedBlue) ? requestedBlue : 'deep';
-      document.documentElement.style.setProperty('--landing', blues[blue]);
-      document.documentElement.dataset.blue = blue;
-      document.querySelector('meta[name="theme-color"]').content = blues[blue];
-      if (params.get('blue') === blue) { try { localStorage.setItem('v2-boot', blue); } catch {} }
+      // TEMP: remove once Dominik picks a layout
+      let savedLayout;
+      try { savedLayout = localStorage.getItem('v2-layout'); } catch {}
+      const layout = params.get('layout') ?? savedLayout;
+      document.documentElement.dataset.layout = ['a', 'b', 'c', 'd'].includes(layout) ? layout : 'b';
       if ('registerProperty' in CSS) document.documentElement.classList.add('v2-sweep');
     </script>
     <title>Dominik Machowiak (v2 preview)</title>

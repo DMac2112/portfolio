@@ -24,34 +24,6 @@ if (desktopMotion) {
 
 }
 
-// TEMP: remove once Dominik picks a colour
-const colourButtons = [...document.querySelectorAll<HTMLButtonElement>('button[data-blue]')];
-function selectBlue(button: HTMLButtonElement, save = true) {
-  document.documentElement.style.setProperty('--landing', button.dataset.colour!);
-  document.documentElement.dataset.blue = button.dataset.blue;
-  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!.content = button.dataset.colour!;
-  colourButtons.forEach(item => {
-    item.setAttribute('aria-checked', String(item === button));
-    item.tabIndex = item === button ? 0 : -1;
-  });
-  if (save) { try { localStorage.setItem('v2-boot', button.dataset.blue!); } catch {} }
-}
-colourButtons.forEach((button, i) => {
-  button.addEventListener('click', () => selectBlue(button));
-  button.addEventListener('keydown', event => {
-    let next = i;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (i + 1) % colourButtons.length;
-    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (i + colourButtons.length - 1) % colourButtons.length;
-    else if (event.key === 'Home') next = 0;
-    else if (event.key === 'End') next = colourButtons.length - 1;
-    else return;
-    event.preventDefault();
-    selectBlue(colourButtons[next]);
-    colourButtons[next].focus();
-  });
-});
-selectBlue(colourButtons.find(button => button.dataset.blue === document.documentElement.dataset.blue) ?? colourButtons[0], false);
-
 const landing = document.querySelector<HTMLElement>('#top')!;
 const name = document.querySelector<HTMLElement>('.v2-name')!;
 const brand = document.querySelector<HTMLElement>('.v2-brand')!;
@@ -131,7 +103,7 @@ const renderDock = () => {
     });
     runnerSprite.dataset.frame = `run-${Math.floor(performance.now() / 75) % 4 + 1}`;
   }
-  gsap.set('.v2-intro, .v2-colour-test', { opacity: 1 - p });
+  gsap.set('.v2-intro', { opacity: 1 - p });
   nav.classList.toggle('is-solid', p === 1);
 };
 const dock = (forward: boolean, destination = workTop() - navOffset()) => {
@@ -270,15 +242,50 @@ frame.addEventListener('pointerleave', () => { frameHovered = false; syncPagePla
 document.addEventListener('visibilitychange', syncPagePlayback);
 motionPreference.addEventListener('change', animatePage);
 new ResizeObserver(animatePage).observe(pageViewport);
+let autoplayFraction = 1;
 function updateProgress() {
   const active = thumbs.find(thumb => thumb.getAttribute('aria-current') === 'true')!;
   const progress = work.querySelector<HTMLElement>('.ws-progress')!;
-  progress.style.width = `${active.getBoundingClientRect().width}px`;
-  progress.style.transform = `translateX(${active.getBoundingClientRect().left - rail.getBoundingClientRect().left}px)`;
+  const track = work.querySelector<HTMLElement>('.ws-track')!;
+  const activeRect = active.getBoundingClientRect();
+  const railRect = rail.getBoundingClientRect();
+  const vertical = getComputedStyle(rail).flexDirection === 'column';
+  track.style.top = vertical ? `${activeRect.bottom - railRect.top - 2}px` : '';
+  progress.style.width = `${activeRect.width * autoplayFraction}px`;
+  progress.style.transform = `translateX(${activeRect.left - railRect.left}px)`;
+
 }
 rail.addEventListener('scroll', updateProgress, { passive: true });
 new ResizeObserver(updateProgress).observe(rail);
 updateProgress();
+
+// TEMP: remove once Dominik picks a layout
+const layoutButtons = [...work.querySelectorAll<HTMLButtonElement>('[data-layout-choice]')];
+function selectLayout(button: HTMLButtonElement, save = true) {
+  document.documentElement.dataset.layout = button.dataset.layoutChoice;
+  layoutButtons.forEach(item => {
+    item.setAttribute('aria-checked', String(item === button));
+    item.tabIndex = item === button ? 0 : -1;
+  });
+  if (save) { try { localStorage.setItem('v2-layout', button.dataset.layoutChoice!); } catch {} }
+  updateProgress();
+}
+layoutButtons.forEach((button, i) => {
+  button.addEventListener('click', () => selectLayout(button));
+  button.addEventListener('keydown', event => {
+    let next = i;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (i + 1) % layoutButtons.length;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (i + layoutButtons.length - 1) % layoutButtons.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = layoutButtons.length - 1;
+    else return;
+    event.preventDefault();
+    event.stopPropagation();
+    selectLayout(layoutButtons[next]);
+    layoutButtons[next].focus();
+  });
+});
+selectLayout(layoutButtons.find(button => button.dataset.layoutChoice === document.documentElement.dataset.layout) ?? layoutButtons[1], false);
 
 const trailerRoot = work.querySelector<HTMLElement>('.tr')!;
 const trailer = createTrailer(trailerRoot);
@@ -400,6 +407,7 @@ function swapContent(slide: Slide, next: number) {
   show('.ws-quote-todo', !!slide.quotePlaceholder);
   setText('.ws-quote-todo', slide.quotePlaceholder ?? '');
   const link = work.querySelector<HTMLAnchorElement>('.ws-link')!;
+  link.dataset.project = slide.id;
   link.hidden = !slide.link;
   if (slide.link) {
     link.href = slide.link.href;
@@ -439,6 +447,9 @@ async function goTo(next: number) {
     await animateCells(order, false);
   } else swapContent(slides[next], next);
   index = next;
+  autoplayElapsed = 0;
+  autoplayFraction = autoplayDesktop.matches && !motionPreference.matches ? 0 : 1;
+  updateProgress();
   syncTrailer();
   swapping = false;
 }
@@ -470,6 +481,49 @@ work.addEventListener('keydown', (event) => {
   event.preventDefault();
   void goTo(index + (event.key === 'ArrowRight' ? 1 : -1));
 });
+
+// Pause the carousel while a visitor reads, operates controls, or leaves the tab.
+const autoplayDuration = 12000;
+let autoplayElapsed = 0;
+let autoplayLastTime = 0;
+let autoplayRequest = 0;
+let autoplayVisible = false;
+const autoplayDesktop = matchMedia('(min-width: 1000px)');
+function autoplayAllowed() {
+  return autoplayDesktop.matches && !motionPreference.matches && autoplayVisible && !document.hidden
+    && !work.matches(':hover') && !work.contains(document.activeElement);
+}
+function autoplayTick(now: number) {
+  autoplayRequest = 0;
+  if (!autoplayAllowed()) return;
+  if (!swapping) autoplayElapsed += autoplayLastTime ? Math.min(now - autoplayLastTime, 100) : 0;
+  autoplayLastTime = now;
+  autoplayFraction = Math.min(1, autoplayElapsed / autoplayDuration);
+  updateProgress();
+  if (autoplayElapsed >= autoplayDuration && !swapping) void goTo(index + 1);
+  autoplayRequest = requestAnimationFrame(autoplayTick);
+}
+function syncAutoplay() {
+  cancelAnimationFrame(autoplayRequest);
+  autoplayRequest = 0;
+  autoplayLastTime = 0;
+  if (!autoplayDesktop.matches || motionPreference.matches) {
+    autoplayFraction = 1;
+    updateProgress();
+  }
+  if (autoplayAllowed()) autoplayRequest = requestAnimationFrame(autoplayTick);
+}
+work.addEventListener('pointerenter', syncAutoplay);
+work.addEventListener('pointerleave', syncAutoplay);
+work.addEventListener('focusin', syncAutoplay);
+work.addEventListener('focusout', () => queueMicrotask(syncAutoplay));
+document.addEventListener('visibilitychange', syncAutoplay);
+motionPreference.addEventListener('change', syncAutoplay);
+autoplayDesktop.addEventListener('change', syncAutoplay);
+new IntersectionObserver(([entry]) => {
+  autoplayVisible = entry.isIntersecting;
+  syncAutoplay();
+}, { threshold: .5 }).observe(work);
 
 if (!reduced && matchMedia('(pointer: fine)').matches && getComputedStyle(trail).display !== 'none') {
   type Cell = { x: number; y: number; born: number };
