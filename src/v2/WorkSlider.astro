@@ -4,7 +4,7 @@ import jobs from '../data/v2-experience.json';
 
 interface Slide {
   id: string; years: string; title: string; role: string; summary: string; stack: string;
-  image: string | null; placeholder: string | null; media?: string; accent?: string;
+  image: string | null; placeholder: string | null; media?: string; accent?: string; scroll?: string;
   quote: { text: string; name: string; company: string } | null;
   quotePlaceholder: string | null; link: { label: string; href: string } | null;
 }
@@ -16,7 +16,7 @@ const trailBadge = '/src/assets/content/skill-trailhead-mountaineer.png';
 const badges = import.meta.glob('/src/assets/content/skill-*.png', { eager: true, import: 'default' });
 const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)?.src;
 ---
-<section class="ws" id="work" style={`--accent: ${first.accent}`} aria-roledescription="carousel" aria-label="Selected work" tabindex="0">
+<section class="ws" id="work" aria-roledescription="carousel" aria-label="Selected work" tabindex="0">
   <div class="ws-bg" aria-hidden="true">
     <img class="ws-bg-image is-visible" src={first.image ?? undefined} alt="" hidden={!first.image} />
     <img class="ws-bg-image" alt="" hidden />
@@ -29,6 +29,10 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
     <div class="ws-frame">
       <img class="ws-image" src={first.image ?? undefined} alt={first.title + ' project preview'} hidden={!first.image || first.media === 'os-trailer'} />
       <div class="ws-placeholder" hidden={!!first.image || first.media === 'os-trailer'}><strong>Placeholder</strong><span>{first.placeholder}</span></div>
+      <div class="ws-browser" hidden>
+        <div class="ws-browser-bar"><span class="ws-browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ws-domain"></span></div>
+        <div class="ws-page"></div>
+      </div>
       <OsTrailer hidden={first.media !== 'os-trailer'} />
       <canvas class="ws-dissolve" aria-hidden="true"></canvas>
     </div>
@@ -43,14 +47,14 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
       </blockquote>
       <p class="ws-todo ws-quote-todo" hidden={!first.quotePlaceholder}>{first.quotePlaceholder}</p>
       <div class="ws-actions">
-        <a class:list={['ws-link', first.link?.href?.startsWith('/os/') ? 'v2-start' : 'v2-button']} href={first.link?.href ?? '#work'} hidden={!first.link} data-boot={first.link?.href?.startsWith('/os/') ? '' : undefined}>{first.link?.label}</a>
+        <a class:list={['ws-link', 'v2-button']} href={first.link?.href ?? '#work'} hidden={!first.link} data-boot={first.link?.href?.startsWith('/os/') ? '' : undefined}>{first.link?.label}</a>
         <button type="button" class="ws-ask" data-contact-open hidden={!first.quote}>Message me about a website</button>
       </div>
     </div>
   <div class="ws-bottom">
     <div class="ws-rail" role="group" aria-label="Choose project">
       {slides.map((slide, i) => <button class="ws-thumb" type="button" data-index={i} aria-label={`Show ${slide.title}, slide ${i + 1} of ${slides.length}`} aria-current={i === 0 ? 'true' : undefined}>
-        {slide.image ? <img src={slide.image} alt="" loading="lazy" /> : <span class="ws-thumb-checker"></span>}
+        <strong>{slide.title}</strong><span>{slide.years}</span>
       </button>)}
     </div>
     <div class="ws-track" aria-hidden="true"><span class="ws-progress" style={`width: ${100 / slides.length}%`}></span></div>

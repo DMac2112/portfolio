@@ -22,6 +22,7 @@
     "summary": "Designed and built the site a property management company uses to advertise its homes and services.",
     "stack": "HTML, CSS, JavaScript",
     "image": "/v2-media/welcom-inn.webp",
+    "scroll": "/v2-media/welcom-inn-full.jpg",
     "accent": "#7A1B4E",
     "placeholder": null,
     "quote": {
@@ -40,6 +41,7 @@
     "summary": "Designed and built a cleaning company's site, then extended it when they moved into Airbnb management.",
     "stack": "HTML, CSS, JavaScript",
     "image": "/v2-media/rubicall.webp",
+    "scroll": "/v2-media/rubicall-full.jpg",
     "accent": "#00813C",
     "placeholder": null,
     "quote": {

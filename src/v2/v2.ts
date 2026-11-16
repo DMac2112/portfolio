@@ -5,7 +5,7 @@ import { createTrailer } from './trailer';
 
 type Slide = {
   id: string; years: string; title: string; role: string; summary: string; stack: string;
-  image: string | null; placeholder: string | null; media?: string; accent?: string;
+  image: string | null; placeholder: string | null; media?: string; accent?: string; scroll?: string;
   quote: { text: string; name: string; company: string } | null;
   quotePlaceholder: string | null; link: { label: string; href: string } | null;
 };
@@ -23,6 +23,34 @@ if (desktopMotion) {
   gsap.ticker.lagSmoothing(0);
 
 }
+
+// TEMP: remove once Dominik picks a colour
+const colourButtons = [...document.querySelectorAll<HTMLButtonElement>('button[data-blue]')];
+function selectBlue(button: HTMLButtonElement, save = true) {
+  document.documentElement.style.setProperty('--boot', button.dataset.colour!);
+  document.documentElement.dataset.blue = button.dataset.blue;
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!.content = button.dataset.colour!;
+  colourButtons.forEach(item => {
+    item.setAttribute('aria-checked', String(item === button));
+    item.tabIndex = item === button ? 0 : -1;
+  });
+  if (save) { try { localStorage.setItem('v2-boot', button.dataset.blue!); } catch {} }
+}
+colourButtons.forEach((button, i) => {
+  button.addEventListener('click', () => selectBlue(button));
+  button.addEventListener('keydown', event => {
+    let next = i;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (i + 1) % colourButtons.length;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (i + colourButtons.length - 1) % colourButtons.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = colourButtons.length - 1;
+    else return;
+    event.preventDefault();
+    selectBlue(colourButtons[next]);
+    colourButtons[next].focus();
+  });
+});
+selectBlue(colourButtons.find(button => button.dataset.blue === document.documentElement.dataset.blue) ?? colourButtons[0], false);
 
 const landing = document.querySelector<HTMLElement>('#top')!;
 const name = document.querySelector<HTMLElement>('.v2-name')!;
@@ -103,7 +131,7 @@ const renderDock = () => {
     });
     runnerSprite.dataset.frame = `run-${Math.floor(performance.now() / 75) % 4 + 1}`;
   }
-  gsap.set('.v2-intro', { opacity: 1 - p });
+  gsap.set('.v2-intro, .v2-colour-test', { opacity: 1 - p });
   nav.classList.toggle('is-solid', p === 1);
 };
 const dock = (forward: boolean, destination = workTop() - navOffset()) => {
@@ -189,6 +217,69 @@ const frame = work.querySelector<HTMLElement>('.ws-frame')!;
 const dissolve = work.querySelector<HTMLCanvasElement>('.ws-dissolve')!;
 const frameImage = work.querySelector<HTMLImageElement>('.ws-image')!;
 const placeholder = work.querySelector<HTMLElement>('.ws-placeholder')!;
+const browserPreview = work.querySelector<HTMLElement>('.ws-browser')!;
+const pageViewport = work.querySelector<HTMLElement>('.ws-page')!;
+const pageCaptures = new Map<string, HTMLImageElement>();
+const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+let pageAnimation: Animation | undefined;
+let currentCapture: HTMLImageElement | undefined;
+let frameHovered = false;
+function syncPagePlayback() {
+  if (!pageAnimation) return;
+  if (frameHovered || document.hidden || motionPreference.matches) pageAnimation.pause();
+  else pageAnimation.play();
+}
+function animatePage() {
+  pageAnimation?.cancel();
+  pageAnimation = undefined;
+  if (!currentCapture?.complete || !currentCapture.naturalWidth || motionPreference.matches) return;
+  const distance = Math.max(0, currentCapture.getBoundingClientRect().height - pageViewport.clientHeight);
+  if (!distance) return;
+  pageAnimation = currentCapture.animate([
+    { transform: 'translateY(0)' },
+    { transform: `translateY(-${distance}px)` }
+  ], { duration: 40000, iterations: Infinity, direction: 'alternate', easing: 'cubic-bezier(.15,0,.85,1)' });
+  syncPagePlayback();
+}
+function showPage(slide: Slide) {
+  pageAnimation?.cancel();
+  pageAnimation = undefined;
+  currentCapture = undefined;
+  pageViewport.replaceChildren();
+  browserPreview.hidden = !slide.scroll;
+  if (!slide.scroll) return;
+  work.querySelector<HTMLElement>('.ws-domain')!.textContent = slide.link ? new URL(slide.link.href, location.href).hostname : '';
+  let capture = pageCaptures.get(slide.scroll);
+  if (!capture) {
+    capture = new Image();
+    capture.loading = 'lazy';
+    capture.decoding = 'async';
+    capture.width = 1280;
+    capture.height = slide.id === 'welcom-inn' ? 4544 : 4264;
+    capture.alt = `Full-page capture of the ${slide.title} site`;
+    capture.addEventListener('load', () => { if (currentCapture === capture) animatePage(); });
+    capture.src = slide.scroll;
+    pageCaptures.set(slide.scroll, capture);
+  }
+  currentCapture = capture;
+  pageViewport.append(capture);
+  animatePage();
+}
+frame.addEventListener('pointerenter', () => { frameHovered = true; syncPagePlayback(); });
+frame.addEventListener('pointerleave', () => { frameHovered = false; syncPagePlayback(); });
+document.addEventListener('visibilitychange', syncPagePlayback);
+motionPreference.addEventListener('change', animatePage);
+new ResizeObserver(animatePage).observe(pageViewport);
+function updateProgress() {
+  const active = thumbs.find(thumb => thumb.getAttribute('aria-current') === 'true')!;
+  const progress = work.querySelector<HTMLElement>('.ws-progress')!;
+  progress.style.width = `${active.getBoundingClientRect().width}px`;
+  progress.style.transform = `translateX(${active.getBoundingClientRect().left - rail.getBoundingClientRect().left}px)`;
+}
+rail.addEventListener('scroll', updateProgress, { passive: true });
+new ResizeObserver(updateProgress).observe(rail);
+updateProgress();
+
 const trailerRoot = work.querySelector<HTMLElement>('.tr')!;
 const trailer = createTrailer(trailerRoot);
 let workVisible = false;
@@ -282,7 +373,6 @@ function rollTitle(title: string) {
   gsap.fromTo(line.querySelectorAll('.ws-char'), { yPercent: 110 }, { yPercent: 0, duration: .5, stagger: .018, ease: 'power3.out' });
 }
 function swapContent(slide: Slide, next: number) {
-  work.style.setProperty('--accent', slide.accent ?? '#0E1A44');
   setText('.ws-years', slide.years);
   setText('.ws-count', `${next + 1} of ${slides.length}`);
   if (reduced) {
@@ -294,8 +384,9 @@ function swapContent(slide: Slide, next: number) {
   setText('.ws-stack', `Built with ${slide.stack}`);
   const hasTrailer = slide.media === 'os-trailer';
   trailerRoot.hidden = !hasTrailer;
-  frameImage.hidden = hasTrailer || !slide.image;
-  placeholder.hidden = hasTrailer || !!slide.image;
+  showPage(slide);
+  frameImage.hidden = hasTrailer || !!slide.scroll || !slide.image;
+  placeholder.hidden = hasTrailer || !!slide.scroll || !!slide.image;
   if (slide.image) {
     frameImage.src = slide.image;
     frameImage.alt = `${slide.title} project preview`;
@@ -314,8 +405,8 @@ function swapContent(slide: Slide, next: number) {
   if (slide.link) {
     link.href = slide.link.href;
     link.textContent = slide.link.label;
-    link.classList.toggle('v2-start', slide.link.href.startsWith('/os/'));
-    link.classList.toggle('v2-button', !slide.link.href.startsWith('/os/'));
+    link.classList.remove('v2-start');
+    link.classList.add('v2-button');
     if (slide.link.href.startsWith('/os/')) link.dataset.boot = '';
     else delete link.dataset.boot;
   }
@@ -332,7 +423,7 @@ function swapContent(slide: Slide, next: number) {
     if (i === next) thumb.setAttribute('aria-current', 'true');
     else thumb.removeAttribute('aria-current');
   });
-  work.querySelector<HTMLElement>('.ws-progress')!.style.width = `${(next + 1) / slides.length * 100}%`;
+  updateProgress();
   thumbs[next].scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
   live.textContent = `Slide ${next + 1} of ${slides.length}: ${slide.title}`;
   if (!reduced) gsap.fromTo('.ws-summary, .ws-quote', { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: .35 });

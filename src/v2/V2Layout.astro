@@ -10,7 +10,20 @@ import './v2.css';
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#1740C9" />
     <!-- Carbon (dark) is the trial default; /v2/?theme=light shows the original light look for comparison. -->
-    <script is:inline>if (new URLSearchParams(location.search).get("theme") === "light") document.documentElement.removeAttribute("data-theme");</script>
+    <script is:inline>
+      const params = new URLSearchParams(location.search);
+      if (params.get('theme') === 'light') document.documentElement.removeAttribute('data-theme');
+      // TEMP: remove once Dominik picks a colour
+      const blues = { xp: '#1740C9', indigo: '#2B3BD4', blueviolet: '#3A32D0', violet: '#4B2FCC', deep: '#3D22A8' };
+      let savedBlue;
+      try { savedBlue = localStorage.getItem('v2-boot'); } catch {}
+      const blue = [params.get('blue'), savedBlue].find(name => Object.hasOwn(blues, name)) || 'xp';
+      document.documentElement.style.setProperty('--boot', blues[blue]);
+      document.documentElement.dataset.blue = blue;
+      document.querySelector('meta[name="theme-color"]').content = blues[blue];
+      if (params.get('blue') === blue) { try { localStorage.setItem('v2-boot', blue); } catch {} }
+      if ('registerProperty' in CSS) document.documentElement.classList.add('v2-sweep');
+    </script>
     <title>Dominik Machowiak (v2 preview)</title>
   </head>
   <body>
