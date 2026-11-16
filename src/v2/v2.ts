@@ -249,6 +249,19 @@ function updateProgress() {
   const track = work.querySelector<HTMLElement>('.ws-track')!;
   const activeRect = active.getBoundingClientRect();
   const railRect = rail.getBoundingClientRect();
+  // TEMP: remove once Dominik picks a layout
+  const layout = matchMedia('(min-width: 1000px)').matches ? document.documentElement.dataset.layout : '';
+  const typeLayout = layout === 'e' || layout === 'f';
+  const container = track.offsetParent as HTMLElement;
+  const containerRect = container.getBoundingClientRect();
+  track.style.left = typeLayout ? `${activeRect.left - containerRect.left}px` : '';
+  track.style.width = typeLayout ? `${activeRect.width}px` : '';
+  if (typeLayout) {
+    track.style.top = `${activeRect.bottom - containerRect.top - 2}px`;
+    progress.style.width = `${autoplayFraction * 100}%`;
+    progress.style.transform = 'none';
+    return;
+  }
   const vertical = getComputedStyle(rail).flexDirection === 'column';
   track.style.top = vertical ? `${activeRect.bottom - railRect.top - 2}px` : '';
   progress.style.width = `${activeRect.width * autoplayFraction}px`;
@@ -257,6 +270,10 @@ function updateProgress() {
 }
 rail.addEventListener('scroll', updateProgress, { passive: true });
 new ResizeObserver(updateProgress).observe(rail);
+// TEMP: remove once Dominik picks a layout (F has no rail box to observe).
+new ResizeObserver(updateProgress).observe(work.querySelector<HTMLElement>('.ws-content')!);
+addEventListener('resize', updateProgress);
+document.fonts.ready.then(updateProgress);
 updateProgress();
 
 // TEMP: remove once Dominik picks a layout
@@ -267,7 +284,7 @@ function selectLayout(button: HTMLButtonElement, save = true) {
     item.setAttribute('aria-checked', String(item === button));
     item.tabIndex = item === button ? 0 : -1;
   });
-  if (save) { try { localStorage.setItem('v2-layout', button.dataset.layoutChoice!); } catch {} }
+  if (save) { try { localStorage.setItem('v2-layout2', button.dataset.layoutChoice!); } catch {} }
   updateProgress();
 }
 layoutButtons.forEach((button, i) => {
@@ -285,7 +302,7 @@ layoutButtons.forEach((button, i) => {
     layoutButtons[next].focus();
   });
 });
-selectLayout(layoutButtons.find(button => button.dataset.layoutChoice === document.documentElement.dataset.layout) ?? layoutButtons[0], false);
+selectLayout(layoutButtons.find(button => button.dataset.layoutChoice === document.documentElement.dataset.layout) ?? layoutButtons.find(button => button.dataset.layoutChoice === 'd')!, false);
 
 const trailerRoot = work.querySelector<HTMLElement>('.tr')!;
 const trailer = createTrailer(trailerRoot);
@@ -476,6 +493,20 @@ if (matchMedia('(pointer: fine)').matches) {
   }, true);
 }
 thumbs.forEach((thumb, i) => thumb.addEventListener('click', () => { if (!dragged) void goTo(i); }));
+// TEMP: remove once Dominik picks a layout
+const nameHover = matchMedia('(min-width: 1000px) and (pointer: fine)');
+thumbs.forEach((thumb, i) => {
+  let restTimer: ReturnType<typeof setTimeout>;
+  const cancelRest = () => clearTimeout(restTimer);
+  thumb.addEventListener('pointerenter', () => {
+    cancelRest();
+    restTimer = setTimeout(() => {
+      if (nameHover.matches && ['e', 'f'].includes(document.documentElement.dataset.layout ?? '') && thumb.matches(':hover')) void goTo(i);
+    }, 150);
+  });
+  thumb.addEventListener('pointerleave', cancelRest);
+  thumb.addEventListener('pointerdown', cancelRest);
+});
 work.addEventListener('keydown', (event) => {
   if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
   event.preventDefault();

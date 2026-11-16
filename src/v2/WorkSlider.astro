@@ -27,20 +27,12 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
     <!-- TEMP: remove once Dominik picks a layout -->
     <div class="ws-layout-test" role="radiogroup" aria-label="Test: layout">
       <span>Test: layout</span>
-      {['a', 'c'].map(layout => <button type="button" role="radio" data-layout-choice={layout} aria-checked={layout === 'a' ? 'true' : 'false'} tabindex={layout === 'a' ? 0 : -1}>{layout.toUpperCase()}</button>)}
+      {['a', 'c', 'd', 'e', 'f'].map(layout => <button type="button" role="radio" data-layout-choice={layout} aria-checked={layout === 'd' ? 'true' : 'false'} tabindex={layout === 'd' ? 0 : -1}>{layout.toUpperCase()}</button>)}
     </div>
+    <!-- TEMP: remove once Dominik picks a layout -->
+    <div class="ws-info">
     <div class="ws-meta"><span class="ws-count">1 of {slides.length}</span></div>
     <h2 class="ws-title" aria-label={first.title}><span class="ws-title-line">{first.title}</span></h2>
-    <div class="ws-frame">
-      <img class="ws-image" src={first.image ?? undefined} alt={first.title + ' project preview'} hidden={!first.image || first.media === 'os-trailer'} />
-      <div class="ws-placeholder" hidden={!!first.image || first.media === 'os-trailer'}><strong>Placeholder</strong><span>{first.placeholder}</span></div>
-      <div class="ws-browser" hidden>
-        <div class="ws-browser-bar"><span class="ws-browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ws-domain"></span></div>
-        <div class="ws-page"></div>
-      </div>
-      <OsTrailer hidden={first.media !== 'os-trailer'} />
-      <canvas class="ws-dissolve" aria-hidden="true"></canvas>
-    </div>
     <div class="ws-details">
       <div class="ws-description">
       <p class="ws-role">{first.role}</p>
@@ -59,6 +51,17 @@ const badgeSrc = (name: string) => (badges[name] as { src: string } | undefined)
         <button type="button" class="ws-ask" data-contact-open hidden={!first.quote}>Message me about a website</button>
       </div>
       </div>
+    </div>
+    </div>
+    <div class="ws-frame">
+      <img class="ws-image" src={first.image ?? undefined} alt={first.title + ' project preview'} hidden={!first.image || first.media === 'os-trailer'} />
+      <div class="ws-placeholder" hidden={!!first.image || first.media === 'os-trailer'}><strong>Placeholder</strong><span>{first.placeholder}</span></div>
+      <div class="ws-browser" hidden>
+        <div class="ws-browser-bar"><span class="ws-browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ws-domain"></span></div>
+        <div class="ws-page"></div>
+      </div>
+      <OsTrailer hidden={first.media !== 'os-trailer'} />
+      <canvas class="ws-dissolve" aria-hidden="true"></canvas>
     </div>
   <div class="ws-bottom">
     <div class="ws-rail" role="group" aria-label="Choose project">
